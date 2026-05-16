@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code — A Non-Technical Introduction · CETI.AI</title>
+<meta name="description" content="A warm, demystifying tour of Claude Code — Anthropic's terminal-based AI work-partner. Built for curious non-technical leaders.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --color-bg: #FAF7F2;
+  --color-bg-warm: #F5F0E8;
+  --color-text: #2C2A28;
+  --color-text-secondary: #6B6560;
+  --color-text-muted: #9E9790;
+  --color-border: #E5DFD6;
+  --color-border-light: #EEEBE5;
+  --color-surface: #FFFFFF;
+  --color-surface-warm: #FDF9F3;
+
+  --color-accent: #D94F30;
+  --color-accent-hover: #C4432A;
+  --color-accent-light: #FDEEE9;
+  --color-accent-muted: #E8836C;
+
+  --color-actor-1: #D94F30;
+  --color-actor-2: #2A7B9B;
+  --color-actor-3: #7B6DAA;
+  --color-actor-4: #D4A843;
+  --color-actor-5: #2D8B55;
+
+  /* Catppuccin Mocha for the terminal */
+  --term-bg: #1E1E2E;
+  --term-bg-soft: #181825;
+  --term-text: #CDD6F4;
+  --term-muted: #6C7086;
+  --term-prompt: #A6E3A1;
+  --term-cyan: #94E2D5;
+  --term-mauve: #CBA6F7;
+  --term-yellow: #F9E2AF;
+  --term-peach: #FAB387;
+
+  --font-display: 'Bricolage Grotesque', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+  --stagger: 80ms;
+
+  --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+  --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+  --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+  --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.14);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+  background-image:
+    radial-gradient(ellipse at 18% 24%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
+    radial-gradient(ellipse at 82% 10%, rgba(42, 123, 155, 0.04) 0%, transparent 50%);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--color-accent-light); color: var(--color-accent-hover); }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 999px; }
+
+/* ============ TOP NAV ============ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.brand-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--color-accent);
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  transform: translateY(-2px);
+}
+.topbar-meta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+}
+
+/* ============ HERO ============ */
+.hero {
+  padding: 4rem 1.5rem 5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+.hero-text { min-width: 0; }
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-accent);
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-out);
+}
+.hero.visible .eyebrow { opacity: 1; }
+.eyebrow .sep { color: var(--color-text-muted); margin: 0 0.5rem; }
+
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 5.4vw, 4.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  margin: 1.5rem 0 1.5rem;
+  max-width: 14ch;
+}
+.hero-title .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity var(--duration-slower) var(--ease-spring),
+    transform var(--duration-slower) var(--ease-spring);
+}
+.hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+.hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
+.hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
+.hero.visible .hero-title .word:nth-child(3) { transition-delay: 260ms; }
+.hero.visible .hero-title .word:nth-child(4) { transition-delay: 340ms; }
+.hero-title em {
+  font-style: normal;
+  color: var(--color-accent);
+}
+
+.hero-sub {
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+  max-width: 48ch;
+  margin: 0 0 2.5rem;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+  transition-delay: 540ms;
+}
+.hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+.cta-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  transition: opacity var(--duration-slower) var(--ease-out);
+  transition-delay: 760ms;
+}
+.hero.visible .cta-row { opacity: 1; }
+
+.magnetic {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.75rem;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  color: white;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+  transition: transform 600ms var(--ease-spring), background 200ms ease;
+  will-change: transform;
+}
+.magnetic:hover { background: var(--color-accent-hover); }
+.magnetic .arrow { transition: transform var(--duration-normal) var(--ease-out); }
+.magnetic:hover .arrow { transform: translateX(3px); }
+
+.secondary-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 2px;
+  transition: color var(--duration-fast), border-color var(--duration-fast);
+}
+.secondary-link:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.hero-visual {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-spring);
+  transition-delay: 200ms;
+}
+.hero.visible .hero-visual { opacity: 1; transform: translateY(0); }
+
+/* ============ TERMINAL ============ */
+.terminal {
+  position: relative;
+  background: var(--term-bg);
+  border-radius: 14px;
+  box-shadow: var(--shadow-xl), 0 0 0 1px rgba(44, 42, 40, 0.06);
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--term-text);
+}
+.terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.75rem 1rem;
+  background: var(--term-bg-soft);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.tdot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.tdot.r { background: #F38BA8; }
+.tdot.y { background: #F9E2AF; }
+.tdot.g { background: #A6E3A1; }
+.terminal-title {
+  flex: 1;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--term-muted);
+  letter-spacing: 0.06em;
+}
+.terminal-body {
+  padding: 1.25rem 1.25rem 1.5rem;
+  min-height: 380px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.term-line { display: block; min-height: 1.55em; }
+.term-line.cmd { color: var(--term-text); }
+.term-line.cmd .prompt { color: var(--term-prompt); margin-right: 0.5rem; font-weight: 500; }
+.term-line.user-q { color: var(--term-cyan); }
+.term-line.label { color: var(--term-mauve); margin-top: 1rem; font-weight: 600; }
+.term-line.body { color: var(--term-text); }
+.term-line.check {
+  color: var(--term-prompt);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-spring);
+}
+.term-line.check.in { opacity: 1; transform: translateX(0); }
+.term-line.check .mark { color: var(--term-prompt); margin-right: 0.6rem; font-weight: 700; }
+.term-line.check .meta { color: var(--term-muted); margin-left: 0.5rem; font-size: 0.85em; }
+
+.caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.1em;
+  background: var(--term-text);
+  vertical-align: -2px;
+  margin-left: 1px;
+  animation: caretBlink 1s steps(1) infinite;
+}
+@keyframes caretBlink { 50% { opacity: 0; } }
+
+.terminal-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem 0.75rem;
+  font-size: 0.7rem;
+  color: var(--term-muted);
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.terminal-foot .pulse {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  background: var(--term-prompt);
+  border-radius: 50%;
+  margin-right: 0.4rem;
+  box-shadow: 0 0 8px var(--term-prompt);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* ============ SECTION SHELL ============ */
+.section {
+  padding: 5rem 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-text-muted);
+  margin: 0 0 1rem;
+}
+.section-heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.028em;
+  margin: 0 0 1rem;
+  max-width: 22ch;
+}
+.section-heading em {
+  font-style: normal;
+  color: var(--color-accent);
+}
+.section-lead {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  max-width: 60ch;
+  margin: 0 0 3rem;
+}
+
+/* ============ SEE IT WORK ============ */
+.see-it {
+  background: var(--color-bg-warm);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+.see-it-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem;
+}
+.see-it-grid p {
+  color: var(--color-text-secondary);
+  margin: 0 0 1.25rem;
+  font-size: 1.05rem;
+}
+.see-it-grid p strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* ============ BENTO ============ */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(180px, auto);
+  gap: 1rem;
+}
+.tile {
+  position: relative;
+  padding: 1.75rem;
+  border-radius: 16px;
+  background:
+    radial-gradient(560px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(217, 79, 48, 0.07), transparent 40%),
+    var(--color-surface);
+  border: 1px solid var(--color-border);
+  transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal) var(--ease-out);
+  opacity: 0;
+  transform: translateY(20px);
+  overflow: hidden;
+}
+.tile.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--duration-slower) var(--ease-spring),
+    transform var(--duration-slower) var(--ease-spring),
+    border-color var(--duration-normal),
+    box-shadow var(--duration-normal) var(--ease-out);
+}
+.tile.visible:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-accent-muted);
+  box-shadow: var(--shadow-lg);
+}
+.tile.span-2 { grid-column: span 2; }
+
+.tile .tile-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+}
+.tile.t2 .tile-tag { color: var(--color-actor-2); background: rgba(42, 123, 155, 0.10); }
+.tile.t3 .tile-tag { color: var(--color-actor-3); background: rgba(123, 109, 170, 0.10); }
+.tile.t4 .tile-tag { color: var(--color-actor-4); background: rgba(212, 168, 67, 0.12); }
+.tile.t5 .tile-tag { color: var(--color-actor-5); background: rgba(45, 139, 85, 0.10); }
+.tile.t6 .tile-tag { color: var(--color-accent); background: var(--color-accent-light); }
+
+.tile h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.015em;
+  margin: 1rem 0 0.6rem;
+  line-height: 1.2;
+}
+.tile p {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.55;
+}
+.tile-glyph {
+  position: absolute;
+  right: 1.1rem;
+  top: 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* ============ WHERE IT LIVES ============ */
+.where-it {
+  background: var(--color-bg-warm);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+.where-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem;
+  align-items: start;
+}
+.compare {
+  display: grid;
+  gap: 0.85rem;
+}
+.compare-row {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1.1rem 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+.compare-row .label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+.compare-row .desc {
+  color: var(--color-text);
+  font-size: 0.98rem;
+}
+.compare-row.highlight {
+  background: var(--color-accent-light);
+  border-color: var(--color-accent-muted);
+}
+.compare-row.highlight .label { color: var(--color-accent-hover); }
+.compare-row.highlight .desc { color: var(--color-text); font-weight: 500; }
+
+.where-prose p {
+  font-size: 1.05rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 1rem;
+}
+.where-prose p strong { color: var(--color-text); font-weight: 600; }
+.where-prose .demystify {
+  margin-top: 1.75rem;
+  padding: 1.25rem 1.4rem;
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-surface);
+  border-radius: 0 12px 12px 0;
+  font-size: 0.98rem;
+  color: var(--color-text);
+}
+
+/* ============ VIGNETTES ============ */
+.vignettes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+.vignette {
+  padding: 2rem 1.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
+}
+.vignette.visible { opacity: 1; transform: translateY(0); }
+.vignette:hover { border-color: var(--color-accent-muted); box-shadow: var(--shadow-md); }
+.vignette .who {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+  margin-bottom: 0.85rem;
+}
+.vignette.v2 .who { color: var(--color-actor-2); }
+.vignette.v3 .who { color: var(--color-actor-5); }
+.vignette h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.85rem;
+  line-height: 1.2;
+}
+.vignette p {
+  color: var(--color-text-secondary);
+  font-size: 0.98rem;
+  margin: 0;
+  line-height: 1.6;
+}
+.vignette .ask {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+.vignette .ask::before {
+  content: "WHAT THEY TYPED";
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  margin-bottom: 0.4rem;
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+/* ============ PRICING ============ */
+.pricing-section {
+  background: var(--color-bg-warm);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+.pricing {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+.plan {
+  padding: 1.75rem 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
+}
+.plan.visible { opacity: 1; transform: translateY(0); }
+.plan.recommended {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-muted), var(--shadow-md);
+  position: relative;
+}
+.plan.recommended::before {
+  content: "BEST FOR CURIOUS LEADERS";
+  position: absolute;
+  top: -0.6rem;
+  left: 1.25rem;
+  background: var(--color-accent);
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+.plan .name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.4rem;
+}
+.plan .for {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 0 0 1.25rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+}
+.plan .price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+.plan .price .currency {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+.plan .price .num {
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.plan .price .per {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+.plan ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+.plan ul li {
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+.plan ul li::before {
+  content: "·";
+  color: var(--color-accent);
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 1.2em;
+  line-height: 1;
+  margin-top: -2px;
+}
+.plan.recommended ul li::before { color: var(--color-accent); }
+.plan-foot {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* ============ FINAL CTA ============ */
+.final {
+  padding: 6rem 1.5rem;
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+.final h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  margin: 0 0 1rem;
+  line-height: 1.05;
+}
+.final h2 em { font-style: normal; color: var(--color-accent); }
+.final p {
+  color: var(--color-text-secondary);
+  margin: 0 0 2.5rem;
+  font-size: 1.1rem;
+}
+.final .cta-row { justify-content: center; opacity: 1; }
+
+footer {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border-light);
+}
+footer a { color: var(--color-text-secondary); text-decoration: none; border-bottom: 1px dotted var(--color-border); }
+footer a:hover { color: var(--color-accent); }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; gap: 3rem; padding-top: 2rem; padding-bottom: 3rem; }
+  .see-it-grid, .where-grid { grid-template-columns: 1fr; gap: 2.5rem; padding: 4rem 1.5rem; }
+  .bento { grid-template-columns: repeat(2, 1fr); }
+  .tile.span-2 { grid-column: span 2; }
+  .vignettes { grid-template-columns: 1fr; }
+  .pricing { grid-template-columns: repeat(2, 1fr); }
+  .section { padding: 3.5rem 1.5rem; }
+}
+@media (max-width: 560px) {
+  .topbar { padding: 1rem; }
+  .topbar-meta { display: none; }
+  .hero { padding: 1.5rem 1rem 2rem; }
+  .terminal { font-size: 0.78rem; }
+  .terminal-body { padding: 1rem 0.85rem 1.25rem; min-height: 340px; }
+  .bento { grid-template-columns: 1fr; }
+  .tile.span-2 { grid-column: auto; }
+  .pricing { grid-template-columns: 1fr; }
+  .compare-row { grid-template-columns: 1fr; gap: 0.35rem; }
+  .compare-row .label { font-size: 0.7rem; }
+  .magnetic { padding: 0.85rem 1.4rem; font-size: 0.95rem; }
+  .section-heading { letter-spacing: -0.02em; }
+  .vignette { padding: 1.5rem 1.25rem; }
+}
+
+@media (hover: none) {
+  .magnetic { transform: none !important; }
+  .tile:hover { transform: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .hero .word, .hero-sub, .cta-row, .hero-visual, .eyebrow,
+  .tile, .vignette, .plan { opacity: 1 !important; transform: none !important; }
+  .caret { animation: none; opacity: 1; }
+  .terminal-foot .pulse { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="https://cetiai.co"><span class="brand-dot"></span>CETI.AI · Lookbook</a>
+  <span class="topbar-meta">A non-technical introduction</span>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="hero">
+  <div class="hero-text">
+    <p class="eyebrow">CLAUDE CODE <span class="sep">·</span> YOUR AI WORK-PARTNER</p>
+    <h1 class="hero-title">
+      <span class="word">Not</span>
+      <span class="word">a chatbot.</span>
+      <span class="word">A</span>
+      <span class="word"><em>teammate.</em></span>
+    </h1>
+    <p class="hero-sub">Claude Code is Anthropic's terminal-based AI work-partner. It reads your files, writes new ones, runs commands, and follows multi-step instructions — autonomously, with your supervision. You don't need to be technical. You just need to know what you want done.</p>
+    <div class="cta-row">
+      <a class="magnetic" href="#terminal-demo">
+        See it work
+        <span class="arrow">→</span>
+      </a>
+      <a class="secondary-link" href="#start">Plans &amp; pricing</a>
+    </div>
+  </div>
+
+  <div class="hero-visual" id="terminal-demo">
+    <div class="terminal" role="img" aria-label="An animated demo of a Claude Code terminal session organizing a Notion workspace.">
+      <div class="terminal-bar">
+        <span class="tdot r"></span>
+        <span class="tdot y"></span>
+        <span class="tdot g"></span>
+        <span class="terminal-title">~/work — claude</span>
+      </div>
+      <div class="terminal-body" id="term-body"></div>
+      <div class="terminal-foot">
+        <span><span class="pulse"></span> claude-code · v2.1</span>
+        <span>opus-4.7 · 1M ctx</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SEE IT WORK ============ -->
+<section class="see-it">
+  <div class="see-it-grid">
+    <div>
+      <p class="section-eyebrow">SECTION 01 · WATCH IT THINK</p>
+      <h2 class="section-heading">You type what you need. <em>Claude figures out the steps.</em></h2>
+      <p>The black box on the left is a terminal — the same kind of text-in, text-out window your IT folks live in. But what's happening inside it is new. You're not typing commands. You're typing <strong>intent</strong>.</p>
+      <p>Claude reads the situation, lays out a plan, and starts executing — scanning, finding, generating. You watch each step land. If a checkmark looks wrong, you intervene. Most of the time you don't have to.</p>
+      <p>The skill isn't typing. The skill is <strong>knowing what to ask for.</strong></p>
+    </div>
+    <div>
+      <!-- terminal lives in hero on desktop; placeholder copy here on mobile -->
+      <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-text-muted); padding: 1.5rem; background: var(--color-surface); border: 1px dashed var(--color-border); border-radius: 12px;">
+        <p style="margin: 0 0 0.75rem; color: var(--color-text);"><strong>What you saw in the hero terminal</strong></p>
+        <p style="margin: 0 0 0.4rem;">→ A plain-English request</p>
+        <p style="margin: 0 0 0.4rem;">→ A plan ("Let me help…")</p>
+        <p style="margin: 0 0 0.4rem;">→ Four real actions, each verified</p>
+        <p style="margin: 0;">→ A finished result you could use</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT IT DOES ============ -->
+<section class="section">
+  <p class="section-eyebrow">SECTION 02 · WHAT IT ACTUALLY DOES</p>
+  <h2 class="section-heading">Six jobs that used to need an engineer.</h2>
+  <p class="section-lead">Claude Code isn't a chatbot with extra steps. It has hands. It edits real files on your computer, runs real commands, and reads real codebases. Below: the six things business teams actually use it for.</p>
+
+  <div class="bento">
+    <article class="tile span-2 t1">
+      <span class="tile-glyph">01</span>
+      <span class="tile-tag">WRITE &amp; EDIT FILES</span>
+      <h3>Build a working app from a paragraph.</h3>
+      <p>Describe a tool you wish existed — a client report generator, an inventory dashboard, a webhook router — and watch Claude write the files for it across folders. It plans, drafts, tests, fixes its own mistakes, and shows you the diff before saving anything.</p>
+    </article>
+    <article class="tile t2">
+      <span class="tile-glyph">02</span>
+      <span class="tile-tag">RUN COMMANDS</span>
+      <h3>Press play on the boring stuff.</h3>
+      <p>Installs, deploys, migrations, backups — Claude runs them, reads the output, and tells you what happened in plain English.</p>
+    </article>
+    <article class="tile t3">
+      <span class="tile-glyph">03</span>
+      <span class="tile-tag">DEBUG</span>
+      <h3>"It broke. Make it work."</h3>
+      <p>Paste an error message. Claude traces the cause, names the file and line, suggests a fix, and offers to apply it.</p>
+    </article>
+    <article class="tile t4">
+      <span class="tile-glyph">04</span>
+      <span class="tile-tag">DEPLOY</span>
+      <h3>From draft to live URL.</h3>
+      <p>"Put this on Vercel." Claude configures the project, pushes it, and reports the production URL back. Same workflow for Netlify, Cloudflare, or your own server.</p>
+    </article>
+    <article class="tile t5">
+      <span class="tile-glyph">05</span>
+      <span class="tile-tag">SEARCH ACROSS CODEBASES</span>
+      <h3>Find a needle in 10,000 files.</h3>
+      <p>"Where do we set the trial length to 14 days?" Claude reads the whole project and points to the exact line — no grep skills required.</p>
+    </article>
+    <article class="tile span-2 t6">
+      <span class="tile-glyph">06</span>
+      <span class="tile-tag">CHAT + DO</span>
+      <h3>A conversation that leaves footprints.</h3>
+      <p>You and Claude talk back and forth like a Slack thread — but every reply can ship as a file, a commit, a deployment, a sent email. Think of regular Claude as a brilliant assistant who can only point. Claude Code can <strong>pick things up.</strong></p>
+    </article>
+  </div>
+</section>
+
+<!-- ============ WHERE IT LIVES ============ -->
+<section class="where-it">
+  <div class="where-grid">
+    <div>
+      <p class="section-eyebrow">SECTION 03 · WHERE IT LIVES</p>
+      <h2 class="section-heading">The terminal is just a place where text goes in and out.</h2>
+      <div class="where-prose">
+        <p>If "the terminal" sounds intimidating, here's the secret: it's <strong>just a chat window</strong>. You type, something replies, you read the reply, you type back. The format hasn't changed since 1971.</p>
+        <p>The difference with Claude Code is that the thing on the other end of your typing isn't a script anymore. It's an intelligent partner that can take real actions on your behalf. So the same window that used to be hostile becomes the most flexible workspace you've ever had.</p>
+        <p>You can also use Claude Code in <strong>VS Code, your browser, or a desktop app</strong> if the terminal is too spartan. The same engine, just dressed up.</p>
+        <div class="demystify">
+          <strong>The metaphor:</strong> if email is talking, Slack is chatting, and ChatGPT is asking — Claude Code is <strong>delegating</strong>. It has hands, and it uses them.
+        </div>
+      </div>
+    </div>
+    <div class="compare">
+      <div class="compare-row">
+        <span class="label">EMAIL</span>
+        <span class="desc">Send a request, wait, read a reply. Asynchronous.</span>
+      </div>
+      <div class="compare-row">
+        <span class="label">SLACK</span>
+        <span class="desc">Chat back and forth. Synchronous, words only.</span>
+      </div>
+      <div class="compare-row">
+        <span class="label">CHATGPT / CLAUDE</span>
+        <span class="desc">Ask a smart friend. They reply with words and maybe a draft.</span>
+      </div>
+      <div class="compare-row highlight">
+        <span class="label">CLAUDE CODE</span>
+        <span class="desc">Same chat — but the friend now has hands, a filesystem, and a deploy button.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VIGNETTES ============ -->
+<section class="section">
+  <p class="section-eyebrow">SECTION 04 · REAL WORKFLOWS</p>
+  <h2 class="section-heading">Three people, three Tuesday afternoons.</h2>
+  <p class="section-lead">None of these people identify as engineers. They learned the basics in an afternoon. Here's what they built.</p>
+
+  <div class="vignettes">
+    <article class="vignette v1">
+      <p class="who">THE FOUNDER</p>
+      <h3>Prototype an investor demo overnight.</h3>
+      <p>Maya had a pitch on Monday and no product yet. She described her idea — a referral tracker for fitness studios — to Claude Code, slept while it built a working version, woke up to a live URL she could click. She fixed the colors herself.</p>
+      <p class="ask">claude "build a referral tracker web app where studios can paste a list of clients and get a shareable referral link per client. deploy to vercel."</p>
+    </article>
+    <article class="vignette v2">
+      <p class="who">THE OPS LEAD</p>
+      <h3>Refactor a messy data pipeline.</h3>
+      <p>Devon inherited a Python script that nobody understood. He asked Claude Code to read it, explain it in plain English, then rewrite it cleanly. The new version is half as long and has tests. Devon now actually knows how it works.</p>
+      <p class="ask">claude "read pipeline.py, explain what each function does in plain language, then refactor for clarity. add tests."</p>
+    </article>
+    <article class="vignette v3">
+      <p class="who">THE MARKETER</p>
+      <h3>Auto-generate client proposals.</h3>
+      <p>Priya was hand-customizing the same proposal deck 12 times a week. She gave Claude Code her template and a CSV of clients; now a single command renders all twelve, swaps in logos, and saves them as PDFs. She edits, then sends.</p>
+      <p class="ask">claude "for every row in clients.csv, render proposal-template.html with the right name, logo, and price. export as pdf."</p>
+    </article>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="pricing-section">
+  <div class="section">
+    <p class="section-eyebrow">SECTION 05 · WHAT IT COSTS</p>
+    <h2 class="section-heading">Claude Code comes free with any paid Claude plan.</h2>
+    <p class="section-lead">If you're already paying for Claude, you already have it. The numbers below are Anthropic's published consumer plans — same dollars whether you're using the chat or the terminal.</p>
+
+    <div class="pricing">
+      <article class="plan">
+        <h3 class="name">Free</h3>
+        <p class="for">TRY THE CHAT</p>
+        <div class="price">
+          <span class="currency">$</span>
+          <span class="num"><span class="num-val" data-to="0">0</span></span>
+          <span class="per">/ month</span>
+        </div>
+        <ul>
+          <li>Claude.ai web chat</li>
+          <li>Limited daily usage</li>
+          <li>Claude Code <em>not</em> included</li>
+        </ul>
+      </article>
+
+      <article class="plan recommended">
+        <h3 class="name">Pro</h3>
+        <p class="for">FIRST REAL WORKSPACE</p>
+        <div class="price">
+          <span class="currency">$</span>
+          <span class="num"><span class="num-val" data-to="20">0</span></span>
+          <span class="per">/ month</span>
+        </div>
+        <ul>
+          <li><strong>Claude Code included</strong></li>
+          <li>~5× the chat usage of Free</li>
+          <li>Projects, Artifacts, file uploads</li>
+          <li>$17/mo if you pay annually</li>
+        </ul>
+      </article>
+
+      <article class="plan">
+        <h3 class="name">Max</h3>
+        <p class="for">POWER USERS</p>
+        <div class="price">
+          <span class="currency">$</span>
+          <span class="num"><span class="num-val" data-to="100">0</span></span>
+          <span class="per">/ month+</span>
+        </div>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>5×–20× the usage of Pro</li>
+          <li>Priority access at peak hours</li>
+        </ul>
+      </article>
+
+      <article class="plan">
+        <h3 class="name">Team</h3>
+        <p class="for">FOR SMALL ORGS</p>
+        <div class="price">
+          <span class="currency">$</span>
+          <span class="num"><span class="num-val" data-to="20">0</span></span>
+          <span class="per">/ seat / month</span>
+        </div>
+        <ul>
+          <li>Claude Code + Cowork</li>
+          <li>Central admin &amp; billing</li>
+          <li>Premium tier at $100/seat</li>
+        </ul>
+      </article>
+    </div>
+
+    <p class="plan-foot">Pricing reflects Anthropic's public plans at <a href="https://claude.com/pricing" style="color: var(--color-text-secondary); border-bottom: 1px dotted var(--color-border); text-decoration: none;">claude.com/pricing</a>. Enterprise plans are quoted per workspace.</p>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final" id="start">
+  <h2>Ready to <em>delegate</em> instead of describe?</h2>
+  <p>The hardest part of Claude Code is the first ten minutes. After that, the terminal stops feeling like a black box and starts feeling like a teammate.</p>
+  <div class="cta-row">
+    <a class="magnetic" href="https://claude.com/claude-code" target="_blank" rel="noopener">
+      Install Claude Code
+      <span class="arrow">→</span>
+    </a>
+    <a class="secondary-link" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">Or: talk to CETI for a team walkthrough</a>
+  </div>
+</section>
+
+<footer>
+  <p>Lookbook · <a href="https://cetiai.co">CETI.AI</a> · A warm, demystifying introduction. Claude Code is a product of <a href="https://www.anthropic.com" target="_blank" rel="noopener">Anthropic</a>.</p>
+</footer>
+
+<script>
+// ============ HERO REVEAL ============
+requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+// ============ INTERSECTION REVEALS ============
+const reveal = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      reveal.unobserve(e.target);
+    }
+  });
+}, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+document.querySelectorAll('.tile, .vignette, .plan').forEach((el) => reveal.observe(el));
+
+// ============ NUMBER TICKER (pricing) ============
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+function animateNum(el) {
+  const to = +el.dataset.to;
+  if (to === 0) { el.textContent = '0'; return; }
+  const dur = 1100;
+  const start = performance.now();
+  function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+const numObs = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+  });
+}, { threshold: 0.6 });
+document.querySelectorAll('.num-val').forEach((el) => numObs.observe(el));
+
+// ============ MAGNETIC BUTTONS ============
+const STRENGTH = 25;
+document.querySelectorAll('.magnetic').forEach((btn) => {
+  btn.addEventListener('mousemove', (e) => {
+    const r = btn.getBoundingClientRect();
+    const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+    const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+    btn.style.setProperty('--mx', `${x}px`);
+    btn.style.setProperty('--my', `${y}px`);
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.setProperty('--mx', '0px');
+    btn.style.setProperty('--my', '0px');
+  });
+});
+
+// ============ MAGIC-CARD CURSOR GLOW (tiles) ============
+document.querySelectorAll('.tile').forEach((card) => {
+  card.addEventListener('mousemove', (e) => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    card.style.setProperty('--my', `${e.clientY - r.top}px`);
+  });
+});
+
+// ============ TERMINAL TYPEWRITER ============
+const termBody = document.getElementById('term-body');
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// The script: array of segments. Each has a type and content.
+// Types: cmd (with $ prompt), user-q (cyan question), label (mauve "Claude:"),
+//        body (plain), check (animated checkmark), blank (empty line)
+const script = [
+  { type: 'cmd', text: 'claude' },
+  { type: 'blank' },
+  { type: 'user-q', text: '> I need help organizing my Notion database' },
+  { type: 'blank' },
+  { type: 'label', text: 'Claude:' },
+  { type: 'body', text: 'I see you have 247 pages across 3 databases.' },
+  { type: 'body', text: 'Let me help structure them...' },
+  { type: 'blank' },
+  { type: 'check', text: 'Scanning Notion workspace', meta: '247 pages indexed' },
+  { type: 'check', text: 'Identifying duplicates', meta: 'found 23' },
+  { type: 'check', text: 'Generating new taxonomy', meta: '4 top-level themes' },
+  { type: 'check', text: 'Drafting migration plan', meta: 'awaiting your review' },
+];
+
+function buildEmptyLines() {
+  termBody.innerHTML = '';
+  script.forEach((s, i) => {
+    const span = document.createElement('span');
+    span.className = 'term-line ' + s.type;
+    span.dataset.idx = i;
+    if (s.type === 'cmd') {
+      span.innerHTML = '<span class="prompt">$</span><span class="cmd-text"></span><span class="caret"></span>';
+    } else if (s.type === 'check') {
+      span.innerHTML = '<span class="mark">✓</span><span class="check-text"></span><span class="meta"></span>';
+    } else if (s.type === 'blank') {
+      span.innerHTML = '&nbsp;';
+    } else {
+      span.innerHTML = '<span class="content"></span>';
+    }
+    termBody.appendChild(span);
+  });
+}
+
+function renderStatic() {
+  termBody.innerHTML = '';
+  script.forEach((s) => {
+    const span = document.createElement('span');
+    span.className = 'term-line ' + s.type;
+    if (s.type === 'cmd') {
+      span.innerHTML = '<span class="prompt">$</span>' + s.text;
+    } else if (s.type === 'check') {
+      span.innerHTML = '<span class="mark">✓</span>' + s.text + '<span class="meta">' + (s.meta || '') + '</span>';
+      span.classList.add('in');
+    } else if (s.type === 'blank') {
+      span.innerHTML = '&nbsp;';
+    } else {
+      span.textContent = s.text;
+    }
+    termBody.appendChild(span);
+  });
+}
+
+function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+async function typeInto(targetEl, text, minDelay = 38, maxDelay = 78) {
+  for (let i = 0; i < text.length; i++) {
+    targetEl.textContent += text[i];
+    const ch = text[i];
+    // pause longer at sentence-ish chars
+    let d = minDelay + Math.random() * (maxDelay - minDelay);
+    if (ch === ',' || ch === '.') d += 120;
+    if (ch === ' ') d *= 0.55;
+    await wait(d);
+  }
+}
+
+async function runTypewriter() {
+  buildEmptyLines();
+  const lines = [...termBody.querySelectorAll('.term-line')];
+
+  for (let i = 0; i < script.length; i++) {
+    const s = script[i];
+    const line = lines[i];
+
+    if (s.type === 'cmd') {
+      const cmdText = line.querySelector('.cmd-text');
+      await typeInto(cmdText, s.text, 70, 130);
+      await wait(420);
+      // remove caret from this line; place it nowhere until next typed line
+      const c = line.querySelector('.caret');
+      if (c) c.remove();
+    } else if (s.type === 'user-q') {
+      const content = line.querySelector('.content');
+      // add caret to start typing
+      const caret = document.createElement('span');
+      caret.className = 'caret';
+      line.appendChild(caret);
+      await typeInto(content, s.text, 28, 58);
+      caret.remove();
+      await wait(540);
+    } else if (s.type === 'label') {
+      line.querySelector('.content').textContent = s.text;
+      await wait(380);
+    } else if (s.type === 'body') {
+      const content = line.querySelector('.content');
+      await typeInto(content, s.text, 16, 34);
+      await wait(180);
+    } else if (s.type === 'check') {
+      line.querySelector('.check-text').textContent = s.text;
+      if (s.meta) line.querySelector('.meta').textContent = s.meta;
+      // spring fade in
+      requestAnimationFrame(() => line.classList.add('in'));
+      await wait(560);
+    } else {
+      // blank
+      await wait(120);
+    }
+  }
+  // hold the final state, then loop
+  await wait(3200);
+  runTypewriter();
+}
+
+if (reduce) {
+  renderStatic();
+} else {
+  // Defer start until terminal is in view (saves CPU if scrolled past quickly)
+  const termObs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        runTypewriter();
+        termObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  termObs.observe(document.querySelector('.terminal'));
+}
+</script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transformers — Attention is all you need · CETI.AI Lookbook</title>
+  <meta name="description" content="From the 2017 paper to modern decoder-only LLMs — Q/K/V attention, the layer cake, RoPE, GQA, MoE, FlashAttention. A mental model for developers.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-bg-code: #1E1E2E;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+      --color-accent: #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+      --color-info: #2A7B9B;
+      --color-actor-2: #2A7B9B;
+      --color-actor-3: #7B6DAA;
+      --color-actor-4: #D4A843;
+      --color-actor-5: #2D8B55;
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 18% 12%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 92% 80%, rgba(42, 123, 155, 0.04) 0%, transparent 55%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection { background: var(--color-accent-light); color: var(--color-text); }
+
+    /* ============ SECTION SCAFFOLD ============ */
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    section { padding: 5rem 0; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--color-accent);
+      margin: 0 0 1.25rem;
+    }
+
+    h1, h2, h3 {
+      font-family: var(--font-display);
+      letter-spacing: -0.02em;
+      line-height: 1.08;
+      margin: 0;
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 1.5rem 4rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .hero-title {
+      font-weight: 800;
+      font-size: clamp(2.75rem, 7.5vw, 6rem);
+      line-height: 1.02;
+      margin: 1.5rem 0 1.75rem;
+      max-width: 14ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 300ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 400ms; }
+    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 500ms; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-accent);
+    }
+    .hero-eyebrow {
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .hero-eyebrow { opacity: 1; }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 700ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .cta-row {
+      display: flex;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 900ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.75rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease;
+      will-change: transform;
+      text-decoration: none;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+    .secondary {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-family: var(--font-mono);
+      transition: color 200ms;
+    }
+    .secondary:hover { color: var(--color-accent); }
+
+    /* ============ SECTION HEADINGS ============ */
+    .section-head {
+      max-width: 60ch;
+      margin-bottom: 3rem;
+    }
+    .section-head h2 {
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .section-head p {
+      color: var(--color-text-secondary);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    /* ============ ATTENTION MATRIX (the WOW) ============ */
+    .matrix-section {
+      background: var(--color-bg-warm);
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
+    .matrix-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .matrix-stage {
+      position: relative;
+      padding: 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 1.25rem;
+      box-shadow: var(--shadow-md);
+    }
+    .matrix-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-text-muted);
+      margin-bottom: 1.25rem;
+    }
+    .matrix-caption .pattern-name {
+      color: var(--color-accent);
+      font-weight: 500;
+    }
+    .matrix {
+      display: grid;
+      grid-template-columns: auto repeat(8, 1fr);
+      grid-template-rows: auto repeat(8, 1fr);
+      gap: 4px;
+      aspect-ratio: 1 / 1;
+    }
+    .matrix-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 3.2ch;
+    }
+    .matrix-label.row {
+      justify-content: flex-end;
+      padding-right: 0.4rem;
+    }
+    .matrix-cell {
+      border-radius: 3px;
+      background: var(--color-accent);
+      opacity: var(--w, 0.02);
+      transition: opacity 480ms var(--ease-out);
+      aspect-ratio: 1 / 1;
+      min-height: 18px;
+    }
+    .matrix-cell.diag {
+      box-shadow: 0 0 0 1px var(--color-accent-muted);
+    }
+    .pattern-pills {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .pill {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all 200ms var(--ease-out);
+      font-weight: 500;
+    }
+    .pill:hover { color: var(--color-accent); border-color: var(--color-accent-muted); }
+    .pill.active {
+      background: var(--color-accent);
+      color: white;
+      border-color: var(--color-accent);
+    }
+
+    .qkv {
+      display: grid;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .qkv-row {
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 1rem;
+      align-items: baseline;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .qkv-row:last-child { border-bottom: none; }
+    .qkv-key {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.8rem;
+      color: var(--color-accent);
+      line-height: 1;
+    }
+    .qkv-body { font-size: 0.98rem; color: var(--color-text-secondary); }
+    .qkv-body strong { color: var(--color-text); font-weight: 500; }
+
+    /* ============ LAYER CAKE ============ */
+    .cake-layout {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .cake {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .layer {
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      transition: all 400ms var(--ease-out);
+    }
+    .layer.embed { background: var(--color-accent-light); color: var(--color-accent); border-color: var(--color-accent-muted); }
+    .layer.output { background: var(--color-bg-warm); }
+    .layer.block {
+      background: var(--color-surface);
+      box-shadow: var(--shadow-md);
+    }
+    .layer.glow {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-accent-light), var(--shadow-lg);
+      transform: translateX(4px);
+    }
+    .layer .layer-num {
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+      font-weight: 400;
+    }
+    .layer.glow .layer-num { color: var(--color-accent); }
+    .stack-label {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-text-muted);
+      margin-top: 0.75rem;
+    }
+    .stack-label .n {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--color-accent);
+      font-size: 1rem;
+    }
+
+    /* ============ BENTO GRID ============ */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .tile {
+      position: relative;
+      padding: 1.75rem;
+      border-radius: 1rem;
+      background:
+        radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(217, 79, 48, 0.07), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring),
+        border-color var(--duration-normal),
+        box-shadow var(--duration-normal);
+    }
+    .tile.visible { opacity: 1; transform: translateY(0); }
+    .tile.visible:hover { border-color: var(--color-accent-muted); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+    .tile-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+      padding: 0.3rem 0.7rem;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+    .tile-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+      margin: 0.85rem 0 0.5rem;
+    }
+    .tile-body {
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* ============ TIMELINE ============ */
+    .timeline-section {
+      background: var(--color-bg-warm);
+    }
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+      position: relative;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      top: 6.5rem;
+      left: 8%;
+      right: 8%;
+      height: 2px;
+      background: linear-gradient(to right, var(--color-border) 0%, var(--color-accent-muted) 100%);
+      z-index: 0;
+    }
+    .era {
+      position: relative;
+      z-index: 1;
+      padding: 1.5rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 1rem;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring),
+        border-color var(--duration-normal);
+    }
+    .era.visible { opacity: 1; transform: translateY(0); }
+    .era:nth-child(1).visible { transition-delay: 0ms; }
+    .era:nth-child(2).visible { transition-delay: 100ms; }
+    .era:nth-child(3).visible { transition-delay: 200ms; }
+    .era:nth-child(4).visible { transition-delay: 300ms; }
+    .era:nth-child(5).visible { transition-delay: 400ms; }
+    .era:hover { border-color: var(--color-accent-muted); }
+
+    .era-year {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-text-muted);
+    }
+    .era-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin: 0.5rem 0 0.25rem;
+      letter-spacing: -0.01em;
+    }
+    .era-num {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      color: var(--color-accent);
+      line-height: 1;
+      margin: 0.75rem 0 0.3rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    .era-unit {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+    }
+    .era-note {
+      margin-top: 0.75rem;
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+    }
+    .era .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-surface);
+      border: 2px solid var(--color-accent);
+      margin: 0.5rem auto 0;
+    }
+
+    /* ============ CODE BLOCK ============ */
+    .code-section { background: var(--color-bg); }
+    .code-wrap {
+      background: var(--color-bg-code);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-top: 1.5rem;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    .code-wrap::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--color-accent-muted), transparent);
+    }
+    .code-head {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .code-head .filename {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: #9E9790;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .code-head .dots { display: flex; gap: 6px; }
+    .code-head .dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+    .code-head .dots span:first-child { background: #E8836C; }
+    pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: #CDD6F4;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .ck { color: #CBA6F7; } /* keyword */
+    .cs { color: #A6E3A1; } /* string */
+    .cf { color: #89B4FA; } /* function */
+    .cc { color: #6C7086; font-style: italic; } /* comment */
+    .cn { color: #FAB387; } /* number */
+    .cp { color: #F9E2AF; } /* property */
+    .co { color: #94E2D5; } /* operator */
+    .ct { color: #F38BA8; } /* tag/type */
+
+    /* ============ FINAL CTA ============ */
+    .final {
+      text-align: center;
+      padding: 7rem 1.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .final h2 {
+      font-size: clamp(2.25rem, 5vw, 3.25rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .final p {
+      color: var(--color-text-secondary);
+      font-size: 1.1rem;
+      margin-bottom: 2.25rem;
+    }
+    .footer {
+      padding: 2rem 1.5rem 3rem;
+      text-align: center;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-top: 1px solid var(--color-border-light);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ============ ANIMATE-IN UTILITY ============ */
+    .animate-in {
+      opacity: 0;
+      transform: translateY(22px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .animate-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 900px) {
+      .matrix-layout, .cake-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+      .bento { grid-template-columns: 1fr 1fr; }
+      .timeline { grid-template-columns: 1fr 1fr; }
+      .timeline::before { display: none; }
+    }
+    @media (max-width: 560px) {
+      section { padding: 3.5rem 0; }
+      .bento { grid-template-columns: 1fr; }
+      .timeline { grid-template-columns: 1fr; }
+      .matrix { grid-template-columns: auto repeat(6, 1fr); grid-template-rows: auto repeat(6, 1fr); }
+      .matrix-cell.hide-mobile { display: none; }
+      .matrix-label.hide-mobile { display: none; }
+      .hero { padding-top: 4rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .cta-row, .hero-eyebrow,
+      .tile, .era, .animate-in {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      /* Static diagonal-only attention pattern for reduced motion */
+      .matrix-cell { opacity: 0.04 !important; transition: none !important; }
+      .matrix-cell.diag { opacity: 0.85 !important; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .tile:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="hero">
+    <p class="eyebrow hero-eyebrow">Transformers · Modern LLM architectures · CETI.AI Lookbook</p>
+    <h1 class="hero-title">
+      <span class="word">Attention</span>
+      <span class="word">is</span>
+      <span class="word">all</span>
+      <span class="word">you</span>
+      <span class="word"><em>need.</em></span>
+    </h1>
+    <p class="hero-sub">
+      One sentence in a 2017 paper rewrote machine learning. Eight years later it powers every model you've heard of — GPT, Claude, Llama, Gemini. This is the mental model for what's actually inside, and how the architecture evolved into the LLMs of 2026.
+    </p>
+    <div class="cta-row">
+      <a class="magnetic" href="#attention">
+        Start with attention
+        <span class="arrow">→</span>
+      </a>
+      <a class="secondary" href="#evolution">jump to 2017 → 2026 ↓</a>
+    </div>
+  </section>
+
+  <!-- ============ ATTENTION MATRIX (the WOW) ============ -->
+  <section class="matrix-section" id="attention">
+    <div class="wrap">
+      <div class="section-head animate-in">
+        <p class="eyebrow">01 · Self-attention</p>
+        <h2>Every token looks at every other token.</h2>
+        <p>The 2017 idea, in one image: each token in the sequence asks "who else should I pay attention to?" The answer is a matrix of weights. Brighter cell = more attention from row→column.</p>
+      </div>
+
+      <div class="matrix-layout">
+        <div class="matrix-stage animate-in">
+          <div class="matrix-caption">
+            <span>attention weights · 8 × 8</span>
+            <span class="pattern-name" id="patternName">causal</span>
+          </div>
+          <div class="matrix" id="matrix" aria-label="Animated attention weight matrix">
+            <!-- corner -->
+            <div class="matrix-label"></div>
+            <!-- column labels -->
+            <div class="matrix-label">THE</div>
+            <div class="matrix-label">CAT</div>
+            <div class="matrix-label">SAT</div>
+            <div class="matrix-label">ON</div>
+            <div class="matrix-label">THE</div>
+            <div class="matrix-label">MAT</div>
+            <div class="matrix-label hide-mobile">AND</div>
+            <div class="matrix-label hide-mobile">SLEPT</div>
+            <!-- rows -->
+            <!-- row 0 -->
+            <div class="matrix-label row">THE</div>
+            <div class="matrix-cell" data-r="0" data-c="0"></div>
+            <div class="matrix-cell" data-r="0" data-c="1"></div>
+            <div class="matrix-cell" data-r="0" data-c="2"></div>
+            <div class="matrix-cell" data-r="0" data-c="3"></div>
+            <div class="matrix-cell" data-r="0" data-c="4"></div>
+            <div class="matrix-cell" data-r="0" data-c="5"></div>
+            <div class="matrix-cell hide-mobile" data-r="0" data-c="6"></div>
+            <div class="matrix-cell hide-mobile" data-r="0" data-c="7"></div>
+            <!-- row 1 -->
+            <div class="matrix-label row">CAT</div>
+            <div class="matrix-cell" data-r="1" data-c="0"></div>
+            <div class="matrix-cell" data-r="1" data-c="1"></div>
+            <div class="matrix-cell" data-r="1" data-c="2"></div>
+            <div class="matrix-cell" data-r="1" data-c="3"></div>
+            <div class="matrix-cell" data-r="1" data-c="4"></div>
+            <div class="matrix-cell" data-r="1" data-c="5"></div>
+            <div class="matrix-cell hide-mobile" data-r="1" data-c="6"></div>
+            <div class="matrix-cell hide-mobile" data-r="1" data-c="7"></div>
+            <!-- row 2 -->
+            <div class="matrix-label row">SAT</div>
+            <div class="matrix-cell" data-r="2" data-c="0"></div>
+            <div class="matrix-cell" data-r="2" data-c="1"></div>
+            <div class="matrix-cell" data-r="2" data-c="2"></div>
+            <div class="matrix-cell" data-r="2" data-c="3"></div>
+            <div class="matrix-cell" data-r="2" data-c="4"></div>
+            <div class="matrix-cell" data-r="2" data-c="5"></div>
+            <div class="matrix-cell hide-mobile" data-r="2" data-c="6"></div>
+            <div class="matrix-cell hide-mobile" data-r="2" data-c="7"></div>
+            <!-- row 3 -->
+            <div class="matrix-label row">ON</div>
+            <div class="matrix-cell" data-r="3" data-c="0"></div>
+            <div class="matrix-cell" data-r="3" data-c="1"></div>
+            <div class="matrix-cell" data-r="3" data-c="2"></div>
+            <div class="matrix-cell" data-r="3" data-c="3"></div>
+            <div class="matrix-cell" data-r="3" data-c="4"></div>
+            <div class="matrix-cell" data-r="3" data-c="5"></div>
+            <div class="matrix-cell hide-mobile" data-r="3" data-c="6"></div>
+            <div class="matrix-cell hide-mobile" data-r="3" data-c="7"></div>
+            <!-- row 4 -->
+            <div class="matrix-label row">THE</div>
+            <div class="matrix-cell" data-r="4" data-c="0"></div>
+            <div class="matrix-cell" data-r="4" data-c="1"></div>
+            <div class="matrix-cell" data-r="4" data-c="2"></div>
+            <div class="matrix-cell" data-r="4" data-c="3"></div>
+            <div class="matrix-cell" data-r="4" data-c="4"></div>
+            <div class="matrix-cell" data-r="4" data-c="5"></div>
+            <div class="matrix-cell hide-mobile" data-r="4" data-c="6"></div>
+            <div class="matrix-cell hide-mobile" data-r="4" data-c="7"></div>
+            <!-- row 5 -->
+            <div class="matrix-label row">MAT</div>
+            <div class="matrix-cell" data-r="5" data-c="0"></div>
+            <div class="matrix-cell" data-r="5" data-c="1"></div>
+            <div class="matrix-cell" data-r="5" data-c="2"></div>
+            <div class="matrix-cell" data-r="5" data-c="3"></div>
+            <div class="matrix-cell" data-r="5" data-c="4"></div>
+            <div class="matrix-cell" data-r="5" data-c="5"></div>
+            <div class="matrix-cell hide-mobile" data-r="5" data-c="6"></div>
+            <div class="matrix-cell hide-mobile" data-r="5" data-c="7"></div>
+            <!-- row 6 -->
+            <div class="matrix-label row hide-mobile">AND</div>
+            <div class="matrix-cell hide-mobile" data-r="6" data-c="0"></div>
+            <div class="matrix-cell hide-mobile" data-r="6" data-c="1"></div>
+            <div class="matrix-cell hide-mobile" data-r="6" data-c="2"></div>
+            <div class="matrix-cell hide-mobile" data-r="6" data-c="3"></div>
+            <div class="matrix-cell hide-mobile" data-r="6" data-c="4"></div>
+            <div class="matrix-cell hide-mobile" data-r="6" data-c="5"></div>
+            <div class="matrix-cell hide-mobile" data-r="6" data-c="6"></div>
+            <div class="matrix-cell hide-mobile" data-r="6" data-c="7"></div>
+            <!-- row 7 -->
+            <div class="matrix-label row hide-mobile">SLEPT</div>
+            <div class="matrix-cell hide-mobile" data-r="7" data-c="0"></div>
+            <div class="matrix-cell hide-mobile" data-r="7" data-c="1"></div>
+            <div class="matrix-cell hide-mobile" data-r="7" data-c="2"></div>
+            <div class="matrix-cell hide-mobile" data-r="7" data-c="3"></div>
+            <div class="matrix-cell hide-mobile" data-r="7" data-c="4"></div>
+            <div class="matrix-cell hide-mobile" data-r="7" data-c="5"></div>
+            <div class="matrix-cell hide-mobile" data-r="7" data-c="6"></div>
+            <div class="matrix-cell hide-mobile" data-r="7" data-c="7"></div>
+          </div>
+          <div class="pattern-pills">
+            <button class="pill" data-pattern="diagonal">diagonal · self</button>
+            <button class="pill active" data-pattern="causal">causal · GPT-style</button>
+            <button class="pill" data-pattern="local">local window</button>
+            <button class="pill" data-pattern="full">full · BERT-style</button>
+          </div>
+        </div>
+
+        <div class="animate-in">
+          <div class="qkv">
+            <div class="qkv-row">
+              <div class="qkv-key">Q</div>
+              <div class="qkv-body"><strong>Query</strong> — "What am I looking for?" Each token projects a question into a learned vector space.</div>
+            </div>
+            <div class="qkv-row">
+              <div class="qkv-key">K</div>
+              <div class="qkv-body"><strong>Key</strong> — "What do I offer?" Every other token advertises what it has to contribute.</div>
+            </div>
+            <div class="qkv-row">
+              <div class="qkv-key">V</div>
+              <div class="qkv-body"><strong>Value</strong> — "Here's my content." Once attention picks the matches, values are mixed by the attention weights.</div>
+            </div>
+            <div class="qkv-row">
+              <div class="qkv-key">×n</div>
+              <div class="qkv-body"><strong>Multi-head</strong> — do this whole thing in parallel ~32 times, each "head" learning a different relationship (syntax, coreference, position). Then concatenate.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LAYER CAKE ============ -->
+  <section id="layers">
+    <div class="wrap">
+      <div class="section-head animate-in">
+        <p class="eyebrow">02 · The layer cake</p>
+        <h2>Stack the same block, 32 to 80 times.</h2>
+        <p>A transformer is mostly one block, repeated. Tokens flow up through embeddings, through N identical layers of <em>attention + feed-forward</em>, and out as a probability distribution over the next token.</p>
+      </div>
+
+      <div class="cake-layout">
+        <div class="animate-in">
+          <div class="cake" id="cake" aria-hidden="true">
+            <div class="layer embed" data-layer="0">
+              <span>EMBED + POS</span><span class="layer-num">in</span>
+            </div>
+            <div class="layer block" data-layer="1">
+              <span>ATTENTION + FFN</span><span class="layer-num">L01</span>
+            </div>
+            <div class="layer block" data-layer="2">
+              <span>ATTENTION + FFN</span><span class="layer-num">L02</span>
+            </div>
+            <div class="layer block" data-layer="3">
+              <span>ATTENTION + FFN</span><span class="layer-num">L03</span>
+            </div>
+            <div class="layer block" data-layer="4">
+              <span>ATTENTION + FFN</span><span class="layer-num">···</span>
+            </div>
+            <div class="layer block" data-layer="5">
+              <span>ATTENTION + FFN</span><span class="layer-num">L80</span>
+            </div>
+            <div class="layer output" data-layer="6">
+              <span>UNEMBED → SOFTMAX</span><span class="layer-num">out</span>
+            </div>
+          </div>
+          <p class="stack-label"><span class="n">N = 32–80</span> identical blocks in modern LLMs</p>
+        </div>
+
+        <div class="bento">
+          <article class="tile animate-in">
+            <span class="tile-tag">embed</span>
+            <h3 class="tile-title">Token → vector</h3>
+            <p class="tile-body">Each token becomes a learned ~4096-dimensional vector. Position information is added (sinusoidal in 2017, RoPE today).</p>
+          </article>
+          <article class="tile animate-in">
+            <span class="tile-tag">attention</span>
+            <h3 class="tile-title">Mix across tokens</h3>
+            <p class="tile-body">The Q/K/V machinery. The only place where tokens look at each other. Everything else acts per-token.</p>
+          </article>
+          <article class="tile animate-in">
+            <span class="tile-tag">ffn</span>
+            <h3 class="tile-title">Think per token</h3>
+            <p class="tile-body">A two-layer MLP applied to each token independently. ~⅔ of the model's parameters live here.</p>
+          </article>
+          <article class="tile animate-in">
+            <span class="tile-tag">layer-norm</span>
+            <h3 class="tile-title">Keep the math sane</h3>
+            <p class="tile-body">Normalizes activations so the signal doesn't explode or vanish across 80 layers. RMSNorm replaces LayerNorm in most modern stacks.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TIMELINE ============ -->
+  <section class="timeline-section" id="evolution">
+    <div class="wrap">
+      <div class="section-head animate-in">
+        <p class="eyebrow">03 · From 2017 to 2026</p>
+        <h2>The same block, scaled five orders of magnitude.</h2>
+        <p>The architecture changed less than you'd think. Parameter count changed by a factor of ~10,000× from the original paper to today's frontier models.</p>
+      </div>
+
+      <div class="timeline">
+        <article class="era">
+          <div class="era-year">JUN 2017</div>
+          <div class="era-name">"Attention is all you need"</div>
+          <div class="dot"></div>
+          <div class="era-num"><span class="num" data-to="65" data-suffix="M">0</span></div>
+          <div class="era-unit">params · encoder-decoder</div>
+          <div class="era-note">The original transformer, designed for machine translation.</div>
+        </article>
+        <article class="era">
+          <div class="era-year">FEB 2019</div>
+          <div class="era-name">GPT-2</div>
+          <div class="dot"></div>
+          <div class="era-num"><span class="num" data-to="1.5" data-suffix="B" data-decimals="1">0</span></div>
+          <div class="era-unit">decoder-only · text</div>
+          <div class="era-note">"Too dangerous to release" — first hint of scale unlocking generality.</div>
+        </article>
+        <article class="era">
+          <div class="era-year">MAY 2020</div>
+          <div class="era-name">GPT-3</div>
+          <div class="dot"></div>
+          <div class="era-num"><span class="num" data-to="175" data-suffix="B">0</span></div>
+          <div class="era-unit">few-shot in-context</div>
+          <div class="era-note">100× larger than GPT-2. Few-shot learning emerged as a property of scale.</div>
+        </article>
+        <article class="era">
+          <div class="era-year">MAR 2023</div>
+          <div class="era-name">GPT-4</div>
+          <div class="dot"></div>
+          <div class="era-num">~<span class="num" data-to="1.8" data-suffix="T" data-decimals="1">0</span></div>
+          <div class="era-unit">rumored MoE · multimodal</div>
+          <div class="era-note">Estimated mixture-of-experts; OpenAI never published the architecture.</div>
+        </article>
+        <article class="era">
+          <div class="era-year">JUL 2024</div>
+          <div class="era-name">Llama 3.1</div>
+          <div class="dot"></div>
+          <div class="era-num"><span class="num" data-to="405" data-suffix="B">0</span></div>
+          <div class="era-unit">open-weight · dense</div>
+          <div class="era-note">Meta's frontier-class open model. RoPE + GQA + SwiGLU + 128K context.</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MODERN EVOLUTIONS ============ -->
+  <section id="modern">
+    <div class="wrap">
+      <div class="section-head animate-in">
+        <p class="eyebrow">04 · What changed</p>
+        <h2>Four upgrades that quietly redefined the block.</h2>
+        <p>The shape of the transformer is the same. Inside the block, four ideas have become standard since 2020. Every frontier model in 2026 uses some combination of these.</p>
+      </div>
+
+      <div class="bento">
+        <article class="tile animate-in">
+          <span class="tile-tag">positional</span>
+          <h3 class="tile-title">RoPE</h3>
+          <p class="tile-body">Rotary positional embeddings. Encodes position by rotating Q/K vectors in complex space — generalizes cleanly to longer sequences than seen in training.</p>
+        </article>
+        <article class="tile animate-in">
+          <span class="tile-tag">attention</span>
+          <h3 class="tile-title">GQA</h3>
+          <p class="tile-body">Grouped-Query Attention. Multiple Q heads share one K/V pair — shrinks the KV-cache 4–8× with near-zero quality loss. The reason long-context inference is affordable.</p>
+        </article>
+        <article class="tile animate-in">
+          <span class="tile-tag">sparsity</span>
+          <h3 class="tile-title">Mixture of Experts</h3>
+          <p class="tile-body">Replace one big FFN with many small ones plus a router. Only a few experts activate per token — total params explode, compute per token stays flat.</p>
+        </article>
+        <article class="tile animate-in">
+          <span class="tile-tag">systems</span>
+          <h3 class="tile-title">FlashAttention</h3>
+          <p class="tile-body">Same math, better memory access. Fuses operations on-GPU to skip the slow HBM round-trip. Long context windows (128K+) became practical because of this.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CODE ============ -->
+  <section class="code-section" id="code">
+    <div class="wrap">
+      <div class="section-head animate-in">
+        <p class="eyebrow">05 · What it looks like in code</p>
+        <h2>One equation, the whole idea.</h2>
+        <p>The attention layer of every transformer reduces to this. Everything else — multi-head, layer-norm, residuals, FFN — wraps around it.</p>
+      </div>
+
+      <div class="code-wrap animate-in">
+        <div class="code-head">
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="filename">attention.py · scaled dot-product</div>
+        </div>
+<pre><span class="cc"># Q, K, V: (batch, heads, seq_len, d_k)</span>
+<span class="ck">import</span> torch
+<span class="ck">import</span> torch.nn.functional <span class="ck">as</span> F
+
+<span class="ck">def</span> <span class="cf">attention</span>(Q, K, V, mask<span class="co">=</span><span class="ck">None</span>):
+    d_k <span class="co">=</span> Q.size(<span class="co">-</span><span class="cn">1</span>)                          <span class="cc"># key dim</span>
+    scores <span class="co">=</span> Q <span class="co">@</span> K.transpose(<span class="co">-</span><span class="cn">2</span>, <span class="co">-</span><span class="cn">1</span>) <span class="co">/</span> d_k<span class="co">**</span><span class="cn">0.5</span>  <span class="cc"># QKᵀ / √d_k</span>
+
+    <span class="ck">if</span> mask <span class="ck">is</span> <span class="ck">not</span> <span class="ck">None</span>:
+        scores <span class="co">=</span> scores.masked_fill(mask <span class="co">==</span> <span class="cn">0</span>, <span class="co">-</span><span class="cn">1e9</span>)
+
+    weights <span class="co">=</span> F.softmax(scores, dim<span class="co">=-</span><span class="cn">1</span>)        <span class="cc"># the matrix above</span>
+    <span class="ck">return</span> weights <span class="co">@</span> V                          <span class="cc"># mix the values</span></pre>
+      </div>
+      <p style="color: var(--color-text-secondary); margin-top: 1.5rem; font-size: 0.95rem; max-width: 60ch;">
+        That's it. Run it 32 times per layer (multi-head), stack the layer 80 times, and you have a frontier LLM. Everything since 2017 has been making this faster, cheaper, or longer.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="final" id="next">
+    <div class="animate-in">
+      <p class="eyebrow">Where to go next</p>
+      <h2>You now have the mental model.</h2>
+      <p>Read the original paper for the gold standard. Read Karpathy's nanoGPT to see it in 300 lines. Read Raschka's "Big LLM Architecture Comparison" to see how 22 frontier models differ.</p>
+      <a class="magnetic" href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">
+        Read the 2017 paper
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    CETI.AI · Lookbook · Transformers &amp; modern LLM architectures
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ ANIMATE-IN ON SCROLL ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
+    document.querySelectorAll('.animate-in, .tile, .era').forEach(el => reveal.observe(el));
+
+    // ============ NUMBER TICKER ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const decimals = +(el.dataset.decimals || 0);
+      const suffix = el.dataset.suffix || '';
+      const dur = 1300;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const v = easeOutCubic(p) * to;
+        el.textContent = v.toFixed(decimals) + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach(el => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 25;
+    const isTouch = matchMedia('(hover: none)').matches;
+    if (!isTouch) {
+      document.querySelectorAll('.magnetic').forEach((btn) => {
+        btn.addEventListener('mousemove', (e) => {
+          const r = btn.getBoundingClientRect();
+          const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+          const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+          btn.style.setProperty('--mx', `${x}px`);
+          btn.style.setProperty('--my', `${y}px`);
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.setProperty('--mx', '0px');
+          btn.style.setProperty('--my', '0px');
+        });
+      });
+    }
+
+    // ============ MAGIC CARD CURSOR GLOW ============
+    if (!isTouch) {
+      document.querySelectorAll('.tile').forEach((card) => {
+        card.addEventListener('mousemove', (e) => {
+          const r = card.getBoundingClientRect();
+          card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+          card.style.setProperty('--my', `${e.clientY - r.top}px`);
+        });
+      });
+    }
+
+    // ============ ATTENTION MATRIX ============
+    const N = 8;
+    const cells = Array.from(document.querySelectorAll('.matrix-cell'));
+    const patternName = document.getElementById('patternName');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Pattern generators — returns weight matrix W[r][c] in [0, 1]
+    function makePattern(name) {
+      const W = Array.from({ length: N }, () => Array(N).fill(0));
+      if (name === 'diagonal') {
+        for (let i = 0; i < N; i++) W[i][i] = 1;
+      } else if (name === 'causal') {
+        for (let r = 0; r < N; r++) {
+          // exponential decay along the row, only for c <= r, normalized softmax-ish
+          const raw = [];
+          for (let c = 0; c <= r; c++) raw.push(Math.exp(-(r - c) * 0.5));
+          const sum = raw.reduce((a, b) => a + b, 0);
+          for (let c = 0; c <= r; c++) W[r][c] = raw[c] / sum;
+        }
+      } else if (name === 'local') {
+        for (let r = 0; r < N; r++) {
+          const raw = [];
+          const window = 2;
+          for (let c = 0; c < N; c++) raw.push(Math.abs(r - c) <= window ? Math.exp(-Math.abs(r - c) * 0.6) : 0);
+          const sum = raw.reduce((a, b) => a + b, 0) || 1;
+          for (let c = 0; c < N; c++) W[r][c] = raw[c] / sum;
+        }
+      } else if (name === 'full') {
+        for (let r = 0; r < N; r++) {
+          // BERT-style: every token attends with mild bias toward similar tokens (here arbitrary peaks)
+          const raw = [];
+          for (let c = 0; c < N; c++) raw.push(0.5 + 0.4 * Math.cos((r - c) * 0.9));
+          const sum = raw.reduce((a, b) => a + b, 0);
+          for (let c = 0; c < N; c++) W[r][c] = raw[c] / sum;
+        }
+      }
+      return W;
+    }
+
+    function applyPattern(name, animated) {
+      const W = makePattern(name);
+      cells.forEach((cell) => {
+        const r = +cell.dataset.r;
+        const c = +cell.dataset.c;
+        let w = W[r][c];
+        // amplify visually so small values still register
+        w = Math.pow(w, 0.55);
+        const op = Math.max(0.025, Math.min(1, w));
+        cell.style.setProperty('--w', op.toFixed(3));
+        cell.classList.toggle('diag', r === c && w > 0.3);
+      });
+      if (patternName) patternName.textContent = name;
+    }
+
+    // Initial state
+    applyPattern('causal', false);
+
+    // Pill click handlers
+    document.querySelectorAll('.pill').forEach((pill) => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        applyPattern(pill.dataset.pattern, true);
+        // pause auto-cycle once user takes control
+        autoCycle = false;
+      });
+    });
+
+    // Auto-cycle through patterns (unless reduced motion)
+    let autoCycle = !reducedMotion;
+    const cycleOrder = ['diagonal', 'causal', 'local', 'full'];
+    let cycleIdx = 1;
+    if (autoCycle) {
+      const matrixSection = document.querySelector('.matrix-section');
+      let cycleTimer = null;
+      const startCycle = () => {
+        if (cycleTimer) return;
+        cycleTimer = setInterval(() => {
+          if (!autoCycle) return;
+          cycleIdx = (cycleIdx + 1) % cycleOrder.length;
+          const name = cycleOrder[cycleIdx];
+          applyPattern(name, true);
+          document.querySelectorAll('.pill').forEach(p => {
+            p.classList.toggle('active', p.dataset.pattern === name);
+          });
+        }, 3200);
+      };
+      const stopCycle = () => {
+        if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; }
+      };
+      // Only run when section is visible
+      const sectObs = new IntersectionObserver((entries) => {
+        entries.forEach(e => e.isIntersecting ? startCycle() : stopCycle());
+      }, { threshold: 0.25 });
+      sectObs.observe(matrixSection);
+    }
+
+    // ============ LAYER CAKE FLOW ============
+    if (!reducedMotion) {
+      const cake = document.getElementById('cake');
+      const layers = cake ? Array.from(cake.querySelectorAll('.layer')) : [];
+      let cakeTimer = null;
+      let li = 0;
+      const flowStep = () => {
+        layers.forEach(l => l.classList.remove('glow'));
+        if (layers[li]) layers[li].classList.add('glow');
+        li = (li + 1) % layers.length;
+      };
+      const cakeObs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting && !cakeTimer) {
+            flowStep();
+            cakeTimer = setInterval(flowStep, 700);
+          } else if (!e.isIntersecting && cakeTimer) {
+            clearInterval(cakeTimer); cakeTimer = null;
+            layers.forEach(l => l.classList.remove('glow'));
+          }
+        });
+      }, { threshold: 0.4 });
+      if (cake) cakeObs.observe(cake);
+    }
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

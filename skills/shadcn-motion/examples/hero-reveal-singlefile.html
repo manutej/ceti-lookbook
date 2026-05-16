@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>shadcn-motion — Canonical Example</title>
+  <meta name="description" content="A hero/landing demo showing 5 of the v1 components from the shadcn-motion skill — running in a single HTML file with no build step.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-surface: #FFFFFF;
+      --color-accent: #D94F30;
+      --color-accent-muted: #E8836C;
+      --color-accent-light: #FDEEE9;
+      --color-info: #2A7B9B;
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+      --stagger: 80ms;
+
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image: radial-gradient(ellipse at 20% 30%, rgba(217, 79, 48, 0.04) 0%, transparent 50%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      min-height: 100dvh;
+      padding: 6rem 1.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; transition-delay: 0ms; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin: 1.5rem 0 1.5rem;
+      max-width: 14ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(24px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 260ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 340ms; }
+    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 420ms; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-accent);
+    }
+
+    .hero-sub {
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      max-width: 48ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 600ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 800ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    /* ============ MAGNETIC BUTTON ============ */
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.75rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease;
+      will-change: transform;
+    }
+    .magnetic:hover { background: #C4432A; }
+    .magnetic .arrow {
+      transition: transform 300ms var(--ease-out);
+    }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+
+    .secondary {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 200ms;
+    }
+    .secondary:hover { color: var(--color-accent); }
+
+    /* ============ PROOF / STATS ============ */
+    .proof {
+      padding: 4rem 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .proof-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .stat {
+      padding: 2rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 1rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .stat.visible { opacity: 1; transform: translateY(0); }
+    .stat:nth-child(2).visible { transition-delay: 100ms; }
+    .stat:nth-child(3).visible { transition-delay: 200ms; }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-value .plus { color: var(--color-accent); }
+    .stat-label {
+      margin-top: 0.5rem;
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* ============ BENTO ============ */
+    .bento-section {
+      padding: 4rem 1.5rem 6rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .bento-heading {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.75rem;
+    }
+    .bento-sub {
+      color: var(--color-text-secondary);
+      margin: 0 0 3rem;
+      max-width: 50ch;
+    }
+
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: minmax(180px, auto);
+      gap: 1rem;
+    }
+    .magic-card {
+      position: relative;
+      padding: 2rem;
+      border-radius: 1rem;
+      background:
+        radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(217, 79, 48, 0.08), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring);
+      cursor: default;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .magic-card.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring); }
+    .magic-card.visible:hover { transform: translateY(-3px); border-color: var(--color-accent-muted); box-shadow: var(--shadow-lg); }
+
+    .magic-card.span-2 { grid-column: span 2; }
+    .magic-card.row-2 { grid-row: span 2; }
+
+    .card-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+      padding: 0.25rem 0.625rem;
+      border-radius: 999px;
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.01em;
+      margin: 1rem 0 0.5rem;
+    }
+    .card-body {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    /* Animated beam canvas inside the wide card */
+    .beam-diagram {
+      margin-top: 1.5rem;
+      height: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .beam-node {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-surface);
+      border: 2px solid var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-accent);
+      font-weight: 500;
+    }
+    .beam-node.from { left: 0; }
+    .beam-node.mid { left: 50%; transform: translate(-50%, -50%); border-color: var(--color-info); color: var(--color-info); }
+    .beam-node.to { right: 0; }
+    .beam-line {
+      position: absolute;
+      top: 50%;
+      left: 36px;
+      right: 36px;
+      height: 2px;
+      background: var(--color-border);
+      transform: translateY(-50%);
+    }
+    .beam-pulse {
+      position: absolute;
+      top: 50%;
+      left: 36px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      transform: translateY(-50%);
+      box-shadow: 0 0 16px var(--color-accent);
+      animation: beam-travel 3s var(--ease-out) infinite;
+    }
+    @keyframes beam-travel {
+      0%   { left: 36px; opacity: 0; }
+      10%  { opacity: 1; }
+      50%  { left: calc(50% - 4px); }
+      90%  { opacity: 1; }
+      100% { left: calc(100% - 36px - 8px); opacity: 0; }
+    }
+
+    /* ============ FINAL CTA ============ */
+    .final {
+      padding: 6rem 1.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 1rem;
+    }
+    .final p {
+      color: var(--color-text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stats > :nth-child(3) { grid-column: span 2; }
+      .bento { grid-template-columns: 1fr 1fr; }
+      .magic-card.span-2 { grid-column: span 2; }
+      .magic-card.row-2 { grid-row: auto; }
+    }
+    @media (max-width: 480px) {
+      .stats { grid-template-columns: 1fr; }
+      .stats > :nth-child(3) { grid-column: auto; }
+      .bento { grid-template-columns: 1fr; }
+      .magic-card.span-2 { grid-column: auto; }
+      .hero { padding-top: 3rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .cta-row, .stat, .magic-card, .eyebrow {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .beam-pulse { display: none; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .magic-card:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">shadcn-motion · canonical example</p>
+    <h1 class="hero-title">
+      <span class="word">Animations</span>
+      <span class="word">that</span>
+      <span class="word"><em>direct</em></span>
+      <span class="word">attention,</span>
+      <span class="word">not steal it.</span>
+    </h1>
+    <p class="hero-sub">A working demo of five v1 components — hero text reveal, magnetic CTA, number ticker, magic card, and animated beam — in a single 12KB HTML file with no build step.</p>
+    <div class="cta-row">
+      <button class="magnetic" type="button">
+        Start the experience
+        <span class="arrow">→</span>
+      </button>
+      <a class="secondary" href="#proof">See the components ↓</a>
+    </div>
+  </section>
+
+  <!-- PROOF / STATS -->
+  <section class="proof" id="proof">
+    <p class="proof-label">Built for courses, dashboards, and proposals</p>
+    <div class="stats">
+      <article class="stat">
+        <div class="stat-value"><span class="num" data-to="5000">0</span></div>
+        <p class="stat-label">Components catalogued across 10 libraries</p>
+      </article>
+      <article class="stat">
+        <div class="stat-value"><span class="num" data-to="100">0</span><span class="plus">+</span></div>
+        <p class="stat-label">Code patterns ported to single-file HTML</p>
+      </article>
+      <article class="stat">
+        <div class="stat-value"><span class="num" data-to="20">0</span></div>
+        <p class="stat-label">Years of motion design distilled</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- BENTO -->
+  <section class="bento-section">
+    <h2 class="bento-heading">Five components, five WOW moments.</h2>
+    <p class="bento-sub">Every tile below uses one of the v1 catalog components. Hover any card — the cursor leaves a warm glow.</p>
+
+    <div class="bento">
+      <article class="magic-card span-2 row-2">
+        <span class="card-tag">Animated Beam</span>
+        <h3 class="card-title">Show how the data flows.</h3>
+        <p class="card-body">A light beam travels between two refs — ideal for system architecture diagrams in course modules.</p>
+        <div class="beam-diagram" aria-hidden="true">
+          <div class="beam-line"></div>
+          <div class="beam-pulse"></div>
+          <div class="beam-node from">IN</div>
+          <div class="beam-node mid">↻</div>
+          <div class="beam-node to">OUT</div>
+        </div>
+      </article>
+
+      <article class="magic-card">
+        <span class="card-tag">Magic Card</span>
+        <h3 class="card-title">Warm radial glow.</h3>
+        <p class="card-body">Follows the cursor at 8% accent opacity.</p>
+      </article>
+
+      <article class="magic-card">
+        <span class="card-tag">Number Ticker</span>
+        <h3 class="card-title">Counters with character.</h3>
+        <p class="card-body">requestAnimationFrame + easeOutCubic.</p>
+      </article>
+
+      <article class="magic-card">
+        <span class="card-tag">Magnetic Button</span>
+        <h3 class="card-title">Pulls toward the cursor.</h3>
+        <p class="card-body">SmoothUI house spring: <code style="font-family:var(--font-mono); font-size:0.85em;">{ duration: 0.6, bounce: 0.2 }</code>.</p>
+      </article>
+
+      <article class="magic-card">
+        <span class="card-tag">Hero Text Reveal</span>
+        <h3 class="card-title">Words spring up in turn.</h3>
+        <p class="card-body">80ms stagger feels tight and confident.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <h2>Want to see this in your own course pages?</h2>
+    <p>Invoke the skill with <code style="font-family:var(--font-mono);">/shadcn-motion</code> or just say "make a WOW landing page."</p>
+    <button class="magnetic" type="button">
+      Open the catalog
+      <span class="arrow">→</span>
+    </button>
+  </section>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION-DRIVEN REVEALS ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+    document.querySelectorAll('.stat, .magic-card').forEach((el) => reveal.observe(el));
+
+    // ============ NUMBER TICKER ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ MAGIC CARDS (cursor-follow glow) ============
+    document.querySelectorAll('.magic-card').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+  </script>
+</body>
+</html>

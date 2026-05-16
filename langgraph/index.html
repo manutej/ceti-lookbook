@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LangGraph — Agents that remember.</title>
+  <meta name="description" content="LangGraph is a low-level orchestration framework for stateful, graph-based LLM agents. A five-minute primer for builders and curious product folks.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-bg-code: #1E1E2E;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+      --color-accent: #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+      --color-info: #2A7B9B;
+      --color-success: #2D8B55;
+      --color-actor-2: #2A7B9B;
+      --color-actor-3: #7B6DAA;
+      --color-actor-4: #D4A843;
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+      --stagger: 80ms;
+
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 15% 10%, rgba(217, 79, 48, 0.05) 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 90%, rgba(42, 123, 155, 0.03) 0%, transparent 50%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 9999px; }
+
+    /* ============ HERO ============ */
+    .hero {
+      min-height: 92dvh;
+      padding: 5rem 1.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+    .eyebrow .dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--color-accent);
+      border-radius: 50%;
+      margin: 0 0.6em;
+      vertical-align: middle;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.75rem, 7vw, 5rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 1.75rem 0 1.75rem;
+      max-width: 16ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 260ms; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-accent);
+      position: relative;
+    }
+    .hero-title em::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0.05em;
+      height: 0.18em;
+      background: var(--color-accent-light);
+      z-index: -1;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 800ms var(--ease-out) 700ms;
+    }
+    .hero.visible .hero-title em::after { transform: scaleX(1); }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--color-text-secondary);
+      max-width: 52ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 600ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .cta-row {
+      display: flex;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 800ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    /* ============ MAGNETIC BUTTON ============ */
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.75rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms ease;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow {
+      transition: transform 300ms var(--ease-out);
+      display: inline-block;
+    }
+    .magnetic:hover .arrow { transform: translateX(4px); }
+
+    .secondary {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 200ms;
+      font-family: var(--font-body);
+    }
+    .secondary:hover { color: var(--color-accent); }
+
+    /* ============ LOOP DIAGRAM SECTION ============ */
+    .loop-section {
+      padding: 4rem 1.5rem 6rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-text-muted);
+      margin: 0 0 0.75rem;
+    }
+    .section-heading {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin: 0 0 1rem;
+      max-width: 22ch;
+    }
+    .section-sub {
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      font-size: 1.05rem;
+      margin: 0;
+    }
+
+    .loop-stage {
+      margin-top: 3.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .loop-viz {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      max-width: 460px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .loop-viz svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+    /* The traveling pulse */
+    .pulse-glow {
+      filter: drop-shadow(0 0 8px var(--color-accent)) drop-shadow(0 0 16px rgba(217, 79, 48, 0.45));
+    }
+
+    /* Node activations driven via animation-delay + a single shared keyframe */
+    .node-circle {
+      fill: var(--color-surface);
+      stroke: var(--color-border);
+      stroke-width: 2;
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform var(--duration-normal) var(--ease-spring);
+    }
+    .node-group { transform-box: fill-box; transform-origin: center; }
+    .node-group.active .node-circle {
+      fill: var(--color-accent-light);
+      stroke: var(--color-accent);
+      stroke-width: 2.5;
+    }
+    .node-group.active .node-icon { color: var(--color-accent); }
+    .node-group.active { animation: nodePop 600ms var(--ease-spring); }
+
+    @keyframes nodePop {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .node-label {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: -0.01em;
+      fill: var(--color-text);
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .node-sublabel {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      fill: var(--color-text-muted);
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .node-group.active .node-sublabel { fill: var(--color-accent); }
+
+    .edge-path {
+      fill: none;
+      stroke: var(--color-border);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 4;
+    }
+    .edge-path.solid { stroke-dasharray: none; }
+
+    .exit-edge {
+      stroke: var(--color-text-muted);
+      stroke-width: 1.5;
+      fill: none;
+      stroke-dasharray: 3 3;
+    }
+    .exit-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      fill: var(--color-text-muted);
+    }
+
+    /* State pill below diagram */
+    .state-pill {
+      margin: 1.5rem auto 0;
+      max-width: 380px;
+      padding: 0.75rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      box-shadow: var(--shadow-md);
+    }
+    .state-pill .state-key { color: var(--color-text-muted); }
+    .state-pill .state-val {
+      color: var(--color-accent);
+      transition: opacity 250ms var(--ease-out);
+    }
+    .state-pill .state-line { display: flex; justify-content: space-between; padding: 0.15rem 0; }
+
+    .loop-copy h3 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: -0.01em;
+      margin: 0 0 0.75rem;
+    }
+    .loop-copy p { color: var(--color-text-secondary); margin: 0 0 1rem; }
+    .loop-copy ol {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0 0;
+      counter-reset: step;
+    }
+    .loop-copy ol li {
+      counter-increment: step;
+      padding: 0.85rem 0 0.85rem 2.75rem;
+      position: relative;
+      border-top: 1px solid var(--color-border-light);
+      color: var(--color-text);
+    }
+    .loop-copy ol li:first-child { border-top: none; }
+    .loop-copy ol li::before {
+      content: counter(step, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+    .loop-copy ol li strong {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .loop-copy ol li span {
+      display: block;
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      margin-top: 0.15rem;
+    }
+
+    /* ============ WHY A GRAPH ============ */
+    .why {
+      padding: 5rem 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .bento {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: minmax(200px, auto);
+      gap: 1rem;
+    }
+    .magic-card {
+      position: relative;
+      padding: 1.75rem;
+      border-radius: 16px;
+      background:
+        radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(217, 79, 48, 0.08), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal) var(--ease-out);
+      cursor: default;
+      opacity: 0;
+      transform: translateY(20px);
+      overflow: hidden;
+    }
+    .magic-card.visible {
+      opacity: 1; transform: translateY(0);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .magic-card.visible:hover {
+      transform: translateY(-3px);
+      border-color: var(--color-accent-muted);
+      box-shadow: var(--shadow-lg);
+    }
+    .magic-card.span-2 { grid-column: span 2; }
+
+    .card-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.01em;
+      margin: 1rem 0 0.5rem;
+    }
+    .card-body {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    /* Motifs inside cards */
+    .motif {
+      margin-top: 1.25rem;
+      height: 60px;
+      position: relative;
+    }
+    .motif-checkpoint {
+      display: flex; align-items: center; gap: 6px; height: 100%;
+    }
+    .motif-checkpoint .chk {
+      flex: 1; height: 6px;
+      background: var(--color-border-light);
+      border-radius: 3px;
+      position: relative;
+      overflow: hidden;
+    }
+    .motif-checkpoint .chk::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--color-accent);
+      transform-origin: left;
+      transform: scaleX(0);
+      animation: chkFill 2.4s var(--ease-out) infinite;
+    }
+    .motif-checkpoint .chk:nth-child(2)::after { animation-delay: 0.4s; }
+    .motif-checkpoint .chk:nth-child(3)::after { animation-delay: 0.8s; }
+    .motif-checkpoint .chk:nth-child(4)::after { animation-delay: 1.2s; }
+    @keyframes chkFill {
+      0%, 90%, 100% { transform: scaleX(0); }
+      30%, 70% { transform: scaleX(1); }
+    }
+
+    .motif-branch svg { width: 100%; height: 100%; }
+    .motif-branch .br-line {
+      stroke: var(--color-border);
+      stroke-width: 1.5;
+      fill: none;
+    }
+    .motif-branch .br-active {
+      stroke: var(--color-accent);
+      stroke-width: 2.5;
+      fill: none;
+      stroke-dasharray: 80;
+      stroke-dashoffset: 80;
+      animation: brDraw 2.6s var(--ease-out) infinite;
+    }
+    @keyframes brDraw {
+      0% { stroke-dashoffset: 80; }
+      45% { stroke-dashoffset: 0; }
+      55% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 80; }
+    }
+
+    .motif-memory {
+      display: flex; gap: 8px; align-items: flex-end; height: 100%;
+    }
+    .motif-memory .stick {
+      flex: 1;
+      background: var(--color-accent);
+      border-radius: 3px 3px 0 0;
+      opacity: 0.25;
+      animation: memPulse 2.4s var(--ease-out) infinite;
+    }
+    .motif-memory .stick:nth-child(1) { animation-delay: 0s; height: 25%; }
+    .motif-memory .stick:nth-child(2) { animation-delay: 0.2s; height: 45%; }
+    .motif-memory .stick:nth-child(3) { animation-delay: 0.4s; height: 65%; }
+    .motif-memory .stick:nth-child(4) { animation-delay: 0.6s; height: 80%; }
+    .motif-memory .stick:nth-child(5) { animation-delay: 0.8s; height: 95%; }
+    @keyframes memPulse {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 1; }
+    }
+
+    .motif-hitl {
+      display: flex; align-items: center; justify-content: center; gap: 14px;
+      height: 100%;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .motif-hitl .pill {
+      padding: 0.4rem 0.8rem;
+      background: var(--color-bg-warm);
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+    }
+    .motif-hitl .pill.human {
+      background: var(--color-accent-light);
+      border-color: var(--color-accent-muted);
+      color: var(--color-accent);
+      animation: humanBlink 2.4s ease-in-out infinite;
+    }
+    @keyframes humanBlink {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(217, 79, 48, 0); }
+      50% { box-shadow: 0 0 0 6px rgba(217, 79, 48, 0.12); }
+    }
+    .motif-hitl .arrow-s {
+      color: var(--color-text-muted);
+    }
+
+    /* ============ CODE SECTION ============ */
+    .code-section {
+      padding: 5rem 1.5rem;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    pre.code-block {
+      margin: 2.5rem 0 0;
+      padding: 1.75rem 2rem;
+      background: var(--color-bg-code);
+      color: #CDD6F4;
+      border-radius: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.65;
+      overflow-x: auto;
+      box-shadow: var(--shadow-lg);
+      white-space: pre;
+    }
+    pre.code-block::-webkit-scrollbar { height: 6px; }
+    pre.code-block::-webkit-scrollbar-thumb { background: #45475A; border-radius: 9999px; }
+    .ck { color: #CBA6F7; }   /* keyword */
+    .cs { color: #A6E3A1; }   /* string */
+    .cf { color: #89B4FA; }   /* function */
+    .cc { color: #6C7086; font-style: italic; }   /* comment */
+    .cn { color: #FAB387; }   /* number */
+    .cp { color: #F9E2AF; }   /* property */
+    .co { color: #94E2D5; }   /* operator */
+    .cm { color: #F38BA8; }   /* module / class */
+
+    .code-caption {
+      margin-top: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      letter-spacing: 0.02em;
+    }
+
+    /* ============ USE CASES ============ */
+    .cases {
+      padding: 5rem 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .stats {
+      margin-top: 2.5rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .stat {
+      padding: 1.75rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .stat.visible { opacity: 1; transform: translateY(0); }
+    .stat:nth-child(2).visible { transition-delay: 100ms; }
+    .stat:nth-child(3).visible { transition-delay: 200ms; }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 4.5vw, 3rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text);
+    }
+    .stat-value .accent { color: var(--color-accent); }
+    .stat-label {
+      margin-top: 0.5rem;
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+    }
+
+    .case-row {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .case-card {
+      padding: 1.75rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal);
+    }
+    .case-card.visible { opacity: 1; transform: translateY(0); }
+    .case-card:nth-child(2).visible { transition-delay: 100ms; }
+    .case-card:nth-child(3).visible { transition-delay: 200ms; }
+    .case-card:hover { border-color: var(--color-accent-muted); }
+
+    .case-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-accent);
+    }
+    .case-card h4 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin: 0.75rem 0 0.5rem;
+      letter-spacing: -0.01em;
+    }
+    .case-card p {
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      margin: 0;
+    }
+
+    /* ============ FINAL CTA ============ */
+    .final {
+      padding: 6rem 1.5rem 8rem;
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin: 0 0 1rem;
+    }
+    .final p {
+      color: var(--color-text-secondary);
+      margin: 0 auto 2.5rem;
+      max-width: 50ch;
+      font-size: 1.05rem;
+    }
+    .final .cta-row { justify-content: center; }
+
+    footer {
+      padding: 2rem 1.5rem 3rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+    }
+    footer a { color: var(--color-text-secondary); text-decoration: none; border-bottom: 1px dotted var(--color-border); }
+    footer a:hover { color: var(--color-accent); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 880px) {
+      .loop-stage { grid-template-columns: 1fr; gap: 2rem; }
+      .bento { grid-template-columns: repeat(2, 1fr); }
+      .magic-card.span-2 { grid-column: span 2; }
+    }
+    @media (max-width: 640px) {
+      .hero { padding-top: 3.5rem; min-height: auto; }
+      .stats { grid-template-columns: 1fr; }
+      .case-row { grid-template-columns: 1fr; }
+      .bento { grid-template-columns: 1fr; }
+      .magic-card.span-2 { grid-column: auto; }
+      .cta-row { gap: 0.75rem; }
+      pre.code-block { padding: 1.25rem; font-size: 0.78rem; }
+    }
+    @media (max-width: 380px) {
+      .hero-title { font-size: 2.5rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .hero .word, .hero-sub, .cta-row, .stat, .magic-card, .case-card, .eyebrow {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .hero-title em::after { transform: scaleX(1) !important; }
+      .pulse-dot, .motif-checkpoint .chk::after, .motif-branch .br-active,
+      .motif-memory .stick, .motif-hitl .pill.human, .node-group { animation: none !important; }
+      .pulse-dot { display: none; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .magic-card:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">LangGraph<span class="dot"></span>Stateful Agent Graphs</p>
+    <h1 class="hero-title">
+      <span class="word">Agents</span>
+      <span class="word">that</span>
+      <span class="word"><em>remember.</em></span>
+    </h1>
+    <p class="hero-sub">LangGraph is the low-level orchestration framework for building stateful, long-running LLM agents as directed graphs &mdash; the way teams at Klarna, Replit, Uber and LinkedIn actually ship them.</p>
+    <div class="cta-row">
+      <a class="magnetic" href="#loop">
+        See how the loop works
+        <span class="arrow">&rarr;</span>
+      </a>
+      <a class="secondary" href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener">Read the docs &darr;</a>
+    </div>
+  </section>
+
+  <!-- ============ THE AGENT LOOP ============ -->
+  <section class="loop-section" id="loop">
+    <p class="section-eyebrow">The agent loop</p>
+    <h2 class="section-heading">A thinking, acting, observing cycle &mdash; with memory.</h2>
+    <p class="section-sub">Every LangGraph agent is a graph. Nodes do the work. Edges decide what runs next. State threads through all of it &mdash; so the agent doesn't restart its brain on every step.</p>
+
+    <div class="loop-stage">
+      <!-- The signature animated loop -->
+      <div class="loop-viz">
+        <svg viewBox="0 0 400 400" role="img" aria-label="Three nodes — Reason, Act, Observe — connected in a clockwise cycle. A vermillion pulse travels around the cycle, activating each node in turn. A dashed exit edge labelled FINISH leaves the Reason node.">
+          <!-- Cycle path (invisible, used to motion-path the pulse) -->
+          <defs>
+            <path id="cycle"
+                  d="M 200 70
+                     A 130 130 0 0 1 313 265
+                     A 130 130 0 0 1 87 265
+                     A 130 130 0 0 1 200 70 Z" />
+          </defs>
+
+          <!-- Visible cycle path -->
+          <use href="#cycle" class="edge-path solid" />
+
+          <!-- Arrow indicators on the cycle (three small triangles) -->
+          <g fill="var(--color-text-muted)">
+            <polygon points="0,-5 8,0 0,5" transform="translate(308, 165) rotate(60)" />
+            <polygon points="0,-5 8,0 0,5" transform="translate(200, 335) rotate(180)" />
+            <polygon points="0,-5 8,0 0,5" transform="translate(92, 165) rotate(-60)" />
+          </g>
+
+          <!-- Exit edge: Reason → FINISH -->
+          <path class="exit-edge" d="M 200 70 L 200 25" />
+          <polygon points="0,-4 7,0 0,4" transform="translate(200, 25) rotate(-90)" fill="var(--color-text-muted)" />
+          <text x="216" y="34" class="exit-label">FINISH</text>
+
+          <!-- Node 1: Reason (top) -->
+          <g class="node-group" id="node-reason" transform="translate(200, 70)">
+            <circle class="node-circle" r="46" />
+            <text class="node-sublabel" y="-10">01</text>
+            <text class="node-label" y="8">Reason</text>
+            <text class="node-sublabel" y="22">think</text>
+          </g>
+
+          <!-- Node 2: Act (bottom-right) -->
+          <g class="node-group" id="node-act" transform="translate(313, 265)">
+            <circle class="node-circle" r="46" />
+            <text class="node-sublabel" y="-10">02</text>
+            <text class="node-label" y="8">Act</text>
+            <text class="node-sublabel" y="22">tool call</text>
+          </g>
+
+          <!-- Node 3: Observe (bottom-left) -->
+          <g class="node-group" id="node-observe" transform="translate(87, 265)">
+            <circle class="node-circle" r="46" />
+            <text class="node-sublabel" y="-10">03</text>
+            <text class="node-label" y="8">Observe</text>
+            <text class="node-sublabel" y="22">result</text>
+          </g>
+
+          <!-- The traveling pulse -->
+          <g class="pulse-glow">
+            <circle r="7" fill="var(--color-accent)">
+              <animateMotion dur="6s" repeatCount="indefinite" rotate="auto">
+                <mpath href="#cycle" />
+              </animateMotion>
+            </circle>
+            <!-- trailing softer pulse -->
+            <circle r="4" fill="var(--color-accent-muted)" opacity="0.55">
+              <animateMotion dur="6s" repeatCount="indefinite" begin="-0.25s">
+                <mpath href="#cycle" />
+              </animateMotion>
+            </circle>
+          </g>
+        </svg>
+
+        <!-- State pill -->
+        <div class="state-pill" aria-live="polite">
+          <div class="state-line"><span class="state-key">state.step</span><span class="state-val" id="state-step">reason</span></div>
+          <div class="state-line"><span class="state-key">state.messages</span><span class="state-val" id="state-messages">2</span></div>
+          <div class="state-line"><span class="state-key">state.observations</span><span class="state-val" id="state-obs">1</span></div>
+        </div>
+      </div>
+
+      <!-- Copy beside it -->
+      <div class="loop-copy">
+        <h3>The ReAct loop, drawn as a graph.</h3>
+        <p>Each node receives the full state, returns an update, and hands control to the next node. The pulse you see is one tick of the agent &mdash; in production it might be a single LLM call, a tool invocation, and an observation.</p>
+        <ol>
+          <li><strong>Reason</strong><span>The LLM reads the conversation so far and decides what to do next &mdash; or whether it's done.</span></li>
+          <li><strong>Act</strong><span>The agent calls a tool: a search, a database query, a Python function, an external API.</span></li>
+          <li><strong>Observe</strong><span>The tool's output is appended to state and the loop continues &mdash; or routes to <code style="font-family:var(--font-mono); font-size:0.85em; color:var(--color-accent);">END</code>.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHY A GRAPH ============ -->
+  <section class="why">
+    <p class="section-eyebrow">Why a graph &mdash; not a chain</p>
+    <h2 class="section-heading">Chains run forward. Graphs remember, branch, pause, resume.</h2>
+
+    <div class="bento">
+      <!-- Tile 1: Stateful memory (wide) -->
+      <article class="magic-card span-2">
+        <span class="card-tag">01 &middot; State</span>
+        <h3 class="card-title">Memory is a first-class type.</h3>
+        <p class="card-body">Define a typed state schema once. Every node reads it, returns updates, and the graph merges them. No more passing context dictionaries through ten function calls.</p>
+        <div class="motif motif-memory" aria-hidden="true">
+          <div class="stick"></div><div class="stick"></div><div class="stick"></div><div class="stick"></div><div class="stick"></div>
+        </div>
+      </article>
+
+      <!-- Tile 2: Branching -->
+      <article class="magic-card">
+        <span class="card-tag">02 &middot; Routing</span>
+        <h3 class="card-title">Conditional edges.</h3>
+        <p class="card-body">A node returns "search" or "respond" &mdash; the graph routes accordingly.</p>
+        <div class="motif motif-branch" aria-hidden="true">
+          <svg viewBox="0 0 120 60" preserveAspectRatio="none">
+            <path class="br-line" d="M 10 30 L 50 30 L 95 10" />
+            <path class="br-line" d="M 50 30 L 95 50" />
+            <path class="br-active" d="M 10 30 L 50 30 L 95 10" />
+            <circle cx="50" cy="30" r="3" fill="var(--color-accent)" />
+            <circle cx="95" cy="10" r="3" fill="var(--color-accent)" />
+            <circle cx="95" cy="50" r="3" fill="var(--color-border)" />
+            <circle cx="10" cy="30" r="3" fill="var(--color-text-muted)" />
+          </svg>
+        </div>
+      </article>
+
+      <!-- Tile 3: Checkpointing -->
+      <article class="magic-card">
+        <span class="card-tag">03 &middot; Durability</span>
+        <h3 class="card-title">Checkpoint anywhere.</h3>
+        <p class="card-body">Every step persists. Crash a node, restart from the last good state.</p>
+        <div class="motif motif-checkpoint" aria-hidden="true">
+          <div class="chk"></div><div class="chk"></div><div class="chk"></div><div class="chk"></div>
+        </div>
+      </article>
+
+      <!-- Tile 4: Human-in-the-loop (wide) -->
+      <article class="magic-card span-2">
+        <span class="card-tag">04 &middot; Oversight</span>
+        <h3 class="card-title">Pause for a human, then resume.</h3>
+        <p class="card-body">Inspect state mid-run. Approve a tool call. Edit a draft. The graph waits, then continues from exactly where it stopped &mdash; minutes or days later.</p>
+        <div class="motif motif-hitl" aria-hidden="true">
+          <span class="pill">Agent</span>
+          <span class="arrow-s">&rarr;</span>
+          <span class="pill human">Human</span>
+          <span class="arrow-s">&rarr;</span>
+          <span class="pill">Agent</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ CODE ============ -->
+  <section class="code-section">
+    <p class="section-eyebrow">What it looks like in code</p>
+    <h2 class="section-heading">Ten lines to a working stateful agent.</h2>
+    <p class="section-sub">Python. No magic. Define a state, add nodes, draw the edges, compile.</p>
+
+<pre class="code-block" aria-label="Minimal LangGraph example in Python"><span class="ck">from</span> <span class="cm">langgraph.graph</span> <span class="ck">import</span> StateGraph, MessagesState, START, END
+
+<span class="ck">def</span> <span class="cf">reason</span>(state: MessagesState):
+    <span class="cc"># LLM looks at messages, decides next step</span>
+    <span class="ck">return</span> {<span class="cs">"messages"</span><span class="co">:</span> [llm.invoke(state[<span class="cs">"messages"</span>])]}
+
+<span class="ck">def</span> <span class="cf">act</span>(state: MessagesState):
+    <span class="cc"># Run the tool call from the latest message</span>
+    <span class="ck">return</span> {<span class="cs">"messages"</span><span class="co">:</span> [tool_node.invoke(state)]}
+
+graph <span class="co">=</span> <span class="cf">StateGraph</span>(MessagesState)
+graph.<span class="cf">add_node</span>(<span class="cs">"reason"</span>, reason)
+graph.<span class="cf">add_node</span>(<span class="cs">"act"</span>, act)
+graph.<span class="cf">add_edge</span>(START, <span class="cs">"reason"</span>)
+graph.<span class="cf">add_conditional_edges</span>(<span class="cs">"reason"</span>, should_act, {<span class="cs">"yes"</span><span class="co">:</span> <span class="cs">"act"</span>, <span class="cs">"no"</span><span class="co">:</span> END})
+graph.<span class="cf">add_edge</span>(<span class="cs">"act"</span>, <span class="cs">"reason"</span>)
+
+agent <span class="co">=</span> graph.<span class="cf">compile</span>(checkpointer<span class="co">=</span>memory)</pre>
+
+    <p class="code-caption">// That's the entire structure of a ReAct agent in LangGraph. The conditional edge is what makes it a graph instead of a chain.</p>
+  </section>
+
+  <!-- ============ USE CASES ============ -->
+  <section class="cases">
+    <p class="section-eyebrow">Where it's running</p>
+    <h2 class="section-heading">Used in production by teams shipping real agent products.</h2>
+
+    <div class="stats">
+      <article class="stat">
+        <div class="stat-value"><span class="num" data-to="24">0</span><span class="accent">k</span></div>
+        <p class="stat-label">GitHub stars on the Python repo &mdash; growing fast in 2026.</p>
+      </article>
+      <article class="stat">
+        <div class="stat-value"><span class="num" data-to="4">0</span></div>
+        <p class="stat-label">Adopters publicly running it: Klarna, Replit, Uber, LinkedIn &mdash; among many.</p>
+      </article>
+      <article class="stat">
+        <div class="stat-value"><span class="num" data-to="2">0</span><span class="accent">x</span></div>
+        <p class="stat-label">First-class runtimes: Python and JavaScript, with a Java port too.</p>
+      </article>
+    </div>
+
+    <div class="case-row">
+      <article class="case-card">
+        <span class="case-tag">Multi-agent</span>
+        <h4>Specialist teams of agents</h4>
+        <p>A supervisor node routes work to a researcher, a writer, a critic. Each is its own subgraph. State threads through all of them.</p>
+      </article>
+      <article class="case-card">
+        <span class="case-tag">Conditional flow</span>
+        <h4>Branching on what the model said</h4>
+        <p>If the answer mentions a SQL query &rarr; run it. If it asks for clarification &rarr; route to a human. The graph encodes the decision.</p>
+      </article>
+      <article class="case-card">
+        <span class="case-tag">Long-running</span>
+        <h4>Workflows that span days</h4>
+        <p>An agent drafts an email Monday, waits for approval Tuesday, sends it Wednesday. Checkpointing makes that one logical run.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="final">
+    <h2>Try it &mdash; in less time than it took to read this.</h2>
+    <p>The fastest path is the quickstart: 30 lines of Python and you have a stateful agent with a tool call, a conditional edge, and a checkpointer.</p>
+    <div class="cta-row">
+      <a class="magnetic" href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener">
+        Open the LangGraph docs
+        <span class="arrow">&rarr;</span>
+      </a>
+      <a class="secondary" href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">View on GitHub &darr;</a>
+    </div>
+  </section>
+
+  <footer>
+    Built for the CETI.AI lookbook &middot; <a href="https://cetiai.co">cetiai.co</a>
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION-DRIVEN REVEALS ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+    document.querySelectorAll('.stat, .magic-card, .case-card').forEach((el) => reveal.observe(el));
+
+    // ============ NUMBER TICKER ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ MAGIC CARDS (cursor-follow glow) ============
+    document.querySelectorAll('.magic-card').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ============ LOOP NODE ACTIVATION ============
+    // The SVG pulse takes 6s to traverse the cycle. We sync node "active"
+    // pulses to it via a JS clock so the visuals always agree.
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReducedMotion) {
+      const nodes = [
+        document.getElementById('node-reason'),
+        document.getElementById('node-act'),
+        document.getElementById('node-observe'),
+      ];
+      const stepNames = ['reason', 'act', 'observe'];
+      const stateStep = document.getElementById('state-step');
+      const stateMessages = document.getElementById('state-messages');
+      const stateObs = document.getElementById('state-obs');
+      const PERIOD = 6000; // ms — must match animateMotion dur
+      const startedAt = performance.now();
+      let lastIdx = -1;
+      let messages = 2;
+      let observations = 1;
+
+      function tickLoop(now) {
+        const t = ((now - startedAt) % PERIOD) / PERIOD; // 0..1
+        const idx = Math.floor(t * 3) % 3;
+        if (idx !== lastIdx) {
+          nodes.forEach((n, i) => n.classList.toggle('active', i === idx));
+          lastIdx = idx;
+          stateStep.textContent = stepNames[idx];
+          if (stepNames[idx] === 'act') { messages += 1; stateMessages.textContent = messages; }
+          if (stepNames[idx] === 'observe') { observations += 1; stateObs.textContent = observations; }
+          // Reset counters periodically so they don't grow forever
+          if (messages > 9) { messages = 2; }
+          if (observations > 9) { observations = 1; }
+        }
+        requestAnimationFrame(tickLoop);
+      }
+      requestAnimationFrame(tickLoop);
+    } else {
+      // Reduced motion: show a static "reason" step
+      const reason = document.getElementById('node-reason');
+      if (reason) reason.classList.add('active');
+    }
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

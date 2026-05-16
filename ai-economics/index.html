@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Economics — Cost, Latency, Caching · CETI Lookbook</title>
+  <meta name="description" content="Tokens are the new SaaS unit. An engineering-and-ops view of LLM pricing, prompt caching, batch APIs, and latency — with the curve that changes the bill.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-bg-code: #1E1E2E;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+      --color-surface-warm: #FDF9F3;
+
+      /* Primary accent: vermillion. Used for the "expensive" path. */
+      --color-accent: #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+
+      /* Secondary accent: teal. Used for the "cached / cheap" path. */
+      --color-info: #2A7B9B;
+      --color-info-light: #E4F2F7;
+
+      /* Actor rotation (anti-monotone) */
+      --color-actor-1: #D94F30; /* vermillion — uncached */
+      --color-actor-2: #2A7B9B; /* teal     — cached */
+      --color-actor-3: #7B6DAA; /* plum     — batch */
+      --color-actor-4: #D4A843; /* golden   — output budgets */
+      --color-actor-5: #2D8B55; /* forest   — model select */
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body:    'DM Sans', -apple-system, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+      --stagger: 100ms;
+
+      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image: radial-gradient(ellipse at 80% 10%, rgba(42, 123, 155, 0.05) 0%, transparent 50%),
+                        radial-gradient(ellipse at 10% 70%, rgba(217, 79, 48, 0.04) 0%, transparent 50%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Top utility bar */
+    .utility {
+      border-bottom: 1px solid var(--color-border);
+      padding: 0.875rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      background: rgba(250, 247, 242, 0.7);
+      backdrop-filter: saturate(140%) blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .utility .brand { color: var(--color-text); font-weight: 500; }
+    .utility .meta { display: flex; gap: 1.5rem; align-items: center; }
+    .utility .pulse {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--color-actor-5);
+      box-shadow: 0 0 0 0 rgba(45, 139, 85, 0.6);
+      animation: util-pulse 2.4s ease-out infinite;
+      display: inline-block; vertical-align: middle; margin-right: 0.5rem;
+    }
+    @keyframes util-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(45, 139, 85, 0.6); }
+      70%  { box-shadow: 0 0 0 8px rgba(45, 139, 85, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(45, 139, 85, 0); }
+    }
+
+    /* ================= HERO ================= */
+    .hero {
+      padding: 6rem 0 4rem;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.75rem, 6.4vw, 5rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 1.25rem 0 1.5rem;
+      max-width: 18ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
+    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 440ms; }
+    .hero.visible .hero-title .word:nth-child(6) { transition-delay: 520ms; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-accent);
+    }
+
+    .hero-sub {
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      max-width: 52ch;
+      margin: 0;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 700ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .hero-meta {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 900ms;
+    }
+    .hero.visible .hero-meta { opacity: 1; }
+    .hero-meta .item .v {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--color-text);
+    }
+    .hero-meta .item .l {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+    .hero-meta .item .v .unit {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      font-weight: 400;
+      letter-spacing: 0;
+      margin-left: 0.25rem;
+    }
+
+    /* ================= SIGNATURE COST CURVE ================= */
+    .curve-section {
+      padding: 4rem 0 6rem;
+    }
+    .section-head { margin-bottom: 2.5rem; max-width: 64ch; }
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.75rem, 3.6vw, 2.6rem);
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      margin: 0 0 0.75rem;
+    }
+    .section-lede {
+      color: var(--color-text-secondary);
+      font-size: 1.0625rem;
+      margin: 0;
+    }
+
+    .curve-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .curve-card.visible { opacity: 1; transform: translateY(0); }
+
+    .curve-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 1.5rem;
+    }
+    .curve-head h3 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.375rem;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .curve-head .scenario {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .legend {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+    }
+    .legend-swatch {
+      width: 22px;
+      height: 3px;
+      border-radius: 2px;
+    }
+    .legend-swatch.dashed {
+      background: repeating-linear-gradient(90deg, var(--color-info) 0 5px, transparent 5px 9px);
+      height: 2px;
+    }
+
+    .curve-svg-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .curve-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    .curve-line {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 1600;
+      stroke-dashoffset: 1600;
+      transition: stroke-dashoffset 2200ms var(--ease-out);
+    }
+    .curve-card.visible .curve-line {
+      stroke-dashoffset: 0;
+    }
+    .curve-card.visible .curve-line.cached {
+      transition-delay: 700ms;
+    }
+
+    .curve-area {
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out) 1800ms;
+    }
+    .curve-card.visible .curve-area { opacity: 1; }
+
+    .cache-hit {
+      opacity: 0;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    .curve-card.visible .cache-hit {
+      animation: cache-pop 600ms var(--ease-spring) forwards;
+    }
+    .curve-card.visible .cache-hit:nth-of-type(1) { animation-delay: 1400ms; }
+    .curve-card.visible .cache-hit:nth-of-type(2) { animation-delay: 1700ms; }
+    .curve-card.visible .cache-hit:nth-of-type(3) { animation-delay: 2000ms; }
+    .curve-card.visible .cache-hit:nth-of-type(4) { animation-delay: 2300ms; }
+    .curve-card.visible .cache-hit:nth-of-type(5) { animation-delay: 2600ms; }
+
+    @keyframes cache-pop {
+      0%   { opacity: 0; transform: scale(0.4); }
+      60%  { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .curve-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      fill: var(--color-text-muted);
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out) 2200ms;
+    }
+    .curve-card.visible .curve-label { opacity: 1; }
+    .curve-label.uncached { fill: var(--color-accent); }
+    .curve-label.cached { fill: var(--color-info); }
+
+    .curve-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.75rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border-light);
+    }
+    .curve-stat .v {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .curve-stat .v .delta { color: var(--color-info); }
+    .curve-stat .l {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* Token-flow animation BELOW the curve */
+    .token-flow {
+      margin-top: 1.5rem;
+      padding: 1.25rem 1rem;
+      background: var(--color-bg-warm);
+      border-radius: var(--radius-md);
+      position: relative;
+      overflow: hidden;
+      height: 56px;
+      display: flex;
+      align-items: center;
+    }
+    .token-flow-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+      margin-right: 1rem;
+      flex: 0 0 auto;
+    }
+    .token-track {
+      position: relative;
+      flex: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+    .token {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 500;
+      opacity: 0;
+    }
+    .token.saved { background: var(--color-info); }
+    .token.spent { background: var(--color-accent); }
+    .curve-card.visible .token {
+      animation: token-fly 5s linear infinite;
+    }
+    @keyframes token-fly {
+      0%   { left: -10%; opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 1; }
+      100% { left: 110%; opacity: 0; }
+    }
+
+    .curve-prose {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .curve-prose p {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 1rem;
+    }
+    .curve-prose strong { color: var(--color-text); font-weight: 600; }
+    .curve-prose code {
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      background: var(--color-accent-light);
+      color: var(--color-accent);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    /* ================= BENTO: FOUR LEVERS ================= */
+    .levers-section { padding: 5rem 0; background: var(--color-bg-warm); }
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: minmax(220px, auto);
+      gap: 1rem;
+    }
+    .lever {
+      position: relative;
+      padding: 1.75rem;
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(var(--lever-rgb), 0.10), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: transform var(--duration-normal) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
+      opacity: 0;
+      transform: translateY(20px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .lever.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring); }
+    .lever.visible:hover { transform: translateY(-3px); border-color: rgba(var(--lever-rgb), 0.45); box-shadow: var(--shadow-lg); }
+
+    .lever-num {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: rgba(var(--lever-rgb), 1);
+      letter-spacing: 0.04em;
+    }
+    .lever-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.375rem;
+      letter-spacing: -0.015em;
+      margin: 0.5rem 0 0.5rem;
+      line-height: 1.15;
+    }
+    .lever-desc {
+      color: var(--color-text-secondary);
+      font-size: 0.9375rem;
+      margin: 0 0 1.25rem;
+      line-height: 1.55;
+    }
+    .lever-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border-light);
+    }
+    .lever-stat .big {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: rgba(var(--lever-rgb), 1);
+      line-height: 1;
+    }
+    .lever-stat .tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    .lever-1 { --lever-rgb: 45, 139, 85; }    /* forest */
+    .lever-2 { --lever-rgb: 42, 123, 155; }   /* teal */
+    .lever-3 { --lever-rgb: 123, 109, 170; }  /* plum */
+    .lever-4 { --lever-rgb: 212, 168, 67; }   /* golden */
+
+    /* ================= PRICE LADDER ================= */
+    .ladder-section { padding: 5rem 0; }
+    .ladder {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .ladder.visible { opacity: 1; transform: translateY(0); }
+
+    .ladder-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .ladder-toggle {
+      display: inline-flex;
+      background: var(--color-bg-warm);
+      border-radius: 9999px;
+      padding: 0.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .ladder-toggle button {
+      border: none;
+      background: transparent;
+      padding: 0.45rem 0.95rem;
+      cursor: pointer;
+      border-radius: 9999px;
+      color: var(--color-text-muted);
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      transition: background var(--duration-fast), color var(--duration-fast);
+    }
+    .ladder-toggle button.active {
+      background: var(--color-surface);
+      color: var(--color-text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .price-row {
+      display: grid;
+      grid-template-columns: 220px 1fr 96px;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 0;
+      border-top: 1px solid var(--color-border-light);
+    }
+    .price-row:first-of-type { border-top: none; }
+
+    .price-name {
+      display: flex;
+      flex-direction: column;
+    }
+    .price-name .nm {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.0625rem;
+      letter-spacing: -0.005em;
+    }
+    .price-name .vendor {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-top: 0.125rem;
+    }
+
+    .price-bar-wrap {
+      position: relative;
+      height: 28px;
+      background: var(--color-bg-warm);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .price-bar {
+      height: 100%;
+      width: 0;
+      transition: width 1100ms var(--ease-out);
+      border-radius: 8px;
+      position: relative;
+    }
+    .ladder.visible .price-bar { width: var(--w, 0%); }
+    .price-bar.input { background: linear-gradient(90deg, rgba(42,123,155,0.6), rgba(42,123,155,0.95)); }
+    .price-bar.output { background: linear-gradient(90deg, rgba(217,79,48,0.65), rgba(217,79,48,1)); }
+
+    .price-num {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-align: right;
+      color: var(--color-text);
+    }
+    .price-num .currency { color: var(--color-text-muted); font-weight: 400; }
+    .price-num .unit {
+      display: block;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+
+    .price-legend {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--color-border-light);
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .price-legend .note {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    /* ================= LATENCY ================= */
+    .latency-section { padding: 4rem 0 5rem; background: var(--color-bg-warm); }
+    .latency-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .lat-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .lat-card.visible { opacity: 1; transform: translateY(0); }
+    .lat-card .label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .lat-card .title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin: 0.4rem 0 1.25rem;
+      letter-spacing: -0.01em;
+    }
+    .lat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 70px;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.625rem 0;
+      border-top: 1px solid var(--color-border-light);
+    }
+    .lat-row:first-of-type { border-top: none; }
+    .lat-row .model {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    .lat-track {
+      height: 8px;
+      background: var(--color-bg-warm);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .lat-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 999px;
+      transition: width 1000ms var(--ease-out);
+    }
+    .lat-card.visible .lat-fill { width: var(--w, 0%); }
+    .lat-fill.fast { background: var(--color-info); }
+    .lat-fill.med  { background: var(--color-actor-4); }
+    .lat-fill.slow { background: var(--color-accent); }
+    .lat-val {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.875rem;
+      text-align: right;
+      color: var(--color-text);
+    }
+
+    /* ================= CHECKLIST ================= */
+    .checklist-section { padding: 5rem 0; }
+    .checklist {
+      display: grid;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .check {
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal);
+    }
+    .check.visible { opacity: 1; transform: translateY(0); }
+    .check:hover { border-color: var(--color-accent-muted); }
+    .check-num {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 2rem;
+      color: var(--color-accent);
+      opacity: 0.85;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .check-body .ttl {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.125rem;
+      letter-spacing: -0.005em;
+    }
+    .check-body .desc {
+      color: var(--color-text-secondary);
+      font-size: 0.9375rem;
+      margin-top: 0.25rem;
+    }
+    .check-impact {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      color: var(--color-info);
+      background: var(--color-info-light);
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    /* ================= CODE ================= */
+    .code-section { padding: 4rem 0 5rem; background: var(--color-bg-warm); }
+    .code-wrap {
+      background: var(--color-bg-code);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.5rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .code-wrap.visible { opacity: 1; transform: translateY(0); }
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.875rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .code-dots { display: inline-flex; gap: 0.5rem; }
+    .code-dots span { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+    .code-dots span:nth-child(1) { background: #ED6A5E; }
+    .code-dots span:nth-child(2) { background: #F4BF4F; }
+    .code-dots span:nth-child(3) { background: #62C654; }
+    .code-tag-file {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9E9790;
+    }
+    pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      line-height: 1.65;
+      color: #CDD6F4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-x: hidden;
+    }
+    .k { color: #CBA6F7; }       /* keyword */
+    .s { color: #A6E3A1; }       /* string */
+    .fn { color: #89B4FA; }      /* function */
+    .c { color: #6C7086; font-style: italic; } /* comment */
+    .n { color: #FAB387; }       /* number */
+    .p { color: #F9E2AF; }       /* property */
+    .o { color: #94E2D5; }       /* operator */
+
+    /* ================= CTA ================= */
+    .cta-section { padding: 6rem 0; text-align: center; }
+    .cta-section h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      letter-spacing: -0.025em;
+      margin: 0 0 1rem;
+      max-width: 22ch;
+      margin-inline: auto;
+      line-height: 1.1;
+    }
+    .cta-section p {
+      color: var(--color-text-secondary);
+      font-size: 1.0625rem;
+      max-width: 52ch;
+      margin: 0 auto 2.25rem;
+    }
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 1rem 1.875rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms ease;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+
+    footer {
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--color-border);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 900px) {
+      .bento { grid-template-columns: 1fr 1fr; }
+      .curve-prose { grid-template-columns: 1fr; }
+      .latency-grid { grid-template-columns: 1fr; }
+      .price-row { grid-template-columns: 160px 1fr 88px; }
+    }
+    @media (max-width: 640px) {
+      .hero { padding: 4rem 0 2rem; }
+      .bento { grid-template-columns: 1fr; }
+      .curve-summary { grid-template-columns: 1fr; gap: 0.75rem; padding-top: 1rem; }
+      .check { grid-template-columns: 36px 1fr; }
+      .check-impact { grid-column: 1 / -1; justify-self: start; margin-top: 0.5rem; }
+      .price-row { grid-template-columns: 130px 1fr 72px; gap: 0.5rem; }
+      .price-name .nm { font-size: 0.95rem; }
+      .hero-meta { gap: 1.5rem; }
+      .hero-meta .item .v { font-size: 1.5rem; }
+      .utility .meta .when { display: none; }
+    }
+
+    /* ================= REDUCED MOTION ================= */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .hero-meta, .eyebrow,
+      .curve-card, .lever, .ladder, .lat-card, .check, .code-wrap {
+        opacity: 1 !important; transform: none !important;
+      }
+      .curve-line { stroke-dashoffset: 0 !important; }
+      .curve-area, .curve-label, .cache-hit { opacity: 1 !important; transform: none !important; }
+      .price-bar, .lat-fill { width: var(--w) !important; }
+      .token, .pulse { display: none; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .lever:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- UTILITY BAR -->
+  <div class="utility">
+    <span class="brand">CETI · Lookbook</span>
+    <div class="meta">
+      <span class="when">2026.05 · Engineering &amp; Ops</span>
+      <span><span class="pulse"></span>Live pricing</span>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero container" id="hero">
+    <p class="eyebrow">AI Economics · Cost · Latency · Caching</p>
+    <h1 class="hero-title">
+      <span class="word">Every</span>
+      <span class="word">prompt</span>
+      <span class="word">has</span>
+      <span class="word"><em>a</em></span>
+      <span class="word"><em>price.</em></span>
+    </h1>
+    <p class="hero-sub">
+      Tokens are the new SaaS unit — billed by the million, priced per-direction, discounted when cached, marked up when reasoned. The bill bends to whoever knows the levers.
+    </p>
+    <div class="hero-meta">
+      <div class="item">
+        <div class="v">90<span class="unit">%</span></div>
+        <span class="l">Cached input discount</span>
+      </div>
+      <div class="item">
+        <div class="v">50<span class="unit">%</span></div>
+        <span class="l">Batch API discount</span>
+      </div>
+      <div class="item">
+        <div class="v">5×</div>
+        <span class="l">Output : Input price ratio</span>
+      </div>
+      <div class="item">
+        <div class="v">80<span class="unit">%</span></div>
+        <span class="l">TTFT cut on cache hits</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGNATURE COST CURVE -->
+  <section class="curve-section container">
+    <div class="section-head">
+      <p class="section-eyebrow">The signature curve</p>
+      <h2 class="section-title">Two paths. Same product. One bill grows linearly. The other barely moves.</h2>
+      <p class="section-lede">Modeled at 200 requests per hour against a 10K-token system prompt with 800 output tokens per turn, on Claude Sonnet 4.6 ($3.00 / $15.00 per MTok).</p>
+    </div>
+
+    <article class="curve-card" id="curve-card">
+      <div class="curve-head">
+        <div>
+          <h3>Cumulative spend over 24 hours</h3>
+          <div class="scenario">10K system prompt · 800 output tokens · 200 req/hr</div>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch" style="background: var(--color-accent);"></span>Without prompt caching</span>
+          <span class="legend-item"><span class="legend-swatch dashed"></span>With prompt caching (5-min TTL)</span>
+        </div>
+      </div>
+
+      <div class="curve-svg-wrap">
+        <svg class="curve-svg" viewBox="0 0 800 320" preserveAspectRatio="none" role="img" aria-label="Cost curve comparison">
+          <!-- Grid lines -->
+          <g stroke="#E5DFD6" stroke-width="1">
+            <line x1="40" y1="40"  x2="780" y2="40"/>
+            <line x1="40" y1="110" x2="780" y2="110"/>
+            <line x1="40" y1="180" x2="780" y2="180"/>
+            <line x1="40" y1="250" x2="780" y2="250"/>
+          </g>
+
+          <!-- Axis labels (y, in dollars) -->
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="#9E9790" text-anchor="end">
+            <text x="34" y="44">$200</text>
+            <text x="34" y="114">$150</text>
+            <text x="34" y="184">$100</text>
+            <text x="34" y="254">$50</text>
+            <text x="34" y="294">$0</text>
+          </g>
+          <!-- Axis labels (x, hours) -->
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="#9E9790" text-anchor="middle">
+            <text x="40"  y="310">0h</text>
+            <text x="225" y="310">6h</text>
+            <text x="410" y="310">12h</text>
+            <text x="595" y="310">18h</text>
+            <text x="780" y="310">24h</text>
+          </g>
+
+          <!-- Uncached fill area -->
+          <path class="curve-area"
+                d="M 40 290 L 225 197 L 410 105 L 595 55 L 780 30 L 780 290 Z"
+                fill="rgba(217,79,48,0.08)"/>
+          <!-- Cached fill area -->
+          <path class="curve-area"
+                d="M 40 290 L 225 270 L 410 252 L 595 238 L 780 226 L 780 290 Z"
+                fill="rgba(42,123,155,0.10)"/>
+
+          <!-- Uncached line (steep) -->
+          <path class="curve-line"
+                d="M 40 290 Q 130 245, 225 197 T 410 105 T 595 55 T 780 30"
+                stroke="#D94F30"/>
+
+          <!-- Cached line (shallow with drops) -->
+          <path class="curve-line cached"
+                d="M 40 290 L 80 282 L 100 280 L 105 286 L 145 270 L 180 264 L 185 270 L 225 254 L 260 248 L 265 254 L 305 240 L 340 234 L 345 240 L 380 226 L 415 222 L 420 228 L 460 216 L 495 212 L 500 218 L 540 208 L 575 204 L 580 210 L 615 200 L 650 198 L 655 204 L 690 196 L 720 194 L 725 200 L 760 192 L 780 190"
+                stroke="#2A7B9B"
+                stroke-dasharray="6,5"/>
+
+          <!-- Cache-hit drop markers along the cached path -->
+          <g>
+            <circle class="cache-hit" cx="105" cy="286" r="5" fill="#2A7B9B"/>
+            <circle class="cache-hit" cx="265" cy="254" r="5" fill="#2A7B9B"/>
+            <circle class="cache-hit" cx="420" cy="228" r="5" fill="#2A7B9B"/>
+            <circle class="cache-hit" cx="580" cy="210" r="5" fill="#2A7B9B"/>
+            <circle class="cache-hit" cx="725" cy="200" r="5" fill="#2A7B9B"/>
+          </g>
+
+          <!-- End-point labels -->
+          <text class="curve-label uncached" x="775" y="20" text-anchor="end">$198 · uncached</text>
+          <text class="curve-label cached"   x="775" y="248" text-anchor="end">$24 · cached</text>
+        </svg>
+      </div>
+
+      <!-- Token flow strip -->
+      <div class="token-flow" aria-hidden="true">
+        <span class="token-flow-label">Tokens saved on each cache hit →</span>
+        <div class="token-track" id="token-track"></div>
+      </div>
+
+      <div class="curve-summary">
+        <div class="curve-stat">
+          <div class="v">$<span class="num" data-to="198">0</span></div>
+          <span class="l">24h spend · uncached</span>
+        </div>
+        <div class="curve-stat">
+          <div class="v">$<span class="num" data-to="24">0</span></div>
+          <span class="l">24h spend · cached</span>
+        </div>
+        <div class="curve-stat">
+          <div class="v"><span class="delta">−<span class="num" data-to="88">0</span>%</span></div>
+          <span class="l">Cost delta</span>
+        </div>
+      </div>
+
+      <div class="curve-prose">
+        <p>
+          <strong>What changes the curve.</strong> The 10K-token system prompt is the dominant input cost — read on every request. Mark it cacheable and the first request pays the <code>1.25× write</code> premium; every subsequent request within the TTL pays <code>0.1× read</code>. Five reads recoup the write, then the discount compounds.
+        </p>
+        <p>
+          <strong>Why the shape is jagged.</strong> Each visible drop on the cached line is a 5-minute window where the cache stayed warm. The line nudges up between reads (live output tokens still cost full rate) and barely climbs during sustained traffic. At enterprise volume this is the difference between a $200/day bill and a $24/day bill — same product, same model.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <!-- THE FOUR LEVERS -->
+  <section class="levers-section">
+    <div class="container">
+      <div class="section-head">
+        <p class="section-eyebrow">The four levers</p>
+        <h2 class="section-title">Cost is a system, not a sticker price.</h2>
+        <p class="section-lede">Every production LLM bill is the product of four decisions. Most teams adjust only the first one — model selection — and leave the other 90% of savings on the table.</p>
+      </div>
+
+      <div class="bento">
+        <article class="lever lever-1">
+          <div>
+            <span class="lever-num">01</span>
+            <h3 class="lever-name">Model<br>selection</h3>
+            <p class="lever-desc">Match the smallest capable model to each task. Haiku for triage; Sonnet for production; Opus for the hard 5%.</p>
+          </div>
+          <div class="lever-stat">
+            <div class="big">5×</div>
+            <div class="tag">Opus → Sonnet · input cost</div>
+          </div>
+        </article>
+
+        <article class="lever lever-2">
+          <div>
+            <span class="lever-num">02</span>
+            <h3 class="lever-name">Prompt<br>caching</h3>
+            <p class="lever-desc">Mark long system prompts, tool definitions, and document prefixes as cacheable. Reads cost 10% of base; writes cost 125%.</p>
+          </div>
+          <div class="lever-stat">
+            <div class="big">90%</div>
+            <div class="tag">Cache read discount</div>
+          </div>
+        </article>
+
+        <article class="lever lever-3">
+          <div>
+            <span class="lever-num">03</span>
+            <h3 class="lever-name">Batch<br>API</h3>
+            <p class="lever-desc">For any work tolerant of up to 24h latency — overnight evals, summarization backfills, embeddings — batch is a flat 50% off.</p>
+          </div>
+          <div class="lever-stat">
+            <div class="big">50%</div>
+            <div class="tag">Async discount · stackable</div>
+          </div>
+        </article>
+
+        <article class="lever lever-4">
+          <div>
+            <span class="lever-num">04</span>
+            <h3 class="lever-name">Output<br>budgets</h3>
+            <p class="lever-desc">Output tokens cost ~5× input. Set <code style="font-family:var(--font-mono); font-size:0.85em; color:inherit; background:transparent;">max_tokens</code>, prefer structured output schemas, and prune verbose system instructions about response length.</p>
+          </div>
+          <div class="lever-stat">
+            <div class="big">5:1</div>
+            <div class="tag">Output : input cost ratio</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICE LADDER -->
+  <section class="ladder-section container">
+    <div class="section-head">
+      <p class="section-eyebrow">Price ladder · 2026</p>
+      <h2 class="section-title">Frontier pricing, per million tokens.</h2>
+      <p class="section-lede">Bars are scaled to the most expensive model in view. Toggle between input, output, and cached-read tiers to see how the ranking changes — Opus is 25× its own cached read.</p>
+    </div>
+
+    <div class="ladder" id="ladder">
+      <div class="ladder-head">
+        <h3 style="font-family: var(--font-display); margin: 0; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em;">USD per 1M tokens</h3>
+        <div class="ladder-toggle" role="tablist" aria-label="Pricing tier">
+          <button class="active" data-tier="input">Input</button>
+          <button data-tier="output">Output</button>
+          <button data-tier="cached">Cached read</button>
+        </div>
+      </div>
+
+      <div id="price-list">
+        <!-- Rows populated by JS so we can re-render on toggle -->
+      </div>
+
+      <div class="price-legend">
+        <span>Bars normalized to the maximum visible price.</span>
+        <span class="note">Sources: vendor pricing pages, May 2026</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LATENCY -->
+  <section class="latency-section">
+    <div class="container">
+      <div class="section-head">
+        <p class="section-eyebrow">Latency profile</p>
+        <h2 class="section-title">Two numbers that matter: time-to-first-token and tokens-per-second.</h2>
+        <p class="section-lede">TTFT governs how snappy the UI feels. Tokens/sec governs how long the user waits for a complete answer. Cache hits collapse TTFT by up to 80% on long prefixes.</p>
+      </div>
+
+      <div class="latency-grid">
+        <article class="lat-card" id="lat-ttft">
+          <div class="label">Time to first token · streaming</div>
+          <h3 class="title">TTFT (lower is better)</h3>
+          <div class="lat-row"><span class="model">Haiku 4.5</span>      <div class="lat-track"><div class="lat-fill fast" style="--w: 22%"></div></div><span class="lat-val">0.20 s</span></div>
+          <div class="lat-row"><span class="model">Gemini 2.5 Flash</span><div class="lat-track"><div class="lat-fill fast" style="--w: 28%"></div></div><span class="lat-val">0.25 s</span></div>
+          <div class="lat-row"><span class="model">GPT-5.2</span>        <div class="lat-track"><div class="lat-fill med"  style="--w: 45%"></div></div><span class="lat-val">0.42 s</span></div>
+          <div class="lat-row"><span class="model">Sonnet 4.6</span>     <div class="lat-track"><div class="lat-fill med"  style="--w: 55%"></div></div><span class="lat-val">0.50 s</span></div>
+          <div class="lat-row"><span class="model">Gemini 3.1 Pro</span> <div class="lat-track"><div class="lat-fill med"  style="--w: 70%"></div></div><span class="lat-val">0.65 s</span></div>
+          <div class="lat-row"><span class="model">Opus 4.7</span>       <div class="lat-track"><div class="lat-fill slow" style="--w: 95%"></div></div><span class="lat-val">0.88 s</span></div>
+        </article>
+
+        <article class="lat-card" id="lat-tps">
+          <div class="label">Sustained throughput · single stream</div>
+          <h3 class="title">Tokens / second (higher is better)</h3>
+          <div class="lat-row"><span class="model">Haiku 4.5</span>      <div class="lat-track"><div class="lat-fill fast" style="--w: 98%"></div></div><span class="lat-val">185 t/s</span></div>
+          <div class="lat-row"><span class="model">Gemini 2.5 Flash</span><div class="lat-track"><div class="lat-fill fast" style="--w: 80%"></div></div><span class="lat-val">150 t/s</span></div>
+          <div class="lat-row"><span class="model">GPT-5.2</span>        <div class="lat-track"><div class="lat-fill med"  style="--w: 60%"></div></div><span class="lat-val">112 t/s</span></div>
+          <div class="lat-row"><span class="model">Sonnet 4.6</span>     <div class="lat-track"><div class="lat-fill med"  style="--w: 50%"></div></div><span class="lat-val">95 t/s</span></div>
+          <div class="lat-row"><span class="model">Gemini 3.1 Pro</span> <div class="lat-track"><div class="lat-fill med"  style="--w: 38%"></div></div><span class="lat-val">72 t/s</span></div>
+          <div class="lat-row"><span class="model">Opus 4.7</span>       <div class="lat-track"><div class="lat-fill slow" style="--w: 30%"></div></div><span class="lat-val">58 t/s</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section class="checklist-section container">
+    <div class="section-head">
+      <p class="section-eyebrow">Cost-optimization checklist</p>
+      <h2 class="section-title">Five things engineers should always do.</h2>
+      <p class="section-lede">In rough order of return. Most teams ship the first three on day one — the second two are where the savings compound.</p>
+    </div>
+
+    <div class="checklist">
+      <article class="check">
+        <div class="check-num">01</div>
+        <div class="check-body">
+          <div class="ttl">Cache the system prompt.</div>
+          <div class="desc">Anything &gt; 1024 tokens that doesn't change between requests — system instructions, tool definitions, few-shot examples, long document prefixes — should be cacheable.</div>
+        </div>
+        <span class="check-impact">−60 to −90%</span>
+      </article>
+      <article class="check">
+        <div class="check-num">02</div>
+        <div class="check-body">
+          <div class="ttl">Cap <code style="font-family:var(--font-mono); background:var(--color-accent-light); color:var(--color-accent); padding:0.05rem 0.35rem; border-radius:4px;">max_tokens</code> aggressively.</div>
+          <div class="desc">Output is 5× input. Pick the smallest budget that still produces complete answers, then audit. Most production prompts ship with the default — and pay for it.</div>
+        </div>
+        <span class="check-impact">−20 to −40%</span>
+      </article>
+      <article class="check">
+        <div class="check-num">03</div>
+        <div class="check-body">
+          <div class="ttl">Route by complexity, not by default.</div>
+          <div class="desc">A small classifier (Haiku, $0.10/MTok cached) in front of Sonnet/Opus catches the 70% of requests that don't need the flagship model. Cost of routing is rounding error.</div>
+        </div>
+        <span class="check-impact">−40 to −70%</span>
+      </article>
+      <article class="check">
+        <div class="check-num">04</div>
+        <div class="check-body">
+          <div class="ttl">Move async work to the batch API.</div>
+          <div class="desc">Overnight evals, embedding backfills, summarization sweeps, scheduled report generation. 50% off, stacks with caching for ~95% combined savings on long prefixes.</div>
+        </div>
+        <span class="check-impact">−50% flat</span>
+      </article>
+      <article class="check">
+        <div class="check-num">05</div>
+        <div class="check-body">
+          <div class="ttl">Instrument cost per request, not just totals.</div>
+          <div class="desc">Tag every call with feature, model, and cache-hit ratio. The bill is your monthly aggregate — the cost-per-request histogram is what tells you where to optimize next.</div>
+        </div>
+        <span class="check-impact">Visibility · always</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- CODE -->
+  <section class="code-section">
+    <div class="container">
+      <div class="section-head">
+        <p class="section-eyebrow">In code</p>
+        <h2 class="section-title">Prompt caching, ten lines.</h2>
+        <p class="section-lede">Anthropic SDK · mark a block as cacheable with <code style="font-family:var(--font-mono); background:var(--color-accent-light); color:var(--color-accent); padding:0.1rem 0.4rem; border-radius:4px;">cache_control</code>. The first call writes; every call within the 5-minute TTL pays 10%.</p>
+      </div>
+
+      <div class="code-wrap" id="code-wrap">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-tag-file">cache.py · Anthropic Python SDK</span>
+        </div>
+<pre><span class="k">from</span> anthropic <span class="k">import</span> Anthropic
+
+client <span class="o">=</span> Anthropic()
+
+resp <span class="o">=</span> client.messages.<span class="fn">create</span>(
+    model<span class="o">=</span><span class="s">"claude-sonnet-4-6"</span>,
+    max_tokens<span class="o">=</span><span class="n">800</span>,
+    system<span class="o">=</span>[
+        {
+            <span class="p">"type"</span>: <span class="s">"text"</span>,
+            <span class="p">"text"</span>: long_system_prompt,           <span class="c"># ~10K tokens, stable across turns</span>
+            <span class="p">"cache_control"</span>: {<span class="p">"type"</span>: <span class="s">"ephemeral"</span>}  <span class="c"># 5-min TTL · "1h" also available</span>
+        }
+    ],
+    messages<span class="o">=</span>[{<span class="p">"role"</span>: <span class="s">"user"</span>, <span class="p">"content"</span>: turn}],
+)
+<span class="fn">print</span>(resp.usage.cache_read_input_tokens, <span class="s">"tokens read from cache"</span>)
+<span class="c"># First call: usage.cache_creation_input_tokens populated (1.25× cost)</span>
+<span class="c"># Subsequent calls within TTL: cache_read_input_tokens populated (0.1× cost)</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section container">
+    <h2>Tokens are the new SaaS unit. Treat the bill like one.</h2>
+    <p>CETI runs cost-and-latency audits on production AI systems — caching strategy, routing fabric, batch migration, and unit-economics dashboards your finance team can actually read.</p>
+    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
+      Book a 30-min audit
+      <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <footer>
+    CETI Lookbook · AI Economics · 2026.05 · Pricing reflects vendor public rates and may change
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION-DRIVEN REVEALS ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+
+    document.querySelectorAll('.curve-card, .lever, .ladder, .lat-card, .check, .code-wrap')
+      .forEach((el) => reveal.observe(el));
+
+    // ============ NUMBER TICKERS ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ MAGIC LEVER CARDS (cursor-follow glow) ============
+    document.querySelectorAll('.lever').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ TOKEN FLOW (under the curve) ============
+    (function initTokens() {
+      const track = document.getElementById('token-track');
+      if (!track) return;
+      const labels = ['10K', '10K', '10K', '+', '10K', '10K', '+', '10K'];
+      labels.forEach((txt, i) => {
+        const el = document.createElement('div');
+        el.className = 'token ' + (txt === '+' ? 'spent' : 'saved');
+        el.textContent = txt === '+' ? '+' : '·';
+        el.title = txt === '+' ? 'New input tokens (full price)' : '10K tokens read from cache (10% price)';
+        el.style.animationDelay = `${i * 0.6}s`;
+        el.style.left = '-10%';
+        track.appendChild(el);
+      });
+    })();
+
+    // ============ PRICE LADDER ============
+    const MODELS = [
+      { nm: 'Opus 4.7',         vendor: 'Anthropic', input: 5.00,  output: 25.00, cached: 0.50 },
+      { nm: 'Sonnet 4.6',       vendor: 'Anthropic', input: 3.00,  output: 15.00, cached: 0.30 },
+      { nm: 'Haiku 4.5',        vendor: 'Anthropic', input: 1.00,  output:  5.00, cached: 0.10 },
+      { nm: 'GPT-5.2',          vendor: 'OpenAI',    input: 1.75,  output: 14.00, cached: 0.44 },
+      { nm: 'o3 (reasoning)',   vendor: 'OpenAI',    input: 2.00,  output:  8.00, cached: 0.50 },
+      { nm: 'Gemini 3.1 Pro',   vendor: 'Google',    input: 2.00,  output: 12.00, cached: 0.50 },
+      { nm: 'Gemini 2.5 Flash', vendor: 'Google',    input: 0.30,  output:  2.50, cached: 0.075 },
+    ];
+
+    const list = document.getElementById('price-list');
+    function renderLadder(tier) {
+      const max = Math.max(...MODELS.map(m => m[tier]));
+      const cls = tier === 'output' ? 'output' : 'input';
+      list.innerHTML = '';
+      MODELS
+        .slice()
+        .sort((a, b) => b[tier] - a[tier])
+        .forEach((m) => {
+          const pct = (m[tier] / max) * 100;
+          const row = document.createElement('div');
+          row.className = 'price-row';
+          row.innerHTML = `
+            <div class="price-name">
+              <span class="nm">${m.nm}</span>
+              <span class="vendor">${m.vendor}</span>
+            </div>
+            <div class="price-bar-wrap">
+              <div class="price-bar ${cls}" style="--w: ${pct.toFixed(1)}%"></div>
+            </div>
+            <div class="price-num"><span class="currency">$</span>${m[tier].toFixed(2)}<span class="unit">per 1M</span></div>
+          `;
+          list.appendChild(row);
+          // Trigger animation if section already visible
+          if (document.getElementById('ladder').classList.contains('visible')) {
+            requestAnimationFrame(() => {
+              const bar = row.querySelector('.price-bar');
+              bar.style.width = '0';
+              requestAnimationFrame(() => bar.style.width = `${pct.toFixed(1)}%`);
+            });
+          }
+        });
+    }
+    renderLadder('input');
+
+    document.querySelectorAll('.ladder-toggle button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ladder-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderLadder(btn.dataset.tier);
+      });
+    });
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

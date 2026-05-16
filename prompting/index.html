@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Engineering Patterns — CETI.AI Lookbook</title>
+  <meta name="description" content="Six canonical prompt engineering patterns — Chain-of-Thought, Few-Shot, Role, Structured Output, Self-Consistency, ReAct — explained with live animated demos.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg:             #FAF7F2;
+      --color-bg-warm:        #F5F0E8;
+      --color-bg-code:        #1E1E2E;
+      --color-text:           #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted:     #9E9790;
+      --color-border:         #E5DFD6;
+      --color-border-light:   #EEEBE5;
+      --color-surface:        #FFFFFF;
+      --color-surface-warm:   #FDF9F3;
+
+      --color-accent:         #D94F30;
+      --color-accent-hover:   #C4432A;
+      --color-accent-light:   #FDEEE9;
+      --color-accent-muted:   #E8836C;
+
+      /* Six pattern colors — accent rotation */
+      --color-p1: #D94F30;   /* vermillion — Chain-of-Thought */
+      --color-p2: #2A7B9B;   /* teal       — Few-Shot */
+      --color-p3: #7B6DAA;   /* plum       — Role */
+      --color-p4: #2D8B55;   /* forest     — Structured Output */
+      --color-p5: #D4A843;   /* golden     — Self-Consistency */
+      --color-p6: #B85C57;   /* rust       — ReAct */
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body:    'DM Sans', -apple-system, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast:   150ms;
+      --duration-normal: 300ms;
+      --duration-slow:   500ms;
+      --duration-slower: 700ms;
+
+      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 18% 22%, rgba(217, 79, 48, 0.05) 0%, transparent 45%),
+        radial-gradient(ellipse at 82% 68%, rgba(123, 109, 170, 0.045) 0%, transparent 50%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ NAV ============ */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 56px; z-index: 100;
+      background: rgba(250, 247, 242, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border-light);
+      display: flex; align-items: center;
+    }
+    .nav-inner {
+      max-width: 1180px; margin: 0 auto; padding: 0 1.5rem;
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text);
+    }
+    .nav-brand b { color: var(--color-accent); font-weight: 500; }
+    .nav-meta {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    section { padding: 5rem 1.5rem; max-width: 1180px; margin: 0 auto; }
+
+    /* ============ HERO ============ */
+    .hero {
+      min-height: 88dvh;
+      padding: 8rem 1.5rem 4rem;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+      margin: 0;
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.5rem, 7vw, 5.25rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 1.5rem 0;
+      max-width: 14ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay:  80ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 160ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 240ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 320ms; }
+    .hero-title em { font-style: normal; color: var(--color-accent); }
+
+    .hero-sub {
+      font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out),
+                  transform var(--duration-slower) var(--ease-out);
+      transition-delay: 580ms;
+      margin: 0;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .cta-row {
+      display: flex; gap: 1.25rem; margin-top: 2.5rem;
+      align-items: center; flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 780ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    /* ============ MAGNETIC BUTTON ============ */
+    .magnetic {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 1rem 1.75rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none; cursor: pointer;
+      text-decoration: none;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms ease;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(4px); }
+
+    .secondary {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-bottom: 1px solid transparent;
+      transition: color 200ms, border-color 200ms;
+    }
+    .secondary:hover { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+
+    /* ============ SECTION HEADINGS ============ */
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin: 0 0 0.875rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.85rem, 3.6vw, 2.75rem);
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin: 0 0 1rem;
+      max-width: 26ch;
+    }
+    .section-lede {
+      color: var(--color-text-secondary);
+      max-width: 62ch;
+      font-size: 1.075rem;
+      margin: 0;
+    }
+
+    /* ============ WHY PROSE ============ */
+    .why {
+      padding: 4rem 1.5rem 2rem;
+      max-width: 760px; margin: 0 auto;
+    }
+    .why p {
+      font-size: 1.125rem;
+      color: var(--color-text);
+      margin: 0 0 1.25rem;
+      line-height: 1.7;
+    }
+    .why p:last-child { margin-bottom: 0; }
+    .why em { color: var(--color-accent); font-style: normal; font-weight: 500; }
+
+    /* ============ ANIMATE-IN ============ */
+    .animate-in {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity var(--duration-slower) var(--ease-spring),
+                  transform var(--duration-slower) var(--ease-spring);
+    }
+    .animate-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ============ BENTO — SIGNATURE VISUAL ============ */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+    .tile {
+      position: relative;
+      padding: 1.75rem;
+      border-radius: 18px;
+      background:
+        radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
+          var(--tile-glow, rgba(217, 79, 48, 0.07)), transparent 45%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition:
+        transform var(--duration-normal) var(--ease-spring),
+        border-color var(--duration-normal) var(--ease-out),
+        box-shadow var(--duration-normal) var(--ease-out);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      min-height: 340px;
+    }
+    @media (hover: hover) {
+      .tile:hover {
+        transform: translateY(-3px);
+        border-color: var(--tile-color, var(--color-accent-muted));
+        box-shadow: var(--shadow-lg);
+      }
+    }
+    .tile-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .tile-tag {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--tile-color);
+      background: var(--tile-tag-bg);
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+    }
+    .tile-tag::before {
+      content: "";
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--tile-color);
+    }
+    .tile-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+    }
+    .tile-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.015em;
+      margin: 0.85rem 0 0.4rem;
+    }
+    .tile-blurb {
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* per-tile accents */
+    .tile.p1 { --tile-color: var(--color-p1); --tile-tag-bg: var(--color-accent-light); --tile-glow: rgba(217, 79, 48, 0.07); }
+    .tile.p2 { --tile-color: var(--color-p2); --tile-tag-bg: #E4F2F7;                 --tile-glow: rgba(42, 123, 155, 0.07); }
+    .tile.p3 { --tile-color: var(--color-p3); --tile-tag-bg: #EFEBF5;                 --tile-glow: rgba(123, 109, 170, 0.07); }
+    .tile.p4 { --tile-color: var(--color-p4); --tile-tag-bg: #E1F2E7;                 --tile-glow: rgba(45, 139, 85, 0.08); }
+    .tile.p5 { --tile-color: var(--color-p5); --tile-tag-bg: #FBF1DA;                 --tile-glow: rgba(212, 168, 67, 0.10); }
+    .tile.p6 { --tile-color: var(--color-p6); --tile-tag-bg: #F4E2E1;                 --tile-glow: rgba(184, 92, 87, 0.07); }
+
+    /* ============ DEMO PANEL — terminal-like mini area inside each tile ============ */
+    .demo {
+      margin-top: 1.25rem;
+      flex: 1;
+      background: var(--color-bg-warm);
+      border: 1px solid var(--color-border-light);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      color: var(--color-text);
+      overflow: hidden;
+      position: relative;
+      min-height: 150px;
+      display: flex; flex-direction: column;
+      gap: 0.3rem;
+    }
+    .demo .label {
+      color: var(--color-text-muted);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .demo .accent { color: var(--tile-color); font-weight: 500; }
+
+    /* Reusable: text reveal line */
+    .line {
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 280ms var(--ease-out), transform 280ms var(--ease-out);
+    }
+    .line.on { opacity: 1; transform: translateY(0); }
+
+    /* caret blink */
+    .caret {
+      display: inline-block;
+      width: 7px; height: 0.95em;
+      vertical-align: -2px;
+      background: var(--tile-color);
+      margin-left: 2px;
+      animation: blink 1s steps(2, end) infinite;
+    }
+    @keyframes blink {
+      0%, 50%  { opacity: 1; }
+      50.1%, 100% { opacity: 0; }
+    }
+
+    /* ====== 1) CHAIN-OF-THOUGHT specific ====== */
+    .cot-q {
+      color: var(--color-text-secondary);
+      margin-bottom: 0.35rem;
+    }
+    .cot-step {
+      padding-left: 0.85rem;
+      position: relative;
+    }
+    .cot-step::before {
+      content: ""; position: absolute; left: 0; top: 0.55em;
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--tile-color);
+    }
+    .cot-ans {
+      margin-top: 0.4rem;
+      color: var(--tile-color);
+      font-weight: 500;
+    }
+
+    /* ====== 2) FEW-SHOT specific ====== */
+    .fs-pair { display: grid; grid-template-columns: 14px 1fr; gap: 0.4rem; align-items: baseline; }
+    .fs-pair .k { color: var(--color-text-muted); font-size: 0.7rem; }
+    .fs-pair .v { color: var(--color-text); }
+    .fs-pair.example .v { color: var(--color-text-secondary); }
+    .fs-final .v { color: var(--tile-color); font-weight: 500; }
+    .fs-sep { border-top: 1px dashed var(--color-border); margin: 0.35rem 0; }
+
+    /* ====== 3) ROLE specific ====== */
+    .role-prefix {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      border-left: 3px solid var(--tile-color);
+      padding: 0.55rem 0.65rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      transition: opacity 400ms, transform 400ms;
+    }
+    .role-prefix .tag {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--tile-color);
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+    .role-prefix.swap {
+      animation: roleSwap 12s ease-in-out infinite;
+    }
+    @keyframes roleSwap {
+      0%, 45%   { transform: translateX(0); opacity: 1; }
+      48%, 52%  { transform: translateX(-6px); opacity: 0; }
+      55%, 100% { transform: translateX(0); opacity: 1; }
+    }
+    .role-out {
+      color: var(--color-text-secondary);
+      font-size: 0.76rem;
+    }
+    .role-out b { color: var(--tile-color); font-weight: 500; }
+
+    /* ====== 4) STRUCTURED OUTPUT — typewriter JSON ====== */
+    .json-stage {
+      color: var(--color-text-secondary);
+      font-size: 0.78rem;
+      white-space: pre;
+      overflow: hidden;
+    }
+    .json-stage .k { color: var(--tile-color); }
+    .json-stage .s { color: #B85C57; }
+    .json-stage .n { color: #2A7B9B; }
+    .json-stage .p { color: var(--color-text-muted); }
+
+    /* ====== 5) SELF-CONSISTENCY — 3 parallel paths converging ====== */
+    .sc-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.4rem;
+      margin: 0.25rem 0 0.5rem;
+    }
+    .sc-col {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      border-radius: 6px;
+      padding: 0.45rem 0.5rem;
+      font-size: 0.7rem;
+      color: var(--color-text-secondary);
+      min-height: 56px;
+      display: flex; flex-direction: column; gap: 0.15rem;
+      transition: border-color 400ms, background 400ms;
+    }
+    .sc-col .v { font-weight: 500; color: var(--color-text); font-family: var(--font-mono); }
+    .sc-col.consensus { border-color: var(--tile-color); background: #FBF7E8; }
+    .sc-col.consensus .v { color: var(--tile-color); }
+    .sc-arrow {
+      text-align: center; color: var(--color-text-muted); font-size: 0.65rem; margin: 0.1rem 0;
+    }
+    .sc-result {
+      text-align: center;
+      color: var(--tile-color);
+      font-weight: 500;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 400ms;
+    }
+    .sc-result.on { opacity: 1; }
+
+    /* ====== 6) REACT — Thought / Action / Observation loop with traveling pulse ====== */
+    .react-loop {
+      display: flex; flex-direction: column; gap: 0.32rem;
+      position: relative;
+    }
+    .react-row {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 0.5rem;
+      align-items: baseline;
+      padding: 0.3rem 0.5rem;
+      border-radius: 5px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      transition: background 280ms, border-color 280ms, transform 280ms;
+      transform: scale(1);
+      font-size: 0.74rem;
+    }
+    .react-row.active {
+      border-color: var(--tile-color);
+      background: #F8EFEE;
+      transform: scale(1.015);
+    }
+    .react-row .tag {
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+    .react-row.active .tag { color: var(--tile-color); }
+    .react-row .body { color: var(--color-text-secondary); }
+    .react-row.active .body { color: var(--color-text); }
+
+    /* ============ DECISION TABLE ============ */
+    .decide {
+      background: var(--color-bg-warm);
+      padding: 5rem 1.5rem;
+      margin: 5rem 0 0;
+    }
+    .decide-inner { max-width: 1180px; margin: 0 auto; }
+    .table-wrap {
+      margin-top: 2.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .table-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1.6fr;
+      gap: 1.5rem;
+      padding: 1.05rem 1.5rem;
+      border-bottom: 1px solid var(--color-border-light);
+      align-items: center;
+      transition: background 200ms;
+    }
+    .table-row:last-child { border-bottom: none; }
+    .table-row:not(.head):hover { background: var(--color-surface-warm); }
+    .table-row.head {
+      background: var(--color-bg-warm);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .table-row .if  { color: var(--color-text); font-weight: 500; font-size: 0.95rem; }
+    .table-row .use {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--use-color, var(--color-accent));
+      font-weight: 500;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .table-row .use::before {
+      content: ""; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--use-color, var(--color-accent));
+    }
+    .table-row .why-col { color: var(--color-text-secondary); font-size: 0.92rem; }
+    .table-row.r-1 { --use-color: var(--color-p1); }
+    .table-row.r-2 { --use-color: var(--color-p2); }
+    .table-row.r-3 { --use-color: var(--color-p3); }
+    .table-row.r-4 { --use-color: var(--color-p4); }
+    .table-row.r-5 { --use-color: var(--color-p5); }
+    .table-row.r-6 { --use-color: var(--color-p6); }
+
+    /* ============ CODE BLOCK ============ */
+    .code-section {
+      padding: 5rem 1.5rem;
+      max-width: 980px; margin: 0 auto;
+    }
+    .code-wrap {
+      margin-top: 2.5rem;
+      background: var(--color-bg-code);
+      border-radius: 14px;
+      padding: 1.75rem 1.85rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .code-wrap::before {
+      content: "anthropic.messages.create";
+      position: absolute; top: 0.75rem; right: 1.1rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+    }
+    .code-wrap pre {
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      line-height: 1.65;
+      color: #DCE0E8;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .code-wrap .kw   { color: #CBA6F7; }
+    .code-wrap .str  { color: #A6E3A1; }
+    .code-wrap .tag  { color: #F38BA8; }
+    .code-wrap .attr { color: #F9E2AF; }
+    .code-wrap .com  { color: #6C7086; font-style: italic; }
+    .code-wrap .num  { color: #FAB387; }
+
+    /* ============ STATS ROW ============ */
+    .stats-section { padding: 5rem 1.5rem; max-width: 1180px; margin: 0 auto; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+    .stat {
+      padding: 1.75rem 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat::after {
+      content: "";
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--stat-color, var(--color-accent));
+    }
+    .stat.s-1 { --stat-color: var(--color-p1); }
+    .stat.s-2 { --stat-color: var(--color-p2); }
+    .stat.s-3 { --stat-color: var(--color-p4); }
+    .stat.s-4 { --stat-color: var(--color-p5); }
+    .stat-value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 3.5vw, 2.75rem);
+      line-height: 1;
+      letter-spacing: -0.025em;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text);
+    }
+    .stat-value .unit {
+      font-size: 0.55em;
+      color: var(--stat-color);
+      margin-left: 0.15em;
+    }
+    .stat-label {
+      margin-top: 0.5rem;
+      color: var(--color-text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.4;
+    }
+    .stat-cite {
+      margin-top: 0.65rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    /* ============ FINAL CTA ============ */
+    .final {
+      padding: 6rem 1.5rem 7rem;
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin: 0 0 1rem;
+      line-height: 1.1;
+    }
+    .final p {
+      color: var(--color-text-secondary);
+      margin-bottom: 2rem;
+      font-size: 1.075rem;
+    }
+    .final-cta-row {
+      display: flex; gap: 1rem; justify-content: center;
+      align-items: center; flex-wrap: wrap;
+    }
+
+    /* ============ FOOTER ============ */
+    footer {
+      padding: 2rem 1.5rem 3rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+    }
+    footer a { color: var(--color-text-muted); text-decoration: none; border-bottom: 1px solid transparent; }
+    footer a:hover { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 960px) {
+      .bento { grid-template-columns: repeat(2, 1fr); }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .table-row { grid-template-columns: 1.2fr 1fr; }
+      .table-row .why-col { grid-column: 1 / -1; padding-top: 0.4rem; }
+      .table-row.head .why-col { display: none; }
+    }
+    @media (max-width: 600px) {
+      .bento { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .hero { padding-top: 6rem; }
+      .nav-meta { display: none; }
+      section { padding: 3rem 1.25rem; }
+      .code-wrap { padding: 1.25rem 1rem; }
+      .code-wrap pre { font-size: 0.74rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .cta-row, .eyebrow,
+      .animate-in, .line, .sc-result {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .caret { display: none; }
+      .role-prefix.swap { animation: none; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .tile:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <span class="nav-brand">CETI.AI <b>Lookbook</b></span>
+      <span class="nav-meta">Prompt Patterns &middot; 2026 Edition</span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">Prompt Patterns &middot; 2026 Edition</p>
+    <h1 class="hero-title">
+      <span class="word">Prompting</span>
+      <span class="word">is</span>
+      <span class="word"><em>engineering.</em></span>
+    </h1>
+    <p class="hero-sub">Six reusable patterns that move prompts from improvisation into discipline. Each one demoed live below — Chain&#8209;of&#8209;Thought, Few&#8209;Shot, Role, Structured Output, Self&#8209;Consistency, ReAct.</p>
+    <div class="cta-row">
+      <a class="magnetic" href="#patterns">
+        Watch the six patterns
+        <span class="arrow">&rarr;</span>
+      </a>
+      <a class="secondary" href="#code">See the code &darr;</a>
+    </div>
+  </section>
+
+  <!-- WHY PATTERNS MATTER -->
+  <section class="why">
+    <p class="section-eyebrow animate-in">Why patterns</p>
+    <h2 class="section-title animate-in" style="max-width: 22ch;">Prompts are software. Patterns are the libraries.</h2>
+    <p class="animate-in" style="margin-top: 1.5rem;">A model is a function from text to text. The text you put in front of it is not <em>just</em> phrasing &mdash; it is the program. And like any program, good prompts are built from a small set of reusable structures that solve recurring problems: how to make reasoning visible, how to constrain output, how to give the model role and stakes.</p>
+    <p class="animate-in">These six patterns are the design patterns of prompting. Once you can name them, you can <em>compose them</em>. A production prompt is almost never one pattern &mdash; it is a role prefix, plus three few&#8209;shot examples, plus a structured output spec, with a chain&#8209;of&#8209;thought instruction tucked in the middle. Same idea as the Gang of Four. Same payoff: vocabulary buys you leverage.</p>
+  </section>
+
+  <!-- BENTO — SIGNATURE VISUAL: 6 mini live demos -->
+  <section id="patterns">
+    <p class="section-eyebrow animate-in">The six patterns</p>
+    <h2 class="section-title animate-in">Live demos &mdash; each tile loops.</h2>
+    <p class="section-lede animate-in">Hover any tile for a warm cursor glow. Each demo runs on a ~10&#8209;second cycle with a beat of rest, so the eye can rest between loops. Reduced&#8209;motion users see the final state of each.</p>
+
+    <div class="bento" id="bento">
+
+      <!-- 1. CHAIN-OF-THOUGHT -->
+      <article class="tile p1" data-demo="cot">
+        <div class="tile-header">
+          <span class="tile-tag">Chain&#8209;of&#8209;Thought</span>
+          <span class="tile-num">01</span>
+        </div>
+        <h3 class="tile-title">Show the reasoning.</h3>
+        <p class="tile-blurb">Ask the model to think step by step. Hidden reasoning becomes visible &mdash; and verifiable.</p>
+        <div class="demo" id="d-cot">
+          <span class="label">Prompt &middot; "Let's think step by step."</span>
+          <div class="cot-q line">Q: 3 apples + 2 baskets of 4 each. How many?</div>
+          <div class="cot-step line" data-step="1">2 baskets &times; 4 apples = 8 apples</div>
+          <div class="cot-step line" data-step="2">8 + 3 = 11 apples total</div>
+          <div class="cot-ans line" data-step="3">&rArr; 11<span class="caret" style="display:none;" id="cot-caret"></span></div>
+        </div>
+      </article>
+
+      <!-- 2. FEW-SHOT -->
+      <article class="tile p2" data-demo="fs">
+        <div class="tile-header">
+          <span class="tile-tag">Few&#8209;Shot</span>
+          <span class="tile-num">02</span>
+        </div>
+        <h3 class="tile-title">Teach by example.</h3>
+        <p class="tile-blurb">Give 2&ndash;5 worked examples. The model infers the pattern and applies it to the new input.</p>
+        <div class="demo" id="d-fs">
+          <span class="label">3 examples &rarr; new input</span>
+          <div class="fs-pair example line"><span class="k">Q&rarr;</span><span class="v">"warm" &rarr; cold</span></div>
+          <div class="fs-pair example line"><span class="k">Q&rarr;</span><span class="v">"fast" &rarr; slow</span></div>
+          <div class="fs-pair example line"><span class="k">Q&rarr;</span><span class="v">"loud" &rarr; quiet</span></div>
+          <div class="fs-sep line"></div>
+          <div class="fs-pair fs-final line"><span class="k">Q&rarr;</span><span class="v">"bright" &rarr; <span id="fs-ans"></span><span class="caret" id="fs-caret" style="display:none;"></span></span></div>
+        </div>
+      </article>
+
+      <!-- 3. ROLE PROMPTING -->
+      <article class="tile p3" data-demo="role">
+        <div class="tile-header">
+          <span class="tile-tag">Role Prompting</span>
+          <span class="tile-num">03</span>
+        </div>
+        <h3 class="tile-title">Give it a stage.</h3>
+        <p class="tile-blurb">A role prefix shifts vocabulary, depth, and assumed audience. Same question, different answer.</p>
+        <div class="demo" id="d-role">
+          <div class="role-prefix" id="role-prefix">
+            <span class="tag">System</span>
+            <span>You are a <b id="role-name">senior physicist</b>.</span>
+          </div>
+          <div class="line on" style="font-size: 0.74rem; color: var(--color-text-muted); margin-bottom: 0.2rem;">Q: Explain entropy in one line.</div>
+          <div class="role-out line on" id="role-out">
+            <b>A:</b> <span id="role-text"></span><span class="caret" id="role-caret" style="display:none;"></span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 4. STRUCTURED OUTPUT -->
+      <article class="tile p4" data-demo="json">
+        <div class="tile-header">
+          <span class="tile-tag">Structured Output</span>
+          <span class="tile-num">04</span>
+        </div>
+        <h3 class="tile-title">Make the shape exact.</h3>
+        <p class="tile-blurb">JSON, XML, or a tool schema. The output is machine&#8209;readable on the first try.</p>
+        <div class="demo" id="d-json">
+          <span class="label">Schema &rarr; JSON</span>
+          <pre class="json-stage" id="json-stage"></pre>
+        </div>
+      </article>
+
+      <!-- 5. SELF-CONSISTENCY -->
+      <article class="tile p5" data-demo="sc">
+        <div class="tile-header">
+          <span class="tile-tag">Self&#8209;Consistency</span>
+          <span class="tile-num">05</span>
+        </div>
+        <h3 class="tile-title">Vote with three minds.</h3>
+        <p class="tile-blurb">Sample the same prompt multiple times. Take the majority answer. Cheap reliability boost.</p>
+        <div class="demo" id="d-sc">
+          <span class="label">3 samples &rarr; majority vote</span>
+          <div class="sc-cols">
+            <div class="sc-col" id="sc-c1"><span>Path 1</span><span class="v">&mdash;</span></div>
+            <div class="sc-col" id="sc-c2"><span>Path 2</span><span class="v">&mdash;</span></div>
+            <div class="sc-col" id="sc-c3"><span>Path 3</span><span class="v">&mdash;</span></div>
+          </div>
+          <div class="sc-arrow">&darr; &darr; &darr;</div>
+          <div class="sc-result" id="sc-result">Consensus: <span id="sc-answer">42</span></div>
+        </div>
+      </article>
+
+      <!-- 6. REACT -->
+      <article class="tile p6" data-demo="react">
+        <div class="tile-header">
+          <span class="tile-tag">ReAct</span>
+          <span class="tile-num">06</span>
+        </div>
+        <h3 class="tile-title">Think, act, observe.</h3>
+        <p class="tile-blurb">Interleave reasoning with tool calls. The model plans, fetches, and re&#8209;plans against real data.</p>
+        <div class="demo" id="d-react">
+          <div class="react-loop">
+            <div class="react-row" data-react="0"><span class="tag">Thought</span><span class="body">User asks today's weather in Tokyo.</span></div>
+            <div class="react-row" data-react="1"><span class="tag">Action</span><span class="body">get_weather(city="Tokyo")</span></div>
+            <div class="react-row" data-react="2"><span class="tag">Observ.</span><span class="body">{ temp_c: 18, sky: "clear" }</span></div>
+            <div class="react-row" data-react="3"><span class="tag">Answer</span><span class="body">Tokyo is 18&deg;C and clear today.</span></div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- DECISION TABLE -->
+  <section class="decide">
+    <div class="decide-inner">
+      <p class="section-eyebrow animate-in">When to reach for which</p>
+      <h2 class="section-title animate-in" style="max-width: 24ch;">Each pattern earns a place by the symptom it cures.</h2>
+      <p class="section-lede animate-in">Production prompts compose multiple patterns. But each one solves a specific class of failure &mdash; this table maps the failure to the pattern.</p>
+
+      <div class="table-wrap animate-in">
+        <div class="table-row head">
+          <div>If the symptom is&hellip;</div>
+          <div>Use</div>
+          <div>Because</div>
+        </div>
+        <div class="table-row r-1">
+          <div class="if">Model gets multi&#8209;step math/logic wrong</div>
+          <div class="use">Chain&#8209;of&#8209;Thought</div>
+          <div class="why-col">Forces the model to externalise intermediate steps &mdash; both improves accuracy and gives you an audit trail.</div>
+        </div>
+        <div class="table-row r-2">
+          <div class="if">Output format keeps drifting from what you want</div>
+          <div class="use">Few&#8209;Shot</div>
+          <div class="why-col">3&ndash;5 examples nail the shape and tone better than 200 words of instructions.</div>
+        </div>
+        <div class="table-row r-3">
+          <div class="if">Tone is too generic or wrong register</div>
+          <div class="use">Role Prompting</div>
+          <div class="why-col">A role prefix sets vocabulary, depth, and stakes in one line. Cheaper than re&#8209;prompting.</div>
+        </div>
+        <div class="table-row r-4">
+          <div class="if">Downstream code needs to parse the answer</div>
+          <div class="use">Structured Output</div>
+          <div class="why-col">Constrain to JSON schema or function call. No regex hacks, no broken pipelines.</div>
+        </div>
+        <div class="table-row r-5">
+          <div class="if">Answer is inconsistent across runs of the same prompt</div>
+          <div class="use">Self&#8209;Consistency</div>
+          <div class="why-col">Sample n times (n=3 to 7), majority vote. Trades cost for reliability.</div>
+        </div>
+        <div class="table-row r-6">
+          <div class="if">Task needs real data or tools the model doesn't have</div>
+          <div class="use">ReAct</div>
+          <div class="why-col">Interleaves reasoning with tool calls so the model can fetch, then think again.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CODE BLOCK -->
+  <section class="code-section" id="code">
+    <p class="section-eyebrow animate-in">Anatomy of a production prompt</p>
+    <h2 class="section-title animate-in" style="max-width: 26ch;">Anthropic&#8209;style XML tags. Role, examples, schema, thinking &mdash; in 12 lines.</h2>
+    <p class="section-lede animate-in">Three patterns composed: role prefix, two few&#8209;shot examples wrapped in XML tags for unambiguous boundaries, and a structured output instruction. The XML tag convention is what Claude is trained on.</p>
+
+    <div class="code-wrap animate-in">
+<pre><span class="com">// system prompt — composes Role + Few-Shot + Structured Output</span>
+<span class="tag">&lt;role&gt;</span>You are a meticulous invoice auditor.<span class="tag">&lt;/role&gt;</span>
+
+<span class="tag">&lt;examples&gt;</span>
+  <span class="tag">&lt;ex&gt;</span><span class="attr">input:</span>  <span class="str">"Acme Corp, $1,200, paid"</span>
+       <span class="attr">output:</span> <span class="str">{"vendor":"Acme Corp","amount":1200,"status":"paid"}</span><span class="tag">&lt;/ex&gt;</span>
+  <span class="tag">&lt;ex&gt;</span><span class="attr">input:</span>  <span class="str">"Globex — 850 USD — DUE"</span>
+       <span class="attr">output:</span> <span class="str">{"vendor":"Globex","amount":850,"status":"due"}</span><span class="tag">&lt;/ex&gt;</span>
+<span class="tag">&lt;/examples&gt;</span>
+
+<span class="tag">&lt;task&gt;</span>Extract the invoice into JSON matching the schema above.
+Think step by step inside <span class="tag">&lt;thinking&gt;</span> tags before answering.<span class="tag">&lt;/task&gt;</span>
+
+<span class="tag">&lt;input&gt;</span>{{ user_input }}<span class="tag">&lt;/input&gt;</span></pre>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section">
+    <p class="section-eyebrow animate-in">What the literature shows</p>
+    <h2 class="section-title animate-in" style="max-width: 26ch;">Each pattern has receipts.</h2>
+
+    <div class="stats">
+      <article class="stat animate-in s-1">
+        <div class="stat-value"><span class="num" data-to="58">0</span><span class="unit">% &uarr;</span></div>
+        <p class="stat-label">Accuracy lift on GSM8K math word problems from Chain&#8209;of&#8209;Thought prompting at scale.</p>
+        <p class="stat-cite">Wei et al. &middot; 2022</p>
+      </article>
+      <article class="stat animate-in s-2">
+        <div class="stat-value"><span class="num" data-to="3">0</span>&ndash;5</div>
+        <p class="stat-label">Sweet spot for few&#8209;shot example count. More than 7 rarely helps &mdash; often hurts.</p>
+        <p class="stat-cite">Brown et al. &middot; GPT&#8209;3 paper</p>
+      </article>
+      <article class="stat animate-in s-3">
+        <div class="stat-value"><span class="num" data-to="100">0</span><span class="unit">%</span></div>
+        <p class="stat-label">Schema conformance with constrained decoding &mdash; not "mostly valid JSON", actually valid.</p>
+        <p class="stat-cite">Structured outputs API</p>
+      </article>
+      <article class="stat animate-in s-4">
+        <div class="stat-value"><span class="num" data-to="17">0</span><span class="unit">% &uarr;</span></div>
+        <p class="stat-label">Reasoning accuracy gain from Self&#8209;Consistency with n=40 samples on hard benchmarks.</p>
+        <p class="stat-cite">Wang et al. &middot; 2022</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <h2>Patterns over improvisation.</h2>
+    <p>CETI trains teams to compose these patterns into prompts that hold up in production &mdash; not just demos. 5,000+ professionals, 100+ organisations, 20+ countries.</p>
+    <div class="final-cta-row">
+      <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
+        Book a workshop
+        <span class="arrow">&rarr;</span>
+      </a>
+      <a class="secondary" href="https://cetiai.co">Back to cetiai.co</a>
+    </div>
+  </section>
+
+  <footer>
+    CETI.AI &middot; Lookbook &middot; <a href="../">All artifacts</a>
+  </footer>
+
+  <script>
+    /* ============ HERO REVEAL ============ */
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    /* ============ INTERSECTION REVEAL ============ */
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    document.querySelectorAll('.animate-in').forEach((el) => reveal.observe(el));
+
+    /* ============ NUMBER TICKER ============ */
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    /* ============ MAGNETIC BUTTONS ============ */
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    /* ============ TILE GLOW (cursor follow) ============ */
+    document.querySelectorAll('.tile').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    /* ============================================================
+       BENTO MINI DEMOS — six animated patterns, each on its own loop
+       Each demo runs only when its tile is in viewport.
+       Cycle: ~9–11s play, ~2–3s rest.
+    ============================================================ */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    /* ---------- 1) CHAIN-OF-THOUGHT ---------- */
+    async function loopCOT() {
+      const lines = document.querySelectorAll('#d-cot .line');
+      const caret = document.getElementById('cot-caret');
+      while (true) {
+        lines.forEach(l => l.classList.remove('on'));
+        caret.style.display = 'none';
+        await sleep(700);
+        lines[0].classList.add('on'); await sleep(800);
+        lines[1].classList.add('on'); await sleep(900);
+        lines[2].classList.add('on'); await sleep(900);
+        lines[3].classList.add('on'); caret.style.display = 'inline-block';
+        await sleep(3800);
+        caret.style.display = 'none';
+        await sleep(800);
+      }
+    }
+
+    /* ---------- 2) FEW-SHOT ---------- */
+    async function loopFS() {
+      const lines = document.querySelectorAll('#d-fs .line');
+      const ans = document.getElementById('fs-ans');
+      const caret = document.getElementById('fs-caret');
+      const target = 'dim';
+      while (true) {
+        lines.forEach(l => l.classList.remove('on'));
+        ans.textContent = '';
+        caret.style.display = 'none';
+        await sleep(700);
+        for (let i = 0; i < 4; i++) { lines[i].classList.add('on'); await sleep(450); }
+        lines[4].classList.add('on'); // final pair scaffold
+        caret.style.display = 'inline-block';
+        await sleep(500);
+        for (let i = 0; i < target.length; i++) {
+          ans.textContent += target[i];
+          await sleep(140);
+        }
+        await sleep(3200);
+        caret.style.display = 'none';
+        await sleep(700);
+      }
+    }
+
+    /* ---------- 3) ROLE PROMPTING ---------- */
+    async function loopRole() {
+      const roles = [
+        { name: 'senior physicist',  text: 'A measure of dispersed energy unavailable for work.' },
+        { name: 'kindergarten teacher', text: 'When toys spread all over the room, that’s entropy.' },
+        { name: 'standup comedian',  text: 'Entropy is my closet at 2am, just… sprawled.' }
+      ];
+      const nameEl = document.getElementById('role-name');
+      const textEl = document.getElementById('role-text');
+      const caret = document.getElementById('role-caret');
+      let i = 0;
+      while (true) {
+        const r = roles[i % roles.length];
+        nameEl.textContent = r.name;
+        textEl.textContent = '';
+        caret.style.display = 'inline-block';
+        await sleep(700);
+        for (let j = 0; j < r.text.length; j++) {
+          textEl.textContent += r.text[j];
+          await sleep(28);
+        }
+        await sleep(3000);
+        caret.style.display = 'none';
+        // brief fade between roles
+        textEl.style.transition = 'opacity 400ms';
+        textEl.style.opacity = '0';
+        await sleep(450);
+        textEl.style.opacity = '1';
+        i++;
+      }
+    }
+
+    /* ---------- 4) STRUCTURED OUTPUT — typewriter JSON ---------- */
+    async function loopJSON() {
+      const stage = document.getElementById('json-stage');
+      // Token sequence — each item is { text, cls }
+      const tokens = [
+        { t: '{\n  ' },
+        { t: '"task"', c: 'k' }, { t: ': ' }, { t: '"summarize"', c: 's' }, { t: ',\n  ' },
+        { t: '"priority"', c: 'k' }, { t: ': ' }, { t: '"high"', c: 's' }, { t: ',\n  ' },
+        { t: '"score"', c: 'k' }, { t: ': ' }, { t: '0.94', c: 'n' }, { t: ',\n  ' },
+        { t: '"tags"', c: 'k' }, { t: ': [' }, { t: '"prompt"', c: 's' }, { t: ', ' },
+        { t: '"design"', c: 's' }, { t: ']\n}' }
+      ];
+      while (true) {
+        stage.innerHTML = '';
+        await sleep(700);
+        let html = '';
+        for (const tok of tokens) {
+          if (tok.c) html += `<span class="${tok.c}">${escapeHTML(tok.t)}</span>`;
+          else html += escapeHTML(tok.t);
+          stage.innerHTML = html + '<span class="p">|</span>';
+          await sleep(70 + Math.random() * 80);
+        }
+        stage.innerHTML = html;
+        await sleep(3500);
+      }
+    }
+    function escapeHTML(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    /* ---------- 5) SELF-CONSISTENCY ---------- */
+    async function loopSC() {
+      const c1 = document.getElementById('sc-c1');
+      const c2 = document.getElementById('sc-c2');
+      const c3 = document.getElementById('sc-c3');
+      const result = document.getElementById('sc-result');
+      const answerEl = document.getElementById('sc-answer');
+      const scenarios = [
+        { paths: [
+            { label: 'Path 1', val: '42' },
+            { label: 'Path 2', val: '42' },
+            { label: 'Path 3', val: '41' }
+          ], consensus: [0, 1], answer: '42' },
+        { paths: [
+            { label: 'Path 1', val: 'Paris' },
+            { label: 'Path 2', val: 'Paris' },
+            { label: 'Path 3', val: 'Lyon' }
+          ], consensus: [0, 1], answer: 'Paris' },
+        { paths: [
+            { label: 'Path 1', val: '17' },
+            { label: 'Path 2', val: '18' },
+            { label: 'Path 3', val: '17' }
+          ], consensus: [0, 2], answer: '17' }
+      ];
+      let i = 0;
+      while (true) {
+        const s = scenarios[i % scenarios.length];
+        const cols = [c1, c2, c3];
+        // reset
+        cols.forEach((c, k) => {
+          c.classList.remove('consensus');
+          c.innerHTML = `<span>${s.paths[k].label}</span><span class="v">—</span>`;
+        });
+        result.classList.remove('on');
+        await sleep(700);
+        // reveal each path's answer in turn
+        for (let k = 0; k < 3; k++) {
+          await sleep(620);
+          cols[k].innerHTML = `<span>${s.paths[k].label}</span><span class="v">${s.paths[k].val}</span>`;
+        }
+        await sleep(700);
+        // highlight consensus cells
+        s.consensus.forEach(idx => cols[idx].classList.add('consensus'));
+        await sleep(500);
+        answerEl.textContent = s.answer;
+        result.classList.add('on');
+        await sleep(3400);
+        i++;
+      }
+    }
+
+    /* ---------- 6) REACT loop ---------- */
+    async function loopReact() {
+      const rows = document.querySelectorAll('#d-react .react-row');
+      while (true) {
+        rows.forEach(r => r.classList.remove('active'));
+        await sleep(700);
+        for (let k = 0; k < rows.length; k++) {
+          rows.forEach(r => r.classList.remove('active'));
+          rows[k].classList.add('active');
+          await sleep(1100);
+        }
+        await sleep(900);
+        rows.forEach(r => r.classList.remove('active'));
+        await sleep(800);
+      }
+    }
+
+    /* ---------- Run all loops once tiles enter viewport ---------- */
+    const demoRunners = {
+      cot: loopCOT,
+      fs: loopFS,
+      role: loopRole,
+      json: loopJSON,
+      sc: loopSC,
+      react: loopReact
+    };
+
+    if (reduced) {
+      // Show final state for all demos and don't loop
+      document.querySelectorAll('#d-cot .line').forEach(l => l.classList.add('on'));
+      const fsAns = document.getElementById('fs-ans'); if (fsAns) fsAns.textContent = 'dim';
+      document.querySelectorAll('#d-fs .line').forEach(l => l.classList.add('on'));
+      const roleText = document.getElementById('role-text');
+      if (roleText) roleText.textContent = 'A measure of dispersed energy unavailable for work.';
+      const stage = document.getElementById('json-stage');
+      if (stage) stage.innerHTML = '{\n  <span class="k">"task"</span>: <span class="s">"summarize"</span>,\n  <span class="k">"priority"</span>: <span class="s">"high"</span>,\n  <span class="k">"score"</span>: <span class="n">0.94</span>\n}';
+      const c1 = document.getElementById('sc-c1');
+      const c2 = document.getElementById('sc-c2');
+      const c3 = document.getElementById('sc-c3');
+      if (c1) c1.innerHTML = '<span>Path 1</span><span class="v">42</span>';
+      if (c2) c2.innerHTML = '<span>Path 2</span><span class="v">42</span>';
+      if (c3) c3.innerHTML = '<span>Path 3</span><span class="v">41</span>';
+      if (c1) c1.classList.add('consensus');
+      if (c2) c2.classList.add('consensus');
+      const result = document.getElementById('sc-result'); if (result) result.classList.add('on');
+      document.querySelectorAll('#d-react .react-row').forEach(r => r.classList.add('active'));
+    } else {
+      const demoObs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            const key = e.target.dataset.demo;
+            if (demoRunners[key]) {
+              demoRunners[key]();
+              demoObs.unobserve(e.target);
+            }
+          }
+        });
+      }, { threshold: 0.25 });
+      document.querySelectorAll('.tile[data-demo]').forEach(el => demoObs.observe(el));
+    }
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

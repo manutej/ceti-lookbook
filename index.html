@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CETI Lookbook — Eighteen Concepts. One Aesthetic.</title>
+  <meta name="description" content="A lookbook of eighteen WOW-level animated explainers — LangGraph, LangChain, MCP, Transformers, Agentic Patterns, Claude Code, Claude Cowork, Agentic PKM, RAG, Vector DBs, Prompting, Evals, Multimodal, Safety, Voice, Coding Agents, Computer Use, AI Economics — built with the CETI shadcn-motion skill.">
+  <meta property="og:title" content="CETI Lookbook — Eighteen Concepts. One Aesthetic.">
+  <meta property="og:description" content="WOW-level animated explainers for the 18 AI / agent concepts that matter in 2026.">
+  <meta name="theme-color" content="#FAF7F2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+      --color-accent: #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-muted: #E8836C;
+      --color-accent-light: #FDEEE9;
+      --color-info: #2A7B9B;
+      --color-actor-1: #D94F30;
+      --color-actor-2: #2A7B9B;
+      --color-actor-3: #7B6DAA;
+      --color-actor-4: #D4A843;
+      --color-actor-5: #2D8B55;
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 15% 20%, rgba(217, 79, 48, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 80%, rgba(42, 123, 155, 0.03) 0%, transparent 50%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ NAV ============ */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: rgba(250, 247, 242, 0.85);
+      backdrop-filter: saturate(180%) blur(8px);
+      -webkit-backdrop-filter: saturate(180%) blur(8px);
+      border-bottom: 1px solid var(--color-border-light);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+    }
+    .nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .nav-brand .dot { color: var(--color-accent); }
+    .nav-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      min-height: 92dvh;
+      padding: 9rem 1.5rem 4rem;
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      opacity: 0;
+      transition: opacity 600ms var(--ease-out);
+    }
+    .eyebrow::before {
+      content: "";
+      display: inline-block;
+      width: 2rem;
+      height: 1px;
+      background: var(--color-accent);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.75rem, 7vw, 5.5rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 1.5rem 0 1.75rem;
+      max-width: 16ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity 700ms var(--ease-spring),
+        transform 700ms var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
+    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 440ms; }
+    .hero.visible .hero-title .word:nth-child(6) { transition-delay: 520ms; }
+    .hero-title em { font-style: normal; color: var(--color-accent); }
+
+    .hero-sub {
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      max-width: 60ch;
+      line-height: 1.55;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+      transition-delay: 700ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity 700ms var(--ease-out);
+      transition-delay: 900ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.75rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+
+    .secondary {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 200ms;
+    }
+    .secondary:hover { color: var(--color-accent); }
+
+    /* ============ STATS ============ */
+    .stats {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+    .stat {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .stat.visible { opacity: 1; transform: translateY(0); }
+    .stat:nth-child(2).visible { transition-delay: 80ms; }
+    .stat:nth-child(3).visible { transition-delay: 160ms; }
+    .stat:nth-child(4).visible { transition-delay: 240ms; }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-value .plus { color: var(--color-accent); }
+    .stat-label {
+      margin-top: 0.5rem;
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* ============ LOOKBOOK GRID ============ */
+    .lookbook {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin: 0 0 0.75rem;
+    }
+    .section-sub {
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      margin: 0 0 3rem;
+      line-height: 1.55;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-auto-rows: minmax(280px, auto);
+      gap: 1rem;
+    }
+    .card {
+      grid-column: span 6;
+      grid-row: span 1;
+      position: relative;
+      padding: 1.75rem;
+      background:
+        radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(217, 79, 48, 0.06), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 1.25rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--color-text);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(24px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring),
+        border-color 300ms ease,
+        box-shadow 300ms ease;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .card.visible { opacity: 1; transform: translateY(0); }
+    .card:hover { border-color: var(--color-accent-muted); box-shadow: var(--shadow-lg); }
+    .card:hover .card-arrow { transform: translateX(4px); color: var(--color-accent); }
+
+    /* card-grid layout */
+    .card-1 { grid-column: span 8; grid-row: span 2; }
+    .card-2 { grid-column: span 4; }
+    .card-3 { grid-column: span 4; }
+    .card-4 { grid-column: span 6; }
+    .card-5 { grid-column: span 6; }
+    .card-6 { grid-column: span 4; }
+    .card-7 { grid-column: span 4; }
+    .card-8 { grid-column: span 4; }
+
+    .card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-accent);
+      align-self: flex-start;
+      background: var(--color-accent-light);
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+    }
+    .card-tag .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.65rem;
+      letter-spacing: -0.015em;
+      line-height: 1.15;
+      margin: 0;
+    }
+    .card-1 .card-title { font-size: 2.5rem; }
+    .card-body {
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+      flex: 1;
+    }
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--color-border-light);
+    }
+    .card-arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      color: var(--color-text);
+      transition: transform 300ms var(--ease-out), color 200ms;
+      font-family: var(--font-body);
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.85rem;
+    }
+
+    /* ============ CARD MOTIFS — tiny inline previews of each page's signature visual ============ */
+    .motif {
+      width: 100%;
+      aspect-ratio: 16 / 7;
+      border-radius: 0.75rem;
+      background: var(--color-bg-warm);
+      overflow: hidden;
+      position: relative;
+    }
+    .card-1 .motif { aspect-ratio: 16/8; }
+
+    /* MOTIF 1 — LANGGRAPH (cyclic loop) */
+    .motif-graph {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .motif-graph svg { width: 90%; max-width: 360px; }
+    .motif-graph .node circle {
+      fill: var(--color-surface);
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+    .motif-graph .node text {
+      fill: var(--color-accent);
+      font-family: var(--font-mono);
+      font-size: 8px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .motif-graph .edge {
+      fill: none;
+      stroke: var(--color-border);
+      stroke-width: 1.5;
+      stroke-dasharray: 3 4;
+    }
+    .motif-graph .pulse {
+      fill: var(--color-accent);
+      r: 4;
+      filter: drop-shadow(0 0 6px var(--color-accent));
+      offset-distance: 0%;
+      animation: pulse-cycle 5s linear infinite;
+    }
+    @keyframes pulse-cycle { to { offset-distance: 100%; } }
+
+    /* MOTIF 2 — LANGCHAIN (horizontal pipeline) */
+    .motif-pipe {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 1rem;
+      position: relative;
+    }
+    .motif-pipe::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 1.5rem;
+      right: 1.5rem;
+      height: 2px;
+      background: var(--color-border);
+      transform: translateY(-50%);
+    }
+    .motif-pipe .stage {
+      position: relative;
+      z-index: 1;
+      width: 18%;
+      aspect-ratio: 1;
+      background: var(--color-surface);
+      border: 2px solid var(--color-accent);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      font-weight: 500;
+      color: var(--color-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .motif-pipe .packet {
+      position: absolute;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      background: var(--color-accent);
+      border-radius: 4px;
+      transform: translateY(-50%);
+      box-shadow: 0 0 12px rgba(217, 79, 48, 0.5);
+      animation: pipe-flow 4s linear infinite;
+    }
+    @keyframes pipe-flow {
+      0% { left: 0; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { left: calc(100% - 14px); opacity: 0; }
+    }
+
+    /* MOTIF 3 — MCP (radial hub-spoke) */
+    .motif-hub {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .motif-hub .hub {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      box-shadow: 0 0 20px rgba(217, 79, 48, 0.5);
+      position: relative;
+      z-index: 2;
+    }
+    .motif-hub .spoke {
+      position: absolute;
+      width: 70%;
+      height: 1px;
+      background: linear-gradient(to right, var(--color-accent), transparent);
+      left: 50%;
+      top: 50%;
+      transform-origin: 0 0;
+    }
+    .motif-hub .satellite {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--color-surface);
+      border: 2px solid var(--color-info);
+      left: 50%;
+      top: 50%;
+    }
+
+    /* MOTIF 4 — TRANSFORMERS (attention matrix) */
+    .motif-matrix {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      gap: 2px;
+      padding: 1.25rem;
+    }
+    .motif-matrix .cell {
+      background: var(--color-border-light);
+      border-radius: 1px;
+      animation: matrix-pulse 6s ease-in-out infinite;
+    }
+
+    /* MOTIF 5 — AGENTIC PATTERNS (four mini diagrams) */
+    .motif-patterns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 0.5rem;
+      padding: 0.75rem;
+    }
+    .pattern-cell {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .pattern-cell::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      box-shadow: 0 0 8px var(--color-accent);
+    }
+    .pattern-cell:nth-child(1)::after { content: "→ → →"; position: absolute; font-size: 7px; color: var(--color-accent); font-family: var(--font-mono); top: 6px; right: 6px; }
+    .pattern-cell:nth-child(2)::after { content: "⇉"; position: absolute; font-size: 9px; color: var(--color-accent); font-family: var(--font-mono); top: 6px; right: 6px; }
+    .pattern-cell:nth-child(3)::after { content: "⇊⇊"; position: absolute; font-size: 9px; color: var(--color-accent); font-family: var(--font-mono); top: 6px; right: 6px; }
+    .pattern-cell:nth-child(4)::after { content: "⊕"; position: absolute; font-size: 9px; color: var(--color-accent); font-family: var(--font-mono); top: 6px; right: 6px; }
+
+    /* MOTIF 6 — CLAUDE CODE (terminal) */
+    .motif-terminal {
+      background: #1E1E2E;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: #CDD6F4;
+      line-height: 1.6;
+      overflow: hidden;
+    }
+    .motif-terminal .prompt { color: #A6E3A1; }
+    .motif-terminal .cursor {
+      display: inline-block;
+      width: 5px;
+      height: 0.6rem;
+      background: var(--color-accent);
+      vertical-align: middle;
+      animation: blink 1s steps(2) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* MOTIF 7 — CLAUDE COWORK (before / after) */
+    .motif-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      padding: 0.75rem;
+    }
+    .compare-col {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 0.4rem;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .compare-col.after { border-color: var(--color-accent-muted); background: var(--color-accent-light); }
+    .compare-col span {
+      height: 6px;
+      border-radius: 2px;
+      background: var(--color-border);
+    }
+    .compare-col.after span { background: var(--color-accent-muted); }
+    .compare-col span:nth-child(1) { width: 90%; }
+    .compare-col span:nth-child(2) { width: 70%; }
+    .compare-col span:nth-child(3) { width: 80%; }
+    .compare-col span:nth-child(4) { width: 60%; }
+    .compare-col.after span:nth-child(1) { width: 70%; }
+    .compare-col.after span:nth-child(2) { width: 40%; }
+    .compare-col.after span { animation-delay: 0.2s; }
+
+    /* MOTIF 8 — LLM WIKI (knowledge graph) */
+    .motif-knowledge {
+      position: relative;
+    }
+    .motif-knowledge svg {
+      width: 100%;
+      height: 100%;
+    }
+    .motif-knowledge .knode {
+      fill: var(--color-surface);
+      stroke: var(--color-accent);
+      stroke-width: 1.5;
+    }
+    .motif-knowledge .kedge {
+      stroke: var(--color-border);
+      stroke-width: 1;
+    }
+    .motif-knowledge .kpulse {
+      fill: var(--color-accent);
+      filter: drop-shadow(0 0 4px var(--color-accent));
+      animation: kpulse 3s ease-in-out infinite;
+    }
+    @keyframes kpulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    @keyframes matrix-pulse {
+      0% { background: var(--color-border-light); }
+      50% { background: var(--color-accent); }
+      100% { background: var(--color-border-light); }
+    }
+
+    /* ============ FINAL CTA ============ */
+    .final {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 6rem 1.5rem;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin: 0 0 1rem;
+    }
+    .final p {
+      color: var(--color-text-secondary);
+      margin: 0 0 2rem;
+      font-size: 1.05rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 3rem 1.5rem 4rem;
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--color-border-light);
+    }
+    footer .row { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+    footer a { color: var(--color-text-secondary); text-decoration: none; }
+    footer a:hover { color: var(--color-accent); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: repeat(6, 1fr); }
+      .card-1 { grid-column: span 6; grid-row: span 1; }
+      .card-2, .card-3, .card-6, .card-7, .card-8 { grid-column: span 3; }
+      .card-4, .card-5 { grid-column: span 6; }
+    }
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .card, .card-1, .card-2, .card-3, .card-4, .card-5, .card-6, .card-7, .card-8 {
+        grid-column: span 1;
+        grid-row: span 1;
+      }
+      .hero { padding-top: 6rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .cta-row, .stat, .card, .eyebrow {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .motif-graph .pulse, .motif-pipe .packet, .motif-matrix .cell { animation: none !important; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <span class="nav-brand">CETI<span class="dot">.</span>AI</span>
+      <span class="nav-tag">LOOKBOOK · shadcn-motion</span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">SHADCN-MOTION · CONCEPT EXPLAINERS · 2026</p>
+    <h1 class="hero-title">
+      <span class="word">Eighteen</span>
+      <span class="word">concepts.</span>
+      <span class="word"><em>One</em></span>
+      <span class="word">aesthetic.</span>
+      <span class="word">Zero</span>
+      <span class="word">slop.</span>
+    </h1>
+    <p class="hero-sub">A living lookbook built with the CETI <code style="font-family:var(--font-mono); font-size:0.9em; padding:2px 6px; background:var(--color-accent-light); border-radius:4px; color:var(--color-accent);">shadcn-motion</code> skill. Eighteen single-file pages covering the AI / agent concepts that matter in 2026 — from LangGraph to MCP to Computer Use to AI Economics — each with a signature animated visual specific to that concept. Click any tile, or use the floating nav at the bottom of every page.</p>
+    <div class="cta-row">
+      <a href="#lookbook" class="magnetic">
+        Explore the eighteen
+        <span class="arrow">↓</span>
+      </a>
+      <a href="https://cetiai.co" class="secondary">CETI.AI →</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-value"><span class="num" data-to="18">0</span></div>
+      <div class="stat-label">Detailed explainer pages</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value"><span class="num" data-to="14">0</span></div>
+      <div class="stat-label">Animation libraries + engines synthesized</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value"><span class="num" data-to="20">0</span></div>
+      <div class="stat-label">Catalogued components</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value"><span class="num" data-to="0">0</span></div>
+      <div class="stat-label">Purple gradients · forever</div>
+    </div>
+  </section>
+
+  <!-- LOOKBOOK GRID -->
+  <section class="lookbook" id="lookbook">
+    <h2 class="section-heading">The lookbook.</h2>
+    <p class="section-sub">Each tile is a full single-file page with its own signature visual. The motif on each card is a preview, not the real thing — open the page to see it in full bloom.</p>
+
+    <div class="grid">
+
+      <!-- 1. LANGGRAPH (featured wide tile) -->
+      <a href="./langgraph/" class="card card-1">
+        <span class="card-tag"><span class="dot"></span>LANGGRAPH</span>
+        <h3 class="card-title">Agents that remember.</h3>
+        <p class="card-body">Stateful, multi-step LLM agents built as directed graphs. Conditional edges, checkpointing, human-in-the-loop — the architecture pattern that turns prompts into systems.</p>
+        <div class="motif motif-graph">
+          <svg viewBox="0 0 360 130" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <path id="loopPath" d="M 80,65 Q 80,20 180,20 Q 280,20 280,65 Q 280,110 180,110 Q 80,110 80,65 Z" />
+            </defs>
+            <use href="#loopPath" class="edge" />
+            <g class="node">
+              <circle cx="80" cy="65" r="26"></circle>
+              <text x="80" y="65">REASON</text>
+            </g>
+            <g class="node">
+              <circle cx="180" cy="20" r="22"></circle>
+              <text x="180" y="20">ACT</text>
+            </g>
+            <g class="node">
+              <circle cx="280" cy="65" r="26"></circle>
+              <text x="280" y="65">OBSERVE</text>
+            </g>
+            <g class="node">
+              <circle cx="180" cy="110" r="22"></circle>
+              <text x="180" y="110">↻</text>
+            </g>
+            <circle class="pulse" style="offset-path: path('M 80,65 Q 80,20 180,20 Q 280,20 280,65 Q 280,110 180,110 Q 80,110 80,65 Z');"></circle>
+          </svg>
+        </div>
+        <div class="card-meta">
+          <span>· stateful graphs · ReAct loops · checkpoints</span>
+          <span class="card-arrow">Open →</span>
+        </div>
+      </a>
+
+      <!-- 2. LANGCHAIN -->
+      <a href="./langchain/" class="card card-2">
+        <span class="card-tag"><span class="dot"></span>LANGCHAIN</span>
+        <h3 class="card-title">Compose, don't code.</h3>
+        <p class="card-body">LCEL pipelines composed with the `|` operator. Prompt → retriever → format → LLM → parser.</p>
+        <div class="motif motif-pipe">
+          <div class="stage">P</div>
+          <div class="stage">R</div>
+          <div class="stage">F</div>
+          <div class="stage">L</div>
+          <div class="stage">O</div>
+          <div class="packet"></div>
+        </div>
+        <div class="card-meta">
+          <span>· LCEL · runnables · pipes</span>
+          <span class="card-arrow">Open →</span>
+        </div>
+      </a>
+
+      <!-- 3. MCP -->
+      <a href="./mcp/" class="card card-3">
+        <span class="card-tag"><span class="dot"></span>MODEL CONTEXT PROTOCOL</span>
+        <h3 class="card-title">USB-C for LLMs.</h3>
+        <p class="card-body">One open protocol. Every tool. The Anthropic standard that makes LLMs talk to your real software.</p>
+        <div class="motif motif-hub">
+          <div class="hub"></div>
+          <div class="satellite" style="transform: translate(-50%,-50%) translate(70px, 0);"></div>
+          <div class="satellite" style="transform: translate(-50%,-50%) translate(-70px, 0);"></div>
+          <div class="satellite" style="transform: translate(-50%,-50%) translate(0, -40px);"></div>
+          <div class="satellite" style="transform: translate(-50%,-50%) translate(0, 40px);"></div>
+          <div class="satellite" style="transform: translate(-50%,-50%) translate(50px, -28px);"></div>
+          <div class="satellite" style="transform: translate(-50%,-50%) translate(-50px, 28px);"></div>
+        </div>
+        <div class="card-meta">
+          <span>· tools · resources · prompts</span>
+          <span class="card-arrow">Open →</span>
+        </div>
+      </a>
+
+      <!-- 4. TRANSFORMERS -->
+      <a href="./transformers/" class="card card-4">
+        <span class="card-tag"><span class="dot"></span>TRANSFORMERS</span>
+        <h3 class="card-title">Attention is all you need.</h3>
+        <p class="card-body">From the 2017 paper to today's frontier models — the architecture mental model in plain language, with the iconic attention-matrix visualization animated live.</p>
+        <div class="motif motif-matrix" id="motif-matrix"></div>
+        <div class="card-meta">
+          <span>· self-attention · MoE · GQA · 1.8T params</span>
+          <span class="card-arrow">Open →</span>
+        </div>
+      </a>
+
+      <!-- 5. AGENTIC PATTERNS -->
+      <a href="./agentic-patterns/" class="card card-5">
+        <span class="card-tag"><span class="dot"></span>ORCHESTRATOR PATTERNS</span>
+        <h3 class="card-title">Four patterns. One mental model.</h3>
+        <p class="card-body">Chaining, routing, parallelization, orchestrator-workers — the four canonical ways to build agentic systems, explained without jargon.</p>
+        <div class="motif motif-patterns">
+          <div class="pattern-cell"></div>
+          <div class="pattern-cell"></div>
+          <div class="pattern-cell"></div>
+          <div class="pattern-cell"></div>
+        </div>
+        <div class="card-meta">
+          <span>· non-technical · 5 patterns · decision tree</span>
+          <span class="card-arrow">Open →</span>
+        </div>
+      </a>
+
+      <!-- 6. CLAUDE CODE -->
+      <a href="./claude-code/" class="card card-6">
+        <span class="card-tag"><span class="dot"></span>CLAUDE CODE</span>
+        <h3 class="card-title">Not a chatbot. A teammate.</h3>
+        <p class="card-body">The terminal-based AI work partner, demystified for non-technical readers.</p>
+        <div class="motif motif-terminal">
+          <div><span class="prompt">$</span> claude</div>
+          <div><span style="color:#94E2D5">▸</span> organize Notion db</div>
+          <div style="color:#A6E3A1">✓ scanning workspace</div>
+          <div style="color:#A6E3A1">✓ found 23 duplicates<span class="cursor"></span></div>
+        </div>
+        <div class="card-meta">
+          <span>· terminal · agents · workflows</span>
+          <span class="card-arrow">Open →</span>
+        </div>
+      </a>
+
+      <!-- 7. CLAUDE COWORK -->
+      <a href="./claude-cowork/" class="card card-7">
+        <span class="card-tag"><span class="dot"></span>CLAUDE COWORK</span>
+        <h3 class="card-title">Your coworker, on demand.</h3>
+        <p class="card-body">For business users — research, analysis, writing, decisions. Before/after vignettes that make the time-savings tangible.</p>
+        <div class="motif motif-compare">
+          <div class="compare-col">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <div class="compare-col after">
+            <span></span><span></span>
+          </div>
+        </div>
+        <div class="card-meta">
+          <span>· non-technical · workflows · use cases</span>
+          <span class="card-arrow">Open →</span>
+        </div>
+      </a>
+
+      <!-- 8. LLM WIKI -->
+      <a href="./llm-wiki/" class="card card-8">
+        <span class="card-tag"><span class="dot"></span>AGENTIC PKM</span>
+        <h3 class="card-title">Your second brain, now agentic.</h3>
+        <p class="card-body">Karpathy's personal LLM wiki — now with AI agents that can read AND write back to your knowledge graph.</p>
+        <div class="motif motif-knowledge">
+          <svg viewBox="0 0 360 130" preserveAspectRatio="xMidYMid meet">
+            <line class="kedge" x1="60" y1="40" x2="140" y2="65"/>
+            <line class="kedge" x1="140" y1="65" x2="220" y2="35"/>
+            <line class="kedge" x1="140" y1="65" x2="200" y2="100"/>
+            <line class="kedge" x1="220" y1="35" x2="300" y2="60"/>
+            <line class="kedge" x1="200" y1="100" x2="280" y2="95"/>
+            <line class="kedge" x1="300" y1="60" x2="280" y2="95"/>
+            <circle class="knode" cx="60" cy="40" r="9"/>
+            <circle class="knode" cx="140" cy="65" r="11"/>
+            <circle class="knode" cx="220" cy="35" r="10"/>
+            <circle class="knode" cx="200" cy="100" r="9"/>
+            <circle class="knode" cx="300" cy="60" r="9"/>
+            <circle class="knode" cx="280" cy="95" r="10"/>
+            <circle class="kpulse" cx="140" cy="65" r="4"/>
+            <circle class="kpulse" cx="220" cy="35" r="3" style="animation-delay: 1s;"/>
+            <circle class="kpulse" cx="280" cy="95" r="3" style="animation-delay: 2s;"/>
+          </svg>
+        </div>
+        <div class="card-meta">
+          <span>· obsidian · roam · agentic PKM</span>
+          <span class="card-arrow">Open →</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- MORE — applied + frontier concepts -->
+  <section class="lookbook" id="more" style="padding-top:1rem;">
+    <h2 class="section-heading">Applied + frontier.</h2>
+    <p class="section-sub">Ten more single-file pages — the practical patterns (RAG, prompting, evals, economics) and the frontier surface (multimodal, safety, voice, coding agents, computer use). Same aesthetic, same anti-slop bar.</p>
+
+    <div class="more-grid">
+      <a href="./rag/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-1);">RAG</span>
+        <h3 class="more-title">RAG Architecture</h3>
+        <p class="more-body">Don't fine-tune. Retrieve. Pipeline + 2D vector-space visualization of nearest-neighbor search.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+      <a href="./vectors/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-2);">VECTORS</span>
+        <h3 class="more-title">Vector DBs + Embeddings</h3>
+        <p class="more-body">Meaning as coordinates. 50-dot semantic clusters animate into place; hover to see neighbors.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+      <a href="./prompting/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-3);">PROMPTS</span>
+        <h3 class="more-title">Prompt Engineering Patterns</h3>
+        <p class="more-body">Prompting is engineering. Six mini live demos: CoT, Few-Shot, Role, JSON, Self-Consistency, ReAct.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+      <a href="./evals/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-4);">EVALS</span>
+        <h3 class="more-title">AI Evals + Observability</h3>
+        <p class="more-body">If you can't measure it, you can't ship it. A live dashboard with KPIs, sparklines, and trace timeline.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+      <a href="./multimodal/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-5);">MULTIMODAL</span>
+        <h3 class="more-title">Multimodal AI</h3>
+        <p class="more-body">Pixels, text, sound — one model. Three input streams fuse into a unified token pipe.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+      <a href="./safety/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-1);">SAFETY</span>
+        <h3 class="more-title">AI Safety + Alignment</h3>
+        <p class="more-body">Helpful, honest, harmless — engineered. Guardrail pipeline + Constitutional AI self-critique loop.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+      <a href="./voice/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-2);">VOICE</span>
+        <h3 class="more-title">Voice AI + Real-Time Agents</h3>
+        <p class="more-body">Conversations, not commands. STT → LLM → TTS pipeline with live waveforms + latency budget.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+      <a href="./coding-agents/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-3);">CODING</span>
+        <h3 class="more-title">AI Coding Agents Landscape</h3>
+        <p class="more-body">Six tools. One job. Different bets. Capability matrix across Claude Code, Cursor, Copilot, Aider, Cline, Devin.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+      <a href="./computer-use/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-4);">COMPUTER</span>
+        <h3 class="more-title">Computer Use + Browser Agents</h3>
+        <p class="more-body">When the agent uses your computer. Live browser frame with autonomous cursor + action log.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+      <a href="./ai-economics/" class="more-card">
+        <span class="more-tag" style="--c: var(--color-actor-5);">ECON</span>
+        <h3 class="more-title">AI Economics</h3>
+        <p class="more-body">Every prompt has a price. Animated cost curves, prompt-caching savings, price ladder.</p>
+        <span class="more-arrow">Open →</span>
+      </a>
+    </div>
+  </section>
+
+  <style>
+    .more-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .more-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      padding: 1.5rem;
+      background:
+        radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%),
+          color-mix(in oklab, var(--c, var(--color-accent)) 8%, transparent), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 1rem;
+      text-decoration: none;
+      color: var(--color-text);
+      transition: border-color 240ms, box-shadow 240ms, transform 240ms var(--ease-spring);
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    .more-card.visible { opacity: 1; transform: translateY(0); transition: opacity 700ms var(--ease-spring), transform 700ms var(--ease-spring), border-color 240ms, box-shadow 240ms; }
+    .more-card:hover { border-color: var(--c, var(--color-accent-muted)); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .more-card:hover .more-arrow { color: var(--c, var(--color-accent)); transform: translateX(3px); }
+    .more-tag {
+      align-self: flex-start;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--c, var(--color-accent));
+      background: color-mix(in oklab, var(--c, var(--color-accent)) 14%, transparent);
+      padding: 0.25rem 0.625rem;
+      border-radius: 999px;
+    }
+    .more-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      margin: 0;
+    }
+    .more-body {
+      font-size: 0.9rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+      flex: 1;
+      line-height: 1.5;
+    }
+    .more-arrow {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--color-text);
+      font-weight: 500;
+      transition: transform 240ms var(--ease-out), color 200ms;
+    }
+    @media (hover: none) {
+      .more-card:hover { transform: none !important; }
+    }
+  </style>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <h2>Want this aesthetic for your course or product?</h2>
+    <p>The <code style="font-family:var(--font-mono); font-size:0.95em; padding:2px 6px; background:var(--color-accent-light); border-radius:4px; color:var(--color-accent);">shadcn-motion</code> skill is open source — clone the plugin, run <code style="font-family:var(--font-mono); font-size:0.95em;">./install.sh</code>, and you have it locally. Or work with CETI to build pages like these for your domain.</p>
+    <a href="https://calendly.com/manutej/30min" class="magnetic">
+      Book a conversation
+      <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <footer>
+    <div class="row">
+      <a href="https://cetiai.co">cetiai.co</a>
+      <a href="https://github.com/manutej/shadcn-motion">shadcn-motion plugin →</a>
+      <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a>
+    </div>
+    <p style="margin-top:1.5rem; font-family:var(--font-mono); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em;">© 2026 CETI.AI · all eight pages built in one afternoon with the skill that made them.</p>
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION REVEAL ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    document.querySelectorAll('.stat, .card, .more-card').forEach((el) => reveal.observe(el));
+
+    // Cursor-follow glow on the more-cards
+    document.querySelectorAll('.more-card').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ============ NUMBER TICKERS ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      if (to === 0) { el.textContent = '0'; return; }
+      const dur = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 28;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ CARD GLOW FOLLOW ============
+    document.querySelectorAll('.card').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ============ TRANSFORMERS ATTENTION MATRIX MOTIF ============
+    const matrix = document.getElementById('motif-matrix');
+    if (matrix) {
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          // Lower-triangular causal pattern, animated with diagonal delay
+          const causal = c <= r ? 1 : 0;
+          const delay = (r + c) * 0.08;
+          if (causal) {
+            cell.style.animationDelay = `${delay}s`;
+            cell.style.animationDuration = '4s';
+          } else {
+            cell.style.animation = 'none';
+            cell.style.background = 'transparent';
+          }
+          matrix.appendChild(cell);
+        }
+      }
+    }
+  </script>
+  <script src="./shared/nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+{
+  "name": "shadcn-motion",
+  "version": "1.0.0",
+  "description": "Generate WOW-level animated components for course pages, dashboards, hero sections, and technical demos. Hybrid shadcn structure + smoothui motion vocabulary. Synthesizes the best of Motion.dev, Magic UI, Aceternity UI, SmoothUI, Motion Primitives, Animate UI, Cult UI, React Bits, Animata, and Kibo UI across 5 output modes.",
+  "author": {
+    "name": "Manu Mulaveesala",
+    "email": "manutej@gmail.com",
+    "url": "https://cetiai.co"
+  },
+  "homepage": "https://cetiai.co",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/manutej/shadcn-motion"
+  },
+  "license": "MIT",
+  "category": "frontend",
+  "keywords": [
+    "shadcn",
+    "motion",
+    "animation",
+    "framer-motion",
+    "smoothui",
+    "magic-ui",
+    "aceternity",
+    "motion-primitives",
+    "animate-ui",
+    "react-bits",
+    "cult-ui",
+    "kibo-ui",
+    "animata",
+    "gsap",
+    "lenis",
+    "lottie",
+    "view-transitions",
+    "course-page",
+    "dashboard",
+    "hero",
+    "landing-page",
+    "interactive-experience",
+    "wow",
+    "data-viz",
+    "scroll-storytelling"
+  ],
+  "contents": {
+    "skills": [
+      {
+        "name": "shadcn-motion",
+        "path": "skills/shadcn-motion",
+        "description": "Engine + catalog for WOW animations across 5 output modes"
+      }
+    ],
+    "commands": [
+      {
+        "name": "shadcn-motion",
+        "path": "commands/shadcn-motion.md",
+        "description": "Invoke the shadcn-motion skill with an explicit mode"
+      }
+    ]
+  },
+  "requirements": {
+    "claudeCode": ">=0.5.0"
+  },
+  "compatibility": {
+    "platforms": ["macos", "linux", "windows"]
+  },
+  "modes": [
+    "component-snippet",
+    "single-file-html",
+    "dashboard-widget",
+    "interactive-experience",
+    "landing-page"
+  ],
+  "libraries_covered": [
+    "Motion.dev (motion/react)",
+    "Magic UI",
+    "Aceternity UI",
+    "SmoothUI",
+    "Motion Primitives",
+    "Animate UI",
+    "Cult UI",
+    "React Bits",
+    "Animata",
+    "Kibo UI",
+    "GSAP + ScrollTrigger",
+    "Lenis",
+    "@lottiefiles/dotlottie-react",
+    "View Transitions API"
+  ]
+}

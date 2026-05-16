@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice AI &amp; Real-Time Agents — CETI Lookbook</title>
+  <meta name="description" content="The 2026 voice-AI stack: STT, LLM, TTS, orchestration — and the sub-second latency budget that makes a conversation feel like a conversation.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+      --color-surface-warm: #FDF9F3;
+      --color-bg-code: #1E1E2E;
+
+      --color-accent: #D94F30;       /* vermillion — waveforms, user voice */
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+
+      --color-actor-1: #D94F30;  /* user */
+      --color-actor-2: #2A7B9B;  /* STT */
+      --color-actor-3: #7B6DAA;  /* LLM */
+      --color-actor-4: #D4A843;  /* TTS */
+      --color-actor-5: #2D8B55;  /* hears */
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body:    'DM Sans', -apple-system, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+      --stagger: 80ms;
+
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse 60% 40% at 15% 12%, rgba(217, 79, 48, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 90% 70%, rgba(42, 123, 155, 0.04) 0%, transparent 60%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ TYPOGRAPHY ============ */
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--color-accent);
+      margin: 0;
+    }
+    .display {
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin: 0;
+    }
+    .lead {
+      font-size: 1.15rem;
+      color: var(--color-text-secondary);
+      max-width: 60ch;
+      line-height: 1.65;
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      min-height: 92dvh;
+      padding: 6rem 1.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .hero .eyebrow { opacity: 0; transition: opacity var(--duration-slow) var(--ease-out); }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-size: clamp(2.75rem, 7vw, 5.25rem);
+      margin: 1.5rem 0 1.5rem;
+      max-width: 18ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 260ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 340ms; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-accent);
+      position: relative;
+    }
+    .hero-title em::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0.04em;
+      height: 0.08em;
+      background: var(--color-accent);
+      opacity: 0.18;
+    }
+
+    .hero-sub {
+      font-size: 1.25rem;
+      color: var(--color-text-secondary);
+      max-width: 52ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 540ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .hero-cta {
+      margin-top: 2.25rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 720ms;
+    }
+    .hero.visible .hero-cta { opacity: 1; }
+
+    /* ============ MAGNETIC BUTTON ============ */
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.95rem 1.6rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms ease;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+    .ghost {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 2px;
+      transition: color 200ms, border-color 200ms;
+    }
+    .ghost:hover { color: var(--color-accent); border-color: var(--color-accent); }
+
+    /* ============ SECTION ============ */
+    .section {
+      padding: 4rem 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-head { margin-bottom: 2.75rem; max-width: 60ch; }
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.85rem, 3.6vw, 2.75rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0.5rem 0 0.75rem;
+      line-height: 1.1;
+    }
+    .section-head h2 em { font-style: normal; color: var(--color-accent); }
+    .section-head p { margin: 0; color: var(--color-text-secondary); font-size: 1.05rem; max-width: 56ch; }
+
+    /* ============ PIPELINE (signature WOW) ============ */
+    .pipeline-wrap {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 1.5rem 2rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .pipeline-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 30% at 50% 0%, rgba(217, 79, 48, 0.06), transparent 70%);
+      pointer-events: none;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      position: relative;
+      align-items: end;
+    }
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+      padding-top: 0.5rem;
+    }
+    .wave {
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      gap: 3px;
+      height: 64px;
+      width: 100%;
+      max-width: 140px;
+    }
+    .wave .bar {
+      width: 4px;
+      background: var(--bar-color, var(--color-accent));
+      border-radius: 2px;
+      transition: height 120ms var(--ease-out);
+      transform-origin: bottom;
+      opacity: 0.85;
+    }
+    .stage.stt .wave .bar { --bar-color: var(--color-actor-2); }
+    .stage.llm .wave .bar { --bar-color: var(--color-actor-3); }
+    .stage.tts .wave .bar { --bar-color: var(--color-actor-4); }
+    .stage.hear .wave .bar { --bar-color: var(--color-actor-5); }
+
+    /* LLM "thinking pulse" — replaces the waveform with concentric dots */
+    .stage.llm .wave { gap: 6px; }
+    .stage.llm .wave .bar {
+      width: 8px;
+      height: 8px !important;
+      border-radius: 50%;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .stage.llm .wave .bar:nth-child(1) { animation-delay: 0s; }
+    .stage.llm .wave .bar:nth-child(2) { animation-delay: 0.18s; }
+    .stage.llm .wave .bar:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.25; transform: scale(0.85); }
+      50%      { opacity: 1;    transform: scale(1.2); }
+    }
+
+    .stage-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+    .stage-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--color-text);
+      text-align: center;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    .stage-vendor {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+      text-align: center;
+      margin-top: 0.1rem;
+    }
+    .stage-icon {
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      background: var(--color-accent-light);
+      color: var(--color-accent);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    /* arrows between stages */
+    .arrow-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin: 1rem 0 0;
+      padding: 0 7%;
+    }
+    .arrow-row svg {
+      width: 100%;
+      height: 12px;
+      color: var(--color-border);
+    }
+
+    /* transcript box under the pipeline */
+    .transcript {
+      margin-top: 1.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--color-bg-warm);
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--color-text);
+      min-height: 3em;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .transcript .tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+    .transcript .tag.user { color: var(--color-accent); border-color: var(--color-accent-muted); }
+    .transcript .tag.agent { color: var(--color-actor-5); border-color: var(--color-actor-5); }
+    .transcript-text {
+      flex: 1;
+      transition: opacity 240ms var(--ease-out);
+    }
+    .caret { display: inline-block; width: 8px; height: 1em; background: var(--color-text); vertical-align: -2px; margin-left: 2px; animation: blink 1s steps(2) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ============ LATENCY (pie + paragraphs) ============ */
+    .latency-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 360px) 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    .pie-wrap { display: flex; justify-content: center; }
+    .pie-svg {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+    }
+    .pie-svg .slice {
+      transform-origin: center;
+      transition: transform var(--duration-normal) var(--ease-spring);
+      cursor: default;
+    }
+    .pie-svg .slice:hover { transform: scale(1.04); }
+    .pie-center {
+      font-family: var(--font-display);
+      font-weight: 700;
+      fill: var(--color-text);
+      font-size: 28px;
+      letter-spacing: -0.02em;
+    }
+    .pie-center-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      fill: var(--color-text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .pie-legend {
+      margin-top: 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+    }
+    .pie-legend .swatch {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    .latency-prose p {
+      margin: 0 0 1rem;
+      color: var(--color-text-secondary);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+    .latency-prose p strong { color: var(--color-text); font-weight: 500; }
+    .threshold-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border);
+      flex-wrap: wrap;
+    }
+    .threshold-row .t {
+      flex: 1;
+      min-width: 110px;
+    }
+    .threshold-row .t-value {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      letter-spacing: -0.02em;
+    }
+    .threshold-row .t-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ============ STACK BENTO ============ */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: minmax(200px, auto);
+      gap: 1rem;
+    }
+    .tile {
+      position: relative;
+      padding: 1.5rem 1.5rem 1.5rem;
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(217, 79, 48, 0.06), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .tile.visible {
+      opacity: 1; transform: translateY(0);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
+    }
+    .tile.visible:hover {
+      transform: translateY(-3px);
+      border-color: var(--color-accent-muted);
+      box-shadow: var(--shadow-lg);
+    }
+    .tile.wide { grid-column: span 2; }
+    .tile-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: var(--color-accent-light);
+      color: var(--color-accent);
+    }
+    .tile.stt .tile-tag { background: rgba(42, 123, 155, 0.10); color: var(--color-actor-2); }
+    .tile.llm .tile-tag { background: rgba(123, 109, 170, 0.10); color: var(--color-actor-3); }
+    .tile.tts .tile-tag { background: rgba(212, 168, 67, 0.12); color: #B8901E; }
+    .tile.orch .tile-tag { background: rgba(45, 139, 85, 0.10); color: var(--color-actor-5); }
+    .tile h3 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.01em;
+      margin: 0.85rem 0 0.5rem;
+    }
+    .tile p {
+      margin: 0 0 1rem;
+      color: var(--color-text-secondary);
+      font-size: 0.93rem;
+    }
+    .tile .vendors {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: auto;
+    }
+    .tile .vendor {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      background: var(--color-bg-warm);
+      color: var(--color-text);
+      border: 1px solid var(--color-border-light);
+    }
+    .tile .vendor.primary {
+      background: var(--color-text);
+      color: var(--color-bg);
+      border-color: var(--color-text);
+    }
+
+    /* ============ PLAYERS ROW ============ */
+    .players {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .player {
+      padding: 1.25rem 1.25rem 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      position: relative;
+      transition: transform var(--duration-normal) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .player.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring); }
+    .player:hover { transform: translateY(-2px); border-color: var(--color-accent-muted); box-shadow: var(--shadow-md); }
+    .player-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .player h4 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .player .badge {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      background: var(--color-bg-warm);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+      white-space: nowrap;
+    }
+    .player p {
+      margin: 0.6rem 0 0.85rem;
+      color: var(--color-text-secondary);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .player .spec {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      border-top: 1px solid var(--color-border-light);
+      padding-top: 0.6rem;
+    }
+    .player .spec b { color: var(--color-accent); font-weight: 500; }
+
+    /* ============ CODE BLOCK ============ */
+    .code-wrap {
+      background: var(--color-bg-code);
+      border-radius: var(--radius-lg);
+      padding: 1rem 0;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    .code-head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.25rem 1.25rem 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .code-head .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+    }
+    .code-head .dot.r { background: #F38BA8; }
+    .code-head .dot.y { background: #F9E2AF; }
+    .code-head .dot.g { background: #A6E3A1; }
+    .code-head .file {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+    .code-wrap pre {
+      margin: 0;
+      padding: 1rem 1.5rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: #CDD6F4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-x: hidden;
+    }
+    .k { color: #CBA6F7; }
+    .s { color: #A6E3A1; }
+    .f { color: #89B4FA; }
+    .c { color: #6C7086; font-style: italic; }
+    .n { color: #FAB387; }
+    .p { color: #F9E2AF; }
+    .o { color: #94E2D5; }
+
+    /* ============ STATS ROW ============ */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .stat {
+      padding: 1.5rem 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .stat.visible { opacity: 1; transform: translateY(0); }
+    .stat:nth-child(2).visible { transition-delay: 80ms; }
+    .stat:nth-child(3).visible { transition-delay: 160ms; }
+    .stat:nth-child(4).visible { transition-delay: 240ms; }
+
+    .stat-v {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 2.75rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.025em;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text);
+    }
+    .stat-v .unit { color: var(--color-accent); font-size: 0.55em; margin-left: 0.1em; vertical-align: 0.15em; }
+    .stat-l {
+      margin-top: 0.45rem;
+      color: var(--color-text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+    .stat-sub {
+      margin-top: 0.35rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ============ CTA ============ */
+    .cta {
+      padding: 6rem 1.5rem 5rem;
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .cta h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.85rem, 3.6vw, 2.75rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 1rem;
+    }
+    .cta h2 em { font-style: normal; color: var(--color-accent); }
+    .cta p {
+      color: var(--color-text-secondary);
+      margin-bottom: 2rem;
+      font-size: 1.05rem;
+    }
+
+    /* ============ FOOTER ============ */
+    footer {
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      border-top: 1px solid var(--color-border);
+      max-width: 1100px;
+      margin: 2rem auto 0;
+    }
+    footer a { color: var(--color-text-secondary); text-decoration: none; border-bottom: 1px solid var(--color-border); }
+    footer a:hover { color: var(--color-accent); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 900px) {
+      .latency-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .bento { grid-template-columns: 1fr 1fr; }
+      .tile.wide { grid-column: span 2; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .players { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .pipeline { grid-template-columns: 1fr; gap: 1.25rem; }
+      .pipeline .stage { padding: 1rem 0; border-bottom: 1px dashed var(--color-border); }
+      .pipeline .stage:last-child { border-bottom: none; }
+      .arrow-row { display: none; }
+      .wave { height: 48px; }
+      .bento { grid-template-columns: 1fr; }
+      .tile.wide { grid-column: auto; }
+      .players { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .hero { padding-top: 3rem; min-height: auto; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .hero-cta, .stat, .tile, .player { opacity: 1 !important; transform: none !important; }
+      .wave .bar { height: 28px !important; }
+      .stage.llm .wave .bar { transform: none !important; opacity: 0.7 !important; }
+      .caret { display: none; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .tile:hover { transform: none !important; }
+      .player:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">Voice AI · Real-Time Agents · 2026</p>
+    <h1 class="hero-title display">
+      <span class="word">Conversations,</span>
+      <span class="word">not</span>
+      <span class="word"><em>commands.</em></span>
+    </h1>
+    <p class="hero-sub">
+      The voice-AI stack just collapsed below human latency. Five components — capture, transcribe, reason, synthesize, return — all running in under a second. This is the field guide.
+    </p>
+    <div class="hero-cta">
+      <a class="magnetic" href="#pipeline">
+        See the pipeline
+        <span class="arrow">→</span>
+      </a>
+      <a class="ghost" href="#stack">Skip to the stack</a>
+    </div>
+  </section>
+
+  <!-- ============ PIPELINE (signature WOW) ============ -->
+  <section class="section" id="pipeline">
+    <div class="section-head">
+      <p class="eyebrow">The pipeline</p>
+      <h2 class="display">Five stages, one <em>second</em>.</h2>
+      <p>Live audio in, live audio out. The waveforms below are real — they react to the simulated voice. Each stage has a budget; miss it and the agent feels like a phone tree.</p>
+    </div>
+
+    <div class="pipeline-wrap">
+      <div class="pipeline" id="pipeline-live" aria-label="Voice agent pipeline">
+        <!-- 1 USER SPEAKS -->
+        <div class="stage user">
+          <span class="stage-icon">●</span>
+          <div class="wave" data-wave="user">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </div>
+          <h4 class="stage-name">User speaks</h4>
+          <p class="stage-label">Capture</p>
+          <p class="stage-vendor">VAD · 50ms</p>
+        </div>
+
+        <!-- 2 STT -->
+        <div class="stage stt">
+          <span class="stage-icon" style="background: rgba(42,123,155,0.10); color: var(--color-actor-2);">⌁</span>
+          <div class="wave" data-wave="stt">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </div>
+          <h4 class="stage-name">STT</h4>
+          <p class="stage-label">Transcribe</p>
+          <p class="stage-vendor">Whisper · Deepgram · 150ms</p>
+        </div>
+
+        <!-- 3 LLM -->
+        <div class="stage llm">
+          <span class="stage-icon" style="background: rgba(123,109,170,0.10); color: var(--color-actor-3);">∿</span>
+          <div class="wave">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </div>
+          <h4 class="stage-name">LLM</h4>
+          <p class="stage-label">Reason</p>
+          <p class="stage-vendor">GPT-4o · Claude · 400ms</p>
+        </div>
+
+        <!-- 4 TTS -->
+        <div class="stage tts">
+          <span class="stage-icon" style="background: rgba(212,168,67,0.12); color: #B8901E;">♫</span>
+          <div class="wave" data-wave="tts">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </div>
+          <h4 class="stage-name">TTS</h4>
+          <p class="stage-label">Synthesize</p>
+          <p class="stage-vendor">ElevenLabs · Cartesia · 150ms</p>
+        </div>
+
+        <!-- 5 HEAR -->
+        <div class="stage hear">
+          <span class="stage-icon" style="background: rgba(45,139,85,0.10); color: var(--color-actor-5);">◐</span>
+          <div class="wave" data-wave="hear">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </div>
+          <h4 class="stage-name">User hears</h4>
+          <p class="stage-label">Playback</p>
+          <p class="stage-vendor">Stream · 50ms</p>
+        </div>
+      </div>
+
+      <!-- arrow row -->
+      <div class="arrow-row" aria-hidden="true">
+        <svg viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M2 6 L96 6 M90 2 L96 6 L90 10" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M2 6 L96 6 M90 2 L96 6 L90 10" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M2 6 L96 6 M90 2 L96 6 L90 10" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M2 6 L96 6 M90 2 L96 6 L90 10" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <!-- live transcript -->
+      <div class="transcript" aria-live="polite">
+        <span class="tag" id="tx-tag">user</span>
+        <span class="transcript-text" id="tx-text">What's on my calendar today?</span><span class="caret"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LATENCY BUDGET ============ -->
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">The latency budget</p>
+      <h2 class="display">Sub-second, <em>or it isn't a conversation.</em></h2>
+      <p>Humans hand off conversational turns in roughly 200ms. Anything above 800ms and the agent has lost the room.</p>
+    </div>
+
+    <div class="latency-grid">
+      <!-- PIE CHART -->
+      <div class="pie-wrap">
+        <svg class="pie-svg" viewBox="0 0 240 240" role="img" aria-label="Latency budget pie chart: STT 18%, LLM 50%, TTS 18%, Capture/Network 12%">
+          <!-- background ring -->
+          <circle cx="120" cy="120" r="100" fill="none" stroke="var(--color-bg-warm)" stroke-width="60"/>
+
+          <!-- pie slices via stroke-dasharray on r=100 circle, circumference = 628.32 -->
+          <!-- Order (clockwise starting at 12 o'clock): STT 19%, LLM 50%, TTS 19%, Capture 6%, Network 6% -->
+
+          <!-- STT 19% — actor-2 teal -->
+          <circle class="slice" cx="120" cy="120" r="100" fill="none"
+                  stroke="#2A7B9B" stroke-width="60"
+                  stroke-dasharray="119.4 628.32" stroke-dashoffset="0"
+                  transform="rotate(-90 120 120)"/>
+
+          <!-- LLM 50% — actor-3 plum -->
+          <circle class="slice" cx="120" cy="120" r="100" fill="none"
+                  stroke="#7B6DAA" stroke-width="60"
+                  stroke-dasharray="314.16 628.32" stroke-dashoffset="-119.4"
+                  transform="rotate(-90 120 120)"/>
+
+          <!-- TTS 19% — golden -->
+          <circle class="slice" cx="120" cy="120" r="100" fill="none"
+                  stroke="#D4A843" stroke-width="60"
+                  stroke-dasharray="119.4 628.32" stroke-dashoffset="-433.56"
+                  transform="rotate(-90 120 120)"/>
+
+          <!-- Capture 6% — accent -->
+          <circle class="slice" cx="120" cy="120" r="100" fill="none"
+                  stroke="#D94F30" stroke-width="60"
+                  stroke-dasharray="37.7 628.32" stroke-dashoffset="-552.96"
+                  transform="rotate(-90 120 120)"/>
+
+          <!-- Network 6% — forest -->
+          <circle class="slice" cx="120" cy="120" r="100" fill="none"
+                  stroke="#2D8B55" stroke-width="60"
+                  stroke-dasharray="37.66 628.32" stroke-dashoffset="-590.66"
+                  transform="rotate(-90 120 120)"/>
+
+          <!-- center label -->
+          <text class="pie-center-label" x="120" y="108" text-anchor="middle">Total budget</text>
+          <text class="pie-center" x="120" y="135" text-anchor="middle">800ms</text>
+        </svg>
+
+        <div class="pie-legend">
+          <div><span class="swatch" style="background: #D94F30;"></span>Capture · 50ms</div>
+          <div><span class="swatch" style="background: #2A7B9B;"></span>STT · 150ms</div>
+          <div><span class="swatch" style="background: #7B6DAA;"></span>LLM TTFT · 400ms</div>
+          <div><span class="swatch" style="background: #D4A843;"></span>TTS · 150ms</div>
+          <div><span class="swatch" style="background: #2D8B55;"></span>Network · 50ms</div>
+          <div style="color: var(--color-text-muted);">≈ 800ms end-to-end</div>
+        </div>
+      </div>
+
+      <!-- PROSE -->
+      <div class="latency-prose">
+        <p>
+          In natural human conversation, the gap between one speaker finishing and the next starting averages <strong>200&ndash;500 ms</strong>. Beyond <strong>800 ms</strong>, people unconsciously slow their cadence, over-explain, or start to repeat themselves &mdash; the unmistakable feeling of talking to a machine.
+        </p>
+        <p>
+          The 2026 stack hits the budget by streaming: STT emits partial transcripts before the user finishes, the LLM begins generating before STT completes, and the TTS starts speaking before generation ends. Combined streaming can shave <strong>300&ndash;600 ms</strong> off a naive pipeline. The LLM still owns roughly half the wall clock &mdash; pick the wrong model and nothing else matters.
+        </p>
+
+        <div class="threshold-row">
+          <div class="t">
+            <div class="t-value">200ms</div>
+            <div class="t-label">Human turn-taking gap</div>
+          </div>
+          <div class="t">
+            <div class="t-value">800ms</div>
+            <div class="t-label">Conversational ceiling</div>
+          </div>
+          <div class="t">
+            <div class="t-value">1.2s+</div>
+            <div class="t-label">Phone-tree territory</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ THE STACK (Bento) ============ -->
+  <section class="section" id="stack">
+    <div class="section-head">
+      <p class="eyebrow">The stack</p>
+      <h2 class="display">Four layers, <em>composable.</em></h2>
+      <p>Most production agents wire these four boxes together. The orchestration layer is what turns it from a demo into a phone number that answers.</p>
+    </div>
+
+    <div class="bento">
+      <article class="tile stt">
+        <span class="tile-tag">STT</span>
+        <h3>Speech&nbsp;→&nbsp;Text</h3>
+        <p>Streaming transcription with word-level timestamps and partial hypotheses. Strong models now hit <strong>150&nbsp;ms</strong> first-token latency in 70+ languages.</p>
+        <div class="vendors">
+          <span class="vendor primary">Whisper Large v3</span>
+          <span class="vendor">Deepgram Nova-3</span>
+          <span class="vendor">AssemblyAI</span>
+          <span class="vendor">ElevenLabs Scribe v2</span>
+        </div>
+      </article>
+
+      <article class="tile llm wide">
+        <span class="tile-tag">LLM</span>
+        <h3>Reason &amp; respond</h3>
+        <p>The bottleneck. Realtime-tuned models stream tokens within <strong>200&ndash;400&nbsp;ms</strong> TTFT and accept tool calls mid-stream &mdash; the orchestration layer reads from the same socket the audio rides on.</p>
+        <div class="vendors">
+          <span class="vendor primary">gpt-4o-realtime</span>
+          <span class="vendor primary">Gemini 3.1 Flash Live</span>
+          <span class="vendor">Claude Sonnet 4.7</span>
+          <span class="vendor">Llama 3.3 70B Instruct</span>
+        </div>
+      </article>
+
+      <article class="tile tts">
+        <span class="tile-tag">TTS</span>
+        <h3>Text&nbsp;→&nbsp;Speech</h3>
+        <p>Streaming synthesis that emits audio chunks within <strong>75&ndash;150&nbsp;ms</strong> &mdash; including emotion tags, voice cloning, multilingual switching mid-utterance.</p>
+        <div class="vendors">
+          <span class="vendor primary">ElevenLabs Flash v2.5</span>
+          <span class="vendor">Cartesia Sonic</span>
+          <span class="vendor">OpenAI TTS</span>
+        </div>
+      </article>
+
+      <article class="tile orch wide">
+        <span class="tile-tag">Orchestration</span>
+        <h3>The glue that ships</h3>
+        <p>Wires STT&nbsp;→&nbsp;LLM&nbsp;→&nbsp;TTS over a single duplex socket, handles barge-in, dial-tone integration, retries, tool-calling, and telemetry. Without it, you have a demo &mdash; not a phone number.</p>
+        <div class="vendors">
+          <span class="vendor primary">OpenAI Realtime API</span>
+          <span class="vendor primary">LiveKit Agents</span>
+          <span class="vendor">Vapi</span>
+          <span class="vendor">Retell AI</span>
+          <span class="vendor">Pipecat</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ NOTABLE PLAYERS ============ -->
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">Notable players</p>
+      <h2 class="display">Where the field <em>stands.</em></h2>
+      <p>Snapshot of the six providers that ship most of the production traffic today.</p>
+    </div>
+
+    <div class="players">
+      <article class="player">
+        <div class="player-head">
+          <h4>OpenAI Realtime</h4>
+          <span class="badge">Full pipeline</span>
+        </div>
+        <p>End-to-end voice via the <code style="font-family:var(--font-mono); font-size:0.85em;">gpt-4o-realtime</code> WebSocket. Most mature SDK surface; native barge-in.</p>
+        <div class="spec">Steady-state latency · <b>300&ndash;500ms</b></div>
+      </article>
+
+      <article class="player">
+        <div class="player-head">
+          <h4>ElevenLabs</h4>
+          <span class="badge">TTS · Voice</span>
+        </div>
+        <p>Flash v2.5 for realtime, v3 for the highest-fidelity voice on the market. 380+ voices across 70+ languages.</p>
+        <div class="spec">First-chunk TTFB · <b>75ms</b></div>
+      </article>
+
+      <article class="player">
+        <div class="player-head">
+          <h4>Cartesia Sonic</h4>
+          <span class="badge">TTS</span>
+        </div>
+        <p>State-space-model speech synthesis. Fastest TTFB in the field, trades a sliver of emotional range for raw speed.</p>
+        <div class="spec">Sub-<b>50ms</b> TTFB</div>
+      </article>
+
+      <article class="player">
+        <div class="player-head">
+          <h4>Deepgram Nova-3</h4>
+          <span class="badge">STT</span>
+        </div>
+        <p>Streaming ASR with strong diarization, profanity filtering, custom keyword boosting. Industry default for telephony.</p>
+        <div class="spec">Word-level latency · <b>~150ms</b></div>
+      </article>
+
+      <article class="player">
+        <div class="player-head">
+          <h4>Vapi</h4>
+          <span class="badge">Orchestration</span>
+        </div>
+        <p>Developer-centric platform for shipping voice agents into telephony, CRMs, and apps. Sub-500ms turn latency in production; 1M&ndash;5M calls/day.</p>
+        <div class="spec">Production rate · <b>$0.25&ndash;$0.33/min</b></div>
+      </article>
+
+      <article class="player">
+        <div class="player-head">
+          <h4>Retell AI</h4>
+          <span class="badge">Orchestration</span>
+        </div>
+        <p>Low-code rival to Vapi. Pre-built integrations for lead qualification, support, and follow-ups; deploy in minutes.</p>
+        <div class="spec">Flat rate · <b>$0.07/min</b> · ~600ms latency</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ CODE ============ -->
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">Minimal agent</p>
+      <h2 class="display">Twelve lines, <em>a phone call.</em></h2>
+      <p>An OpenAI Realtime session over WebSocket. The model speaks back as audio chunks on the same connection; the client just plays them.</p>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-head">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="file">voice-agent.ts</span>
+      </div>
+<pre><span class="k">import</span> WebSocket <span class="k">from</span> <span class="s">"ws"</span>;
+
+<span class="k">const</span> <span class="f">ws</span> <span class="o">=</span> <span class="k">new</span> <span class="f">WebSocket</span>(
+  <span class="s">"wss://api.openai.com/v1/realtime?model=gpt-4o-realtime"</span>,
+  { <span class="p">headers</span>: { <span class="p">Authorization</span>: <span class="s">`Bearer ${process.env.OPENAI_API_KEY}`</span> } }
+);
+
+ws.<span class="f">on</span>(<span class="s">"open"</span>, () <span class="o">=&gt;</span> ws.<span class="f">send</span>(<span class="f">JSON.stringify</span>({
+  <span class="p">type</span>: <span class="s">"session.update"</span>,
+  <span class="p">session</span>: { <span class="p">voice</span>: <span class="s">"verse"</span>, <span class="p">modalities</span>: [<span class="s">"audio"</span>, <span class="s">"text"</span>] }
+})));
+
+ws.<span class="f">on</span>(<span class="s">"message"</span>, (<span class="f">buf</span>) <span class="o">=&gt;</span> {
+  <span class="k">const</span> <span class="f">e</span> <span class="o">=</span> <span class="f">JSON.parse</span>(buf.<span class="f">toString</span>());
+  <span class="k">if</span> (e.type <span class="o">===</span> <span class="s">"response.audio.delta"</span>) <span class="f">play</span>(e.delta); <span class="c">// stream to speaker</span>
+});</pre>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section class="section">
+    <div class="section-head">
+      <p class="eyebrow">By the numbers</p>
+      <h2 class="display">What "production" <em>looks like.</em></h2>
+    </div>
+    <div class="stats">
+      <article class="stat">
+        <div class="stat-v"><span class="num" data-to="800">0</span><span class="unit">ms</span></div>
+        <div class="stat-l">Conversational ceiling — above this, agents feel like phone trees</div>
+        <div class="stat-sub">Industry consensus</div>
+      </article>
+      <article class="stat">
+        <div class="stat-v"><span class="num" data-to="75">0</span><span class="unit">ms</span></div>
+        <div class="stat-l">ElevenLabs Flash v2.5 first-chunk TTFB</div>
+        <div class="stat-sub">TTS · streaming</div>
+      </article>
+      <article class="stat">
+        <div class="stat-v"><span class="num" data-to="70">0</span><span class="unit">+</span></div>
+        <div class="stat-l">Languages supported by Eleven v3 and Deepgram Nova</div>
+        <div class="stat-sub">STT + TTS coverage</div>
+      </article>
+      <article class="stat">
+        <div class="stat-v"><span class="num" data-to="1000000000">0</span><span class="unit">+</span></div>
+        <div class="stat-l">Calls handled by Vapi alone since launch</div>
+        <div class="stat-sub">Production scale</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="cta">
+    <h2 class="display">Ready to ship a voice that <em>answers back?</em></h2>
+    <p>The hard part used to be the latency. Now it's the design — turn-taking, barge-in, fallback policies, the feel of the silence. We teach this end-to-end.</p>
+    <a class="magnetic" href="https://calendly.com/manutej/30min">
+      Book a session
+      <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <footer>
+    CETI Lookbook · Voice AI &amp; Real-Time Agents · <a href="../">Back to lookbook</a>
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION REVEALS ============
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+    document.querySelectorAll('.tile, .player, .stat').forEach((el) => io.observe(el));
+
+    // ============ NUMBER TICKER ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = to >= 1000000 ? 1600 : 1200;
+      const start = performance.now();
+      const fmt = (n) => to >= 1000000000 ? (n / 1000000000).toFixed(1) + 'B' : n.toLocaleString();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const v = easeOutCubic(p) * to;
+        el.textContent = to >= 1000000000 ? fmt(v) : Math.round(v).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ MAGIC CARDS (cursor-follow glow) ============
+    document.querySelectorAll('.tile').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ============ LIVE WAVEFORM PIPELINE ============
+    // Each non-LLM stage has 12 bars that animate at randomized heights,
+    // with phase-shifted timing per stage to create the "data flowing
+    // through" feel — user speaks, then STT, then LLM thinks, then TTS, then hears.
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const waves = [
+      { sel: '[data-wave="user"]', phase: 0,    active: () => phase < 0.25 },
+      { sel: '[data-wave="stt"]',  phase: 0.20, active: () => phase >= 0.15 && phase < 0.45 },
+      { sel: '[data-wave="tts"]',  phase: 0.50, active: () => phase >= 0.55 && phase < 0.85 },
+      { sel: '[data-wave="hear"]', phase: 0.70, active: () => phase >= 0.75 }
+    ];
+    const waveEls = waves.map(w => ({ ...w, bars: document.querySelectorAll(w.sel + ' .bar') }));
+
+    // simulated conversation phase 0..1, repeats every 5s
+    let phase = 0;
+    let phaseStart = performance.now();
+    const CYCLE = 5000;
+
+    // transcript sequence
+    const transcripts = [
+      { tag: 'user',  text: "What's on my calendar today?", at: 0.05 },
+      { tag: 'agent', text: 'You have a meeting at 3pm with the CETI team.', at: 0.60 }
+    ];
+    let txIdx = -1;
+    const txTag = document.getElementById('tx-tag');
+    const txText = document.getElementById('tx-text');
+
+    function setTranscript(i) {
+      if (i === txIdx) return;
+      txIdx = i;
+      const t = transcripts[i];
+      txTag.textContent = t.tag;
+      txTag.className = 'tag ' + t.tag;
+      txText.style.opacity = '0';
+      setTimeout(() => {
+        txText.textContent = t.text;
+        txText.style.opacity = '1';
+      }, 180);
+    }
+
+    function tickWaves(now) {
+      phase = ((now - phaseStart) % CYCLE) / CYCLE;
+
+      // transcript switch
+      if (phase < transcripts[1].at && phase >= transcripts[0].at) setTranscript(0);
+      else if (phase >= transcripts[1].at) setTranscript(1);
+
+      waveEls.forEach(w => {
+        const live = w.active();
+        w.bars.forEach((bar, i) => {
+          if (!live) {
+            bar.style.height = '6px';
+            bar.style.opacity = '0.25';
+            return;
+          }
+          // smooth pseudo-random per-bar height with phase shift
+          const t = now / 180 + i * 0.7 + w.phase * 10;
+          const h = 8 + Math.abs(Math.sin(t) * Math.sin(t * 1.7 + i)) * 52;
+          bar.style.height = h.toFixed(0) + 'px';
+          bar.style.opacity = '0.9';
+        });
+      });
+
+      if (!prefersReduced) requestAnimationFrame(tickWaves);
+    }
+
+    if (prefersReduced) {
+      // static state: every bar at moderate fixed height
+      waveEls.forEach(w => w.bars.forEach((b, i) => { b.style.height = (16 + (i % 4) * 6) + 'px'; b.style.opacity = '0.6'; }));
+      setTranscript(0);
+    } else {
+      requestAnimationFrame(tickWaves);
+    }
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

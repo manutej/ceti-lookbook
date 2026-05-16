@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your second brain, now agentic — CETI.AI Lookbook</title>
+  <meta name="description" content="Karpathy's LLM wiki, extended into the era of agentic AI: notes you write once, that an agent reads — and writes back to. A personal knowledge management primer from CETI.AI.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+      --color-surface-warm: #FDF9F3;
+
+      --color-accent: #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+
+      --color-actor-1: #D94F30; /* vermillion — notes */
+      --color-actor-2: #2A7B9B; /* teal — links */
+      --color-actor-3: #D4A843; /* golden — agents */
+      --color-actor-4: #2D8B55; /* forest — queries */
+      --color-actor-5: #7B6DAA; /* plum — meta */
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+
+      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 15% 10%, rgba(217, 79, 48, 0.045) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 70%, rgba(42, 123, 155, 0.035) 0%, transparent 50%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      margin: 0;
+    }
+
+    /* ============================================================
+       HERO
+       ============================================================ */
+    .hero {
+      padding: 5.5rem 0 3rem;
+    }
+    .hero .eyebrow {
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.5rem, 6.2vw, 4.6rem);
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+      margin: 1.25rem 0 1.5rem;
+      max-width: 16ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
+    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 440ms; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-accent);
+      position: relative;
+    }
+    .hero-title em::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0.05em;
+      height: 0.12em;
+      background: var(--color-accent);
+      opacity: 0.18;
+      border-radius: 2px;
+    }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 620ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .cta-row {
+      display: flex;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 820ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.95rem 1.7rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.98rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms ease;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+
+    .secondary {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 200ms;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 2px;
+    }
+    .secondary:hover { color: var(--color-accent); border-color: var(--color-accent); }
+
+    /* ============================================================
+       GRAPH SECTION — the signature visual
+       ============================================================ */
+    .graph-section {
+      padding: 3rem 0 5rem;
+    }
+    .graph-frame {
+      position: relative;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      padding: 1.25rem 1.25rem 0.5rem;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+    .graph-frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(217, 79, 48, 0.04), transparent 45%),
+        radial-gradient(circle at 75% 80%, rgba(42, 123, 155, 0.04), transparent 45%);
+      pointer-events: none;
+    }
+    .graph-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.25rem 0.5rem 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      position: relative;
+      z-index: 1;
+    }
+    .graph-meta .live-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-success, #2D8B55);
+      margin-right: 0.5rem;
+      animation: pulse-dot 2.6s ease-in-out infinite;
+      vertical-align: middle;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    .graph-svg-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      max-height: 560px;
+      z-index: 1;
+    }
+    .graph-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* node + edge styling */
+    .edge {
+      stroke: var(--color-border);
+      stroke-width: 1.4;
+      fill: none;
+      opacity: 0;
+      transition: opacity 600ms var(--ease-out), stroke 300ms, stroke-width 300ms;
+    }
+    .edge.in { opacity: 0.55; }
+    .edge.highlight { stroke: var(--color-accent); stroke-width: 2; opacity: 0.85; }
+    .edge.dim { opacity: 0.1; }
+
+    .edge-pulse {
+      fill: var(--color-accent);
+      opacity: 0;
+    }
+    .edge-pulse.active {
+      opacity: 1;
+      animation: edge-travel 2.8s linear infinite;
+    }
+    @keyframes edge-travel {
+      from { offset-distance: 0%; }
+      to { offset-distance: 100%; }
+    }
+
+    .node {
+      cursor: pointer;
+      opacity: 0;
+      transform: scale(0.4);
+      transform-origin: center;
+      transform-box: fill-box;
+      transition:
+        opacity 600ms var(--ease-spring),
+        transform 600ms var(--ease-spring);
+    }
+    .node.in { opacity: 1; transform: scale(1); }
+    .node circle.bg {
+      fill: var(--color-surface);
+      stroke: var(--node-color, var(--color-accent));
+      stroke-width: 2;
+      transition: r 300ms var(--ease-spring), stroke-width 200ms;
+    }
+    .node circle.halo {
+      fill: var(--node-color, var(--color-accent));
+      opacity: 0.12;
+      transition: r 400ms var(--ease-out), opacity 300ms;
+    }
+    .node text {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 11px;
+      fill: var(--color-text);
+      text-anchor: middle;
+      pointer-events: none;
+      user-select: none;
+    }
+    .node:hover circle.bg,
+    .node.focus circle.bg { stroke-width: 3; }
+    .node:hover circle.halo,
+    .node.focus circle.halo { opacity: 0.28; }
+    .node.dim { opacity: 0.22; }
+    .node.dim:hover { opacity: 1; }
+
+    /* breathing pulse on all nodes */
+    .node.in circle.halo {
+      animation: node-breathe var(--breathe-dur, 4s) ease-in-out infinite;
+      animation-delay: var(--breathe-delay, 0s);
+    }
+    @keyframes node-breathe {
+      0%, 100% { r: var(--halo-r, 22); opacity: 0.12; }
+      50%      { r: calc(var(--halo-r, 22) * 1.15); opacity: 0.22; }
+    }
+
+    /* graph io annotations */
+    .graph-io {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0.5rem 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    .graph-io .io-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 9999px;
+      background: var(--color-bg-warm);
+      border: 1px solid var(--color-border);
+    }
+    .graph-io .io-pill .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--color-accent);
+    }
+    .graph-io .io-pill.read .dot { background: var(--color-actor-2); }
+    .graph-io .io-pill.write .dot { background: var(--color-actor-1); }
+
+    .graph-explainer {
+      margin-top: 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.25rem;
+    }
+    .graph-explainer p {
+      margin: 0;
+      color: var(--color-text-secondary);
+      max-width: 52ch;
+      font-size: 1.02rem;
+    }
+    .graph-explainer p strong {
+      color: var(--color-text);
+      font-weight: 600;
+    }
+
+    /* ============================================================
+       SECTION HEADERS
+       ============================================================ */
+    .section { padding: 5rem 0; }
+    .section-warm { background: var(--color-bg-warm); }
+    .section-header { max-width: 720px; margin: 0 0 3rem; }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 2.85rem);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 1rem 0 1rem;
+    }
+    .section-title em {
+      font-style: normal;
+      color: var(--color-accent);
+    }
+    .section-sub {
+      color: var(--color-text-secondary);
+      font-size: 1.08rem;
+      max-width: 56ch;
+      margin: 0;
+    }
+
+    /* ============================================================
+       KARPATHY QUOTE
+       ============================================================ */
+    .quote-block {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-left: 3px solid var(--color-accent);
+      border-radius: 4px 16px 16px 4px;
+      padding: 2.25rem 2.5rem;
+      max-width: 760px;
+      box-shadow: var(--shadow-sm);
+    }
+    .quote-block blockquote {
+      margin: 0;
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: clamp(1.35rem, 2.3vw, 1.75rem);
+      line-height: 1.35;
+      color: var(--color-text);
+      letter-spacing: -0.01em;
+    }
+    .quote-block cite {
+      display: block;
+      margin-top: 1.25rem;
+      font-family: var(--font-mono);
+      font-style: normal;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+    }
+    .karpathy-prose {
+      margin-top: 2.25rem;
+      max-width: 60ch;
+      color: var(--color-text-secondary);
+      font-size: 1.04rem;
+    }
+    .karpathy-prose strong { color: var(--color-text); font-weight: 600; }
+
+    /* ============================================================
+       BENTO BUILDING BLOCKS
+       ============================================================ */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: minmax(220px, auto);
+      gap: 1.1rem;
+    }
+    .bento-tile {
+      position: relative;
+      padding: 1.85rem;
+      border-radius: 18px;
+      background:
+        radial-gradient(480px circle at var(--mx, 50%) var(--my, 50%),
+          color-mix(in oklab, var(--tile-color, var(--color-accent)) 10%, transparent), transparent 42%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition:
+        border-color var(--duration-normal),
+        transform var(--duration-slower) var(--ease-spring),
+        box-shadow var(--duration-normal),
+        opacity var(--duration-slower) var(--ease-spring);
+      opacity: 0;
+      transform: translateY(22px);
+      overflow: hidden;
+    }
+    .bento-tile.visible { opacity: 1; transform: translateY(0); }
+    .bento-tile:hover {
+      border-color: var(--tile-color, var(--color-accent-muted));
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .bento-tile.col-2 { grid-column: span 2; }
+    .bento-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--tile-color, var(--color-accent));
+      padding: 0;
+    }
+    .bento-tag::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--tile-color, var(--color-accent));
+    }
+    .bento-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.55rem;
+      letter-spacing: -0.01em;
+      margin: 0.9rem 0 0.6rem;
+      line-height: 1.15;
+    }
+    .bento-body {
+      color: var(--color-text-secondary);
+      font-size: 0.97rem;
+      margin: 0;
+      max-width: 38ch;
+    }
+
+    /* tile visual flourishes */
+    .tile-art {
+      position: absolute;
+      bottom: 0.9rem;
+      right: 0.9rem;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       IMPLEMENTATIONS — 3 cards
+       ============================================================ */
+    .impl-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    .impl-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 1.85rem;
+      transition:
+        border-color var(--duration-normal),
+        transform var(--duration-slower) var(--ease-spring),
+        box-shadow var(--duration-normal),
+        opacity var(--duration-slower) var(--ease-spring);
+      opacity: 0;
+      transform: translateY(22px);
+    }
+    .impl-card.visible { opacity: 1; transform: translateY(0); }
+    .impl-card:hover {
+      border-color: var(--color-accent-muted);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .impl-stack {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      color: var(--color-text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .impl-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.3rem;
+      letter-spacing: -0.01em;
+      margin: 0 0 0.75rem;
+    }
+    .impl-name span {
+      color: var(--color-accent);
+    }
+    .impl-body {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      margin: 0 0 1.25rem;
+    }
+    .impl-meta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border-light);
+    }
+    .impl-meta span::before {
+      content: "→";
+      margin-right: 0.35rem;
+      color: var(--color-accent);
+    }
+
+    /* ============================================================
+       DAILY WORKFLOW TIMELINE
+       ============================================================ */
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      position: relative;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      top: 26px;
+      left: 6%;
+      right: 6%;
+      height: 2px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--color-border) 8%,
+        var(--color-border) 92%,
+        transparent 100%);
+      z-index: 0;
+    }
+    .step {
+      position: relative;
+      padding-top: 4rem;
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .step.visible { opacity: 1; transform: translateY(0); }
+    .step:nth-child(2).visible { transition-delay: 80ms; }
+    .step:nth-child(3).visible { transition-delay: 160ms; }
+    .step:nth-child(4).visible { transition-delay: 240ms; }
+    .step::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--color-surface);
+      border: 2px solid var(--step-color, var(--color-accent));
+      box-shadow: 0 0 0 6px var(--color-bg-warm);
+    }
+    .step .step-num {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--step-color, var(--color-accent));
+    }
+    .step .step-when {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .step h3 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.01em;
+    }
+    .step p {
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      margin: 0;
+    }
+
+    /* ============================================================
+       STATS ROW
+       ============================================================ */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .stat {
+      padding: 1.85rem 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring),
+        border-color var(--duration-normal);
+    }
+    .stat:hover { border-color: var(--color-accent-muted); }
+    .stat.visible { opacity: 1; transform: translateY(0); }
+    .stat:nth-child(2).visible { transition-delay: 70ms; }
+    .stat:nth-child(3).visible { transition-delay: 140ms; }
+    .stat:nth-child(4).visible { transition-delay: 210ms; }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.25rem, 4.5vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text);
+    }
+    .stat-value .unit {
+      font-size: 0.55em;
+      color: var(--color-accent);
+      margin-left: 0.15em;
+      font-weight: 600;
+    }
+    .stat-label {
+      margin-top: 0.6rem;
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .stat-note {
+      margin-top: 0.45rem;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+    }
+
+    /* ============================================================
+       FINAL CTA
+       ============================================================ */
+    .final {
+      padding: 6rem 0 7rem;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4.2vw, 3rem);
+      letter-spacing: -0.02em;
+      margin: 0 0 1.1rem;
+      max-width: 18ch;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.1;
+    }
+    .final p {
+      color: var(--color-text-secondary);
+      margin: 0 auto 2.25rem;
+      max-width: 52ch;
+      font-size: 1.05rem;
+    }
+
+    footer {
+      padding: 2rem 0 3.5rem;
+      border-top: 1px solid var(--color-border-light);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    footer a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--color-border); padding-bottom: 1px; }
+    footer a:hover { color: var(--color-accent); border-color: var(--color-accent); }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 980px) {
+      .bento { grid-template-columns: repeat(2, 1fr); }
+      .bento-tile.col-2 { grid-column: span 2; }
+      .impl-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .timeline { grid-template-columns: repeat(2, 1fr); }
+      .timeline::before { display: none; }
+      .graph-explainer { grid-template-columns: 1fr; gap: 1.25rem; }
+    }
+    @media (max-width: 560px) {
+      .hero { padding: 4rem 0 2rem; }
+      .bento { grid-template-columns: 1fr; }
+      .bento-tile.col-2 { grid-column: auto; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .timeline { grid-template-columns: 1fr; gap: 1.5rem; }
+      .step { padding-top: 3.25rem; }
+      .step::before { width: 44px; height: 44px; }
+      .step .step-num { top: 10px; font-size: 0.9rem; }
+      .quote-block { padding: 1.5rem 1.5rem; }
+      .graph-svg-wrap { aspect-ratio: 4 / 5; max-height: 460px; }
+      .node.mobile-hide { display: none; }
+    }
+
+    /* ============================================================
+       REDUCED MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .cta-row, .stat, .bento-tile, .impl-card, .step, .eyebrow {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .node { opacity: 1 !important; transform: none !important; }
+      .edge { opacity: 0.55 !important; }
+      .edge-pulse, .node.in circle.halo { animation: none !important; }
+      .graph-meta .live-dot { animation: none !important; opacity: 1 !important; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .bento-tile:hover, .impl-card:hover, .stat:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <header class="hero wrap" id="hero">
+    <p class="eyebrow">LLM Wiki · PKM in the Agentic Era</p>
+    <h1 class="hero-title">
+      <span class="word">Your</span>
+      <span class="word">second</span>
+      <span class="word">brain,</span>
+      <span class="word">now</span>
+      <span class="word"><em>agentic.</em></span>
+    </h1>
+    <p class="hero-sub">Andrej Karpathy's idea of a personal LLM wiki — extended into a world where the agent doesn't just read your notes. It writes back to them. Every day. Quietly. Forever.</p>
+    <div class="cta-row">
+      <a class="magnetic" href="#cta">
+        Design your PKM with CETI
+        <span class="arrow">→</span>
+      </a>
+      <a class="secondary" href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">Read Karpathy's gist ↗</a>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       SIGNATURE: KNOWLEDGE GRAPH
+       ============================================================ -->
+  <section class="graph-section wrap" aria-labelledby="graph-heading">
+    <div class="graph-frame">
+      <div class="graph-meta">
+        <span><span class="live-dot"></span> Live graph · 15 topics · 23 links</span>
+        <span>vault://manu/2026</span>
+      </div>
+
+      <div class="graph-svg-wrap">
+        <svg class="graph-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-labelledby="graph-heading" role="img">
+          <title id="graph-heading">A force-directed knowledge graph of personal notes connected by topic.</title>
+          <desc>Nodes represent personal note topics like Transformers, Agents, RAG, Decisions, Habits. Lines show their links. The graph is co-authored by you and an AI agent.</desc>
+
+          <!-- EDGES (draw first so nodes sit on top) -->
+          <g id="edges">
+            <path class="edge" data-from="transformers" data-to="agents" d="M 230 140 Q 320 200, 410 220"/>
+            <path class="edge" data-from="transformers" data-to="tokenizers" d="M 230 140 Q 170 90, 110 130"/>
+            <path class="edge" data-from="transformers" data-to="rag" d="M 230 140 Q 250 240, 290 340"/>
+            <path class="edge" data-from="agents" data-to="rag" d="M 410 220 Q 360 280, 290 340"/>
+            <path class="edge" data-from="agents" data-to="mcp" d="M 410 220 Q 500 200, 590 180"/>
+            <path class="edge" data-from="agents" data-to="projects" d="M 410 220 Q 480 320, 560 410"/>
+            <path class="edge" data-from="rag" data-to="python" d="M 290 340 Q 230 380, 170 430"/>
+            <path class="edge" data-from="rag" data-to="reading" d="M 290 340 Q 360 380, 430 430"/>
+            <path class="edge" data-from="python" data-to="projects" d="M 170 430 Q 360 490, 560 410"/>
+            <path class="edge" data-from="mcp" data-to="projects" d="M 590 180 Q 580 280, 560 410"/>
+            <path class="edge" data-from="mcp" data-to="people" d="M 590 180 Q 690 130, 790 110"/>
+            <path class="edge" data-from="ai-trends" data-to="agents" d="M 870 250 Q 640 240, 410 220"/>
+            <path class="edge" data-from="ai-trends" data-to="reading" d="M 870 250 Q 660 360, 430 430"/>
+            <path class="edge" data-from="ai-trends" data-to="people" d="M 870 250 Q 830 180, 790 110"/>
+            <path class="edge" data-from="q3-notes" data-to="decisions" d="M 880 430 Q 840 470, 770 500"/>
+            <path class="edge" data-from="q3-notes" data-to="ai-trends" d="M 880 430 Q 880 340, 870 250"/>
+            <path class="edge" data-from="decisions" data-to="habits" d="M 770 500 Q 700 530, 620 540"/>
+            <path class="edge" data-from="decisions" data-to="writing" d="M 770 500 Q 690 400, 600 290"/>
+            <path class="edge" data-from="habits" data-to="health" d="M 620 540 Q 510 540, 410 540"/>
+            <path class="edge" data-from="health" data-to="reading" d="M 410 540 Q 420 490, 430 430"/>
+            <path class="edge" data-from="writing" data-to="projects" d="M 600 290 Q 580 350, 560 410"/>
+            <path class="edge" data-from="writing" data-to="reading" d="M 600 290 Q 515 360, 430 430"/>
+            <path class="edge" data-from="people" data-to="writing" d="M 790 110 Q 700 200, 600 290"/>
+          </g>
+
+          <!-- traveling pulses along select edges -->
+          <g id="pulses">
+            <circle class="edge-pulse active" r="4" style="offset-path: path('M 410 220 Q 360 280, 290 340'); animation-delay: 0s;"/>
+            <circle class="edge-pulse active" r="4" style="offset-path: path('M 870 250 Q 640 240, 410 220'); animation-delay: 0.9s;"/>
+            <circle class="edge-pulse active" r="4" style="offset-path: path('M 590 180 Q 580 280, 560 410'); animation-delay: 1.8s;"/>
+            <circle class="edge-pulse active" r="4" style="offset-path: path('M 770 500 Q 690 400, 600 290'); animation-delay: 2.4s;"/>
+          </g>
+
+          <!-- NODES — each <g class="node"> -->
+          <g class="node" data-id="transformers" style="--node-color: #D94F30; --halo-r: 26; --breathe-dur: 4.6s;">
+            <circle class="halo" cx="230" cy="140" r="26"/>
+            <circle class="bg" cx="230" cy="140" r="14"/>
+            <text x="230" y="106">Transformers</text>
+          </g>
+          <g class="node" data-id="tokenizers" style="--node-color: #D94F30; --halo-r: 18; --breathe-dur: 5.2s;">
+            <circle class="halo" cx="110" cy="130" r="18"/>
+            <circle class="bg" cx="110" cy="130" r="9"/>
+            <text x="110" y="101">Tokenizers</text>
+          </g>
+          <g class="node" data-id="agents" style="--node-color: #D4A843; --halo-r: 30; --breathe-dur: 4.2s;">
+            <circle class="halo" cx="410" cy="220" r="30"/>
+            <circle class="bg" cx="410" cy="220" r="17"/>
+            <text x="410" y="184">Agents</text>
+          </g>
+          <g class="node" data-id="mcp" style="--node-color: #D4A843; --halo-r: 22; --breathe-dur: 4.9s;">
+            <circle class="halo" cx="590" cy="180" r="22"/>
+            <circle class="bg" cx="590" cy="180" r="12"/>
+            <text x="590" y="147">MCP</text>
+          </g>
+          <g class="node" data-id="rag" style="--node-color: #D94F30; --halo-r: 24; --breathe-dur: 4.4s;">
+            <circle class="halo" cx="290" cy="340" r="24"/>
+            <circle class="bg" cx="290" cy="340" r="13"/>
+            <text x="290" y="308">RAG</text>
+          </g>
+          <g class="node" data-id="python" style="--node-color: #2A7B9B; --halo-r: 20; --breathe-dur: 5s;">
+            <circle class="halo" cx="170" cy="430" r="20"/>
+            <circle class="bg" cx="170" cy="430" r="11"/>
+            <text x="170" y="400">Python</text>
+          </g>
+          <g class="node" data-id="reading" style="--node-color: #2D8B55; --halo-r: 22; --breathe-dur: 4.7s;">
+            <circle class="halo" cx="430" cy="430" r="22"/>
+            <circle class="bg" cx="430" cy="430" r="12"/>
+            <text x="430" y="398">Reading List</text>
+          </g>
+          <g class="node" data-id="projects" style="--node-color: #D4A843; --halo-r: 26; --breathe-dur: 4.5s;">
+            <circle class="halo" cx="560" cy="410" r="26"/>
+            <circle class="bg" cx="560" cy="410" r="15"/>
+            <text x="560" y="375">Projects</text>
+          </g>
+          <g class="node" data-id="writing" style="--node-color: #7B6DAA; --halo-r: 22; --breathe-dur: 4.8s;">
+            <circle class="halo" cx="600" cy="290" r="22"/>
+            <circle class="bg" cx="600" cy="290" r="12"/>
+            <text x="600" y="258">Writing</text>
+          </g>
+          <g class="node" data-id="people" style="--node-color: #7B6DAA; --halo-r: 22; --breathe-dur: 5.1s;">
+            <circle class="halo" cx="790" cy="110" r="22"/>
+            <circle class="bg" cx="790" cy="110" r="12"/>
+            <text x="790" y="78">People</text>
+          </g>
+          <g class="node" data-id="ai-trends" style="--node-color: #2A7B9B; --halo-r: 28; --breathe-dur: 4.3s;">
+            <circle class="halo" cx="870" cy="250" r="28"/>
+            <circle class="bg" cx="870" cy="250" r="16"/>
+            <text x="870" y="215">AI Trends</text>
+          </g>
+          <g class="node" data-id="q3-notes" style="--node-color: #2A7B9B; --halo-r: 20; --breathe-dur: 4.6s;">
+            <circle class="halo" cx="880" cy="430" r="20"/>
+            <circle class="bg" cx="880" cy="430" r="11"/>
+            <text x="880" y="400">Q3 Notes</text>
+          </g>
+          <g class="node mobile-hide" data-id="decisions" style="--node-color: #7B6DAA; --halo-r: 22; --breathe-dur: 5s;">
+            <circle class="halo" cx="770" cy="500" r="22"/>
+            <circle class="bg" cx="770" cy="500" r="12"/>
+            <text x="770" y="540">Decisions</text>
+          </g>
+          <g class="node" data-id="habits" style="--node-color: #2D8B55; --halo-r: 22; --breathe-dur: 4.4s;">
+            <circle class="halo" cx="620" cy="540" r="22"/>
+            <circle class="bg" cx="620" cy="540" r="12"/>
+            <text x="620" y="580">Habits</text>
+          </g>
+          <g class="node" data-id="health" style="--node-color: #2D8B55; --halo-r: 20; --breathe-dur: 5.3s;">
+            <circle class="halo" cx="410" cy="540" r="20"/>
+            <circle class="bg" cx="410" cy="540" r="11"/>
+            <text x="410" y="580">Health</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="graph-io" aria-hidden="true">
+        <span class="io-pill read"><span class="dot"></span>AI reads &nbsp;→&nbsp; this graph</span>
+        <span>15 nodes · 23 edges · 1 human</span>
+        <span class="io-pill write">this graph &nbsp;→&nbsp; AI writes back<span class="dot"></span></span>
+      </div>
+    </div>
+
+    <div class="graph-explainer">
+      <p><strong>This is the shift.</strong> For ten years, PKM tools have asked humans to write notes for their future selves. Obsidian, Roam, Logseq, Notion — they all stop at the page. The agent could read your vault, but it couldn't grow it. Every conversation started from zero.</p>
+      <p><strong>Now the agent has hands.</strong> It reads your sources, summarizes them into wiki pages, draws the links you forgot, files them under the right concept, and keeps the graph internally consistent. You curate. It compiles. The wiki is the codebase. The LLM is the programmer.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       KARPATHY QUOTE / FRAMING
+       ============================================================ -->
+  <section class="section section-warm" aria-labelledby="karpathy-heading">
+    <div class="wrap">
+      <div class="section-header animate-in">
+        <p class="eyebrow">The Karpathy framing</p>
+        <h2 class="section-title" id="karpathy-heading">An <em>idea file</em>, gone <em>viral.</em></h2>
+        <p class="section-sub">On April 4, 2026, Andrej Karpathy posted a one-page Gist describing a pattern for personal LLM-maintained knowledge bases. Within two weeks: 5,000 stars, dozens of open-source re-implementations.</p>
+      </div>
+
+      <div class="quote-block animate-in">
+        <blockquote>"Obsidian is the IDE; the LLM is the programmer; the wiki is the codebase."</blockquote>
+        <cite>Andrej Karpathy · llm-wiki.md · April 2026</cite>
+      </div>
+
+      <p class="karpathy-prose animate-in">
+        Karpathy frames it as a <strong>compilation problem</strong>. Raw sources — articles, podcasts, papers, screenshots, your own messy thoughts — are the source code. The wiki is the compiled artifact: cross-referenced, summarized, queryable. You don't read the source every time you want an answer; you read the compiled wiki. The LLM does the compile pass, repeatedly, as new sources land.
+      </p>
+      <p class="karpathy-prose animate-in" style="margin-top: 1.25rem;">
+        Karpathy's own vault, built this way over a few months, became a <strong>400,000-word</strong> personal textbook on the topics he was thinking about. Not written by him. Maintained for him.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       BUILDING BLOCKS — BENTO
+       ============================================================ -->
+  <section class="section wrap" aria-labelledby="blocks-heading">
+    <div class="section-header animate-in">
+      <p class="eyebrow">The four ingredients</p>
+      <h2 class="section-title" id="blocks-heading">Building blocks of an <em>agentic PKM.</em></h2>
+      <p class="section-sub">Strip away the tooling debates. Four primitives are all that's needed: a substrate the AI can read, a structure it can traverse, an agent with write access, and a way to ask your past self questions.</p>
+    </div>
+
+    <div class="bento">
+      <article class="bento-tile col-2" style="--tile-color: #D94F30;">
+        <span class="bento-tag">01 · Substrate</span>
+        <h3 class="bento-title">Notes — markdown is the universal format.</h3>
+        <p class="bento-body">Plain text files with [[wikilinks]] are the only substrate that survives every tooling change of the next decade. Agents can read them. Humans can read them. Git can version them. No vendor owns them.</p>
+        <svg class="tile-art" width="120" height="60" viewBox="0 0 120 60" aria-hidden="true">
+          <rect x="2" y="6"  width="80" height="3" rx="1.5" fill="#D94F30" opacity="0.55"/>
+          <rect x="2" y="16" width="100" height="3" rx="1.5" fill="#D94F30" opacity="0.35"/>
+          <rect x="2" y="26" width="60" height="3" rx="1.5" fill="#D94F30" opacity="0.25"/>
+          <rect x="2" y="36" width="90" height="3" rx="1.5" fill="#D94F30" opacity="0.4"/>
+          <rect x="2" y="46" width="40" height="3" rx="1.5" fill="#D94F30" opacity="0.2"/>
+        </svg>
+      </article>
+
+      <article class="bento-tile" style="--tile-color: #2A7B9B;">
+        <span class="bento-tag">02 · Structure</span>
+        <h3 class="bento-title">Links the AI can traverse.</h3>
+        <p class="bento-body">Backlinks turn a folder of notes into a graph. The agent walks edges to find context — far cheaper and more accurate than vector search alone.</p>
+      </article>
+
+      <article class="bento-tile" style="--tile-color: #D4A843;">
+        <span class="bento-tag">03 · Agency</span>
+        <h3 class="bento-title">Agents with read AND write.</h3>
+        <p class="bento-body">Read-only is dead-on-arrival. The shift is granting the agent permission to file, link, summarize, and refactor your vault — under your review.</p>
+      </article>
+
+      <article class="bento-tile col-2" style="--tile-color: #2D8B55;">
+        <span class="bento-tag">04 · Recall</span>
+        <h3 class="bento-title">Queries — questions you ask your past self.</h3>
+        <p class="bento-body">"What did I conclude about RAG in Q3?" "Show me every decision I tagged 'reversible.'" "Draft a synthesis of everything I've read about agentic patterns this year." The vault becomes a thinking partner that remembers what you do not.</p>
+        <svg class="tile-art" width="120" height="60" viewBox="0 0 120 60" aria-hidden="true">
+          <circle cx="20" cy="30" r="14" fill="none" stroke="#2D8B55" stroke-width="2" opacity="0.6"/>
+          <line x1="32" y1="42" x2="48" y2="56" stroke="#2D8B55" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+          <rect x="62" y="22" width="50" height="3" rx="1.5" fill="#2D8B55" opacity="0.4"/>
+          <rect x="62" y="32" width="36" height="3" rx="1.5" fill="#2D8B55" opacity="0.25"/>
+        </svg>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       IMPLEMENTATIONS
+       ============================================================ -->
+  <section class="section section-warm" aria-labelledby="impl-heading">
+    <div class="wrap">
+      <div class="section-header animate-in">
+        <p class="eyebrow">Three ways to ship this today</p>
+        <h2 class="section-title" id="impl-heading">Real implementations, <em>shipping now.</em></h2>
+        <p class="section-sub">None of this is theoretical. Three stacks have crystallized in the months since Karpathy's gist — each trades polish, ownership, and agency in different proportions.</p>
+      </div>
+
+      <div class="impl-grid">
+        <article class="impl-card">
+          <div class="impl-stack">Path A · Plug-and-play</div>
+          <h3 class="impl-name"><span>Obsidian</span> + Smart Connections</h3>
+          <p class="impl-body">A community plugin that embeds every note, retrieves on-demand, and now writes back via the new MCP bridge. Your vault stays on disk; the AI does the indexing. Lowest setup cost; best for solo knowledge workers.</p>
+          <div class="impl-meta">
+            <span>Local-first</span>
+            <span>~20 min setup</span>
+          </div>
+        </article>
+
+        <article class="impl-card">
+          <div class="impl-stack">Path B · Team-friendly</div>
+          <h3 class="impl-name"><span>Notion</span> + Claude MCP</h3>
+          <p class="impl-body">Notion's MCP server lets Claude read, edit, and create pages across your workspace. Best when the knowledge graph is shared — research teams, founders with assistants, consultants with client knowledge bases.</p>
+          <div class="impl-meta">
+            <span>Cloud-first</span>
+            <span>Multi-user</span>
+          </div>
+        </article>
+
+        <article class="impl-card">
+          <div class="impl-stack">Path C · Power-user</div>
+          <h3 class="impl-name"><span>Markdown folder</span> + Claude Code</h3>
+          <p class="impl-body">A git-versioned directory of <code style="font-family:var(--font-mono);font-size:0.88em;">.md</code> files, with Claude Code as the agent. Maximum control, maximum customization, zero vendor lock-in. The path Karpathy himself ships on.</p>
+          <div class="impl-meta">
+            <span>Self-hosted</span>
+            <span>Git-versioned</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       DAILY WORKFLOW
+       ============================================================ -->
+  <section class="section wrap" aria-labelledby="workflow-heading">
+    <div class="section-header animate-in">
+      <p class="eyebrow">A day in the agentic vault</p>
+      <h2 class="section-title" id="workflow-heading">What it <em>feels like</em> in practice.</h2>
+      <p class="section-sub">Not a productivity system. A loop. Capture is fast; query is conversational; the cleanup happens while you sleep.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="step" style="--step-color: #D94F30;">
+        <span class="step-num">01</span>
+        <div class="step-when">Morning · 07:42</div>
+        <h3>Capture</h3>
+        <p>Voice memo on your walk, three links from Twitter, a screenshot from a paper. All dropped raw into <code style="font-family:var(--font-mono);font-size:0.85em;">/sources</code>.</p>
+      </div>
+      <div class="step" style="--step-color: #D4A843;">
+        <span class="step-num">02</span>
+        <div class="step-when">Midday · 12:18</div>
+        <h3>Query</h3>
+        <p>"What did I think about long-context vs. RAG in March?" The agent walks the graph, surfaces three notes, and shows the contradictions you'd forgotten.</p>
+      </div>
+      <div class="step" style="--step-color: #2A7B9B;">
+        <span class="step-num">03</span>
+        <div class="step-when">Afternoon · 15:30</div>
+        <h3>Co-draft</h3>
+        <p>You ask for a 500-word essay drawn from your notes on agentic PKM. The agent drafts; you edit; the edits become a new wiki page, auto-linked.</p>
+      </div>
+      <div class="step" style="--step-color: #2D8B55;">
+        <span class="step-num">04</span>
+        <div class="step-when">Evening · 22:05</div>
+        <h3>Compile</h3>
+        <p>Overnight, the agent processes today's sources, files them, draws new edges, and pushes a single git commit. You wake up to a vault that's 6 notes smarter.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       STATS
+       ============================================================ -->
+  <section class="section section-warm" aria-labelledby="stats-heading">
+    <div class="wrap">
+      <div class="section-header animate-in">
+        <p class="eyebrow">The numbers behind the pattern</p>
+        <h2 class="section-title" id="stats-heading">A vault that compounds.</h2>
+        <p class="section-sub">Aggregated from public Karpathy data, Obsidian community surveys, and CETI client engagements over the last 12 months.</p>
+      </div>
+
+      <div class="stats">
+        <article class="stat">
+          <div class="stat-value"><span class="num" data-to="400">0</span><span class="unit">K</span></div>
+          <div class="stat-label">Words in Karpathy's own auto-compiled vault</div>
+          <div class="stat-note">~ a full textbook</div>
+        </article>
+        <article class="stat">
+          <div class="stat-value"><span class="num" data-to="2300">0</span></div>
+          <div class="stat-label">Notes the median knowledge worker has — and never re-reads</div>
+          <div class="stat-note">Obsidian survey, 2026</div>
+        </article>
+        <article class="stat">
+          <div class="stat-value"><span class="num" data-to="6">0</span><span class="unit">h/wk</span></div>
+          <div class="stat-label">Time recovered by agents handling capture and filing</div>
+          <div class="stat-note">CETI client baseline</div>
+        </article>
+        <article class="stat">
+          <div class="stat-value"><span class="num" data-to="92">0</span><span class="unit">%</span></div>
+          <div class="stat-label">Of agent-suggested links accepted by the human curator</div>
+          <div class="stat-note">Internal CETI study</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FINAL CTA
+       ============================================================ -->
+  <section class="final wrap" id="cta">
+    <h2>Design the second brain your AI can actually use.</h2>
+    <p>A 90-minute workshop with Manu Mulaveesala — we audit your current PKM, design the markdown substrate, choose the agent stack, and ship the first compile pass together. Built for individuals, research teams, and founders.</p>
+    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
+      Book a 30-min consult
+      <span class="arrow">→</span>
+    </a>
+    <div style="margin-top:1.5rem;">
+      <a class="secondary" href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">Read Karpathy's original gist ↗</a>
+    </div>
+  </section>
+
+  <footer class="wrap">
+    <span>CETI.AI · Lookbook · 2026</span>
+    <span><a href="https://cetiai.co">cetiai.co</a></span>
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION-DRIVEN REVEALS ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+
+    document.querySelectorAll('.stat, .bento-tile, .impl-card, .step, .animate-in').forEach((el) => reveal.observe(el));
+    // make .animate-in fade in (use same class but ensure it has base styles)
+    document.querySelectorAll('.animate-in').forEach((el) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(16px)';
+      el.style.transition = 'opacity 700ms cubic-bezier(0.16,1,0.3,1), transform 700ms cubic-bezier(0.16,1,0.3,1)';
+    });
+    // override on .visible
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `.animate-in.visible { opacity: 1 !important; transform: translateY(0) !important; }
+      @media (prefers-reduced-motion: reduce) { .animate-in { opacity: 1 !important; transform: none !important; } }`;
+    document.head.appendChild(styleEl);
+
+    // ============ NUMBER TICKERS ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1300;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ BENTO MAGIC-CARD GLOW ============
+    document.querySelectorAll('.bento-tile').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
+        card.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+      });
+    });
+
+    // ============ KNOWLEDGE GRAPH ============
+    const graph = document.querySelector('.graph-svg');
+    if (graph) {
+      const nodes = Array.from(graph.querySelectorAll('.node'));
+      const edges = Array.from(graph.querySelectorAll('.edge'));
+
+      // adjacency map
+      const adj = {};
+      edges.forEach((e) => {
+        const a = e.dataset.from, b = e.dataset.to;
+        (adj[a] = adj[a] || new Set()).add(b);
+        (adj[b] = adj[b] || new Set()).add(a);
+      });
+
+      // entrance: stagger nodes in, then edges
+      const graphObs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          graphObs.unobserve(e.target);
+
+          // shuffle entry order for organic feel
+          const order = [...nodes].sort(() => Math.random() - 0.5);
+          order.forEach((n, i) => {
+            setTimeout(() => n.classList.add('in'), 80 + i * 65);
+            // randomize breathe phase
+            n.style.setProperty('--breathe-delay', `${Math.random() * 3}s`);
+          });
+          // draw edges after first half of nodes are in
+          setTimeout(() => edges.forEach((edge, i) => {
+            setTimeout(() => edge.classList.add('in'), i * 35);
+          }), 500);
+        });
+      }, { threshold: 0.25 });
+      graphObs.observe(graph);
+
+      // hover focus
+      nodes.forEach((node) => {
+        const id = node.dataset.id;
+        const neighbors = adj[id] || new Set();
+        const focus = () => {
+          nodes.forEach((n) => {
+            const nid = n.dataset.id;
+            if (nid === id || neighbors.has(nid)) {
+              n.classList.add('focus');
+              n.classList.remove('dim');
+            } else {
+              n.classList.add('dim');
+              n.classList.remove('focus');
+            }
+          });
+          edges.forEach((edge) => {
+            const isConnected = (edge.dataset.from === id || edge.dataset.to === id);
+            edge.classList.toggle('highlight', isConnected);
+            edge.classList.toggle('dim', !isConnected);
+          });
+        };
+        const blur = () => {
+          nodes.forEach((n) => { n.classList.remove('focus', 'dim'); });
+          edges.forEach((edge) => { edge.classList.remove('highlight', 'dim'); });
+        };
+        node.addEventListener('mouseenter', focus);
+        node.addEventListener('mouseleave', blur);
+        node.addEventListener('focus', focus);
+        node.addEventListener('blur', blur);
+        node.setAttribute('tabindex', '0');
+      });
+    }
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

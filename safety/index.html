@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Safety & Alignment — Helpful. Honest. Harmless.</title>
+  <meta name="description" content="A field guide to AI safety and alignment for informed non-experts. Guardrail pipelines, Constitutional AI, RLHF, red-teaming, and the open problems frontier labs still haven't solved.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg:             #FAF7F2;
+      --color-bg-warm:        #F5F0E8;
+      --color-bg-code:        #1E1E2E;
+      --color-text:           #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted:     #9E9790;
+      --color-border:         #E5DFD6;
+      --color-border-light:   #EEEBE5;
+      --color-surface:        #FFFFFF;
+      --color-surface-warm:   #FDF9F3;
+
+      --color-accent:         #D94F30; /* vermillion — used for active filtering / live signal */
+      --color-accent-hover:   #C4432A;
+      --color-accent-light:   #FDEEE9;
+      --color-accent-muted:   #E8836C;
+
+      /* Pipeline actor colors — warm, never alarming */
+      --color-actor-1:        #D94F30; /* vermillion — active filter */
+      --color-actor-2:        #2A7B9B; /* teal — model */
+      --color-actor-3:        #7B6DAA; /* plum — interpretability */
+      --color-actor-4:        #D4A843; /* golden — RLHF / human */
+      --color-actor-5:        #2D8B55; /* forest — constitutional / passed */
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body:    'DM Sans', -apple-system, sans-serif;
+      --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast:   150ms;
+      --duration-normal: 300ms;
+      --duration-slow:   500ms;
+      --duration-slower: 700ms;
+      --stagger:         100ms;
+
+      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 18% 22%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 82% 78%, rgba(45, 139, 85, 0.035) 0%, transparent 55%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; }
+
+    /* ============ TOP BAR ============ */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.75rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+    }
+    .topbar .mark { color: var(--color-accent); font-weight: 500; }
+    .topbar a { text-decoration: none; transition: color 200ms; }
+    .topbar a:hover { color: var(--color-accent); }
+    .topbar nav { display: flex; gap: 1.5rem; }
+    .topbar nav a { color: var(--color-text-muted); }
+
+    /* ============ HERO ============ */
+    .hero {
+      min-height: 80vh;
+      padding: 3rem 1.75rem 5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+    .eyebrow .dot { color: var(--color-text-muted); margin: 0 0.5rem; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.75rem, 7vw, 5.25rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 1.75rem 0 1.5rem;
+      max-width: 16ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity var(--duration-slower) var(--ease-spring),
+                  transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 80ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 380ms; }
+    .hero-title em { font-style: normal; color: var(--color-accent); }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out),
+                  transform var(--duration-slower) var(--ease-out);
+      transition-delay: 580ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .hero-meta {
+      margin-top: 2.5rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.08em;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 780ms;
+    }
+    .hero.visible .hero-meta { opacity: 1; }
+    .hero-meta span strong { color: var(--color-text); font-weight: 500; }
+
+    /* ============ SECTION BASE ============ */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 1.75rem;
+    }
+    .section.warm { background: var(--color-bg-warm); max-width: none; }
+    .section.warm > .inner { max-width: 1100px; margin: 0 auto; padding: 0 1.75rem; }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      margin-bottom: 1rem;
+    }
+    .section-heading {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: -0.025em;
+      margin: 0 0 1.5rem;
+      max-width: 24ch;
+    }
+    .section-lede {
+      font-size: 1.125rem;
+      color: var(--color-text-secondary);
+      max-width: 64ch;
+      margin: 0 0 2.5rem;
+    }
+
+    /* ============ THREAT LANDSCAPE — TWO-COLUMN ============ */
+    .threats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 2.5rem;
+    }
+    .threats p {
+      font-size: 1.05rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+    .threats p strong {
+      color: var(--color-text);
+      font-weight: 500;
+      background: linear-gradient(transparent 60%, var(--color-accent-light) 60%);
+      padding: 0 2px;
+    }
+    .threat-quote {
+      margin-top: 3rem;
+      padding: 1.75rem 2rem;
+      background: var(--color-surface);
+      border-left: 3px solid var(--color-accent);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: 1.2rem;
+      color: var(--color-text);
+      line-height: 1.4;
+      box-shadow: var(--shadow-sm);
+    }
+    .threat-quote cite {
+      display: block;
+      margin-top: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      font-style: normal;
+    }
+
+    /* ============ GUARDRAIL PIPELINE — SIGNATURE VISUAL ============ */
+    .pipeline-wrap {
+      background: var(--color-surface-warm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 1.5rem;
+      margin-top: 2.5rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .pipeline-key {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px dashed var(--color-border);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+    }
+    .pipeline-key .swatch {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .pipeline-key .pass { background: var(--color-actor-5); }
+    .pipeline-key .block { background: var(--color-accent); }
+    .pipeline-key .filter { background: var(--color-actor-2); }
+    .pipeline-key .model { background: var(--color-actor-3); }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr 1fr 1.4fr 1fr;
+      gap: 0.75rem;
+      align-items: stretch;
+      position: relative;
+    }
+    .stage {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1rem;
+      text-align: center;
+      position: relative;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .stage.endpoint {
+      background: var(--color-bg);
+      border-style: dashed;
+    }
+    .stage-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .stage-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+      color: var(--color-text);
+      margin: 0 0 0.75rem;
+    }
+    .stage.filter .stage-title { color: var(--color-actor-2); }
+    .stage.model .stage-title { color: var(--color-actor-3); }
+
+    .filter-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-text-secondary);
+      text-align: left;
+    }
+    .filter-list li {
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--color-border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .filter-list li:last-child { border-bottom: none; }
+    .filter-list .dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-actor-2);
+    }
+
+    .model-core {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .model-ring {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      border: 2px solid var(--color-actor-3);
+      background:
+        radial-gradient(circle at 50% 50%, rgba(123, 109, 170, 0.18), transparent 70%),
+        var(--color-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--color-actor-3);
+      font-size: 0.85rem;
+      position: relative;
+    }
+    .model-ring::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px dashed var(--color-actor-3);
+      opacity: 0.35;
+      animation: pulse-ring 3.5s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%, 100% { transform: scale(1); opacity: 0.35; }
+      50%      { transform: scale(1.1); opacity: 0.15; }
+    }
+    .model-caption {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Flow track holding the moving packets */
+    .flow-track {
+      position: absolute;
+      top: 50%;
+      left: 0; right: 0;
+      height: 2px;
+      background: transparent;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .packet {
+      position: absolute;
+      top: 50%;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 12px currentColor;
+      opacity: 0;
+    }
+    .packet.pass { color: var(--color-actor-5); background: var(--color-actor-5); }
+    .packet.block { color: var(--color-accent); background: var(--color-accent); }
+
+    .blocked-tray {
+      margin-top: 1.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--color-accent-light);
+      border: 1px dashed var(--color-accent-muted);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-accent);
+    }
+    .blocked-tray .label {
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-accent);
+      font-weight: 500;
+    }
+    .blocked-tray .examples {
+      color: var(--color-text-secondary);
+      flex: 1;
+      text-transform: none;
+      letter-spacing: 0.04em;
+    }
+    .blocked-counter {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--color-accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============ ALIGNMENT BENTO ============ */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    .magic-card {
+      position: relative;
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(217, 79, 48, 0.06), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal) var(--ease-out);
+      cursor: default;
+      opacity: 0;
+      transform: translateY(20px);
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+    }
+    .magic-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity var(--duration-slower) var(--ease-spring),
+                  transform var(--duration-slower) var(--ease-spring),
+                  border-color var(--duration-normal),
+                  box-shadow var(--duration-normal);
+    }
+    .magic-card.visible:hover {
+      transform: translateY(-3px);
+      border-color: var(--color-accent-muted);
+      box-shadow: var(--shadow-lg);
+    }
+    .card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+      padding: 0.3rem 0.7rem;
+      border-radius: var(--radius-full);
+      align-self: flex-start;
+    }
+    .card-tag .num { color: var(--color-text-muted); }
+    .card-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: -0.015em;
+      margin: 1.1rem 0 0.6rem;
+    }
+    .card-body {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      margin: 0;
+      flex: 1;
+    }
+    .card-footnote {
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ============ CONSTITUTIONAL AI LOOP ============ */
+    .loop-wrap {
+      background: var(--color-surface-warm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 1.5rem;
+      margin-top: 2.5rem;
+      box-shadow: var(--shadow-md);
+    }
+    .loop {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      align-items: center;
+      position: relative;
+    }
+    .loop-step {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1rem;
+      text-align: center;
+      position: relative;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .loop-step .num {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--color-actor-5);
+      text-transform: uppercase;
+    }
+    .loop-step .title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+      color: var(--color-text);
+    }
+    .loop-step .body {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-secondary);
+    }
+    .loop-arrow {
+      position: absolute;
+      top: 50%;
+      right: -8px;
+      transform: translateY(-50%);
+      color: var(--color-actor-5);
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      opacity: 0.7;
+    }
+    .loop-step:last-child .loop-arrow { display: none; }
+    .loop-return {
+      margin-top: 1.5rem;
+      padding: 0.9rem 1.25rem;
+      background: rgba(45, 139, 85, 0.06);
+      border: 1px dashed var(--color-actor-5);
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--color-actor-5);
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .loop-return strong { color: var(--color-actor-5); font-weight: 500; }
+    .loop-constitution {
+      margin-top: 1.5rem;
+      padding: 1.25rem 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-style: italic;
+      color: var(--color-text);
+      font-size: 1rem;
+      line-height: 1.5;
+      position: relative;
+    }
+    .loop-constitution::before {
+      content: "Excerpt — Claude's Constitution";
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: var(--color-surface-warm);
+      padding: 0 8px;
+      font-family: var(--font-mono);
+      font-style: normal;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+    }
+
+    /* ============ OPEN PROBLEMS ============ */
+    .problems {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      margin-top: 2rem;
+      counter-reset: prob;
+    }
+    .problem {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem 1.75rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      align-items: start;
+      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-out);
+    }
+    .problem:hover { border-color: var(--color-accent-muted); transform: translateX(4px); }
+    .problem-number {
+      counter-increment: prob;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 2.5rem;
+      line-height: 1;
+      color: var(--color-accent);
+      opacity: 0.5;
+    }
+    .problem-number::before { content: "0" counter(prob); }
+    .problem-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      margin: 0 0 0.4rem;
+    }
+    .problem-body {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* ============ TOOLS ROW ============ */
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    .tool {
+      padding: 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: border-color var(--duration-normal), box-shadow var(--duration-normal);
+    }
+    .tool:hover { border-color: var(--color-accent-muted); box-shadow: var(--shadow-md); }
+    .tool-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+    }
+    .tool-vendor {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+    }
+    .tool-desc {
+      font-size: 0.88rem;
+      color: var(--color-text-secondary);
+      margin: 0.4rem 0 0;
+    }
+    .tool-stage {
+      margin-top: auto;
+      padding-top: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-actor-2);
+      letter-spacing: 0.06em;
+    }
+
+    /* ============ CTA ============ */
+    .final {
+      padding: 6rem 1.75rem 5rem;
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin: 0 0 1rem;
+      line-height: 1.1;
+    }
+    .final p {
+      color: var(--color-text-secondary);
+      margin: 0 auto 2.25rem;
+      max-width: 52ch;
+      font-size: 1.05rem;
+    }
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 1rem 1.85rem;
+      border-radius: var(--radius-full);
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(4px); }
+
+    .footer {
+      padding: 2rem 1.75rem 3rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      border-top: 1px solid var(--color-border-light);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+    }
+    .footer a { text-decoration: none; }
+    .footer a:hover { color: var(--color-accent); }
+
+    /* ============ ANIMATE-IN ============ */
+    .animate-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring),
+                  transform var(--duration-slower) var(--ease-spring);
+    }
+    .animate-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 900px) {
+      .threats { grid-template-columns: 1fr; }
+      .pipeline {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+      }
+      .pipeline .stage { min-height: auto; }
+      .flow-track { display: none; }
+      .loop { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+      .loop-arrow { display: none !important; }
+      .tools { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 560px) {
+      .bento { grid-template-columns: 1fr; }
+      .loop { grid-template-columns: 1fr; }
+      .tools { grid-template-columns: 1fr; }
+      .problem { grid-template-columns: 50px 1fr; gap: 1rem; padding: 1.25rem; }
+      .problem-number { font-size: 1.75rem; }
+      .topbar nav { display: none; }
+      .pipeline-key { gap: 0.75rem; font-size: 0.62rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero-title .word, .hero-sub, .hero-meta, .eyebrow,
+      .magic-card, .animate-in {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .packet { display: none; }
+      .model-ring::before { animation: none; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .magic-card:hover { transform: none !important; }
+      .problem:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a href="../index.html"><span class="mark">CETI</span>&nbsp;· Lookbook</a>
+    <nav>
+      <a href="../index.html">Index</a>
+      <a href="https://cetiai.co">cetiai.co</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">AI Safety <span class="dot">·</span> Alignment <span class="dot">·</span> Guardrails</p>
+    <h1 class="hero-title">
+      <span class="word">Helpful.</span>
+      <span class="word">Honest.</span>
+      <span class="word"><em>Harmless.</em></span>
+      <span class="word">Engineered.</span>
+    </h1>
+    <p class="hero-sub">Alignment isn't science fiction — it's engineering. This is a field guide to how frontier labs make large language models safer to deploy: guardrail pipelines, Constitutional AI, RLHF, red-teaming, and the open problems that none of it has solved yet.</p>
+    <div class="hero-meta">
+      <span><strong>Audience</strong> · informed non-experts</span>
+      <span><strong>Tone</strong> · honest, anti-hype</span>
+      <span><strong>Updated</strong> · 2026</span>
+    </div>
+  </section>
+
+  <!-- THREAT LANDSCAPE -->
+  <section class="section">
+    <p class="section-label animate-in">01 · The Threat Landscape</p>
+    <h2 class="section-heading animate-in">The real problems are mundane, not cinematic.</h2>
+    <p class="section-lede animate-in">Public discourse about AI risk leans toward science fiction — superintelligence, terminators, paperclips. The actual problems engineers deploy guardrails against are far less dramatic, and far more present.</p>
+
+    <div class="threats">
+      <p class="animate-in"><strong>Hallucination</strong> is the failure mode you meet first. A model produces fluent, confident, plausible text that happens to be wrong. Citations that don't exist. APIs that were never written. Court cases that were never filed. It's not malice — it's the architecture: the model is predicting the next token, not retrieving a fact.</p>
+      <p class="animate-in"><strong>Prompt injection</strong> is the failure mode that scales. A user (or a webpage the model reads, or a document a teammate uploaded) embeds instructions inside data — and the model can't tell the difference. Recent research clocks the average time to a successful jailbreak at under 17 minutes for frontier models. Defenses help; none are complete.</p>
+      <p class="animate-in"><strong>Data exfiltration and PII leakage</strong> happen when an agent with tool access reads something it shouldn't, then writes it somewhere it can. A model with email-send permission plus a contaminated input is a phishing engine.</p>
+      <p class="animate-in"><strong>Bias and disparate harm</strong> are the failure modes that compound. A model trained on internet text inherits internet patterns — gendered defaults, racial assumptions, dialect penalization. These don't fix themselves; they require deliberate measurement and counterweight.</p>
+    </div>
+
+    <blockquote class="threat-quote animate-in">
+      LLMs carry an intrinsic risk triad — hallucination, indirect prompt injection, and jailbreaks — rooted in probabilistic modeling, stochastic decoding, and linguistic flexibility. These are not bugs to patch. They are properties of the medium.
+      <cite>— synthesis of 2026 red-team literature</cite>
+    </blockquote>
+  </section>
+
+  <!-- PIPELINE — SIGNATURE VISUAL -->
+  <section class="section warm">
+    <div class="inner">
+      <p class="section-label animate-in">02 · The Guardrail Pipeline</p>
+      <h2 class="section-heading animate-in">What a production deployment actually looks like.</h2>
+      <p class="section-lede animate-in">A modern LLM application doesn't expose the raw model to the user. It wraps the model in a pipeline of lightweight classifiers that run in parallel — adding 10–50ms of latency — and reject anything that fails policy. Below: a single user request flowing through the standard five-stage architecture. Some packets pass; some get redirected to the blocked tray.</p>
+
+      <div class="pipeline-wrap animate-in">
+        <div class="pipeline-key">
+          <span><span class="swatch filter"></span>Filter</span>
+          <span><span class="swatch model"></span>Model</span>
+          <span><span class="swatch pass"></span>Passed</span>
+          <span><span class="swatch block"></span>Blocked &amp; rerouted</span>
+        </div>
+
+        <div class="pipeline" id="pipeline">
+          <div class="stage endpoint">
+            <div class="stage-label">Stage 01</div>
+            <h3 class="stage-title">User input</h3>
+            <p style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-text-muted); margin: 0;">Prompts, files, tool results, agent memory.</p>
+          </div>
+
+          <div class="stage filter">
+            <div class="stage-label">Stage 02 · Input rails</div>
+            <h3 class="stage-title">Input filters</h3>
+            <ul class="filter-list">
+              <li><span>Toxicity classifier</span><span class="dot"></span></li>
+              <li><span>Prompt-injection detector</span><span class="dot"></span></li>
+              <li><span>PII redaction</span><span class="dot"></span></li>
+              <li><span>Off-topic / scope check</span><span class="dot"></span></li>
+            </ul>
+          </div>
+
+          <div class="stage model">
+            <div class="stage-label">Stage 03</div>
+            <h3 class="stage-title">Model</h3>
+            <div class="model-core">
+              <div class="model-ring">LLM</div>
+              <div class="model-caption">Aligned weights</div>
+            </div>
+          </div>
+
+          <div class="stage filter">
+            <div class="stage-label">Stage 04 · Output rails</div>
+            <h3 class="stage-title">Output filters</h3>
+            <ul class="filter-list">
+              <li><span>Harmful-content check</span><span class="dot"></span></li>
+              <li><span>Hallucination scoring</span><span class="dot"></span></li>
+              <li><span>Citation verification</span><span class="dot"></span></li>
+              <li><span>PII egress check</span><span class="dot"></span></li>
+            </ul>
+          </div>
+
+          <div class="stage endpoint">
+            <div class="stage-label">Stage 05</div>
+            <h3 class="stage-title">User output</h3>
+            <p style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-text-muted); margin: 0;">Response, tool call, or refusal with reason.</p>
+          </div>
+
+          <div class="flow-track" id="flowTrack" aria-hidden="true"></div>
+        </div>
+
+        <div class="blocked-tray">
+          <span class="label">Blocked tray</span>
+          <span class="examples">Jailbreaks · injection payloads · PII leaks · refused tasks</span>
+          <span class="blocked-counter num" data-to="2147">0</span>
+          <span style="font-family: var(--font-mono); font-size: 0.7rem;">requests / hr</span>
+        </div>
+      </div>
+
+      <p style="margin-top: 1.5rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-muted); text-align: center;">
+        Real implementations: NVIDIA NeMo Guardrails, Llama Guard 4, OpenAI Moderation, Lakera Guard, LLM Guard.
+      </p>
+    </div>
+  </section>
+
+  <!-- ALIGNMENT BENTO -->
+  <section class="section">
+    <p class="section-label animate-in">03 · How Frontier Labs Do Alignment</p>
+    <h2 class="section-heading animate-in">Four techniques that actually shape model behavior.</h2>
+    <p class="section-lede animate-in">Guardrails are the runtime defense. Alignment is what happens during training — the deliberate work of shaping <em>what the model wants to do</em> before it ever sees a user request. These four techniques compose; none is sufficient alone.</p>
+
+    <div class="bento">
+      <article class="magic-card">
+        <span class="card-tag"><span class="num">01</span> · Method</span>
+        <h3 class="card-title">RLHF — Reinforcement Learning from Human Feedback</h3>
+        <p class="card-body">Humans rank pairs of model outputs. A reward model learns to predict which ranking humans would give. The base model is then fine-tuned to maximize that predicted reward. This is what turned GPT-3 into ChatGPT and remains the workhorse of post-training across every frontier lab.</p>
+        <p class="card-footnote">Bottleneck: human raters don't scale to model capability.</p>
+      </article>
+
+      <article class="magic-card">
+        <span class="card-tag"><span class="num">02</span> · Method</span>
+        <h3 class="card-title">Constitutional AI</h3>
+        <p class="card-body">Anthropic's answer to the RLHF scaling problem. Instead of relying purely on human preference labels, the model critiques and revises its own outputs against an explicit, public set of principles — the constitution. Anthropic reports CAI-trained models produce 40% fewer harmful outputs than pure-RLHF baselines while staying equally helpful.</p>
+        <p class="card-footnote">Constitution is versioned and public — last update Jan 2026.</p>
+      </article>
+
+      <article class="magic-card">
+        <span class="card-tag"><span class="num">03</span> · Method</span>
+        <h3 class="card-title">Red-teaming</h3>
+        <p class="card-body">Adversarial probing before release. Internal teams, external researchers, and now automated attacker-models hunt for jailbreaks, harmful behaviors, and capability surprises. Findings flow back into training data and refusal policies. Every frontier release ships with a red-team report; the gap between published and unpublished findings is itself a safety question.</p>
+        <p class="card-footnote">External programs: Anthropic, OpenAI, DeepMind bug bounties.</p>
+      </article>
+
+      <article class="magic-card">
+        <span class="card-tag"><span class="num">04</span> · Method</span>
+        <h3 class="card-title">Mechanistic interpretability</h3>
+        <p class="card-body">The science of reading the model's internals — circuits, features, attention patterns — to understand what computation it's actually performing. This is the most ambitious branch of alignment, the one closest to a real answer. It's also where the field is most honest about its limits. As one prominent researcher put it in 2026: "I don't see a path to deeply and reliably understanding what AIs are thinking."</p>
+        <p class="card-footnote">Status: research moving from circuits → features → policies.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- CONSTITUTIONAL AI LOOP -->
+  <section class="section warm">
+    <div class="inner">
+      <p class="section-label animate-in">04 · Inside Constitutional AI</p>
+      <h2 class="section-heading animate-in">The model critiques itself, then revises.</h2>
+      <p class="section-lede animate-in">The Constitutional AI loop replaces a large chunk of human labeling with the model's own judgment, anchored to an explicit list of written principles. The result is cheaper to scale than RLHF and easier to audit, because the values are written down.</p>
+
+      <div class="loop-wrap animate-in">
+        <div class="loop">
+          <div class="loop-step">
+            <span class="num">Step 01</span>
+            <span class="title">Generate</span>
+            <span class="body">Model produces a candidate response to a prompt.</span>
+            <span class="loop-arrow">→</span>
+          </div>
+          <div class="loop-step">
+            <span class="num">Step 02</span>
+            <span class="title">Self-critique</span>
+            <span class="body">Model reads its own output and checks it against the constitution.</span>
+            <span class="loop-arrow">→</span>
+          </div>
+          <div class="loop-step">
+            <span class="num">Step 03</span>
+            <span class="title">Revise</span>
+            <span class="body">Model rewrites the response to address its own critique.</span>
+            <span class="loop-arrow">→</span>
+          </div>
+          <div class="loop-step">
+            <span class="num">Step 04</span>
+            <span class="title">Output</span>
+            <span class="body">Revised response returns to the pipeline.</span>
+          </div>
+        </div>
+
+        <div class="loop-return">
+          <strong>Loop:</strong> revised pairs become preference data → trains a reward model → fine-tunes the base model → repeat.
+        </div>
+
+        <div class="loop-constitution">
+          "Choose the response that is most supportive of life, liberty, and personal security. Avoid responses that are harmful, unethical, racist, sexist, toxic, dangerous, or illegal. Be helpful in a way a thoughtful, senior, kind person would be helpful."
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OPEN PROBLEMS -->
+  <section class="section">
+    <p class="section-label animate-in">05 · Open Problems</p>
+    <h2 class="section-heading animate-in">What none of this has solved.</h2>
+    <p class="section-lede animate-in">Honesty matters more here than in any other section. These are problems frontier labs publicly acknowledge they don't have answers to. If anyone tells you alignment is solved, they're either selling something or haven't read the literature.</p>
+
+    <div class="problems">
+      <div class="problem animate-in">
+        <div class="problem-number"></div>
+        <div>
+          <h3 class="problem-title">Layered defenses still bleed.</h3>
+          <p class="problem-body">Feedback-based jailbreak attacks retain residual success rates above 15% even against stacked, production-grade defenses. The cost-curve favors the attacker — generating a novel jailbreak is cheaper than blocking one.</p>
+        </div>
+      </div>
+
+      <div class="problem animate-in">
+        <div class="problem-number"></div>
+        <div>
+          <h3 class="problem-title">Interpretability hasn't caught up to capability.</h3>
+          <p class="problem-body">Understanding the circuits behind a single short prompt still takes hours of researcher time. Automated interpretability — using LLMs to explain LLMs — risks hallucinated explanations. The gap between "what the model can do" and "what we can audit it doing" is widening.</p>
+        </div>
+      </div>
+
+      <div class="problem animate-in">
+        <div class="problem-number"></div>
+        <div>
+          <h3 class="problem-title">Reward hacking and specification gaming.</h3>
+          <p class="problem-body">Models optimize for what reward models measure, not what humans meant. Subtle reward-model errors compound during fine-tuning into systematic, hard-to-detect behaviors. The smarter the model, the better it gets at gaming a flawed objective.</p>
+        </div>
+      </div>
+
+      <div class="problem animate-in">
+        <div class="problem-number"></div>
+        <div>
+          <h3 class="problem-title">Indirect prompt injection in agent loops.</h3>
+          <p class="problem-body">A model that reads tools, files, or web pages reads instructions embedded in them. As agentic systems take more actions on more surfaces, the attack surface compounds — and no current defense reliably distinguishes "data the model should consider" from "instructions the model should obey."</p>
+        </div>
+      </div>
+
+      <div class="problem animate-in">
+        <div class="problem-number"></div>
+        <div>
+          <h3 class="problem-title">Evaluation drift.</h3>
+          <p class="problem-body">Safety benchmarks leak into training data. Models score higher on the test, not safer on the world. Holdout sets degrade in months. Continuous, adversarial, in-the-wild evaluation is operationally expensive and methodologically immature.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLS -->
+  <section class="section warm">
+    <div class="inner">
+      <p class="section-label animate-in">06 · Tools Developers Can Use Today</p>
+      <h2 class="section-heading animate-in">Production-grade safety tooling, 2026.</h2>
+      <p class="section-lede animate-in">If you're shipping an LLM application this quarter, these are the names you'll evaluate. None replaces a thoughtful threat model — but each one closes attack surface a hand-rolled prompt cannot.</p>
+
+      <div class="tools">
+        <article class="tool animate-in">
+          <div class="tool-vendor">NVIDIA · Open-source</div>
+          <div class="tool-name">NeMo Guardrails</div>
+          <p class="tool-desc">Programmable rails (input, dialog, retrieval, execution, output) defined in the Colang DSL. Works with every major LLM provider; integrates with LangChain and LangGraph.</p>
+          <div class="tool-stage">Stage · all rails</div>
+        </article>
+
+        <article class="tool animate-in">
+          <div class="tool-vendor">Meta · Open weights</div>
+          <div class="tool-name">Llama Guard 4</div>
+          <p class="tool-desc">12B multimodal safeguard model aligned to the MLCommons hazards taxonomy. Drop-in input + output classifier; runs locally or via inference providers.</p>
+          <div class="tool-stage">Stage · input + output</div>
+        </article>
+
+        <article class="tool animate-in">
+          <div class="tool-vendor">OpenAI · Hosted API</div>
+          <div class="tool-name">Moderation API</div>
+          <p class="tool-desc">Free hosted classifier across 13 harm categories. Lowest-friction first line of defense for OpenAI-stack applications; pair with custom classifiers for domain-specific risk.</p>
+          <div class="tool-stage">Stage · input + output</div>
+        </article>
+
+        <article class="tool animate-in">
+          <div class="tool-vendor">Lakera · Commercial</div>
+          <div class="tool-name">Lakera Guard</div>
+          <p class="tool-desc">Real-time prompt-injection, jailbreak, and PII detection. Particularly strong on adversarial benchmarks where lightweight open classifiers degrade.</p>
+          <div class="tool-stage">Stage · input rails</div>
+        </article>
+      </div>
+
+      <p style="margin-top: 2rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-muted); text-align: center;">
+        Honorable mentions: Microsoft Azure AI Content Safety · LLM Guard · Prompt Armor · Guardrails AI · Langfuse evals.
+      </p>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <h2>Safety is a posture, not a feature.</h2>
+    <p>If you're deploying LLMs in production — for customers, employees, or agents acting on your behalf — CETI runs an executive workshop on the threat model, the tooling, and the policies you need before launch.</p>
+    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
+      Book a safety workshop
+      <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span>CETI · Lookbook · AI Safety &amp; Alignment</span>
+    <span><a href="../index.html">← All concepts</a></span>
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION-DRIVEN REVEALS ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+
+    document.querySelectorAll('.animate-in, .magic-card').forEach((el) => reveal.observe(el));
+
+    // ============ NUMBER TICKER ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1400;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num[data-to]').forEach((el) => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ MAGIC CARDS (cursor-follow glow) ============
+    document.querySelectorAll('.magic-card').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ============ PIPELINE PACKETS ============
+    // Spawns small "packet" dots that travel along the horizontal pipeline.
+    // Most pass (green); some get blocked at filter stages (vermillion to the blocked tray).
+    (function pipeline() {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+
+      const track = document.getElementById('flowTrack');
+      const pipeline = document.getElementById('pipeline');
+      if (!track || !pipeline) return;
+
+      // Wait for pipeline visible before spawning
+      let active = false;
+      new IntersectionObserver((entries) => {
+        entries.forEach((e) => { active = e.isIntersecting; });
+      }, { threshold: 0.25 }).observe(pipeline);
+
+      // Stage centers (computed in % relative to pipeline width)
+      function stageCenters() {
+        const rect = pipeline.getBoundingClientRect();
+        const stages = pipeline.querySelectorAll('.stage');
+        return [...stages].map((s) => {
+          const r = s.getBoundingClientRect();
+          return ((r.left + r.width / 2) - rect.left) / rect.width * 100;
+        });
+      }
+
+      function spawn() {
+        if (!active) return;
+        const centers = stageCenters();
+        if (centers.length < 5) return;
+
+        const blocked = Math.random() < 0.32;
+        // If blocked, it stops at stage 2 (input filter, index 1) or stage 4 (output filter, index 3)
+        const stopAt = blocked ? (Math.random() < 0.55 ? 1 : 3) : 4;
+
+        const packet = document.createElement('div');
+        packet.className = 'packet ' + (blocked ? 'block' : 'pass');
+        packet.style.left = centers[0] + '%';
+        track.appendChild(packet);
+
+        // Animate through each stage center
+        const dur = 2600 + Math.random() * 800;
+        const startTime = performance.now();
+        const startLeft = centers[0];
+        const endLeft = centers[stopAt];
+
+        function step(now) {
+          const p = Math.min((now - startTime) / dur, 1);
+          const eased = 1 - Math.pow(1 - p, 2);
+          packet.style.left = (startLeft + (endLeft - startLeft) * eased) + '%';
+          packet.style.opacity = p < 0.08 ? p / 0.08 : (p > 0.92 ? (1 - p) / 0.08 : 1);
+          if (p < 1) {
+            requestAnimationFrame(step);
+          } else {
+            // If blocked, briefly flash red then drop down to blocked tray (off the visible track)
+            if (blocked) {
+              packet.style.transition = 'transform 400ms var(--ease-out), opacity 400ms var(--ease-out)';
+              packet.style.transform = 'translate(-50%, calc(-50% + 80px))';
+              packet.style.opacity = 0;
+            }
+            setTimeout(() => packet.remove(), 500);
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      // Spawn at staggered intervals
+      setInterval(spawn, 700);
+    })();
+  </script>
+
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

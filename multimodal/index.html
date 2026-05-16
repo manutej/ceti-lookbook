@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multimodal AI — Pixels, text, sound, one model · CETI.AI Lookbook</title>
+  <meta name="description" content="Vision, audio, video — how multimodal frontier models (GPT-4o, Claude 4, Gemini 3, Llama 3.2 Vision) fuse separate input streams into a single embedding space and reason across them.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-bg-code: #1E1E2E;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+
+      /* Accent rotation — vision / text / audio / unified */
+      --color-accent:        #D94F30;   /* vermillion — unified / hero */
+      --color-accent-hover:  #C4432A;
+      --color-accent-light:  #FDEEE9;
+      --color-accent-muted:  #E8836C;
+
+      --color-vision:        #2A7B9B;   /* teal — image */
+      --color-vision-light:  #E4F2F7;
+      --color-text-stream:   #D4A843;   /* golden — text */
+      --color-text-light:    #FAEFD2;
+      --color-audio:         #7B6DAA;   /* plum — audio */
+      --color-audio-light:   #ECE7F4;
+      --color-output:        #2D8B55;   /* forest — output */
+      --color-output-light:  #DDEEE4;
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body:    'DM Sans', -apple-system, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast:   150ms;
+      --duration-normal: 300ms;
+      --duration-slow:   500ms;
+      --duration-slower: 700ms;
+      --stagger:         100ms;
+
+      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 12% 18%, rgba(42, 123, 155, 0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 88% 8%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 65% 92%, rgba(123, 109, 170, 0.04) 0%, transparent 55%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ LAYOUT ============ */
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ============ NAV ============ */
+    .topnav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(10px);
+      background: rgba(250, 247, 242, 0.85);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .topnav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1.5rem; max-width: 1120px; margin: 0 auto;
+    }
+    .topnav-brand {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+    }
+    .topnav-brand strong { color: var(--color-accent); }
+    .topnav-links { display: flex; gap: 1.25rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .topnav-links a { color: var(--color-text-muted); text-decoration: none; transition: color 200ms; }
+    .topnav-links a:hover { color: var(--color-accent); }
+
+    /* ============ HERO ============ */
+    .hero {
+      padding: 5rem 1.5rem 3rem;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .eyebrow .dot { color: var(--color-text-muted); margin: 0 0.4rem; }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(2.4rem, 6.5vw, 4.8rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 1.5rem 0 1.5rem;
+      max-width: 16ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(24px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay:  80ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 160ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 240ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 320ms; }
+    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 400ms; }
+    .hero.visible .hero-title .word:nth-child(6) { transition-delay: 480ms; }
+
+    .ink-vision { color: var(--color-vision); }
+    .ink-text   { color: var(--color-text-stream); }
+    .ink-audio  { color: var(--color-audio); }
+    .ink-unify  { color: var(--color-accent); }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 620ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .hero-meta {
+      display: flex; gap: 2rem; margin-top: 2.5rem; flex-wrap: wrap;
+      font-family: var(--font-mono); font-size: 0.78rem;
+      opacity: 0; transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 780ms;
+    }
+    .hero.visible .hero-meta { opacity: 1; }
+    .meta-cell { color: var(--color-text-muted); }
+    .meta-cell strong { display:block; color: var(--color-text); font-size: 1rem; margin-top: 0.15rem; font-weight: 500; }
+
+    /* ============ FUSION (THE SIGNATURE VISUAL) ============ */
+    .fusion-section {
+      padding: 3rem 1.5rem 6rem;
+      max-width: 1120px; margin: 0 auto;
+    }
+    .fusion-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--color-text-muted); margin-bottom: 0.5rem;
+    }
+    .fusion-heading {
+      font-family: var(--font-display); font-weight: 700;
+      font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+      letter-spacing: -0.02em; margin: 0 0 0.6rem;
+    }
+    .fusion-sub {
+      color: var(--color-text-secondary);
+      max-width: 56ch; margin: 0 0 2.5rem;
+    }
+
+    .fusion {
+      position: relative;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      padding: 2rem 1.5rem 2.5rem;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    .fusion-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 0;
+    }
+    .input-col {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-light);
+      border-radius: 14px;
+      padding: 1.25rem 1rem;
+      min-height: 200px;
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+    .input-tag {
+      font-family: var(--font-mono); font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0.2rem 0.55rem; border-radius: 999px;
+      align-self: flex-start;
+      margin-bottom: 0.85rem;
+    }
+    .col-vision .input-tag { color: var(--color-vision); background: var(--color-vision-light); }
+    .col-text   .input-tag { color: var(--color-text-stream); background: var(--color-text-light); }
+    .col-audio  .input-tag { color: var(--color-audio); background: var(--color-audio-light); }
+
+    .input-canvas {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Vision: morphing geometric SVG */
+    .shape-stage {
+      width: 100%; max-width: 120px; aspect-ratio: 1;
+      position: relative;
+    }
+    .shape-stage svg {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      opacity: 0;
+      transition: opacity 600ms var(--ease-out);
+    }
+    .shape-stage svg.on { opacity: 1; }
+
+    /* Text: typing snippet */
+    .text-snippet {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--color-text);
+      line-height: 1.55;
+      width: 100%;
+      min-height: 90px;
+    }
+    .text-snippet .prompt { color: var(--color-text-stream); }
+    .text-cursor {
+      display: inline-block; width: 7px; height: 1em;
+      background: var(--color-text-stream); vertical-align: -2px;
+      animation: blink 1s steps(2, end) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Audio: waveform bars */
+    .wave {
+      display: flex; align-items: flex-end;
+      gap: 4px; height: 90px;
+      width: 100%; justify-content: center;
+    }
+    .wave .bar {
+      width: 5px;
+      background: var(--color-audio);
+      border-radius: 3px;
+      transform-origin: bottom;
+      animation: wavebar 1.2s ease-in-out infinite;
+    }
+    .wave .bar:nth-child(1)  { animation-delay: 0.00s; height: 30%; }
+    .wave .bar:nth-child(2)  { animation-delay: 0.08s; height: 55%; }
+    .wave .bar:nth-child(3)  { animation-delay: 0.16s; height: 80%; }
+    .wave .bar:nth-child(4)  { animation-delay: 0.24s; height: 45%; }
+    .wave .bar:nth-child(5)  { animation-delay: 0.32s; height: 70%; }
+    .wave .bar:nth-child(6)  { animation-delay: 0.40s; height: 35%; }
+    .wave .bar:nth-child(7)  { animation-delay: 0.48s; height: 60%; }
+    .wave .bar:nth-child(8)  { animation-delay: 0.20s; height: 85%; }
+    .wave .bar:nth-child(9)  { animation-delay: 0.10s; height: 40%; }
+    .wave .bar:nth-child(10) { animation-delay: 0.30s; height: 65%; }
+    .wave .bar:nth-child(11) { animation-delay: 0.05s; height: 50%; }
+    .wave .bar:nth-child(12) { animation-delay: 0.36s; height: 75%; }
+    @keyframes wavebar {
+      0%, 100% { transform: scaleY(0.55); opacity: 0.75; }
+      50%      { transform: scaleY(1.05); opacity: 1; }
+    }
+
+    .input-caption {
+      font-family: var(--font-mono); font-size: 0.68rem;
+      color: var(--color-text-muted);
+      text-align: center; margin-top: 0.75rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* The token-stream pipe */
+    .fusion-pipe {
+      position: relative;
+      margin-top: 1.75rem;
+      height: 64px;
+    }
+    .pipe-track {
+      position: absolute;
+      left: 8%; right: 8%;
+      top: 50%; transform: translateY(-50%);
+      height: 2px;
+      background: linear-gradient(90deg,
+        var(--color-vision) 0%, var(--color-vision) 18%,
+        var(--color-text-stream) 22%, var(--color-text-stream) 48%,
+        var(--color-audio) 52%, var(--color-audio) 78%,
+        var(--color-accent) 82%, var(--color-accent) 100%);
+      border-radius: 1px;
+      opacity: 0.35;
+    }
+    .pipe-token {
+      position: absolute;
+      top: 50%;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 12px currentColor;
+      opacity: 0;
+      animation: token-flow 3.2s linear infinite;
+    }
+    .pipe-token.t1 { color: var(--color-vision); background: var(--color-vision); animation-delay: 0s; }
+    .pipe-token.t2 { color: var(--color-vision); background: var(--color-vision); animation-delay: 0.4s; }
+    .pipe-token.t3 { color: var(--color-text-stream); background: var(--color-text-stream); animation-delay: 0.8s; }
+    .pipe-token.t4 { color: var(--color-text-stream); background: var(--color-text-stream); animation-delay: 1.2s; }
+    .pipe-token.t5 { color: var(--color-audio); background: var(--color-audio); animation-delay: 1.6s; }
+    .pipe-token.t6 { color: var(--color-audio); background: var(--color-audio); animation-delay: 2.0s; }
+    .pipe-token.t7 { color: var(--color-accent); background: var(--color-accent); animation-delay: 2.4s; }
+    @keyframes token-flow {
+      0%   { left: 8%;  opacity: 0; }
+      10%  { opacity: 1; }
+      80%  { left: 78%; opacity: 1; }
+      92%  { left: 88%; opacity: 0; }
+      100% { left: 92%; opacity: 0; }
+    }
+
+    /* Unified model box + output */
+    .fusion-model-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      align-items: stretch;
+    }
+    .model-box {
+      background: var(--color-accent);
+      color: white;
+      border-radius: 14px;
+      padding: 1.5rem 1.25rem;
+      position: relative;
+      overflow: hidden;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .model-box::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,0.18), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.12), transparent 50%);
+      pointer-events: none;
+    }
+    .model-tag {
+      font-family: var(--font-mono); font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      opacity: 0.82; margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .model-name {
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 1.5rem; letter-spacing: -0.02em;
+      line-height: 1.1; position: relative;
+    }
+    .model-name small {
+      display: block;
+      font-family: var(--font-mono); font-weight: 400;
+      font-size: 0.7rem; letter-spacing: 0.1em;
+      opacity: 0.78; margin-top: 0.6rem; text-transform: uppercase;
+    }
+
+    .output-box {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-light);
+      border-radius: 14px;
+      padding: 1.25rem 1.1rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      color: var(--color-text);
+      position: relative;
+    }
+    .output-tag {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--color-output);
+      background: var(--color-output-light);
+      padding: 0.2rem 0.55rem; border-radius: 999px;
+      display: inline-block; margin-bottom: 0.65rem;
+    }
+    .output-box .key { color: var(--color-output); }
+    .output-box .str { color: var(--color-text-stream); }
+    .output-box .num { color: var(--color-accent); }
+    .output-box .punc { color: var(--color-text-muted); }
+
+    /* ============ BENTO ============ */
+    .section {
+      padding: 4rem 1.5rem;
+      max-width: 1120px; margin: 0 auto;
+    }
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--color-text-muted);
+    }
+    .section-heading {
+      font-family: var(--font-display); font-weight: 700;
+      font-size: clamp(1.7rem, 3.6vw, 2.4rem);
+      letter-spacing: -0.02em; margin: 0.5rem 0 0.6rem;
+    }
+    .section-sub {
+      color: var(--color-text-secondary);
+      max-width: 56ch; margin: 0 0 2.5rem;
+    }
+
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: minmax(190px, auto);
+      gap: 1rem;
+    }
+    .tile {
+      position: relative;
+      padding: 1.5rem;
+      border-radius: 16px;
+      background:
+        radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(217, 79, 48, 0.06), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal);
+      opacity: 0; transform: translateY(20px);
+    }
+    .tile.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring); }
+    .tile.visible:hover { border-color: var(--color-accent-muted); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+    .tile.span-2 { grid-column: span 2; }
+
+    .tile-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0.22rem 0.6rem; border-radius: 999px;
+      display: inline-block;
+    }
+    .tag-vision { color: var(--color-vision); background: var(--color-vision-light); }
+    .tag-text   { color: var(--color-text-stream); background: var(--color-text-light); }
+    .tag-audio  { color: var(--color-audio); background: var(--color-audio-light); }
+    .tag-unify  { color: var(--color-accent); background: var(--color-accent-light); }
+
+    .tile-title {
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 1.3rem; letter-spacing: -0.01em;
+      margin: 0.85rem 0 0.5rem;
+    }
+    .tile-body {
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      margin: 0;
+    }
+    .tile-foot {
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* Mini diagrams inside tiles */
+    .mini-stage {
+      margin-top: 1rem; height: 56px; position: relative;
+    }
+    .mini-doc {
+      position: absolute; left: 0; top: 0;
+      width: 42px; height: 54px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-vision);
+      border-radius: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+    .mini-doc::before, .mini-doc::after {
+      content: ""; position: absolute; left: 6px; right: 6px; height: 2px;
+      background: var(--color-vision); opacity: 0.6; border-radius: 1px;
+    }
+    .mini-doc::before { top: 10px; }
+    .mini-doc::after  { top: 18px; right: 14px; }
+    .mini-doc-lines {
+      position: absolute; left: 6px; right: 6px; top: 24px;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .mini-doc-lines span {
+      height: 2px; background: var(--color-vision); opacity: 0.35; border-radius: 1px;
+    }
+    .mini-arrow {
+      position: absolute; left: 52px; top: 50%; transform: translateY(-50%);
+      width: 30px; height: 1px; background: var(--color-text-muted);
+    }
+    .mini-arrow::after {
+      content: ""; position: absolute; right: 0; top: -3px;
+      width: 0; height: 0;
+      border-left: 6px solid var(--color-text-muted);
+      border-top: 3px solid transparent; border-bottom: 3px solid transparent;
+    }
+    .mini-text-out {
+      position: absolute; left: 90px; top: 50%; transform: translateY(-50%);
+      font-family: var(--font-mono); font-size: 0.7rem;
+      color: var(--color-text);
+      line-height: 1.4;
+    }
+    .mini-text-out span { color: var(--color-vision); }
+
+    .mini-wave {
+      display: flex; align-items: flex-end; gap: 3px;
+      height: 36px; margin-top: 0.5rem;
+    }
+    .mini-wave .b {
+      width: 3px; background: var(--color-audio);
+      border-radius: 2px;
+      animation: wavebar 1.3s ease-in-out infinite;
+    }
+    .mini-wave .b:nth-child(odd)  { height: 80%; animation-delay: 0.1s; }
+    .mini-wave .b:nth-child(even) { height: 50%; animation-delay: 0.3s; }
+    .mini-wave .b:nth-child(3n)   { height: 95%; animation-delay: 0.0s; }
+    .mini-wave .b:nth-child(5n)   { height: 35%; animation-delay: 0.45s; }
+
+    .mini-video {
+      margin-top: 0.75rem;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 4px; height: 44px;
+    }
+    .mini-video .frame {
+      background: linear-gradient(135deg, rgba(123, 109, 170, 0.18), rgba(217, 79, 48, 0.12));
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mini-video .frame::before {
+      content: "";
+      position: absolute; inset: 30% 35% 30% 35%;
+      background: var(--color-text-secondary);
+      opacity: 0.4;
+      border-radius: 50%;
+    }
+    .mini-video .frame:nth-child(2)::before { inset: 25% 30% 35% 40%; }
+    .mini-video .frame:nth-child(3)::before { inset: 35% 40% 25% 30%; }
+    .mini-video .frame:nth-child(4)::before { inset: 30% 25% 30% 45%; }
+
+    .mini-unify {
+      margin-top: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      height: 50px;
+    }
+    .uni-node {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+      flex-shrink: 0;
+    }
+    .uni-v { background: var(--color-vision-light); color: var(--color-vision); border: 1px solid var(--color-vision); }
+    .uni-t { background: var(--color-text-light); color: var(--color-text-stream); border: 1px solid var(--color-text-stream); }
+    .uni-a { background: var(--color-audio-light); color: var(--color-audio); border: 1px solid var(--color-audio); }
+    .uni-arrow { flex: 1; height: 1px; background: var(--color-border); position: relative; }
+    .uni-arrow::after {
+      content: ""; position: absolute; right: 0; top: -3px;
+      border-left: 5px solid var(--color-border);
+      border-top: 3px solid transparent; border-bottom: 3px solid transparent;
+    }
+    .uni-out {
+      padding: 0.25rem 0.6rem;
+      background: var(--color-accent); color: white;
+      font-family: var(--font-mono); font-size: 0.62rem;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      border-radius: 999px; font-weight: 500;
+    }
+
+    /* ============ MODEL MATRIX ============ */
+    .matrix-wrap {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .matrix th, .matrix td {
+      padding: 0.95rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .matrix thead th {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      background: var(--color-bg-warm);
+      font-weight: 500;
+    }
+    .matrix tbody tr:last-child td { border-bottom: none; }
+    .matrix tbody tr { transition: background 200ms; }
+    .matrix tbody tr:hover { background: var(--color-bg-warm); }
+
+    .model-cell strong {
+      display: block;
+      font-family: var(--font-display); font-size: 1.05rem; font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .model-cell small {
+      font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+    }
+    .cap {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+    }
+    .cap.yes   { color: var(--color-output); background: var(--color-output-light); }
+    .cap.text  { color: var(--color-text-stream); background: var(--color-text-light); }
+    .cap.in    { color: var(--color-vision); background: var(--color-vision-light); }
+    .cap.no    { color: var(--color-text-muted); background: var(--color-border-light); }
+
+    .ctx { font-family: var(--font-mono); font-size: 0.82rem; color: var(--color-text); }
+    .ctx small { color: var(--color-text-muted); }
+
+    /* ============ CODE ============ */
+    .code-section .codeframe {
+      background: var(--color-bg-code);
+      border-radius: 16px;
+      padding: 1.5rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .code-tag {
+      position: absolute; top: 1rem; right: 1rem;
+      font-family: var(--font-mono); font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: #6C7086;
+    }
+    .code-section pre {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #CDD6F4;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .ck { color: #CBA6F7; }   /* keyword */
+    .cs { color: #A6E3A1; }   /* string */
+    .cf { color: #89B4FA; }   /* function */
+    .cc { color: #6C7086; }   /* comment */
+    .cp { color: #F9E2AF; }   /* property */
+    .cn { color: #FAB387; }   /* number */
+
+    /* ============ STATS ============ */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .stat {
+      padding: 1.5rem 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .stat.visible { opacity: 1; transform: translateY(0); }
+    .stat:nth-child(2).visible { transition-delay:  80ms; }
+    .stat:nth-child(3).visible { transition-delay: 160ms; }
+    .stat:nth-child(4).visible { transition-delay: 240ms; }
+
+    .stat-val {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3.6vw, 2.4rem);
+      font-weight: 700; line-height: 1;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-val .unit { color: var(--color-accent); font-size: 0.65em; margin-left: 0.1rem; }
+    .stat-label {
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+    }
+
+    /* ============ CTA ============ */
+    .final {
+      padding: 5rem 1.5rem 7rem;
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 1rem;
+    }
+    .final p { color: var(--color-text-secondary); margin-bottom: 2rem; }
+
+    .magnetic {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      padding: 1rem 1.85rem;
+      border-radius: 9999px;
+      background: var(--color-accent); color: white;
+      font-family: var(--font-body); font-weight: 500; font-size: 1rem;
+      border: none; cursor: pointer; text-decoration: none;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+
+    .secondary {
+      display: inline-block; margin-left: 1.25rem;
+      color: var(--color-text-secondary);
+      text-decoration: none; font-size: 0.95rem;
+      transition: color 200ms;
+    }
+    .secondary:hover { color: var(--color-accent); }
+
+    /* Footer */
+    .foot {
+      padding: 2rem 1.5rem 3rem;
+      max-width: 1120px; margin: 0 auto;
+      border-top: 1px solid var(--color-border-light);
+      font-family: var(--font-mono); font-size: 0.72rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.05em;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .foot a { color: var(--color-text-muted); text-decoration: none; }
+    .foot a:hover { color: var(--color-accent); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 880px) {
+      .bento { grid-template-columns: 1fr 1fr; }
+      .tile.span-2 { grid-column: span 2; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .fusion-model-row { grid-template-columns: 1fr; }
+      .matrix { font-size: 0.82rem; }
+      .matrix th, .matrix td { padding: 0.7rem 0.6rem; }
+      .topnav-links { display: none; }
+    }
+    @media (max-width: 640px) {
+      .fusion-inputs { grid-template-columns: 1fr; }
+      .fusion-pipe {
+        height: 80px; margin: 1.5rem 0;
+      }
+      .pipe-track {
+        left: 50%; top: 8%; bottom: 8%;
+        width: 2px; height: auto;
+        transform: translateX(-50%);
+        background: linear-gradient(180deg,
+          var(--color-vision) 0%, var(--color-vision) 18%,
+          var(--color-text-stream) 22%, var(--color-text-stream) 48%,
+          var(--color-audio) 52%, var(--color-audio) 78%,
+          var(--color-accent) 82%, var(--color-accent) 100%);
+      }
+      .pipe-token { animation: token-flow-v 3.2s linear infinite; left: 50% !important; }
+      @keyframes token-flow-v {
+        0%   { top: 8%;  opacity: 0; }
+        10%  { opacity: 1; }
+        80%  { top: 80%; opacity: 1; }
+        92%  { top: 92%; opacity: 0; }
+        100% { top: 100%; opacity: 0; }
+      }
+      .input-col { min-height: 170px; }
+      .hero-title { max-width: 100%; }
+    }
+    @media (max-width: 520px) {
+      .bento { grid-template-columns: 1fr; }
+      .tile.span-2 { grid-column: auto; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .matrix thead { display: none; }
+      .matrix, .matrix tbody, .matrix tr, .matrix td { display: block; width: 100%; }
+      .matrix tr { padding: 0.85rem; border-bottom: 1px solid var(--color-border-light); }
+      .matrix td { padding: 0.25rem 0; border: none; }
+      .matrix td::before {
+        content: attr(data-label);
+        font-family: var(--font-mono); font-size: 0.65rem;
+        color: var(--color-text-muted); text-transform: uppercase;
+        letter-spacing: 0.1em; display: block; margin-bottom: 0.15rem;
+      }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .hero-meta, .eyebrow,
+      .stat, .tile { opacity: 1 !important; transform: none !important; }
+      .pipe-token { display: none; }
+      .wave .bar, .mini-wave .b { animation: none; transform: scaleY(0.75); }
+      .text-cursor { animation: none; }
+      .shape-stage svg.on { opacity: 1; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .tile:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <a class="topnav-brand" href="../">CETI <strong>·</strong> Lookbook</a>
+      <div class="topnav-links">
+        <a href="#fusion">Fusion</a>
+        <a href="#unlocks">Unlocks</a>
+        <a href="#models">Models</a>
+        <a href="#code">Code</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero" id="hero">
+    <p class="eyebrow">MULTIMODAL <span class="dot">·</span> VISION <span class="dot">·</span> AUDIO <span class="dot">·</span> VIDEO</p>
+    <h1 class="hero-title">
+      <span class="word"><span class="ink-vision">Pixels,</span></span>
+      <span class="word"><span class="ink-text">text,</span></span>
+      <span class="word"><span class="ink-audio">sound</span></span>
+      <span class="word">—</span>
+      <span class="word">one</span>
+      <span class="word"><span class="ink-unify">model.</span></span>
+    </h1>
+    <p class="hero-sub">
+      The frontier of 2026: image, text, and audio streams pass through modality-specific encoders, then meet in a shared embedding space. The model reasons across them as if they were one substance. This is what makes a screenshot "readable," a podcast "summarisable," and a video "queryable."
+    </p>
+    <div class="hero-meta">
+      <div class="meta-cell">Audience<strong>Mid-level</strong></div>
+      <div class="meta-cell">Frontier models<strong>GPT-4o · Claude 4 · Gemini 3 · Llama 3.2-V</strong></div>
+      <div class="meta-cell">Reading time<strong>9 min</strong></div>
+    </div>
+  </header>
+
+  <!-- SIGNATURE FUSION VISUAL -->
+  <section class="fusion-section" id="fusion">
+    <p class="fusion-eyebrow">01 · The signature insight</p>
+    <h2 class="fusion-heading">Three streams. One embedding space. One reasoning loop.</h2>
+    <p class="fusion-sub">
+      Each modality has its own encoder — a vision transformer for image patches, a tokeniser for text, a Whisper-style encoder for audio frames. Their outputs land in the same vector space, where the language model treats them as just more tokens to attend to.
+    </p>
+
+    <div class="fusion">
+      <div class="fusion-inputs">
+
+        <!-- VISION COLUMN -->
+        <div class="input-col col-vision">
+          <span class="input-tag">Vision · image patches</span>
+          <div class="input-canvas">
+            <div class="shape-stage" id="shape-stage" aria-hidden="true">
+              <svg viewBox="0 0 100 100" class="on" data-i="0">
+                <rect x="18" y="18" width="64" height="64" rx="8" fill="none" stroke="#2A7B9B" stroke-width="3"/>
+                <circle cx="50" cy="50" r="14" fill="#2A7B9B" opacity="0.55"/>
+              </svg>
+              <svg viewBox="0 0 100 100" data-i="1">
+                <polygon points="50,14 86,50 50,86 14,50" fill="none" stroke="#2A7B9B" stroke-width="3"/>
+                <polygon points="50,32 68,50 50,68 32,50" fill="#2A7B9B" opacity="0.55"/>
+              </svg>
+              <svg viewBox="0 0 100 100" data-i="2">
+                <circle cx="50" cy="50" r="34" fill="none" stroke="#2A7B9B" stroke-width="3"/>
+                <rect x="34" y="34" width="32" height="32" rx="2" fill="#2A7B9B" opacity="0.55"/>
+              </svg>
+              <svg viewBox="0 0 100 100" data-i="3">
+                <polygon points="50,16 84,82 16,82" fill="none" stroke="#2A7B9B" stroke-width="3"/>
+                <circle cx="50" cy="60" r="12" fill="#2A7B9B" opacity="0.55"/>
+              </svg>
+            </div>
+          </div>
+          <div class="input-caption">→ patch tokens · 14×14 grid</div>
+        </div>
+
+        <!-- TEXT COLUMN -->
+        <div class="input-col col-text">
+          <span class="input-tag">Text · BPE tokens</span>
+          <div class="input-canvas">
+            <div class="text-snippet">
+              <div class="prompt">user&gt;</div>
+              <div><span id="typed">describe what you see and hear</span><span class="text-cursor"></span></div>
+            </div>
+          </div>
+          <div class="input-caption">→ ~6 tokens · 24 bytes</div>
+        </div>
+
+        <!-- AUDIO COLUMN -->
+        <div class="input-col col-audio">
+          <span class="input-tag">Audio · mel spectrogram</span>
+          <div class="input-canvas">
+            <div class="wave" aria-hidden="true">
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+          </div>
+          <div class="input-caption">→ frame tokens · 25ms windows</div>
+        </div>
+      </div>
+
+      <!-- TOKEN PIPE -->
+      <div class="fusion-pipe" aria-hidden="true">
+        <div class="pipe-track"></div>
+        <div class="pipe-token t1"></div>
+        <div class="pipe-token t2"></div>
+        <div class="pipe-token t3"></div>
+        <div class="pipe-token t4"></div>
+        <div class="pipe-token t5"></div>
+        <div class="pipe-token t6"></div>
+        <div class="pipe-token t7"></div>
+      </div>
+
+      <!-- MODEL + OUTPUT -->
+      <div class="fusion-model-row">
+        <div class="model-box">
+          <div class="model-tag">Shared embedding space</div>
+          <div class="model-name">Unified transformer
+            <small>cross-modal attention</small>
+          </div>
+        </div>
+        <div class="output-box">
+          <span class="output-tag">Structured output</span>
+<pre style="margin:0; font-family:inherit; font-size:inherit; line-height:inherit;">{
+  <span class="key">"scene"</span><span class="punc">:</span> <span class="str">"a kitchen, two people talking"</span><span class="punc">,</span>
+  <span class="key">"objects"</span><span class="punc">:</span> [<span class="str">"kettle"</span><span class="punc">,</span> <span class="str">"mug"</span>]<span class="punc">,</span>
+  <span class="key">"speech"</span><span class="punc">:</span> <span class="str">"morning, want tea?"</span><span class="punc">,</span>
+  <span class="key">"sentiment"</span><span class="punc">:</span> <span class="str">"warm"</span><span class="punc">,</span>
+  <span class="key">"confidence"</span><span class="punc">:</span> <span class="num">0.94</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT EACH MODALITY UNLOCKS -->
+  <section class="section" id="unlocks">
+    <p class="section-eyebrow">02 · What each modality unlocks</p>
+    <h2 class="section-heading">Four superpowers, one model.</h2>
+    <p class="section-sub">
+      Each modality changes the shape of problems the model can attack. The point isn't novelty — it's that the cost of switching tools (transcribe → summarise → caption → reason) drops to zero.
+    </p>
+
+    <div class="bento">
+      <article class="tile">
+        <span class="tile-tag tag-vision">VISION</span>
+        <h3 class="tile-title">Read documents and screenshots.</h3>
+        <p class="tile-body">Extract structured data from PDFs, parse UI screenshots, OCR receipts, understand charts. Image input ≈ <code style="font-family:var(--font-mono);">width × height ÷ 750</code> tokens on Claude.</p>
+        <div class="mini-stage" aria-hidden="true">
+          <div class="mini-doc">
+            <div class="mini-doc-lines"><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div class="mini-arrow"></div>
+          <div class="mini-text-out">{ <span>total</span>: 42.50,<br>&nbsp;&nbsp;<span>tax</span>: 3.50 }</div>
+        </div>
+        <div class="tile-foot">~1334 tokens · 1000×1000 px</div>
+      </article>
+
+      <article class="tile">
+        <span class="tile-tag tag-audio">AUDIO</span>
+        <h3 class="tile-title">Transcribe and respond in voice.</h3>
+        <p class="tile-body">Native audio in/out enables voice agents that hear tone, accent, and pauses — and reply with prosody. Latency drops from 2.8s (chained pipeline) to ~320ms.</p>
+        <div class="mini-wave" aria-hidden="true">
+          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
+          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
+          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
+          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
+          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
+        </div>
+        <div class="tile-foot">25ms frames · prosody preserved</div>
+      </article>
+
+      <article class="tile">
+        <span class="tile-tag tag-unify">VIDEO</span>
+        <h3 class="tile-title">Summarise and search across frames.</h3>
+        <p class="tile-body">Gemini 3 samples up to 10 FPS to catch fast actions; Claude 4 reads keyframes for narrative. Ask "where does the chart go up?" and get a timestamp.</p>
+        <div class="mini-video" aria-hidden="true">
+          <div class="frame"></div><div class="frame"></div><div class="frame"></div><div class="frame"></div>
+        </div>
+        <div class="tile-foot">10 FPS · multi-clip reasoning</div>
+      </article>
+
+      <article class="tile span-2">
+        <span class="tile-tag tag-unify">UNIFIED REASONING</span>
+        <h3 class="tile-title">Cross the streams.</h3>
+        <p class="tile-body">The real unlock isn't "vision OR audio OR text" — it's reasoning across them in the same prompt. Watch a tutorial video, listen to a customer call, paste a dashboard screenshot — and ask one question about all three. The model attends to every modality through the same self-attention layer.</p>
+        <div class="mini-unify" aria-hidden="true">
+          <div class="uni-node uni-v">V</div>
+          <div class="uni-node uni-t">T</div>
+          <div class="uni-node uni-a">A</div>
+          <div class="uni-arrow"></div>
+          <div class="uni-out">answer</div>
+        </div>
+        <div class="tile-foot">single forward pass · one context window</div>
+      </article>
+
+      <article class="tile">
+        <span class="tile-tag tag-text">TEXT</span>
+        <h3 class="tile-title">Still the glue.</h3>
+        <p class="tile-body">Text remains the cheapest modality and the lingua franca. Multimodal prompts almost always include a text instruction telling the model <em>what</em> to do with the other inputs.</p>
+        <div class="tile-foot">~$0.000003 / token in · always grounding</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- MODEL LANDSCAPE -->
+  <section class="section" id="models">
+    <p class="section-eyebrow">03 · The 2026 landscape</p>
+    <h2 class="section-heading">Four frontier models, picked per modality.</h2>
+    <p class="section-sub">
+      Most production deployments now route by modality — the leader on video isn't the leader on real-time audio. Multi-model routing is cheap; the quality lift per modality is large.
+    </p>
+
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Vision</th>
+            <th>Audio</th>
+            <th>Video</th>
+            <th>Context</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="model-cell" data-label="Model"><strong>Claude Opus 4.7</strong><small>Anthropic</small></td>
+            <td data-label="Vision"><span class="cap yes">In · hi-res 2576px</span></td>
+            <td data-label="Audio"><span class="cap no">— not yet</span></td>
+            <td data-label="Video"><span class="cap in">Keyframes</span></td>
+            <td data-label="Context" class="ctx">200K <small>· 1M beta</small></td>
+          </tr>
+          <tr>
+            <td class="model-cell" data-label="Model"><strong>GPT-4o / GPT-5</strong><small>OpenAI</small></td>
+            <td data-label="Vision"><span class="cap yes">In · structured</span></td>
+            <td data-label="Audio"><span class="cap yes">In + out · realtime</span></td>
+            <td data-label="Video"><span class="cap in">Frames + audio</span></td>
+            <td data-label="Context" class="ctx">128K <small>· 256K turbo</small></td>
+          </tr>
+          <tr>
+            <td class="model-cell" data-label="Model"><strong>Gemini 3 Pro</strong><small>Google DeepMind</small></td>
+            <td data-label="Vision"><span class="cap yes">In · charts/spatial</span></td>
+            <td data-label="Audio"><span class="cap yes">In + out · live API</span></td>
+            <td data-label="Video"><span class="cap yes">Native · 10 FPS</span></td>
+            <td data-label="Context" class="ctx">1M <small>· 2M preview</small></td>
+          </tr>
+          <tr>
+            <td class="model-cell" data-label="Model"><strong>Llama 3.2 Vision</strong><small>Meta · open weights</small></td>
+            <td data-label="Vision"><span class="cap yes">In · fine-tunable</span></td>
+            <td data-label="Audio"><span class="cap no">— separate model</span></td>
+            <td data-label="Video"><span class="cap no">— frame loop</span></td>
+            <td data-label="Context" class="ctx">128K <small>· self-hosted</small></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CODE -->
+  <section class="section code-section" id="code">
+    <p class="section-eyebrow">04 · The shape of a multimodal call</p>
+    <h2 class="section-heading">One request. Two modalities. Same response shape.</h2>
+    <p class="section-sub">
+      The API surface is almost boring — and that's the point. An image is just another content block alongside text.
+    </p>
+
+    <div class="codeframe">
+      <span class="code-tag">python · anthropic SDK</span>
+<pre><span class="ck">import</span> anthropic, base64, httpx
+
+<span class="cc"># Load an image as base64 — could equally be a local file</span>
+img_url = <span class="cs">"https://example.com/receipt.png"</span>
+img_b64 = base64.standard_b64encode(httpx.get(img_url).content).decode(<span class="cs">"utf-8"</span>)
+
+client = anthropic.<span class="cf">Anthropic</span>()
+msg = client.messages.<span class="cf">create</span>(
+    model=<span class="cs">"claude-opus-4-7"</span>,
+    max_tokens=<span class="cn">1024</span>,
+    messages=[{
+        <span class="cp">"role"</span>: <span class="cs">"user"</span>,
+        <span class="cp">"content"</span>: [
+            {<span class="cp">"type"</span>: <span class="cs">"image"</span>, <span class="cp">"source"</span>: {
+                <span class="cp">"type"</span>: <span class="cs">"base64"</span>,
+                <span class="cp">"media_type"</span>: <span class="cs">"image/png"</span>,
+                <span class="cp">"data"</span>: img_b64,
+            }},
+            {<span class="cp">"type"</span>: <span class="cs">"text"</span>, <span class="cp">"text"</span>: <span class="cs">"Extract total, tax, and date as JSON."</span>},
+        ],
+    }],
+)
+<span class="cf">print</span>(msg.content[<span class="cn">0</span>].text)
+<span class="cc"># → { "total": 42.50, "tax": 3.50, "date": "2026-05-15" }</span></pre>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="section">
+    <p class="section-eyebrow">05 · By the numbers</p>
+    <h2 class="section-heading">The economics of going multimodal.</h2>
+
+    <div class="stats">
+      <article class="stat">
+        <div class="stat-val"><span class="num" data-to="1334">0</span></div>
+        <div class="stat-label">Tokens per 1000×1000 image on Claude (width × height ÷ 750)</div>
+      </article>
+      <article class="stat">
+        <div class="stat-val"><span class="num" data-to="10">0</span><span class="unit">×</span></div>
+        <div class="stat-label">Gemini 3 video sampling vs default (10 FPS for fast actions)</div>
+      </article>
+      <article class="stat">
+        <div class="stat-val"><span class="num" data-to="320">0</span><span class="unit">ms</span></div>
+        <div class="stat-label">Native voice round-trip on GPT-4o realtime (vs ~2800ms chained)</div>
+      </article>
+      <article class="stat">
+        <div class="stat-val"><span class="num" data-to="2">0</span><span class="unit">M</span></div>
+        <div class="stat-label">Gemini 3 context — fits a 2-hour video plus a screenplay</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <h2>Build with all the senses.</h2>
+    <p>Multimodal isn't a feature toggle — it changes which problems are tractable. Train your team to think across modalities by default.</p>
+    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
+      Book a workshop
+      <span class="arrow">→</span>
+    </a>
+    <a class="secondary" href="../">← Back to the lookbook</a>
+  </section>
+
+  <footer class="foot">
+    <span>CETI.AI · Lookbook · Multimodal AI</span>
+    <span><a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a> · <a href="https://wa.me/16502832299">WhatsApp</a></span>
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION-DRIVEN REVEALS ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+    document.querySelectorAll('.stat, .tile').forEach((el) => reveal.observe(el));
+
+    // ============ NUMBER TICKER ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1100;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ MAGIC TILES (cursor-follow glow) ============
+    document.querySelectorAll('.tile').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ============ FUSION VISUAL — vision shape morph ============
+    (function() {
+      const stage = document.getElementById('shape-stage');
+      if (!stage) return;
+      const svgs = stage.querySelectorAll('svg');
+      let i = 0;
+      // Pause if reduced motion
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      setInterval(() => {
+        svgs[i].classList.remove('on');
+        i = (i + 1) % svgs.length;
+        svgs[i].classList.add('on');
+      }, 2200);
+    })();
+
+    // ============ FUSION VISUAL — text typing loop ============
+    (function() {
+      const el = document.getElementById('typed');
+      if (!el) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const phrases = [
+        'describe what you see and hear',
+        'summarise this meeting',
+        'what changed in the screenshot?',
+        'transcribe and extract action items'
+      ];
+      let pi = 0, ci = 0, deleting = false;
+
+      function tick() {
+        const full = phrases[pi];
+        if (!deleting) {
+          ci++;
+          el.textContent = full.slice(0, ci);
+          if (ci === full.length) {
+            deleting = true;
+            return setTimeout(tick, 1600);
+          }
+          return setTimeout(tick, 55 + Math.random() * 30);
+        } else {
+          ci--;
+          el.textContent = full.slice(0, ci);
+          if (ci === 0) {
+            deleting = false;
+            pi = (pi + 1) % phrases.length;
+            return setTimeout(tick, 400);
+          }
+          return setTimeout(tick, 28);
+        }
+      }
+      setTimeout(tick, 1200);
+    })();
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

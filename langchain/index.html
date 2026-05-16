@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LangChain Pipelines — Compose, don't code · CETI.AI Lookbook</title>
+  <meta name="description" content="A plain-English explanation of LangChain Expression Language (LCEL) and the pipe operator — for people who've heard of LangChain and want to understand how the pieces actually click together.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-bg-code: #1E1E2E;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+
+      --color-accent: #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-muted: #E8836C;
+      --color-accent-light: #FDEEE9;
+
+      --color-actor-2: #2A7B9B;
+      --color-actor-3: #7B6DAA;
+      --color-actor-4: #D4A843;
+      --color-actor-5: #2D8B55;
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+
+      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
+                        radial-gradient(ellipse at 85% 60%, rgba(42, 123, 155, 0.035) 0%, transparent 55%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: var(--color-accent-light); color: var(--color-accent-hover); }
+
+    /* ============ NAV STRIP ============ */
+    .top-strip {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .top-strip .brand { color: var(--color-text); font-weight: 500; }
+    .top-strip .brand b { color: var(--color-accent); font-weight: 500; }
+
+    /* ============ HERO ============ */
+    .hero {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 6rem 1.5rem 4rem;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.75rem, 7.5vw, 5.75rem);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      margin: 1.25rem 0 1.5rem;
+      max-width: 16ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity var(--duration-slower) var(--ease-spring),
+                  transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-accent);
+      position: relative;
+    }
+    .hero-title em::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0.08em;
+      height: 0.18em;
+      background: var(--color-accent-light);
+      z-index: -1;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 600ms var(--ease-out) 700ms;
+    }
+    .hero.visible .hero-title em::after { transform: scaleX(1); }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      margin: 0;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 540ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .cta-row {
+      display: flex;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 720ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 1.05rem 1.85rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms ease, box-shadow 300ms ease;
+      will-change: transform;
+      box-shadow: 0 6px 18px rgba(217, 79, 48, 0.28);
+      text-decoration: none;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); box-shadow: 0 10px 24px rgba(217, 79, 48, 0.38); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(4px); }
+
+    .secondary-link {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 200ms;
+    }
+    .secondary-link:hover { color: var(--color-accent); }
+
+    /* ============ PIPELINE — THE WOW VISUAL ============ */
+    .pipeline-section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem 6rem;
+    }
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-text-muted);
+      margin: 0 0 0.75rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      margin: 0 0 1rem;
+      max-width: 22ch;
+    }
+    .section-title em { font-style: normal; color: var(--color-accent); }
+    .section-lead {
+      color: var(--color-text-secondary);
+      max-width: 62ch;
+      font-size: 1.1rem;
+      margin: 0 0 3rem;
+    }
+
+    .pipeline-wrap {
+      position: relative;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 1.25rem;
+      padding: 3rem 2rem 2.25rem;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+    .pipeline-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top, rgba(217, 79, 48, 0.04), transparent 60%);
+      pointer-events: none;
+    }
+    .pipeline-input,
+    .pipeline-output {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .pipeline-output {
+      margin: 1.75rem 0 0;
+      justify-content: flex-end;
+      min-height: 1.4rem;
+    }
+    .output-caption {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      background: var(--color-accent-light);
+      color: var(--color-accent);
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+    }
+    .output-caption.show { opacity: 1; transform: translateY(0); }
+    .output-caption::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      box-shadow: 0 0 8px var(--color-accent);
+    }
+
+    .pipeline {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      min-height: 150px;
+    }
+
+    .stage {
+      position: relative;
+      padding: 1.25rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 0.85rem;
+      background: var(--color-bg);
+      text-align: center;
+      transition: transform var(--duration-normal) var(--ease-spring),
+                  border-color var(--duration-normal),
+                  box-shadow var(--duration-normal);
+      z-index: 2;
+    }
+    .stage.lit {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 4px var(--color-accent-light);
+      transform: translateY(-2px);
+    }
+    .stage-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .stage-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+      color: var(--color-text);
+    }
+    .stage-name b { color: var(--color-accent); }
+    .stage-glyph {
+      width: 24px; height: 24px;
+      margin: 0.55rem auto 0.4rem;
+      display: block;
+      color: var(--color-accent);
+    }
+
+    /* connecting rail (sits between stages) */
+    .rail {
+      position: absolute;
+      top: 50%;
+      left: 8%;
+      right: 8%;
+      height: 2px;
+      background: repeating-linear-gradient(
+        to right,
+        var(--color-accent-muted) 0 6px,
+        transparent 6px 12px
+      );
+      transform: translateY(-50%);
+      opacity: 0.5;
+      z-index: 1;
+    }
+
+    /* flowing packets */
+    .packets {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .packet {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translate(-50%, -50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: var(--color-surface);
+      border: 1.5px solid var(--color-accent);
+      box-shadow: 0 4px 14px rgba(217, 79, 48, 0.22),
+                  0 0 0 4px var(--color-accent-light);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--color-accent);
+      white-space: nowrap;
+      will-change: left, opacity;
+    }
+    .packet::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      box-shadow: 0 0 6px var(--color-accent);
+    }
+
+    @media (max-width: 720px) {
+      .pipeline { grid-template-columns: repeat(5, minmax(78px, 1fr)); gap: 0.35rem; min-height: 130px; overflow-x: auto; }
+      .stage { padding: 0.85rem 0.4rem; }
+      .stage-name { font-size: 0.78rem; }
+      .stage-label { font-size: 0.62rem; }
+      .packet { font-size: 0.62rem; padding: 0.25rem 0.5rem; }
+    }
+
+    /* paragraphs under the pipeline */
+    .pipe-prose {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3.5rem;
+    }
+    .pipe-prose p {
+      color: var(--color-text-secondary);
+      font-size: 1.02rem;
+      margin: 0;
+      line-height: 1.65;
+    }
+    .pipe-prose p .pipe-key {
+      font-family: var(--font-mono);
+      background: var(--color-accent-light);
+      color: var(--color-accent-hover);
+      padding: 0.1rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+    @media (max-width: 720px) { .pipe-prose { grid-template-columns: 1fr; gap: 1.5rem; } }
+
+    /* ============ RUNNABLE BENTO ============ */
+    .runnable-section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 5rem;
+    }
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .tile {
+      position: relative;
+      padding: 2rem 1.75rem;
+      border-radius: 1rem;
+      background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
+                  rgba(217, 79, 48, 0.07), transparent 40%),
+                  var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring),
+                  box-shadow var(--duration-normal);
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .tile.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring),
+                  transform var(--duration-slower) var(--ease-spring),
+                  border-color var(--duration-normal); }
+    .tile.visible:nth-child(2) { transition-delay: 80ms; }
+    .tile.visible:nth-child(3) { transition-delay: 160ms; }
+    .tile.visible:nth-child(4) { transition-delay: 240ms; }
+    @media (hover: hover) {
+      .tile.visible:hover { transform: translateY(-4px); border-color: var(--color-accent-muted); box-shadow: var(--shadow-lg); }
+    }
+
+    .tile-method {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--color-accent);
+      letter-spacing: -0.01em;
+    }
+    .tile-method .dot { color: var(--color-text-muted); }
+    .tile-headline {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+      margin: 0.75rem 0 0.4rem;
+      color: var(--color-text);
+    }
+    .tile-body {
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      margin: 0;
+      line-height: 1.55;
+    }
+    .tile-spark {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 1rem;
+      align-items: flex-end;
+      height: 14px;
+    }
+    .tile-spark span {
+      flex: 1;
+      background: var(--color-accent-muted);
+      border-radius: 2px;
+      opacity: 0.55;
+    }
+    .tile[data-method="invoke"] .tile-spark span:nth-child(1) { height: 100%; opacity: 1; background: var(--color-accent); }
+    .tile[data-method="invoke"] .tile-spark span:nth-child(2),
+    .tile[data-method="invoke"] .tile-spark span:nth-child(3),
+    .tile[data-method="invoke"] .tile-spark span:nth-child(4),
+    .tile[data-method="invoke"] .tile-spark span:nth-child(5) { display: none; }
+    .tile[data-method="batch"] .tile-spark span { height: 100%; opacity: 1; background: var(--color-accent); }
+    .tile[data-method="batch"] .tile-spark span:nth-child(2) { opacity: 0.8; }
+    .tile[data-method="batch"] .tile-spark span:nth-child(3) { opacity: 0.65; }
+    .tile[data-method="batch"] .tile-spark span:nth-child(4) { opacity: 0.5; }
+    .tile[data-method="batch"] .tile-spark span:nth-child(5) { opacity: 0.4; }
+    .tile[data-method="stream"] .tile-spark span { height: 50%; background: var(--color-accent); animation: stream-pulse 1.6s ease-in-out infinite; }
+    .tile[data-method="stream"] .tile-spark span:nth-child(2) { animation-delay: 0.12s; }
+    .tile[data-method="stream"] .tile-spark span:nth-child(3) { animation-delay: 0.24s; }
+    .tile[data-method="stream"] .tile-spark span:nth-child(4) { animation-delay: 0.36s; }
+    .tile[data-method="stream"] .tile-spark span:nth-child(5) { animation-delay: 0.48s; }
+    @keyframes stream-pulse {
+      0%, 100% { height: 30%; opacity: 0.4; }
+      50% { height: 100%; opacity: 1; }
+    }
+    .tile[data-method="ainvoke"] .tile-spark span { height: 60%; opacity: 0.8; }
+    .tile[data-method="ainvoke"] .tile-spark span:nth-child(1) { height: 100%; background: var(--color-accent); opacity: 1; }
+    .tile[data-method="ainvoke"] .tile-spark span:nth-child(3) { height: 80%; background: var(--color-accent); opacity: 1; }
+    .tile[data-method="ainvoke"] .tile-spark span:nth-child(5) { height: 90%; background: var(--color-accent); opacity: 1; }
+
+    @media (max-width: 920px) { .bento { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .bento { grid-template-columns: 1fr; } }
+
+    /* ============ CODE BLOCK ============ */
+    .code-section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 5rem;
+    }
+    .code-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    .code-wrap .lede h2 { margin-top: 0; }
+    .code-wrap .lede p { color: var(--color-text-secondary); margin: 0 0 1rem; }
+    .code-wrap pre {
+      background: var(--color-bg-code);
+      color: #CDD6F4;
+      border-radius: 1rem;
+      padding: 1.5rem 1.5rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.86rem;
+      line-height: 1.7;
+      overflow-x: hidden;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: var(--shadow-lg);
+      margin: 0;
+    }
+    .code-wrap pre .filename {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6C7086;
+      margin-bottom: 1rem;
+    }
+    .ck-kw { color: #CBA6F7; }
+    .ck-str { color: #A6E3A1; }
+    .ck-fn { color: #89B4FA; }
+    .ck-cmt { color: #6C7086; font-style: italic; }
+    .ck-op { color: #F38BA8; }
+    .ck-num { color: #FAB387; }
+    .ck-pipe { color: #F38BA8; font-weight: 700; }
+
+    @media (max-width: 920px) { .code-wrap { grid-template-columns: 1fr; gap: 1.5rem; } }
+
+    /* ============ NUMBER TICKER ============ */
+    .stats-section {
+      background: var(--color-bg-warm);
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      padding: 5rem 1.5rem;
+    }
+    .stats-inner { max-width: 1180px; margin: 0 auto; }
+    .stats-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 3rem; }
+    .stats-header h2 { font-family: var(--font-display); font-size: clamp(1.75rem, 3.2vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; margin: 0; max-width: 22ch; line-height: 1.05; }
+    .stats-header h2 em { font-style: normal; color: var(--color-accent); }
+    .stats-header p { font-family: var(--font-mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-text-muted); margin: 0; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .stat {
+      padding: 1.75rem 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 1rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .stat.visible { opacity: 1; transform: translateY(0); }
+    .stat.visible:nth-child(2) { transition-delay: 80ms; }
+    .stat.visible:nth-child(3) { transition-delay: 160ms; }
+    .stat.visible:nth-child(4) { transition-delay: 240ms; }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 2.85rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text);
+    }
+    .stat-value .unit { color: var(--color-accent); font-size: 0.65em; margin-left: 0.05em; }
+    .stat-value .plus { color: var(--color-accent); }
+    .stat-label {
+      margin-top: 0.65rem;
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 920px) { .stats { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .stats { grid-template-columns: 1fr; } }
+
+    /* ============ FINAL CTA ============ */
+    .final {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 6rem 1.5rem 7rem;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      margin: 0 0 1rem;
+    }
+    .final h2 em { font-style: normal; color: var(--color-accent); }
+    .final p {
+      color: var(--color-text-secondary);
+      margin: 0 auto 2.5rem;
+      max-width: 50ch;
+      font-size: 1.1rem;
+    }
+
+    /* ============ FOOT ============ */
+    .foot {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      border-top: 1px solid var(--color-border);
+    }
+    .foot a { color: var(--color-text-secondary); text-decoration: none; transition: color 200ms; }
+    .foot a:hover { color: var(--color-accent); }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .cta-row, .stat, .tile, .eyebrow,
+      .hero-title em::after { opacity: 1 !important; transform: none !important; }
+      .packet { display: none; }
+      .rail { opacity: 1; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-strip">
+    <span class="brand"><b>CETI.AI</b> · Lookbook</span>
+    <span>LANGCHAIN · COMPOSABLE LLM PIPELINES</span>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">LangChain · LCEL · Composable LLM Pipelines</p>
+    <h1 class="hero-title">
+      <span class="word">Compose,</span>
+      <span class="word">don't</span>
+      <span class="word"><em>code</em></span>
+      <span class="word">the glue.</span>
+    </h1>
+    <p class="hero-sub">LangChain pipelines let you snap together prompts, retrievers, models, and parsers with a single pipe character. The pieces don't care what's on either side — that's the whole trick.</p>
+    <div class="cta-row">
+      <a class="magnetic" href="#pipeline">
+        See it flow
+        <span class="arrow">→</span>
+      </a>
+      <a class="secondary-link" href="#code">Show me the code ↓</a>
+    </div>
+  </section>
+
+  <!-- PIPELINE WOW VISUAL -->
+  <section class="pipeline-section" id="pipeline">
+    <p class="section-eyebrow">The pipe operator</p>
+    <h2 class="section-title">One vertical bar. <em>Five stages.</em> Anything in between.</h2>
+    <p class="section-lead">LangChain Expression Language (LCEL) borrows the Unix pipe: write <code style="font-family:var(--font-mono); background:var(--color-accent-light); color:var(--color-accent-hover); padding:0.1rem 0.4rem; border-radius:6px; font-size:0.9em;">prompt | retriever | format | model | parser</code> and you have a working chain. Each piece implements the same <b>Runnable</b> contract, so order, swap, and reuse are free.</p>
+
+    <div class="pipeline-wrap" aria-hidden="true">
+      <div class="pipeline-input">
+        <span>INPUT</span>
+        <span style="color: var(--color-accent); font-family: var(--font-mono); text-transform: none; letter-spacing: 0;">&nbsp;"What's our return policy?"</span>
+      </div>
+
+      <div class="pipeline" id="pipelineGrid">
+        <div class="rail"></div>
+
+        <div class="stage" data-idx="0">
+          <div class="stage-label">01 · Prompt</div>
+          <div class="stage-name"><b>PROMPT</b></div>
+          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+        </div>
+        <div class="stage" data-idx="1">
+          <div class="stage-label">02 · Retrieve</div>
+          <div class="stage-name"><b>RETRIEVER</b></div>
+          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.3-4.3"/></svg>
+        </div>
+        <div class="stage" data-idx="2">
+          <div class="stage-label">03 · Format</div>
+          <div class="stage-name"><b>FORMAT</b></div>
+          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
+        </div>
+        <div class="stage" data-idx="3">
+          <div class="stage-label">04 · Model</div>
+          <div class="stage-name"><b>LLM</b></div>
+          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/><circle cx="12" cy="12" r="3.5"/></svg>
+        </div>
+        <div class="stage" data-idx="4">
+          <div class="stage-label">05 · Parse</div>
+          <div class="stage-name"><b>PARSER</b></div>
+          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5 4 12l4 7M16 5l4 7-4 7M14 4l-4 16"/></svg>
+        </div>
+
+        <div class="packets" id="packets"></div>
+      </div>
+
+      <div class="pipeline-output">
+        <span class="output-caption" id="outCaption">OUTPUT · structured JSON</span>
+      </div>
+    </div>
+
+    <div class="pipe-prose">
+      <p>The <span class="pipe-key">|</span> operator isn't a string-template hack. It's Python's <code style="font-family:var(--font-mono);">__or__</code> overloaded so every Runnable composes with every other Runnable — and the result is itself a Runnable. Sequences compose into sequences compose into pipelines.</p>
+      <p>That single property is why LCEL chains support streaming, batching, async, and tracing <em>for free</em>. You write one definition; LangChain gives you four execution modes without a second line of code.</p>
+    </div>
+  </section>
+
+  <!-- RUNNABLE BENTO -->
+  <section class="runnable-section">
+    <p class="section-eyebrow">The Runnable contract</p>
+    <h2 class="section-title">Four verbs. <em>Same pipeline.</em></h2>
+    <p class="section-lead">Every piece of an LCEL chain exposes the same four methods. Write your pipeline once and pick how it runs based on what you need.</p>
+
+    <div class="bento">
+      <article class="tile" data-method="invoke">
+        <div class="tile-spark"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="tile-method"><span class="dot">.</span>invoke<span class="dot">()</span></div>
+        <h3 class="tile-headline">One question, one answer.</h3>
+        <p class="tile-body">A single synchronous call: pass an input, wait for the result. The default mode for prototypes, scripts, and CLI tools.</p>
+      </article>
+      <article class="tile" data-method="batch">
+        <div class="tile-spark"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="tile-method"><span class="dot">.</span>batch<span class="dot">()</span></div>
+        <h3 class="tile-headline">Many inputs in parallel.</h3>
+        <p class="tile-body">Run the same pipeline across a list of inputs concurrently — the I/O-bound ones overlap, latency stays flat instead of multiplying.</p>
+      </article>
+      <article class="tile" data-method="stream">
+        <div class="tile-spark"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="tile-method"><span class="dot">.</span>stream<span class="dot">()</span></div>
+        <h3 class="tile-headline">Token by token, as it happens.</h3>
+        <p class="tile-body">Return the answer as soon as the model starts producing it. Same chain, same code — just a different verb. Chat UIs depend on this.</p>
+      </article>
+      <article class="tile" data-method="ainvoke">
+        <div class="tile-spark"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="tile-method"><span class="dot">.</span>ainvoke<span class="dot">()</span></div>
+        <h3 class="tile-headline">Async for everything else.</h3>
+        <p class="tile-body">The same call, async — for web servers, agents, or anywhere you can't afford to block. Each verb has an <code style="font-family:var(--font-mono); font-size:0.95em;">a*</code> twin.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- CODE BLOCK -->
+  <section class="code-section" id="code">
+    <div class="code-wrap">
+      <div class="lede">
+        <p class="section-eyebrow">What it looks like</p>
+        <h2 class="section-title" style="font-size: clamp(1.75rem, 3.5vw, 2.5rem);">Ten lines. <em>A real RAG chain.</em></h2>
+        <p>This is the entire pipeline: take a question, pull related docs, format both into a prompt, send to the model, parse the result. Every <span class="pipe-key" style="font-family:var(--font-mono); background:var(--color-accent-light); color:var(--color-accent-hover); padding:0.1rem 0.4rem; border-radius:6px; font-size:0.9em;">|</span> is a hand-off.</p>
+        <p>Swap <code style="font-family:var(--font-mono);">ChatOpenAI</code> for <code style="font-family:var(--font-mono);">ChatAnthropic</code>? One line. Add a re-ranker? One pipe. Move from invoke to stream? Change <code style="font-family:var(--font-mono);">.invoke()</code> to <code style="font-family:var(--font-mono);">.stream()</code>.</p>
+      </div>
+
+      <pre><span class="filename">rag_chain.py</span><span class="ck-kw">from</span> langchain_core.prompts <span class="ck-kw">import</span> ChatPromptTemplate
+<span class="ck-kw">from</span> langchain_core.output_parsers <span class="ck-kw">import</span> StrOutputParser
+<span class="ck-kw">from</span> langchain_openai <span class="ck-kw">import</span> ChatOpenAI
+
+prompt = ChatPromptTemplate.<span class="ck-fn">from_template</span>(
+    <span class="ck-str">"Answer using only this context:\n{context}\n\nQ: {question}"</span>
+)
+model  = <span class="ck-fn">ChatOpenAI</span>(model=<span class="ck-str">"gpt-4o-mini"</span>)
+parser = <span class="ck-fn">StrOutputParser</span>()
+
+<span class="ck-cmt"># the whole pipeline — five components, four pipes</span>
+chain = {<span class="ck-str">"context"</span>: retriever, <span class="ck-str">"question"</span>: passthrough} <span class="ck-pipe">|</span> prompt <span class="ck-pipe">|</span> model <span class="ck-pipe">|</span> parser
+
+chain.<span class="ck-fn">invoke</span>(<span class="ck-str">"What's our return policy?"</span>)</pre>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section">
+    <div class="stats-inner">
+      <div class="stats-header">
+        <h2>Built by thousands. <em>Used by everyone.</em></h2>
+        <p>State of LangChain · 2026</p>
+      </div>
+      <div class="stats">
+        <article class="stat">
+          <div class="stat-value"><span class="num" data-to="88">0</span><span class="unit">K★</span></div>
+          <p class="stat-label">GitHub stars on the core repo — top-10 AI project on GitHub.</p>
+        </article>
+        <article class="stat">
+          <div class="stat-value"><span class="num" data-to="200">0</span><span class="plus">+</span></div>
+          <p class="stat-label">Fortune 500 enterprises building production agents on LangChain.</p>
+        </article>
+        <article class="stat">
+          <div class="stat-value"><span class="num" data-to="2">0</span><span class="unit">M/wk</span></div>
+          <p class="stat-label">npm downloads per week across the JS ecosystem alone.</p>
+        </article>
+        <article class="stat">
+          <div class="stat-value"><span class="num" data-to="600">0</span><span class="plus">+</span></div>
+          <p class="stat-label">Contributors across 50+ countries shipping integrations and parsers.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <h2>Want to <em>understand it</em> before you build with it?</h2>
+    <p>CETI runs hands-on LangChain workshops for engineering teams — composing real pipelines, not slide decks. Two days, your codebase, your stack.</p>
+    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
+      Book a discovery call
+      <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <footer class="foot">
+    <span>CETI.AI · 2026 · Confidential lookbook</span>
+    <span><a href="https://cetiai.co">cetiai.co</a> · <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a></span>
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION REVEALS ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.15 });
+    document.querySelectorAll('.tile, .stat').forEach((el) => reveal.observe(el));
+
+    // ============ NUMBER TICKER ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ MAGIC CARD CURSOR GLOW ============
+    document.querySelectorAll('.tile').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ============ THE PIPELINE — flowing packets ============
+    (function pipeline() {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) return;
+
+      const grid = document.getElementById('pipelineGrid');
+      const packetsLayer = document.getElementById('packets');
+      const stages = [...grid.querySelectorAll('.stage')];
+      const outCaption = document.getElementById('outCaption');
+
+      // packet labels per stage (the label changes as the packet transforms)
+      const labelSets = [
+        ['query', 'context', 'messages', 'tokens', 'json'],
+        ['question', 'docs', 'prompt', 'response', '{result}'],
+        ['"return?"', '[3 docs]', 'system+user', 'streamed', 'parsed'],
+        ['intent', 'evidence', 'rendered', 'reply', 'object']
+      ];
+      let setIdx = 0;
+      let busy = false;
+
+      function getStageCenters() {
+        const gridRect = grid.getBoundingClientRect();
+        return stages.map((s) => {
+          const r = s.getBoundingClientRect();
+          return r.left + r.width / 2 - gridRect.left;
+        });
+      }
+
+      function spawnPacket() {
+        if (document.hidden) return;
+        const labels = labelSets[setIdx % labelSets.length];
+        setIdx++;
+        const packet = document.createElement('div');
+        packet.className = 'packet';
+        packet.textContent = labels[0];
+        packetsLayer.appendChild(packet);
+
+        const centers = getStageCenters();
+        const totalDuration = 4200; // ms
+        const start = performance.now();
+        let lastLitIdx = -1;
+
+        function step(now) {
+          const t = Math.min((now - start) / totalDuration, 1);
+          // ease in-out cubic for smoothness
+          const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          // total travel: from before stage 0 to after stage 4
+          const fullLeft = centers[0] - 30;
+          const fullRight = centers[centers.length - 1] + 30;
+          const x = fullLeft + (fullRight - fullLeft) * eased;
+          packet.style.left = x + 'px';
+          // fade in at start, out at end
+          packet.style.opacity = t < 0.06 ? (t / 0.06) : (t > 0.94 ? Math.max(0, (1 - t) / 0.06) : 1);
+
+          // figure out which stage the packet is on
+          let curIdx = -1;
+          for (let i = 0; i < centers.length; i++) {
+            if (Math.abs(x - centers[i]) < 36) { curIdx = i; break; }
+          }
+          if (curIdx !== lastLitIdx) {
+            if (lastLitIdx >= 0) stages[lastLitIdx].classList.remove('lit');
+            if (curIdx >= 0) {
+              stages[curIdx].classList.add('lit');
+              if (labels[curIdx]) packet.textContent = labels[curIdx];
+            }
+            lastLitIdx = curIdx;
+          }
+          if (t < 1) {
+            requestAnimationFrame(step);
+          } else {
+            if (lastLitIdx >= 0) stages[lastLitIdx].classList.remove('lit');
+            // OUTPUT caption flash
+            outCaption.classList.add('show');
+            setTimeout(() => outCaption.classList.remove('show'), 1400);
+            packet.remove();
+            busy = false;
+          }
+        }
+        busy = true;
+        requestAnimationFrame(step);
+      }
+
+      function loop() {
+        if (!busy) spawnPacket();
+        // stagger spawns ~ every 1.5s so up to ~3 packets are in flight
+        setTimeout(spawnPacket, 1500);
+        setTimeout(spawnPacket, 3000);
+      }
+
+      // start when in view
+      const startObs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            spawnPacket();
+            setInterval(spawnPacket, 1500);
+            startObs.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.25 });
+      startObs.observe(document.querySelector('.pipeline-wrap'));
+
+      // pause on tab hidden — caught implicitly by spawnPacket guard
+    })();
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

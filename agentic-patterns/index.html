@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic AI Orchestrator Patterns — CETI.AI Lookbook</title>
+  <meta name="description" content="Four canonical patterns for building agentic AI systems — Prompt Chaining, Routing, Parallelization, Orchestrator-Workers — explained for non-technical leaders.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg:             #FAF7F2;
+      --color-bg-warm:        #F5F0E8;
+      --color-text:           #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted:     #9E9790;
+      --color-border:         #E5DFD6;
+      --color-border-light:   #EEEBE5;
+      --color-surface:        #FFFFFF;
+      --color-surface-warm:   #FDF9F3;
+
+      --color-accent:         #D94F30;
+      --color-accent-hover:   #C4432A;
+      --color-accent-light:   #FDEEE9;
+      --color-accent-muted:   #E8836C;
+
+      --color-actor-1:        #D94F30;  /* vermillion — Chaining */
+      --color-actor-2:        #2A7B9B;  /* teal — Routing */
+      --color-actor-3:        #D4A843;  /* golden — Parallel */
+      --color-actor-4:        #2D8B55;  /* forest — Orchestrator */
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body:    'DM Sans', -apple-system, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast:   150ms;
+      --duration-normal: 300ms;
+      --duration-slow:   500ms;
+      --duration-slower: 700ms;
+      --stagger:         100ms;
+
+      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 18% 24%, rgba(217, 79, 48, 0.05) 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 70%, rgba(42, 123, 155, 0.04) 0%, transparent 50%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============ NAV ============ */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 56px; z-index: 100;
+      background: rgba(250, 247, 242, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border-light);
+      display: flex; align-items: center;
+    }
+    .nav-inner {
+      max-width: 1180px; margin: 0 auto; padding: 0 1.5rem;
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text);
+    }
+    .nav-brand b { color: var(--color-accent); font-weight: 500; }
+    .nav-meta {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    section { padding: 5rem 1.5rem; max-width: 1180px; margin: 0 auto; }
+
+    /* ============ HERO ============ */
+    .hero {
+      min-height: 92dvh;
+      padding: 8rem 1.5rem 4rem;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.5rem, 7vw, 5.25rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 1.5rem 0;
+      max-width: 16ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay:  80ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 160ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 240ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 320ms; }
+    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 400ms; }
+    .hero.visible .hero-title .word:nth-child(6) { transition-delay: 480ms; }
+    .hero-title em { font-style: normal; color: var(--color-accent); }
+
+    .hero-sub {
+      font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+      color: var(--color-text-secondary);
+      max-width: 52ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out),
+                  transform var(--duration-slower) var(--ease-out);
+      transition-delay: 620ms;
+      margin: 0;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .cta-row {
+      display: flex; gap: 1.25rem; margin-top: 2.5rem;
+      align-items: center; flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 820ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    /* ============ MAGNETIC BUTTON ============ */
+    .magnetic {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 1rem 1.75rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none; cursor: pointer;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms ease;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(4px); }
+
+    .secondary {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      border-bottom: 1px solid transparent;
+      transition: color 200ms, border-color 200ms;
+    }
+    .secondary:hover { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+
+    /* ============ SECTION HEADINGS ============ */
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin: 0 0 0.875rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.85rem, 3.6vw, 2.75rem);
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin: 0 0 1rem;
+      max-width: 26ch;
+    }
+    .section-lede {
+      color: var(--color-text-secondary);
+      max-width: 60ch;
+      font-size: 1.075rem;
+      margin: 0;
+    }
+
+    /* ============ WHY PATTERNS PROSE ============ */
+    .why {
+      padding: 4rem 1.5rem 2rem;
+      max-width: 760px; margin: 0 auto;
+    }
+    .why p {
+      font-size: 1.125rem;
+      color: var(--color-text);
+      margin: 0 0 1.25rem;
+      line-height: 1.7;
+    }
+    .why p:last-child { margin-bottom: 0; }
+    .why em { color: var(--color-accent); font-style: normal; font-weight: 500; }
+
+    /* ============ ANIMATE-IN ============ */
+    .animate-in {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity var(--duration-slower) var(--ease-spring),
+                  transform var(--duration-slower) var(--ease-spring);
+    }
+    .animate-in.visible { opacity: 1; transform: translateY(0); }
+    .stagger > .animate-in.visible:nth-child(2) { transition-delay: 80ms; }
+    .stagger > .animate-in.visible:nth-child(3) { transition-delay: 160ms; }
+    .stagger > .animate-in.visible:nth-child(4) { transition-delay: 240ms; }
+
+    /* ============ BENTO GRID — THE CENTERPIECE ============ */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+    .tile {
+      position: relative;
+      padding: 2rem;
+      border-radius: 18px;
+      background:
+        radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
+          var(--tile-glow, rgba(217, 79, 48, 0.07)), transparent 45%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition:
+        transform var(--duration-normal) var(--ease-spring),
+        border-color var(--duration-normal) var(--ease-out),
+        box-shadow var(--duration-normal) var(--ease-out);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      min-height: 380px;
+    }
+    @media (hover: hover) {
+      .tile:hover {
+        transform: translateY(-4px);
+        border-color: var(--tile-color, var(--color-accent-muted));
+        box-shadow: var(--shadow-lg);
+      }
+    }
+    .tile-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem;
+    }
+    .tile-tag {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--tile-color);
+      background: var(--tile-tag-bg);
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+    }
+    .tile-tag::before {
+      content: "";
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--tile-color);
+    }
+    .tile-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+    }
+    .tile-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.015em;
+      margin: 1rem 0 0.5rem;
+    }
+    .tile-blurb {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    .tile-diagram {
+      flex: 1;
+      margin: 1.75rem 0 0.5rem;
+      min-height: 150px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .tile-diagram svg { width: 100%; height: 100%; max-height: 170px; }
+
+    /* per-tile accents */
+    .tile.chaining     { --tile-color: var(--color-actor-1); --tile-tag-bg: var(--color-accent-light); --tile-glow: rgba(217, 79, 48, 0.07); }
+    .tile.routing      { --tile-color: var(--color-actor-2); --tile-tag-bg: #E4F2F7;                 --tile-glow: rgba(42, 123, 155, 0.07); }
+    .tile.parallel     { --tile-color: var(--color-actor-3); --tile-tag-bg: #FBF1DA;                 --tile-glow: rgba(212, 168, 67, 0.10); }
+    .tile.orchestrator { --tile-color: var(--color-actor-4); --tile-tag-bg: #E1F2E7;                 --tile-glow: rgba(45, 139, 85, 0.08); }
+
+    /* SVG diagram primitives */
+    .d-node {
+      fill: var(--color-surface);
+      stroke: var(--tile-color);
+      stroke-width: 1.6;
+    }
+    .d-node-fill { fill: var(--tile-color); stroke: var(--tile-color); }
+    .d-line   { stroke: var(--color-border); stroke-width: 1.4; fill: none; }
+    .d-arrow  { stroke: var(--tile-color); stroke-width: 1.6; fill: none; stroke-linecap: round; }
+    .d-label  { font-family: var(--font-mono); font-size: 9px; fill: var(--color-text-secondary); letter-spacing: 0.05em; text-transform: uppercase; }
+    .d-label-on { fill: var(--tile-color); }
+
+    /* ===== CHAINING animation ===== */
+    .d-pulse {
+      fill: var(--color-actor-1);
+      filter: drop-shadow(0 0 6px rgba(217, 79, 48, 0.6));
+      offset-path: path("M 32 50 L 290 50");
+      offset-rotate: 0deg;
+      animation: pulse-chain 3.4s var(--ease-out) infinite;
+    }
+    @keyframes pulse-chain {
+      0%, 12%   { offset-distance: 0%;   opacity: 0; }
+      18%       { opacity: 1; }
+      82%       { opacity: 1; }
+      88%, 100% { offset-distance: 100%; opacity: 0; }
+    }
+    /* node lift in sync */
+    .chaining .d-node.n1 { animation: node-pop 3.4s linear infinite; animation-delay: 0.0s; }
+    .chaining .d-node.n2 { animation: node-pop 3.4s linear infinite; animation-delay: 0.85s; }
+    .chaining .d-node.n3 { animation: node-pop 3.4s linear infinite; animation-delay: 1.7s; }
+    .chaining .d-node.n4 { animation: node-pop 3.4s linear infinite; animation-delay: 2.55s; }
+    @keyframes node-pop {
+      0%, 8%, 30%, 100% { transform: scale(1); fill: var(--color-surface); }
+      14%, 22%          { transform: scale(1.12); fill: var(--color-accent-light); }
+    }
+    .chaining svg g.node-g { transform-origin: center; transform-box: fill-box; }
+
+    /* ===== ROUTING animation ===== */
+    .routing .d-route-arrow {
+      stroke: var(--color-actor-2);
+      stroke-width: 1.8; fill: none;
+      stroke-linecap: round;
+      opacity: 0;
+      animation: route-fade 4.5s linear infinite;
+    }
+    .routing .d-route-arrow.a { animation-delay: 0s; }
+    .routing .d-route-arrow.b { animation-delay: 1.5s; }
+    .routing .d-route-arrow.c { animation-delay: 3.0s; }
+    @keyframes route-fade {
+      0%, 2%   { opacity: 0; stroke-dashoffset: 200; }
+      8%, 28%  { opacity: 1; stroke-dashoffset: 0; }
+      32%, 100% { opacity: 0; }
+    }
+    .routing .d-route-arrow { stroke-dasharray: 200; transition: stroke-dashoffset 200ms; }
+
+    .routing .d-target { transition: fill 200ms, stroke 200ms; }
+    .routing .d-target.t1 { animation: target-light 4.5s linear infinite 0s; }
+    .routing .d-target.t2 { animation: target-light 4.5s linear infinite 1.5s; }
+    .routing .d-target.t3 { animation: target-light 4.5s linear infinite 3.0s; }
+    @keyframes target-light {
+      0%, 4%, 30%, 100% { fill: var(--color-surface); }
+      10%, 24%          { fill: #E4F2F7; }
+    }
+
+    /* ===== PARALLELIZATION animation ===== */
+    .parallel .d-beam {
+      fill: var(--color-actor-3);
+      filter: drop-shadow(0 0 5px rgba(212, 168, 67, 0.7));
+      animation: parallel-fire 2.4s var(--ease-out) infinite;
+    }
+    .parallel .d-beam.b1 { offset-path: path("M 150 36 L 60 130"); animation-delay: 0s; }
+    .parallel .d-beam.b2 { offset-path: path("M 150 36 L 150 130"); animation-delay: 0s; }
+    .parallel .d-beam.b3 { offset-path: path("M 150 36 L 240 130"); animation-delay: 0s; }
+    @keyframes parallel-fire {
+      0%, 15%   { offset-distance: 0%;   opacity: 0; }
+      25%       { opacity: 1; }
+      75%       { opacity: 1; }
+      85%, 100% { offset-distance: 100%; opacity: 0; }
+    }
+
+    /* ===== ORCHESTRATOR animation ===== */
+    .orchestrator .d-worker {
+      opacity: 0;
+      transform-origin: center bottom;
+      transform-box: fill-box;
+      animation: worker-spawn 4s var(--ease-spring) infinite;
+    }
+    .orchestrator .d-worker.w1 { animation-delay: 0.0s; }
+    .orchestrator .d-worker.w2 { animation-delay: 0.25s; }
+    .orchestrator .d-worker.w3 { animation-delay: 0.5s; }
+    .orchestrator .d-worker.w4 { animation-delay: 0.75s; }
+    @keyframes worker-spawn {
+      0%, 5%   { opacity: 0; transform: translateY(6px) scale(0.85); }
+      18%, 70% { opacity: 1; transform: translateY(0) scale(1); }
+      85%,100% { opacity: 0; transform: translateY(6px) scale(0.85); }
+    }
+    .orchestrator .d-link {
+      stroke: var(--color-actor-4);
+      stroke-width: 1.4; fill: none;
+      stroke-dasharray: 4 4;
+      stroke-dashoffset: 0;
+      animation: dash-flow 1.8s linear infinite;
+      opacity: 0.7;
+    }
+    @keyframes dash-flow {
+      to { stroke-dashoffset: -16; }
+    }
+
+    /* ============ PATTERN DETAIL ROW ============ */
+    .pattern-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem 2.5rem;
+      margin-top: 3.5rem;
+    }
+    .detail h4 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.01em;
+      display: flex; align-items: center; gap: 0.55rem;
+    }
+    .detail h4::before {
+      content: ""; width: 10px; height: 10px; border-radius: 50%;
+      background: var(--dot, var(--color-accent));
+      flex-shrink: 0;
+    }
+    .detail.c-1 { --dot: var(--color-actor-1); }
+    .detail.c-2 { --dot: var(--color-actor-2); }
+    .detail.c-3 { --dot: var(--color-actor-3); }
+    .detail.c-4 { --dot: var(--color-actor-4); }
+    .detail p {
+      color: var(--color-text-secondary);
+      font-size: 0.975rem;
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    /* ============ DECISION TABLE ============ */
+    .decide {
+      background: var(--color-bg-warm);
+      padding: 5rem 1.5rem;
+      margin: 5rem -100vw 0;
+      padding-left: max(1.5rem, calc(50vw - 590px));
+      padding-right: max(1.5rem, calc(50vw - 590px));
+    }
+    .decide-inner { max-width: 1180px; margin: 0 auto; }
+    .table-wrap {
+      margin-top: 2.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .table-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1.6fr;
+      gap: 1.5rem;
+      padding: 1.15rem 1.5rem;
+      border-bottom: 1px solid var(--color-border-light);
+      align-items: center;
+      transition: background 200ms;
+    }
+    .table-row:last-child { border-bottom: none; }
+    .table-row:not(.head):hover { background: var(--color-surface-warm); }
+    .table-row.head {
+      background: var(--color-bg-warm);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .table-row .if  { color: var(--color-text); font-weight: 500; }
+    .table-row .use {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--use-color, var(--color-accent));
+      font-weight: 500;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .table-row .use::before {
+      content: ""; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--use-color, var(--color-accent));
+    }
+    .table-row .why-col { color: var(--color-text-secondary); font-size: 0.95rem; }
+    .table-row.r-1 { --use-color: var(--color-actor-1); }
+    .table-row.r-2 { --use-color: var(--color-actor-2); }
+    .table-row.r-3 { --use-color: var(--color-actor-3); }
+    .table-row.r-4 { --use-color: var(--color-actor-4); }
+    .table-row.r-5 { --use-color: var(--color-text-secondary); }
+
+    /* ============ REAL-WORLD EXAMPLES ============ */
+    .examples {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+    .ex {
+      padding: 2rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      transition: transform var(--duration-normal) var(--ease-spring),
+                  border-color var(--duration-normal);
+      position: relative;
+    }
+    @media (hover: hover) {
+      .ex:hover { transform: translateY(-3px); border-color: var(--color-accent-muted); }
+    }
+    .ex-kicker {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ex-color, var(--color-accent));
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .ex-kicker::before {
+      content: ""; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ex-color, var(--color-accent));
+    }
+    .ex.e-1 { --ex-color: var(--color-actor-2); }
+    .ex.e-2 { --ex-color: var(--color-actor-1); }
+    .ex.e-3 { --ex-color: var(--color-actor-4); }
+    .ex h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+      margin: 0 0 0.75rem;
+      line-height: 1.25;
+    }
+    .ex p {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      margin: 0 0 1.25rem;
+      line-height: 1.6;
+    }
+    .ex .ex-flow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-text);
+      padding: 0.75rem 0.875rem;
+      background: var(--color-bg-warm);
+      border-radius: 8px;
+      border-left: 3px solid var(--ex-color);
+      line-height: 1.5;
+    }
+    .ex .ex-flow .arr { color: var(--ex-color); margin: 0 0.4rem; }
+
+    /* ============ STATS ============ */
+    .stats-section {
+      padding: 5rem 1.5rem;
+      max-width: 1180px; margin: 0 auto;
+      text-align: center;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+    .stat {
+      padding: 2rem 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      text-align: left;
+    }
+    .stat-value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.25rem, 4.5vw, 3.25rem);
+      line-height: 1;
+      letter-spacing: -0.025em;
+      font-variant-numeric: tabular-nums;
+      color: var(--s-color, var(--color-accent));
+    }
+    .stat-value .suffix { font-size: 0.6em; opacity: 0.85; }
+    .stat-label {
+      margin-top: 0.75rem;
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .stat.s-1 { --s-color: var(--color-actor-1); }
+    .stat.s-2 { --s-color: var(--color-actor-2); }
+    .stat.s-3 { --s-color: var(--color-actor-3); }
+    .stat.s-4 { --s-color: var(--color-actor-4); }
+
+    /* ============ FINAL CTA ============ */
+    .final {
+      padding: 6rem 1.5rem 7rem;
+      max-width: 760px; margin: 0 auto;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin: 0 0 1.25rem;
+    }
+    .final p {
+      color: var(--color-text-secondary);
+      font-size: 1.075rem;
+      margin: 0 0 2.5rem;
+    }
+
+    /* ============ FOOTER ============ */
+    footer {
+      border-top: 1px solid var(--color-border-light);
+      padding: 2rem 1.5rem;
+      max-width: 1180px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    footer a { color: var(--color-text-secondary); text-decoration: none; transition: color 200ms; }
+    footer a:hover { color: var(--color-accent); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 900px) {
+      .bento { grid-template-columns: 1fr; }
+      .pattern-details { grid-template-columns: 1fr; gap: 1.5rem; }
+      .examples { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .table-row { grid-template-columns: 1fr; gap: 0.4rem; padding: 1rem 1.25rem; }
+      .table-row.head { display: none; }
+      .table-row .use { order: -1; font-size: 0.7rem; }
+    }
+    @media (max-width: 480px) {
+      .hero { padding-top: 6rem; }
+      section { padding: 3.5rem 1.25rem; }
+      .stats { grid-template-columns: 1fr; }
+      .tile { min-height: 340px; padding: 1.5rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .cta-row, .eyebrow,
+      .animate-in { opacity: 1 !important; transform: none !important; }
+      .d-pulse, .d-beam, .d-route-arrow, .d-worker, .d-link { opacity: 1 !important; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <span class="nav-brand">CETI<b>.AI</b> · LOOKBOOK</span>
+      <span class="nav-meta">Agentic Patterns / 04</span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">AGENTIC AI · ORCHESTRATOR PATTERNS</p>
+    <h1 class="hero-title">
+      <span class="word">Four</span>
+      <span class="word">patterns.</span>
+      <span class="word">One</span>
+      <span class="word"><em>mental</em></span>
+      <span class="word">model.</span>
+    </h1>
+    <p class="hero-sub">How the smartest AI systems are actually built — explained without the jargon. Cooking recipes for software, written for the people who decide what gets cooked.</p>
+    <div class="cta-row">
+      <button class="magnetic" type="button" onclick="document.getElementById('patterns').scrollIntoView({behavior:'smooth'})">
+        See the four patterns
+        <span class="arrow">→</span>
+      </button>
+      <a class="secondary" href="#decide">Or skip to the decision guide</a>
+    </div>
+  </section>
+
+  <!-- WHY PATTERNS -->
+  <section class="why">
+    <p class="section-eyebrow animate-in">01 — Why patterns?</p>
+    <h2 class="section-title animate-in" style="margin-bottom: 2rem;">Building with AI isn't one thing.</h2>
+    <p class="animate-in">A great chef doesn't improvise every dish from scratch. They lean on a small library of <em>techniques</em> — braise, sear, reduce, fold — and combine them per recipe. The technique isn't the dish; it's the move that makes the dish possible.</p>
+    <p class="animate-in">Building agentic AI works the same way. The teams shipping reliable AI systems aren't inventing the wheel each time. They're composing four reusable structures — patterns that decide <em>how</em> work flows between AI models, when to split it up, and who synthesises the result. Learn the four, and most "AI architectures" suddenly become legible.</p>
+  </section>
+
+  <!-- THE FOUR PATTERNS — BENTO -->
+  <section id="patterns">
+    <p class="section-eyebrow animate-in">02 — The four canonical patterns</p>
+    <h2 class="section-title animate-in">Four ways to put AI models to work together.</h2>
+    <p class="section-lede animate-in">Adapted from Anthropic's "Building Effective Agents" (Dec 2024). Hover any tile to see it light up.</p>
+
+    <div class="bento">
+
+      <!-- TILE 1: PROMPT CHAINING -->
+      <article class="tile chaining animate-in">
+        <div class="tile-header">
+          <span class="tile-tag">Prompt Chaining</span>
+          <span class="tile-num">PATTERN 01</span>
+        </div>
+        <h3 class="tile-title">A step-by-step assembly line.</h3>
+        <p class="tile-blurb">Each AI step hands its output to the next, like cooks at a station.</p>
+        <div class="tile-diagram" aria-hidden="true">
+          <svg viewBox="0 0 320 100" preserveAspectRatio="xMidYMid meet">
+            <line class="d-line" x1="32" y1="50" x2="290" y2="50"/>
+            <g class="node-g"><circle class="d-node n1" cx="32"  cy="50" r="18"/><text class="d-label" x="32" y="53" text-anchor="middle">in</text></g>
+            <g class="node-g"><circle class="d-node n2" cx="118" cy="50" r="18"/><text class="d-label" x="118" y="53" text-anchor="middle">a</text></g>
+            <g class="node-g"><circle class="d-node n3" cx="204" cy="50" r="18"/><text class="d-label" x="204" y="53" text-anchor="middle">b</text></g>
+            <g class="node-g"><circle class="d-node n4" cx="290" cy="50" r="18"/><text class="d-label" x="290" y="53" text-anchor="middle">out</text></g>
+            <!-- arrowheads -->
+            <path class="d-arrow" d="M 64 46 L 72 50 L 64 54"/>
+            <path class="d-arrow" d="M 150 46 L 158 50 L 150 54"/>
+            <path class="d-arrow" d="M 236 46 L 244 50 L 236 54"/>
+            <!-- traveling pulse -->
+            <circle class="d-pulse" r="5" cx="0" cy="0"/>
+          </svg>
+        </div>
+      </article>
+
+      <!-- TILE 2: ROUTING -->
+      <article class="tile routing animate-in">
+        <div class="tile-header">
+          <span class="tile-tag">Routing</span>
+          <span class="tile-num">PATTERN 02</span>
+        </div>
+        <h3 class="tile-title">A receptionist with the right specialist.</h3>
+        <p class="tile-blurb">Classify the question first, then send it to the expert who handles that kind.</p>
+        <div class="tile-diagram" aria-hidden="true">
+          <svg viewBox="0 0 320 170" preserveAspectRatio="xMidYMid meet">
+            <!-- source -->
+            <circle class="d-node" cx="40" cy="85" r="20"/>
+            <text class="d-label d-label-on" x="40" y="88" text-anchor="middle">router</text>
+            <!-- targets -->
+            <g><rect class="d-node d-target t1" x="230" y="20"  width="78" height="30" rx="8"/><text class="d-label" x="269" y="40" text-anchor="middle">refunds</text></g>
+            <g><rect class="d-node d-target t2" x="230" y="70"  width="78" height="30" rx="8"/><text class="d-label" x="269" y="90" text-anchor="middle">support</text></g>
+            <g><rect class="d-node d-target t3" x="230" y="120" width="78" height="30" rx="8"/><text class="d-label" x="269" y="140" text-anchor="middle">general</text></g>
+            <!-- guide lines (static, subtle) -->
+            <line class="d-line" x1="60" y1="85" x2="226" y2="35"/>
+            <line class="d-line" x1="60" y1="85" x2="226" y2="85"/>
+            <line class="d-line" x1="60" y1="85" x2="226" y2="135"/>
+            <!-- animated routes -->
+            <line class="d-route-arrow a" x1="60" y1="85" x2="226" y2="35"/>
+            <line class="d-route-arrow b" x1="60" y1="85" x2="226" y2="85"/>
+            <line class="d-route-arrow c" x1="60" y1="85" x2="226" y2="135"/>
+          </svg>
+        </div>
+      </article>
+
+      <!-- TILE 3: PARALLELIZATION -->
+      <article class="tile parallel animate-in">
+        <div class="tile-header">
+          <span class="tile-tag">Parallelization</span>
+          <span class="tile-num">PATTERN 03</span>
+        </div>
+        <h3 class="tile-title">Three reviewers reading at once.</h3>
+        <p class="tile-blurb">Fan the task out, work simultaneously, and combine the answers at the end.</p>
+        <div class="tile-diagram" aria-hidden="true">
+          <svg viewBox="0 0 300 170" preserveAspectRatio="xMidYMid meet">
+            <!-- top -->
+            <circle class="d-node" cx="150" cy="30" r="18"/>
+            <text class="d-label d-label-on" x="150" y="33" text-anchor="middle">task</text>
+            <!-- workers -->
+            <rect class="d-node" x="32"  y="116" width="56" height="30" rx="8"/>
+            <text class="d-label" x="60" y="135" text-anchor="middle">worker 1</text>
+            <rect class="d-node" x="122" y="116" width="56" height="30" rx="8"/>
+            <text class="d-label" x="150" y="135" text-anchor="middle">worker 2</text>
+            <rect class="d-node" x="212" y="116" width="56" height="30" rx="8"/>
+            <text class="d-label" x="240" y="135" text-anchor="middle">worker 3</text>
+            <!-- guide lines -->
+            <line class="d-line" x1="150" y1="48" x2="60"  y2="116"/>
+            <line class="d-line" x1="150" y1="48" x2="150" y2="116"/>
+            <line class="d-line" x1="150" y1="48" x2="240" y2="116"/>
+            <!-- simultaneous beams -->
+            <circle class="d-beam b1" r="4" cx="0" cy="0"/>
+            <circle class="d-beam b2" r="4" cx="0" cy="0"/>
+            <circle class="d-beam b3" r="4" cx="0" cy="0"/>
+          </svg>
+        </div>
+      </article>
+
+      <!-- TILE 4: ORCHESTRATOR -->
+      <article class="tile orchestrator animate-in">
+        <div class="tile-header">
+          <span class="tile-tag">Orchestrator-Workers</span>
+          <span class="tile-num">PATTERN 04</span>
+        </div>
+        <h3 class="tile-title">A foreman hiring crew on the fly.</h3>
+        <p class="tile-blurb">A lead AI inspects the job, then decides how many helpers to spin up — and what each one does.</p>
+        <div class="tile-diagram" aria-hidden="true">
+          <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid meet">
+            <!-- orchestrator -->
+            <rect class="d-node d-node-fill" x="120" y="14" width="80" height="34" rx="9" style="fill: var(--color-actor-4); fill-opacity: 0.18;"/>
+            <text class="d-label d-label-on" x="160" y="35" text-anchor="middle" style="font-size:9px;">orchestrator</text>
+
+            <!-- workers (variable, animated) -->
+            <g class="d-worker w1"><rect class="d-node" x="32"  y="120" width="50" height="28" rx="7"/><text class="d-label" x="57"  y="138" text-anchor="middle">w·a</text></g>
+            <g class="d-worker w2"><rect class="d-node" x="98"  y="120" width="50" height="28" rx="7"/><text class="d-label" x="123" y="138" text-anchor="middle">w·b</text></g>
+            <g class="d-worker w3"><rect class="d-node" x="164" y="120" width="50" height="28" rx="7"/><text class="d-label" x="189" y="138" text-anchor="middle">w·c</text></g>
+            <g class="d-worker w4"><rect class="d-node" x="230" y="120" width="50" height="28" rx="7"/><text class="d-label" x="255" y="138" text-anchor="middle">w·d</text></g>
+
+            <!-- dashed links -->
+            <line class="d-link" x1="160" y1="48"  x2="57"  y2="120"/>
+            <line class="d-link" x1="160" y1="48"  x2="123" y2="120"/>
+            <line class="d-link" x1="160" y1="48"  x2="189" y2="120"/>
+            <line class="d-link" x1="160" y1="48"  x2="255" y2="120"/>
+
+            <!-- synth bar -->
+            <rect class="d-node" x="120" y="160" width="80" height="12" rx="4" style="fill: var(--color-bg-warm);"/>
+            <text class="d-label" x="160" y="169" text-anchor="middle">synthesis</text>
+          </svg>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- DETAIL ROW -->
+    <div class="pattern-details">
+      <div class="detail c-1 animate-in">
+        <h4>Prompt Chaining</h4>
+        <p>You break a job into a fixed sequence: outline first, draft second, polish third. Each step's output feeds the next. Slower than a single shot, but each step is simpler and the system is easier to debug — like a kitchen line where every cook owns one task.</p>
+      </div>
+      <div class="detail c-2 animate-in">
+        <h4>Routing</h4>
+        <p>The first step classifies the request, then forwards it to a specialist designed for that category. The benefit isn't speed — it's precision. A team of focused specialists outperforms one generalist trying to handle everything in a single prompt.</p>
+      </div>
+      <div class="detail c-3 animate-in">
+        <h4>Parallelization</h4>
+        <p>Run the same prompt (or different ones) at the same time, then merge the results. Use it when subtasks are independent — like three reviewers reading a contract — or when you want multiple opinions to vote on the safest answer.</p>
+      </div>
+      <div class="detail c-4 animate-in">
+        <h4>Orchestrator-Workers</h4>
+        <p>You don't know in advance how to split the work. A lead AI reads the request, decides on the fly how many sub-tasks to spawn, dispatches them to worker AIs, and stitches the answers back together. The most flexible — and the hardest to keep on rails.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DECISION TABLE -->
+  <section class="decide" id="decide">
+    <div class="decide-inner">
+      <p class="section-eyebrow animate-in">03 — Picking the right pattern</p>
+      <h2 class="section-title animate-in">If your task looks like this, reach for that.</h2>
+      <p class="section-lede animate-in">A pocket cheat sheet for product reviews, vendor calls, and the moment someone says "let's just use an agent."</p>
+
+      <div class="table-wrap animate-in">
+        <div class="table-row head">
+          <div>If your task is…</div>
+          <div>Use</div>
+          <div>Because</div>
+        </div>
+        <div class="table-row r-1">
+          <div class="if">A clean sequence of fixed steps (outline → draft → polish)</div>
+          <div class="use">Prompt Chaining</div>
+          <div class="why-col">Each step gets a smaller, sharper prompt — and you can inspect every handoff.</div>
+        </div>
+        <div class="table-row r-2">
+          <div class="if">Many distinct kinds of input that need different handling</div>
+          <div class="use">Routing</div>
+          <div class="why-col">A classifier up front means each specialist only has to be good at one thing.</div>
+        </div>
+        <div class="table-row r-3">
+          <div class="if">Several independent sub-questions, or many opinions wanted</div>
+          <div class="use">Parallelization</div>
+          <div class="why-col">Running concurrently cuts latency; voting catches mistakes one model would miss.</div>
+        </div>
+        <div class="table-row r-4">
+          <div class="if">A complex job where you can't predict the sub-tasks ahead of time</div>
+          <div class="use">Orchestrator-Workers</div>
+          <div class="why-col">A lead AI decomposes the problem at runtime — flexible, but needs guardrails.</div>
+        </div>
+        <div class="table-row r-5">
+          <div class="if">A simple, one-shot question with no branching logic</div>
+          <div class="use">A single call</div>
+          <div class="why-col">No pattern beats a well-prompted single model when the task is small.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REAL-WORLD EXAMPLES -->
+  <section>
+    <p class="section-eyebrow animate-in">04 — What this looks like in practice</p>
+    <h2 class="section-title animate-in">Three systems you've probably already used.</h2>
+    <p class="section-lede animate-in">Each one is built on a pattern from above. The pattern is invisible until you know to look.</p>
+
+    <div class="examples">
+      <article class="ex e-1 animate-in">
+        <span class="ex-kicker">Customer Support</span>
+        <h3>The triage desk that never sleeps.</h3>
+        <p>Modern support bots don't try to answer every question with one giant prompt. The first model reads your message, decides if it's a refund, a bug, or a billing question, and hands it to a specialist trained on that lane.</p>
+        <div class="ex-flow">your message <span class="arr">→</span> classifier <span class="arr">→</span> specialist agent</div>
+      </article>
+
+      <article class="ex e-2 animate-in">
+        <span class="ex-kicker">Document Analysis</span>
+        <h3>The contract-reader, in three passes.</h3>
+        <p>When AI reviews a long contract, it usually isn't one heroic read. Pass one extracts the structure. Pass two flags risky clauses. Pass three writes the executive summary — each pass building on the last.</p>
+        <div class="ex-flow">extract <span class="arr">→</span> flag risks <span class="arr">→</span> summarize</div>
+      </article>
+
+      <article class="ex e-3 animate-in">
+        <span class="ex-kicker">Research Assistant</span>
+        <h3>The analyst who hires their own team.</h3>
+        <p>Ask an AI to "research electric trucks for our fleet" and a lead model decides what's needed: a worker for total cost, one for charging logistics, one for incentives. It pulls the threads together into a single brief.</p>
+        <div class="ex-flow">lead AI plans <span class="arr">→</span> spawns workers <span class="arr">→</span> synthesizes brief</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-section">
+    <p class="section-eyebrow animate-in">05 — By the numbers</p>
+    <h2 class="section-title animate-in" style="margin-left:auto; margin-right:auto;">Agentic isn't experimental anymore.</h2>
+
+    <div class="stats">
+      <article class="stat s-1 animate-in">
+        <div class="stat-value"><span class="num" data-to="73">0</span><span class="suffix">%</span></div>
+        <p class="stat-label">of enterprises deploying AI now use multi-step or agentic patterns, not single prompts</p>
+      </article>
+      <article class="stat s-2 animate-in">
+        <div class="stat-value">×<span class="num" data-to="4">0</span></div>
+        <p class="stat-label">typical accuracy lift on complex tasks when chained vs. one-shot prompting</p>
+      </article>
+      <article class="stat s-3 animate-in">
+        <div class="stat-value"><span class="num" data-to="5">0</span></div>
+        <p class="stat-label">canonical patterns cover virtually every production agent system shipped today</p>
+      </article>
+      <article class="stat s-4 animate-in">
+        <div class="stat-value"><span class="num" data-to="2024">0</span></div>
+        <p class="stat-label">year Anthropic published the canonical framing — these aren't new, they're now mainstream</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final">
+    <h2>Want to know which patterns belong in your AI architecture?</h2>
+    <p>CETI works with product, engineering, and operations teams to choose the right pattern before a single line of code is written. We've trained 5,000+ professionals across 100+ organizations on exactly this.</p>
+    <button class="magnetic" type="button" onclick="window.open('https://calendly.com/manutej/30min','_blank')">
+      Book a 30-minute architecture review
+      <span class="arrow">→</span>
+    </button>
+  </section>
+
+  <footer>
+    <div>CETI.AI · LOOKBOOK · AGENTIC PATTERNS</div>
+    <div><a href="https://cetiai.co">cetiai.co</a> · <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a></div>
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ INTERSECTION-DRIVEN REVEALS ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    document.querySelectorAll('.animate-in').forEach((el) => reveal.observe(el));
+
+    // ============ NUMBER TICKER ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = to > 100 ? 1500 : 1100;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const v = Math.round(easeOutCubic(p) * to);
+        el.textContent = (to > 1000) ? v.toString() : v.toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 22;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ TILE CURSOR-FOLLOW GLOW ============
+    document.querySelectorAll('.tile').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

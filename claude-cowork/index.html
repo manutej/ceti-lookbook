@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Cowork — Business AI that works with you · CETI.AI</title>
+  <meta name="description" content="A practical, anti-hype look at using Claude as a coworker for non-coding business work: research, analysis, writing, organizing, decisions. For SMB owners and operations leaders.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+      --color-surface-warm: #FDF9F3;
+
+      --color-accent: #D94F30;         /* vermillion */
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+
+      --color-actor-1: #D94F30;        /* vermillion */
+      --color-actor-2: #2A7B9B;        /* teal */
+      --color-actor-3: #7B6DAA;        /* muted plum */
+      --color-actor-4: #D4A843;        /* golden */
+      --color-actor-5: #2D8B55;        /* forest */
+
+      --color-grey-bg: #EFEBE4;
+      --color-grey-text: #8A857F;
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+      --stagger: 100ms;
+
+      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image: radial-gradient(ellipse at 15% 25%, rgba(217, 79, 48, 0.04) 0%, transparent 55%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; }
+
+    /* ============ LAYOUT ============ */
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    section { padding: 5rem 0; }
+    @media (max-width: 640px) { section { padding: 3.5rem 0; } }
+
+    /* ============ NAV ============ */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(250, 247, 242, 0.85);
+      backdrop-filter: saturate(140%) blur(8px);
+      -webkit-backdrop-filter: saturate(140%) blur(8px);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .topbar-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0.875rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+    }
+    .brand .dot { color: var(--color-accent); }
+    .topbar a.cta-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      transition: color 200ms, border-color 200ms, background 200ms;
+    }
+    .topbar a.cta-link:hover { color: var(--color-accent); border-color: var(--color-accent-muted); background: var(--color-accent-light); }
+
+    /* ============ HERO ============ */
+    .hero { padding: 5rem 0 4rem; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      margin-bottom: 1.25rem;
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.4rem, 6.5vw, 5rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 0 0 1.5rem;
+      max-width: 16ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .word:nth-child(1) { transition-delay: 80ms; }
+    .hero.visible .word:nth-child(2) { transition-delay: 160ms; }
+    .hero.visible .word:nth-child(3) { transition-delay: 240ms; }
+    .hero.visible .word:nth-child(4) { transition-delay: 320ms; }
+    .hero.visible .word:nth-child(5) { transition-delay: 400ms; }
+    .hero-title em { font-style: normal; color: var(--color-accent); }
+
+    .hero-sub {
+      font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      margin: 0;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 540ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 720ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.95rem 1.6rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.98rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); display: inline-block; }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+
+    .magnetic.ghost {
+      background: transparent;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+    .magnetic.ghost:hover { background: var(--color-surface); border-color: var(--color-text-secondary); }
+
+    /* ============ TUESDAY MORNING — signature visual ============ */
+    .tuesday {
+      background: var(--color-bg-warm);
+      border-top: 1px solid var(--color-border-light);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .tuesday h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.75rem, 3.6vw, 2.5rem);
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      max-width: 26ch;
+      margin: 0 0 0.875rem;
+    }
+    .tuesday .lede {
+      color: var(--color-text-secondary);
+      max-width: 62ch;
+      margin: 0 0 0.75rem;
+      font-size: 1.05rem;
+    }
+    .tuesday .lede.small { font-size: 0.95rem; }
+
+    .compare {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      align-items: stretch;
+    }
+    .compare-col {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.5rem 2rem;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .compare-col.before {
+      background: var(--color-grey-bg);
+      border-color: #DCD6CD;
+    }
+    .compare-col.after {
+      border-color: var(--color-accent-muted);
+      box-shadow: 0 0 0 1px var(--color-accent-light), 0 12px 32px rgba(217, 79, 48, 0.08);
+    }
+    .compare-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--color-border-light);
+      margin-bottom: 1.25rem;
+    }
+    .compare-col.before .compare-head { border-bottom-color: #D8D2C8; }
+    .compare-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-grey-text);
+    }
+    .compare-col.after .compare-label { color: var(--color-accent); }
+    .compare-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      margin: 0.25rem 0 0;
+    }
+    .compare-col.before .compare-title { color: var(--color-grey-text); }
+
+    .clock {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-grey-text);
+    }
+    .compare-col.after .clock { color: var(--color-accent); }
+
+    .steps {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 0.875rem;
+      border-radius: var(--radius-sm);
+      background: var(--color-surface-warm);
+      border: 1px solid var(--color-border-light);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+      font-size: 0.92rem;
+    }
+    .compare-col.before .step {
+      background: #E7E2DA;
+      border-color: #D6D0C6;
+      color: var(--color-grey-text);
+    }
+    .compare-col.after .step {
+      background: var(--color-accent-light);
+      border-color: rgba(232, 131, 108, 0.45);
+      color: var(--color-text);
+    }
+    .step.visible { opacity: 1; transform: translateY(0); }
+
+    .step-num {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+      padding: 0.125rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.6);
+      flex-shrink: 0;
+      min-width: 1.8rem;
+      text-align: center;
+    }
+    .compare-col.before .step-num { background: #DDD7CD; color: var(--color-grey-text); }
+    .compare-col.after .step-num { background: var(--color-accent); color: white; }
+    .step-text { flex: 1; line-height: 1.4; }
+    .step-time {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+    .compare-col.after .step-time { color: var(--color-accent-hover); }
+
+    .compare-foot {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+    }
+    .compare-col.before .compare-foot { border-top-color: #D8D2C8; }
+    .foot-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .foot-value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.6rem;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .compare-col.before .foot-value { color: var(--color-grey-text); }
+    .compare-col.after .foot-value { color: var(--color-accent); }
+
+    @media (max-width: 760px) {
+      .compare { grid-template-columns: 1fr; gap: 1rem; }
+    }
+
+    /* ============ WHAT YOU CAN DO — BENTO ============ */
+    .can-do .section-head { margin-bottom: 2.5rem; }
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin-bottom: 0.875rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.75rem, 3.6vw, 2.5rem);
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin: 0 0 0.875rem;
+      max-width: 22ch;
+    }
+    .section-sub {
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      margin: 0;
+    }
+
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: minmax(170px, auto);
+      gap: 1rem;
+    }
+    .tile {
+      position: relative;
+      padding: 1.5rem 1.5rem 1.75rem;
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(420px circle at var(--mx, -200px) var(--my, -200px),
+          rgba(217, 79, 48, 0.07), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal);
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    .tile.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring); }
+    .tile.visible:hover { transform: translateY(-3px); border-color: var(--color-accent-muted); box-shadow: var(--shadow-md); }
+    .tile-glyph {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--color-accent-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      color: var(--color-accent);
+    }
+    .tile h3 {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin: 0 0 0.6rem;
+      font-weight: 500;
+    }
+    .tile h4 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.3rem;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      margin: 0 0 0.5rem;
+    }
+    .tile p {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+    /* Accent rotation per tile */
+    .tile:nth-child(2) .tile-glyph { background: #E4F2F7; color: var(--color-actor-2); }
+    .tile:nth-child(2) h3 { color: var(--color-actor-2); }
+    .tile:nth-child(3) .tile-glyph { background: #EFECF6; color: var(--color-actor-3); }
+    .tile:nth-child(3) h3 { color: var(--color-actor-3); }
+    .tile:nth-child(4) .tile-glyph { background: #F8EFCF; color: #A88A2E; }
+    .tile:nth-child(4) h3 { color: #A88A2E; }
+    .tile:nth-child(5) .tile-glyph { background: #E2F0E7; color: var(--color-actor-5); }
+    .tile:nth-child(5) h3 { color: var(--color-actor-5); }
+
+    @media (max-width: 860px) {
+      .bento { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+      .bento { grid-template-columns: 1fr; }
+    }
+
+    /* ============ CONNECTED WORKSPACE ============ */
+    .connected { background: var(--color-bg-warm); border-top: 1px solid var(--color-border-light); border-bottom: 1px solid var(--color-border-light); }
+    .connected-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    .connected-grid p { color: var(--color-text-secondary); font-size: 1.02rem; max-width: 48ch; }
+    .ring-wrap {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+    .ring-svg { width: 100%; height: 100%; display: block; }
+    .ring-svg circle.orbit { fill: none; stroke: var(--color-border); stroke-width: 1; stroke-dasharray: 3 5; }
+    .ring-svg circle.hub { fill: var(--color-accent); }
+    .ring-svg text.hub-label { font-family: 'Bricolage Grotesque', Georgia, serif; font-weight: 700; font-size: 14px; fill: white; text-anchor: middle; dominant-baseline: central; letter-spacing: -0.02em; }
+    .ring-svg g.node circle { fill: var(--color-surface); stroke: var(--color-border); stroke-width: 1.5; transition: stroke 300ms, fill 300ms; }
+    .ring-svg g.node text { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; fill: var(--color-text); text-anchor: middle; dominant-baseline: central; letter-spacing: 0.04em; }
+    .ring-svg g.node:hover circle { stroke: var(--color-accent); fill: var(--color-accent-light); }
+    .ring-svg line.spoke { stroke: var(--color-border); stroke-width: 1; }
+    .ring-svg .pulse {
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 1.5;
+      transform-origin: center;
+      animation: ring-pulse 4s var(--ease-out) infinite;
+      opacity: 0;
+    }
+    @keyframes ring-pulse {
+      0%   { transform: scale(0.3); opacity: 0.6; }
+      80%  { transform: scale(1.4); opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    @media (max-width: 760px) {
+      .connected-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .ring-wrap { max-width: 300px; }
+    }
+
+    /* ============ REAL WINS — VIGNETTES ============ */
+    .wins-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    .vignette {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal);
+    }
+    .vignette.visible { opacity: 1; transform: translateY(0); }
+    .vignette:hover { border-color: var(--color-accent-muted); }
+    .vignette-role {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .vignette:nth-child(1) .vignette-role { color: var(--color-actor-1); }
+    .vignette:nth-child(2) .vignette-role { color: var(--color-actor-2); }
+    .vignette:nth-child(3) .vignette-role { color: var(--color-actor-5); }
+    .vignette h4 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin: 0;
+    }
+    .vignette p {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .vignette .quote {
+      margin-top: auto;
+      padding-top: 0.875rem;
+      border-top: 1px solid var(--color-border-light);
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--color-text);
+      line-height: 1.4;
+    }
+    @media (max-width: 860px) { .wins-grid { grid-template-columns: 1fr; } }
+
+    /* ============ NUMBER ROW ============ */
+    .numrow { background: var(--color-bg-warm); border-top: 1px solid var(--color-border-light); border-bottom: 1px solid var(--color-border-light); }
+    .nums {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .num-cell {
+      padding: 1.5rem 0.5rem;
+      text-align: left;
+      border-left: 1px solid var(--color-border);
+      padding-left: 1.25rem;
+    }
+    .num-value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4.5vw, 3rem);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-accent);
+    }
+    .num-value .unit { font-size: 0.55em; color: var(--color-text-secondary); margin-left: 0.15em; letter-spacing: -0.01em; }
+    .num-label {
+      margin-top: 0.5rem;
+      font-size: 0.88rem;
+      color: var(--color-text-secondary);
+      max-width: 22ch;
+      line-height: 1.4;
+    }
+    @media (max-width: 760px) {
+      .nums { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 420px) {
+      .nums { grid-template-columns: 1fr; }
+    }
+
+    /* ============ PLANS ============ */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+    .plan {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+    .plan.featured {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 1px var(--color-accent-light), 0 12px 32px rgba(217, 79, 48, 0.08);
+      position: relative;
+    }
+    .plan.featured::before {
+      content: 'Most relevant for SMBs';
+      position: absolute;
+      top: -0.6rem;
+      left: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: white;
+      background: var(--color-accent);
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+    }
+    .plan-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.3rem;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .plan-price {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: -0.03em;
+      color: var(--color-text);
+      font-variant-numeric: tabular-nums;
+    }
+    .plan-price .per { font-size: 0.85rem; font-weight: 400; color: var(--color-text-secondary); letter-spacing: 0; font-family: var(--font-body); margin-left: 0.25rem; }
+    .plan-desc { color: var(--color-text-secondary); font-size: 0.92rem; margin: 0; }
+    .plan ul { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-direction: column; gap: 0.4rem; }
+    .plan li {
+      font-size: 0.9rem;
+      padding-left: 1.2rem;
+      position: relative;
+      color: var(--color-text-secondary);
+    }
+    .plan li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 6px;
+      height: 6px;
+      background: var(--color-accent);
+      border-radius: 50%;
+    }
+    @media (max-width: 760px) { .plans-grid { grid-template-columns: 1fr; } }
+
+    /* ============ FINAL CTA ============ */
+    .final {
+      text-align: center;
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
+    .final .section-title { margin-left: auto; margin-right: auto; }
+    .final .section-sub { margin: 0.5rem auto 2.5rem; }
+    .final .cta-row { justify-content: center; opacity: 1; transition: none; }
+
+    /* ============ FOOTER ============ */
+    footer {
+      padding: 2.5rem 0 3.5rem;
+      border-top: 1px solid var(--color-border);
+      background: var(--color-bg-warm);
+    }
+    .foot-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.88rem;
+      color: var(--color-text-secondary);
+    }
+    .foot-inner a { color: var(--color-text-secondary); text-decoration: none; transition: color 200ms; }
+    .foot-inner a:hover { color: var(--color-accent); }
+    .foot-links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .word, .hero-sub, .cta-row, .eyebrow, .step, .tile, .vignette { opacity: 1 !important; transform: none !important; }
+      .ring-svg .pulse { display: none !important; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .tile:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../">CETI<span class="dot">.</span>AI <span style="color: var(--color-text-muted); font-weight: 400; margin-left: 0.5rem; font-size: 0.85rem;">/ Lookbook</span></a>
+      <a class="cta-link" href="#workshop">Book a workshop</a>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="wrap">
+      <p class="eyebrow">Claude Cowork · Business AI that works with you</p>
+      <h1 class="hero-title">
+        <span class="word">The</span>
+        <span class="word">analyst</span>
+        <span class="word">who</span>
+        <span class="word"><em>never</em></span>
+        <span class="word">sleeps.</span>
+      </h1>
+      <p class="hero-sub">Imagine a brilliant coworker who knew your industry, sat next to you, worked at the speed of thought, and never asked for a raise. That's what Claude already is for thousands of business users — for research, analysis, writing, organizing, and decision support. No code required.</p>
+      <div class="cta-row">
+        <a class="magnetic" href="https://claude.ai" target="_blank" rel="noopener">
+          Try Claude
+          <span class="arrow">&rarr;</span>
+        </a>
+        <a class="magnetic ghost" href="#workshop">
+          Roll it out across your team
+          <span class="arrow">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TUESDAY MORNING — SIGNATURE BEFORE / AFTER -->
+  <section class="tuesday" id="tuesday">
+    <div class="wrap">
+      <p class="section-eyebrow">A Tuesday morning</p>
+      <h2>You need to understand a competitor before the 11 a.m. meeting.</h2>
+      <p class="lede">Same task, same person, same coffee. Two ways of doing it. The first is how most of us still work — switching tabs, copy-pasting, building tables by hand. The second is what already exists if you have Claude open.</p>
+      <p class="lede small">Watch each column build itself as you scroll.</p>
+
+      <div class="compare" id="compare">
+
+        <!-- BEFORE -->
+        <article class="compare-col before">
+          <div class="compare-head">
+            <div>
+              <div class="compare-label">Before</div>
+              <h3 class="compare-title">The browser-tab method</h3>
+            </div>
+            <div class="clock" data-clock="before">00:00</div>
+          </div>
+          <ol class="steps" data-side="before">
+            <li class="step"><span class="step-num">01</span><span class="step-text">Search Google for the competitor's name + "pricing"</span><span class="step-time">00:04</span></li>
+            <li class="step"><span class="step-num">02</span><span class="step-text">Open 12 tabs. Skim, lose your place, open three more.</span><span class="step-time">00:18</span></li>
+            <li class="step"><span class="step-num">03</span><span class="step-text">Read 5 articles. Forget what was in the first one.</span><span class="step-time">00:41</span></li>
+            <li class="step"><span class="step-num">04</span><span class="step-text">Switch to Notion. Make a blank page. Stare at it.</span><span class="step-time">00:52</span></li>
+            <li class="step"><span class="step-num">05</span><span class="step-text">Copy-paste quotes back and forth. Lose formatting.</span><span class="step-time">01:23</span></li>
+            <li class="step"><span class="step-num">06</span><span class="step-text">Build a comparison table by hand. Realize you missed a column.</span><span class="step-time">01:48</span></li>
+            <li class="step"><span class="step-num">07</span><span class="step-text">Run out of time. Bring half-finished notes to the meeting.</span><span class="step-time">02:03</span></li>
+          </ol>
+          <div class="compare-foot">
+            <span class="foot-label">Time spent</span>
+            <span class="foot-value" data-clock-final="before">2h 03m</span>
+          </div>
+        </article>
+
+        <!-- AFTER -->
+        <article class="compare-col after">
+          <div class="compare-head">
+            <div>
+              <div class="compare-label">With Claude</div>
+              <h3 class="compare-title">The cowork method</h3>
+            </div>
+            <div class="clock" data-clock="after">00:00</div>
+          </div>
+          <ol class="steps" data-side="after">
+            <li class="step"><span class="step-num">01</span><span class="step-text">Open Claude. Type one sentence describing what you need.</span><span class="step-time">00:00</span></li>
+            <li class="step"><span class="step-num">02</span><span class="step-text">Claude pulls from your connected Drive, Notion, and the open web.</span><span class="step-time">00:01</span></li>
+            <li class="step"><span class="step-num">03</span><span class="step-text">A clean comparison table appears as an Artifact — pricing, positioning, recent moves.</span><span class="step-time">00:02</span></li>
+            <li class="step"><span class="step-num">04</span><span class="step-text">You ask one follow-up: "What about their enterprise tier?"</span><span class="step-time">00:03</span></li>
+            <li class="step"><span class="step-num">05</span><span class="step-text">Table updates. Sources cited inline. You read, edit, save to Notion.</span><span class="step-time">00:04</span></li>
+          </ol>
+          <div class="compare-foot">
+            <span class="foot-label">Time spent</span>
+            <span class="foot-value" data-clock-final="after">4 min</span>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT YOU CAN DO -->
+  <section class="can-do" id="can-do">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="section-eyebrow">What you can actually do</p>
+        <h2 class="section-title">Six kinds of work Claude does well — today, without you writing a line of code.</h2>
+        <p class="section-sub">Each of these is something people are already doing in their Claude.ai chat right now. The trick isn't the tool — it's knowing which tasks to bring to it.</p>
+      </div>
+
+      <div class="bento" id="bento">
+        <article class="tile">
+          <div class="tile-glyph" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <h3>Research</h3>
+          <h4>Map a market in minutes.</h4>
+          <p>Competitor scans, regulatory landscapes, customer-segment research — Claude pulls, summarizes, and cites the sources you can defend in a meeting.</p>
+        </article>
+
+        <article class="tile">
+          <div class="tile-glyph" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </div>
+          <h3>Write</h3>
+          <h4>First drafts that respect your voice.</h4>
+          <p>Proposals, board updates, client emails, RFP responses. Give Claude two past examples and a brief — get a draft that doesn't sound like a robot.</p>
+        </article>
+
+        <article class="tile">
+          <div class="tile-glyph" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 4 4 5-5"/></svg>
+          </div>
+          <h3>Analyze</h3>
+          <h4>Make sense of a messy spreadsheet.</h4>
+          <p>Upload a CSV of last quarter's pipeline, last month's expenses, last year's NPS. Ask plain questions. Get charts and the "so what" in one pass.</p>
+        </article>
+
+        <article class="tile">
+          <div class="tile-glyph" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
+          </div>
+          <h3>Organize</h3>
+          <h4>Turn a folder into a system.</h4>
+          <p>Twelve scattered vendor PDFs become one comparison table. Four meeting transcripts become a clean decision log with owners and dates.</p>
+        </article>
+
+        <article class="tile">
+          <div class="tile-glyph" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          </div>
+          <h3>Decide</h3>
+          <h4>A structured second opinion.</h4>
+          <p>Lay out a hard call — vendor choice, hire-or-promote, build-or-buy. Claude lists trade-offs, surfaces what you haven't considered, doesn't pretend to know your business better than you.</p>
+        </article>
+
+        <article class="tile">
+          <div class="tile-glyph" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M5 12H2M22 12h-3M6.3 6.3 4.2 4.2M19.8 19.8l-2.1-2.1M6.3 17.7l-2.1 2.1M19.8 4.2l-2.1 2.1"/></svg>
+          </div>
+          <h3>Build</h3>
+          <h4>Tiny tools, not big projects.</h4>
+          <p>A pricing calculator. A meeting-prep checklist generator. A one-page client dashboard. Claude builds it as an Artifact — you use it five minutes later.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONNECTED WORKSPACE -->
+  <section class="connected" id="connected">
+    <div class="wrap">
+      <div class="connected-grid">
+        <div>
+          <p class="section-eyebrow">The connected workspace</p>
+          <h2 class="section-title">No more copy-paste.</h2>
+          <p>Claude can now read directly from your Notion, Gmail, Google Drive, Linear, Asana, HubSpot, and dozens more — through a standard called MCP. You give permission once. Then Claude works with your real material instead of asking you to paste it in.</p>
+          <p style="font-size: 0.92rem; margin-top: 1rem;">As of early 2026, the connector ecosystem covers <strong>6,000+</strong> business apps. The boring parts of your job — finding things, pulling things together — stop being your job.</p>
+        </div>
+        <div class="ring-wrap" aria-hidden="true">
+          <svg class="ring-svg" viewBox="0 0 360 360">
+            <circle class="orbit" cx="180" cy="180" r="130"/>
+            <circle class="orbit" cx="180" cy="180" r="85" opacity="0.6"/>
+            <circle class="pulse" cx="180" cy="180" r="60"/>
+
+            <!-- spokes -->
+            <line class="spoke" x1="180" y1="180" x2="180" y2="50"/>
+            <line class="spoke" x1="180" y1="180" x2="293" y2="115"/>
+            <line class="spoke" x1="180" y1="180" x2="293" y2="245"/>
+            <line class="spoke" x1="180" y1="180" x2="180" y2="310"/>
+            <line class="spoke" x1="180" y1="180" x2="67" y2="245"/>
+            <line class="spoke" x1="180" y1="180" x2="67" y2="115"/>
+
+            <!-- hub -->
+            <circle class="hub" cx="180" cy="180" r="38"/>
+            <text class="hub-label" x="180" y="180">Claude</text>
+
+            <!-- nodes -->
+            <g class="node"><circle cx="180" cy="50" r="28"/><text x="180" y="50">NOTION</text></g>
+            <g class="node"><circle cx="293" cy="115" r="28"/><text x="293" y="115">GMAIL</text></g>
+            <g class="node"><circle cx="293" cy="245" r="28"/><text x="293" y="245">DRIVE</text></g>
+            <g class="node"><circle cx="180" cy="310" r="28"/><text x="180" y="310">HUBSPOT</text></g>
+            <g class="node"><circle cx="67" cy="245" r="28"/><text x="67" y="245">LINEAR</text></g>
+            <g class="node"><circle cx="67" cy="115" r="28"/><text x="67" y="115">ASANA</text></g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REAL WINS -->
+  <section class="wins" id="wins">
+    <div class="wrap">
+      <p class="section-eyebrow">Real wins</p>
+      <h2 class="section-title">Three people. Three Tuesdays. Three hours of their week back.</h2>
+      <p class="section-sub">Names changed; the work is real. Patterns we see again and again across CETI's training cohorts.</p>
+
+      <div class="wins-grid">
+        <article class="vignette">
+          <div class="vignette-role">Marketing lead · agency, 12 people</div>
+          <h4>Proposals that used to take a day take an hour.</h4>
+          <p>Maya kept a folder of past winning proposals. Now she gives Claude the brief, points it at the folder, and gets a draft that already sounds like her firm. She edits — she doesn't author from scratch.</p>
+          <p class="quote">"I'm not faster at typing. I'm faster at starting."</p>
+        </article>
+
+        <article class="vignette">
+          <div class="vignette-role">Operations lead · DTC brand, $18M revenue</div>
+          <h4>Vendor data, finally clean.</h4>
+          <p>Six suppliers. Six spreadsheet formats. Diego dropped them into a Claude Project and asked for one reconciled view with cost trends. What used to be a quarterly headache is now a Monday-morning ritual.</p>
+          <p class="quote">"It noticed a 14% price drift before I did."</p>
+        </article>
+
+        <article class="vignette">
+          <div class="vignette-role">CEO · services firm, 40 people</div>
+          <h4>Board updates that don't eat the weekend.</h4>
+          <p>Priya gives Claude the previous month's metrics, the team's weekly check-ins, and her three talking points. She gets a draft that's already structured the way her board reads. She rewrites the parts that need her voice.</p>
+          <p class="quote">"It's not writing for me. It's getting me to the page."</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUMBER ROW -->
+  <section class="numrow">
+    <div class="wrap">
+      <div class="nums">
+        <div class="num-cell">
+          <div class="num-value"><span class="num" data-to="6">0</span><span class="unit">hrs / week</span></div>
+          <p class="num-label">Median time business users save once Claude is part of their daily routine.</p>
+        </div>
+        <div class="num-cell">
+          <div class="num-value">$<span class="num" data-to="20">0</span><span class="unit">/seat/mo</span></div>
+          <p class="num-label">Claude Team standard, billed annually. 5-seat minimum.</p>
+        </div>
+        <div class="num-cell">
+          <div class="num-value"><span class="num" data-to="6000">0</span><span class="unit">+ apps</span></div>
+          <p class="num-label">Connected to Claude today via MCP — Gmail, Drive, Notion, HubSpot, and more.</p>
+        </div>
+        <div class="num-cell">
+          <div class="num-value"><span class="num" data-to="15">0</span><span class="unit"> workflows</span></div>
+          <p class="num-label">Pre-built workflows in Claude for Small Business (launched May 2026).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANS -->
+  <section class="plans" id="plans">
+    <div class="wrap">
+      <p class="section-eyebrow">Pick a starting point</p>
+      <h2 class="section-title">Pricing is no longer the reason to wait.</h2>
+      <p class="section-sub">Claude's business pricing in 2026, distilled. Numbers below are Anthropic's published tiers — confirm at checkout.</p>
+
+      <div class="plans-grid">
+        <article class="plan">
+          <h3 class="plan-name">Pro</h3>
+          <div class="plan-price">$20<span class="per">/user/month</span></div>
+          <p class="plan-desc">For one person who wants to try the full thing without committing the team.</p>
+          <ul>
+            <li>Claude Opus, Sonnet, Haiku</li>
+            <li>Projects, Artifacts, Memory</li>
+            <li>Connectors (Gmail, Drive, Notion…)</li>
+          </ul>
+        </article>
+
+        <article class="plan featured">
+          <h3 class="plan-name">Team</h3>
+          <div class="plan-price">$20<span class="per">/seat/month · annual · 5 min</span></div>
+          <p class="plan-desc">For SMBs and operating teams. Shared Projects, central admin, no surprise bills.</p>
+          <ul>
+            <li>Everything in Pro</li>
+            <li>Shared Projects + Artifacts</li>
+            <li>Admin console, central billing</li>
+            <li>Claude for Small Business workflows</li>
+          </ul>
+        </article>
+
+        <article class="plan">
+          <h3 class="plan-name">Enterprise</h3>
+          <div class="plan-price">Custom<span class="per"> · usage-based</span></div>
+          <p class="plan-desc">For organizations with compliance, data-residency, or single-sign-on requirements.</p>
+          <ul>
+            <li>SSO, audit logs, SCIM</li>
+            <li>Data-residency options</li>
+            <li>Dedicated support</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final" id="workshop">
+    <div class="wrap">
+      <p class="section-eyebrow">Two doors</p>
+      <h2 class="section-title">Try Claude today. Roll it out properly when you're ready.</h2>
+      <p class="section-sub">Most teams figure out Claude alone and plateau at 20% of the value. CETI's Claude Cowork workshop is a one-day intensive that gets a whole team to the high-leverage 80% — same week.</p>
+      <div class="cta-row">
+        <a class="magnetic" href="https://claude.ai" target="_blank" rel="noopener">
+          Try Claude
+          <span class="arrow">&rarr;</span>
+        </a>
+        <a class="magnetic ghost" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
+          Book a CETI workshop
+          <span class="arrow">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-inner">
+      <div>CETI.AI · AI training and consulting · <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a></div>
+      <div class="foot-links">
+        <a href="https://cetiai.co">cetiai.co</a>
+        <a href="https://calendly.com/manutej/30min">Calendly</a>
+        <a href="https://wa.me/16502832299">WhatsApp</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ============ GENERIC REVEAL (tiles, vignettes) ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.15 });
+    document.querySelectorAll('.tile, .vignette').forEach((el) => reveal.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STRENGTH = 28;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ MAGIC-CARD CURSOR GLOW ============
+    document.querySelectorAll('.tile').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--mx', `-200px`);
+        card.style.setProperty('--my', `-200px`);
+      });
+    });
+
+    // ============ NUMBER TICKER ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ============ TUESDAY MORNING — staged steps + clocks ============
+    const compare = document.getElementById('compare');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function runCompare() {
+      const beforeSteps = compare.querySelectorAll('[data-side="before"] .step');
+      const afterSteps = compare.querySelectorAll('[data-side="after"] .step');
+      const beforeClock = compare.querySelector('[data-clock="before"]');
+      const afterClock = compare.querySelector('[data-clock="after"]');
+
+      if (reducedMotion) {
+        beforeSteps.forEach((s) => s.classList.add('visible'));
+        afterSteps.forEach((s) => s.classList.add('visible'));
+        beforeClock.textContent = '02:03';
+        afterClock.textContent = '00:04';
+        return;
+      }
+
+      // BEFORE: slow, sequential, ~440ms apart. Clock crawls.
+      beforeSteps.forEach((step, i) => {
+        setTimeout(() => step.classList.add('visible'), i * 440);
+      });
+      const beforeTotalMs = (beforeSteps.length - 1) * 440 + 500;
+      const beforeFinal = 123; // 2h 03m → seconds for ticker display
+      const bStart = performance.now();
+      function bTick(now) {
+        const p = Math.min((now - bStart) / beforeTotalMs, 1);
+        const v = Math.floor(easeOutCubic(p) * beforeFinal);
+        const mm = String(Math.floor(v / 60)).padStart(2, '0');
+        const ss = String(v % 60).padStart(2, '0');
+        beforeClock.textContent = `${mm}:${ss}`;
+        if (p < 1) requestAnimationFrame(bTick);
+        else beforeClock.textContent = '02:03';
+      }
+      requestAnimationFrame(bTick);
+
+      // AFTER: snappy, almost parallel, ~140ms apart. Clock barely moves.
+      afterSteps.forEach((step, i) => {
+        setTimeout(() => step.classList.add('visible'), i * 140 + 120);
+      });
+      const afterTotalMs = (afterSteps.length - 1) * 140 + 500;
+      const afterFinal = 4;
+      const aStart = performance.now();
+      function aTick(now) {
+        const p = Math.min((now - aStart) / afterTotalMs, 1);
+        const v = easeOutCubic(p) * afterFinal;
+        afterClock.textContent = `00:0${Math.min(Math.floor(v), 4)}`;
+        if (p < 1) requestAnimationFrame(aTick);
+        else afterClock.textContent = '00:04';
+      }
+      requestAnimationFrame(aTick);
+    }
+
+    const compareObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { runCompare(); compareObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.2 });
+    compareObs.observe(compare);
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

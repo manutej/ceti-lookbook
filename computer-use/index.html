@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Computer Use & Browser Agents — CETI Lookbook</title>
+  <meta name="description" content="When the agent uses your computer. A working demo of Claude Computer Use, OpenAI Operator, Browserbase, and the rest of the autonomous-browser landscape — for mid-level engineers.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-bg-code: #1E1E2E;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+      --color-surface-warm: #FDF9F3;
+
+      --color-accent: #D94F30;       /* vermillion — primary */
+      --color-accent-hover: #C4432A;
+      --color-accent-light: #FDEEE9;
+      --color-accent-muted: #E8836C;
+
+      --color-actor-1: #D94F30;      /* vermillion — Claude */
+      --color-actor-2: #2A7B9B;      /* teal — Browserbase / infra */
+      --color-actor-3: #7B6DAA;      /* plum — OpenAI / Operator */
+      --color-actor-4: #D4A843;      /* golden — Playwright + LLM */
+      --color-actor-5: #2D8B55;      /* forest — Browserless / Steel */
+
+      --color-success: #2D8B55;
+      --color-info: #2A7B9B;
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+      --stagger: 80ms;
+
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 18% 12%, rgba(217, 79, 48, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 88% 78%, rgba(42, 123, 155, 0.04) 0%, transparent 55%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; }
+    code, pre { font-family: var(--font-mono); }
+
+    /* ============ TOP BAR ============ */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(250, 247, 242, 0.78);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .topbar-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0.875rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .brand {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+    }
+    .brand strong { color: var(--color-text); font-weight: 500; }
+    .crumb {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .crumb .dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      vertical-align: middle;
+      margin: 0 0.5rem;
+    }
+
+    /* ============ HERO ============ */
+    .hero {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem 2rem;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.6rem, 6.5vw, 5rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 1.25rem 0 1.5rem;
+      max-width: 18ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 90ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 170ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 250ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 330ms; }
+    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 410ms; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-accent);
+    }
+
+    .hero-sub {
+      font-size: 1.18rem;
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 580ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    .meta-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.75rem;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 720ms;
+    }
+    .hero.visible .meta-row { opacity: 1; }
+    .meta-row span::before {
+      content: "▸ ";
+      color: var(--color-accent);
+      margin-right: 0.2rem;
+    }
+
+    /* ============ BROWSER DEMO ============ */
+    .demo-section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr;
+      gap: 1.25rem;
+    }
+
+    .browser-frame {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+      position: relative;
+      min-height: 460px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .browser-frame.visible { opacity: 1; transform: translateY(0); }
+
+    /* Title bar with traffic lights */
+    .frame-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 0.9rem;
+      background: var(--color-bg-warm);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .light {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: #E5DFD6;
+    }
+    .light.r { background: #E78A77; }
+    .light.y { background: #E8C375; }
+    .light.g { background: #8FBE94; }
+    .frame-title-spacer { flex: 1; }
+    .frame-title-text {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* Tab strip */
+    .frame-tabs {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      padding: 0 0.7rem;
+      background: var(--color-bg-warm);
+      border-bottom: 1px solid var(--color-border);
+      overflow: hidden;
+    }
+    .tab {
+      padding: 0.45rem 0.85rem 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      background: transparent;
+      border-radius: 6px 6px 0 0;
+      white-space: nowrap;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 1px solid transparent;
+      border-bottom: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .tab.active {
+      background: var(--color-surface);
+      color: var(--color-text);
+      border-color: var(--color-border);
+    }
+    .tab .fav {
+      width: 8px; height: 8px; border-radius: 2px;
+      background: var(--color-accent);
+      flex-shrink: 0;
+    }
+    .tab.active .fav { background: var(--color-info); }
+
+    /* URL bar */
+    .frame-urlbar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.85rem;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .url-btn {
+      width: 22px; height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      line-height: 1;
+      cursor: default;
+    }
+    .url-pill {
+      flex: 1;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-light);
+      border-radius: 8px;
+      padding: 0.32rem 0.7rem;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--color-text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+    .url-pill .lock {
+      color: var(--color-success);
+      font-size: 0.7rem;
+    }
+    .url-pill .path { color: var(--color-text-muted); }
+
+    /* Content area */
+    .frame-content {
+      position: relative;
+      height: 320px;
+      background: var(--color-surface);
+      overflow: hidden;
+    }
+
+    /* Search engine "page" */
+    .scene {
+      position: absolute;
+      inset: 0;
+      padding: 2rem 1.5rem;
+      opacity: 0;
+      transition: opacity var(--duration-normal) var(--ease-out);
+      pointer-events: none;
+    }
+    .scene.active { opacity: 1; }
+
+    .scene-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.6rem;
+      letter-spacing: -0.02em;
+      text-align: center;
+      color: var(--color-text);
+      margin-bottom: 1rem;
+    }
+    .scene-logo span:nth-child(1) { color: var(--color-actor-3); }
+    .scene-logo span:nth-child(2) { color: var(--color-actor-1); }
+    .scene-logo span:nth-child(3) { color: var(--color-actor-4); }
+    .scene-logo span:nth-child(4) { color: var(--color-actor-2); }
+    .scene-logo span:nth-child(5) { color: var(--color-actor-5); }
+    .scene-logo span:nth-child(6) { color: var(--color-actor-1); }
+
+    .search-box {
+      width: min(440px, 92%);
+      margin: 0 auto;
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--color-surface);
+      box-shadow: var(--shadow-md);
+      transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+    }
+    .search-box.highlight {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 4px var(--color-accent-light);
+    }
+    .search-box .ico { color: var(--color-text-muted); font-size: 0.9rem; }
+    .search-typed {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--color-text);
+      flex: 1;
+      min-height: 1.2em;
+    }
+    .search-typed::after {
+      content: "";
+      display: inline-block;
+      width: 1px;
+      height: 1em;
+      background: var(--color-accent);
+      vertical-align: text-bottom;
+      margin-left: 1px;
+      animation: caret-blink 1s steps(2) infinite;
+    }
+    @keyframes caret-blink {
+      50% { opacity: 0; }
+    }
+
+    .search-results {
+      width: min(540px, 96%);
+      margin: 1.5rem auto 0;
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .search-results.show { opacity: 1; }
+    .result-item {
+      padding: 0.7rem 0.85rem;
+      border-radius: 8px;
+      transition: background var(--duration-fast);
+      margin-bottom: 0.4rem;
+    }
+    .result-item.highlight { background: var(--color-accent-light); }
+    .result-url {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.02em;
+    }
+    .result-title {
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--color-info);
+      margin: 0.1rem 0 0.15rem;
+    }
+    .result-desc {
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Gmail scene */
+    .gmail-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--color-border-light);
+      margin-bottom: 0.75rem;
+    }
+    .gmail-logo {
+      width: 22px; height: 22px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #D94F30 0%, #E8836C 100%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.8rem;
+    }
+    .gmail-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--color-text);
+    }
+    .gmail-thread {
+      background: var(--color-surface-warm);
+      border: 1px solid var(--color-border-light);
+      border-radius: 8px;
+      padding: 0.7rem 0.85rem;
+      margin-bottom: 0.4rem;
+      transition: background var(--duration-fast);
+    }
+    .gmail-thread.highlight {
+      background: var(--color-accent-light);
+      border-color: var(--color-accent-muted);
+    }
+    .gmail-from {
+      font-weight: 500;
+      font-size: 0.82rem;
+      color: var(--color-text);
+    }
+    .gmail-subj {
+      font-size: 0.78rem;
+      color: var(--color-text-secondary);
+      margin-top: 0.1rem;
+    }
+    .gmail-time {
+      float: right;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+    }
+    .gmail-compose {
+      margin-top: 0.85rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0.7rem 0.85rem;
+      background: var(--color-surface);
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+    }
+    .gmail-compose.show { opacity: 1; transform: translateY(0); }
+    .gmail-compose-to {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--color-border-light);
+    }
+    .gmail-compose-body {
+      padding-top: 0.45rem;
+      font-size: 0.82rem;
+      color: var(--color-text);
+      min-height: 2.4em;
+      line-height: 1.5;
+    }
+    .gmail-compose-body::after {
+      content: "";
+      display: inline-block;
+      width: 1px;
+      height: 1em;
+      background: var(--color-accent);
+      vertical-align: text-bottom;
+      margin-left: 1px;
+      animation: caret-blink 1s steps(2) infinite;
+    }
+
+    /* Cursor (autonomous) */
+    .cursor {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      transform: translate(40px, 40px);
+      transition: transform 800ms cubic-bezier(0.34, 1.4, 0.64, 1);
+      z-index: 10;
+      filter: drop-shadow(0 2px 4px rgba(44, 42, 40, 0.2));
+    }
+    .cursor svg { display: block; }
+    .cursor.click::after {
+      content: "";
+      position: absolute;
+      top: 8px; left: 8px;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      transform: translate(-50%, -50%);
+      animation: click-ring 0.5s var(--ease-out);
+      opacity: 0;
+    }
+    @keyframes click-ring {
+      0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.4); box-shadow: 0 0 0 0 var(--color-accent); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.6); box-shadow: 0 0 0 14px transparent; }
+    }
+
+    /* Replay button */
+    .demo-replay {
+      position: absolute;
+      bottom: 0.85rem;
+      right: 0.85rem;
+      padding: 0.45rem 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      z-index: 11;
+    }
+    .demo-replay:hover {
+      color: var(--color-accent);
+      border-color: var(--color-accent);
+    }
+
+    /* Action log panel */
+    .action-log {
+      background: var(--color-bg-code);
+      border-radius: 14px;
+      padding: 1.4rem 1.5rem;
+      color: #CDD6F4;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      min-height: 460px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-xl);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+      transition-delay: 150ms;
+    }
+    .action-log.visible { opacity: 1; transform: translateY(0); }
+    .log-header {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6C7086;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid #313244;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .log-header::before {
+      content: "";
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #A6E3A1;
+      box-shadow: 0 0 8px #A6E3A1;
+      animation: pulse 2s var(--ease-out) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .log-entries {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .log-entry {
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
+    }
+    .log-entry.show { opacity: 1; transform: translateX(0); }
+    .log-tick {
+      color: #A6E3A1;
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+    .log-entry .log-action { color: #CDD6F4; }
+    .log-entry .log-target { color: #89B4FA; }
+    .log-entry.thinking .log-tick { color: #F9E2AF; animation: pulse 1s infinite; }
+    .log-entry.thinking .log-action { color: #BAC2DE; font-style: italic; }
+    .log-foot {
+      font-size: 0.7rem;
+      color: #6C7086;
+      margin-top: 0.75rem;
+      padding-top: 0.7rem;
+      border-top: 1px solid #313244;
+      display: flex;
+      justify-content: space-between;
+    }
+    .log-foot .task-name { color: #F9E2AF; }
+
+    /* ============ BENTO — CAPABILITIES ============ */
+    .section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 2rem;
+    }
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      margin-bottom: 0.6rem;
+    }
+    .section-heading {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      letter-spacing: -0.025em;
+      line-height: 1.08;
+      margin: 0 0 0.8rem;
+      max-width: 22ch;
+    }
+    .section-sub {
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      margin: 0 0 2.5rem;
+      font-size: 1.05rem;
+    }
+
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1rem;
+      grid-auto-rows: minmax(170px, auto);
+    }
+    .tile {
+      position: relative;
+      padding: 1.6rem;
+      border-radius: 14px;
+      background:
+        radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%),
+          rgba(217, 79, 48, 0.08), transparent 40%),
+        var(--color-surface);
+      border: 1px solid var(--color-border);
+      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal);
+      opacity: 0;
+      transform: translateY(20px);
+      overflow: hidden;
+    }
+    .tile.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring); }
+    @media (hover: hover) {
+      .tile.visible:hover {
+        transform: translateY(-3px);
+        border-color: var(--color-accent-muted);
+        box-shadow: var(--shadow-lg);
+      }
+    }
+    .tile.span-3 { grid-column: span 3; }
+    .tile.span-2 { grid-column: span 2; }
+    .tile.span-4 { grid-column: span 4; }
+
+    .tile-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      display: block;
+      margin-bottom: 0.6rem;
+    }
+    .tile-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.015em;
+      margin: 0 0 0.55rem;
+    }
+    .tile-body {
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      margin: 0;
+    }
+    .tile-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-accent);
+      background: var(--color-accent-light);
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      margin-bottom: 0.85rem;
+    }
+    .tile.actor-2 .tile-tag { color: var(--color-actor-2); background: rgba(42, 123, 155, 0.10); }
+    .tile.actor-3 .tile-tag { color: var(--color-actor-3); background: rgba(123, 109, 170, 0.10); }
+    .tile.actor-4 .tile-tag { color: var(--color-actor-4); background: rgba(212, 168, 67, 0.12); }
+    .tile.actor-5 .tile-tag { color: var(--color-actor-5); background: rgba(45, 139, 85, 0.10); }
+
+    /* tile mini-viz: form */
+    .mini-form {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .mini-input {
+      height: 22px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-light);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mini-input::after {
+      content: "";
+      position: absolute;
+      top: 6px; left: 8px;
+      height: 10px;
+      width: 0;
+      background: var(--color-accent);
+      animation: type-in 4s var(--ease-out) infinite;
+      opacity: 0.5;
+    }
+    .mini-input:nth-child(2)::after { animation-delay: 0.4s; }
+    .mini-input:nth-child(3)::after { animation-delay: 0.8s; width: 30%; animation-name: type-short; }
+    @keyframes type-in {
+      0%, 10% { width: 0; }
+      45% { width: 60%; }
+      75%, 100% { width: 60%; }
+    }
+    @keyframes type-short {
+      0%, 15% { width: 0; }
+      50% { width: 30%; }
+      80%, 100% { width: 30%; }
+    }
+
+    /* tile mini-viz: extract */
+    .mini-extract {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+    }
+    .extract-cell {
+      padding: 0.35rem 0.55rem;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-light);
+      border-radius: 6px;
+      color: var(--color-text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .extract-cell strong { color: var(--color-actor-2); font-weight: 500; }
+
+    /* tile mini-viz: workflow chain */
+    .mini-chain {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .chain-node {
+      padding: 0.3rem 0.65rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      color: var(--color-text-secondary);
+    }
+    .chain-arrow { color: var(--color-accent); font-size: 0.85rem; }
+
+    /* tile mini-viz: QA checks */
+    .mini-checks {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+    .check-row { color: var(--color-success); }
+    .check-row.fail { color: var(--color-accent); }
+    .check-row .lbl { color: var(--color-text-secondary); margin-left: 0.4rem; }
+
+    /* ============ LANDSCAPE TABLE ============ */
+    .landscape {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .landscape-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1.2fr 1.4fr 2.2fr;
+      gap: 1rem;
+      padding: 1.1rem 1.4rem;
+      border-bottom: 1px solid var(--color-border-light);
+      align-items: center;
+      transition: background var(--duration-fast);
+    }
+    .landscape-row:last-child { border-bottom: none; }
+    .landscape-row.head {
+      background: var(--color-bg-warm);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+    }
+    .landscape-row:not(.head):hover { background: var(--color-surface-warm); }
+    .ls-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .ls-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--color-actor-1);
+      flex-shrink: 0;
+    }
+    .ls-name.a2 .ls-dot { background: var(--color-actor-2); }
+    .ls-name.a3 .ls-dot { background: var(--color-actor-3); }
+    .ls-name.a4 .ls-dot { background: var(--color-actor-4); }
+    .ls-name.a5 .ls-dot { background: var(--color-actor-5); }
+    .ls-shape {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-text-secondary);
+    }
+    .ls-best {
+      font-size: 0.85rem;
+      color: var(--color-text);
+    }
+    .ls-best strong {
+      font-weight: 500;
+      color: var(--color-text);
+    }
+    .ls-note {
+      font-size: 0.85rem;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ============ SAFETY ============ */
+    .safety {
+      background: var(--color-bg-warm);
+      border: 1px solid var(--color-border);
+      border-left: 4px solid var(--color-accent);
+      border-radius: 14px;
+      padding: 2rem 2.2rem;
+    }
+    .safety-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.015em;
+      margin: 0 0 0.85rem;
+    }
+    .safety p {
+      color: var(--color-text-secondary);
+      margin: 0 0 0.85rem;
+      max-width: 70ch;
+    }
+    .safety p:last-child { margin-bottom: 0; }
+    .safety strong { color: var(--color-text); font-weight: 500; }
+    .safety-grid {
+      margin-top: 1.4rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.9rem;
+    }
+    .safety-pill {
+      padding: 0.65rem 0.9rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-secondary);
+    }
+    .safety-pill strong {
+      display: block;
+      color: var(--color-accent);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.66rem;
+      margin-bottom: 0.25rem;
+    }
+
+    /* ============ CODE BLOCK ============ */
+    .code-section {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 2rem;
+    }
+    .code-wrap {
+      background: var(--color-bg-code);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+    }
+    .code-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.7rem 0.95rem;
+      background: #181825;
+      border-bottom: 1px solid #313244;
+    }
+    .code-bar .light { width: 10px; height: 10px; }
+    .code-fname {
+      margin-left: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: #6C7086;
+    }
+    .code-lang {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      color: #6C7086;
+      text-transform: uppercase;
+    }
+    pre.code-block {
+      margin: 0;
+      padding: 1.4rem 1.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.86rem;
+      line-height: 1.65;
+      color: #CDD6F4;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-x: hidden;
+    }
+    .k { color: #CBA6F7; }   /* keyword */
+    .s { color: #A6E3A1; }   /* string */
+    .f { color: #89B4FA; }   /* function */
+    .c { color: #6C7086; font-style: italic; }   /* comment */
+    .n { color: #FAB387; }   /* number */
+    .p { color: #F9E2AF; }   /* property */
+
+    /* ============ CTA ============ */
+    .cta {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 6rem 1.5rem 7rem;
+      text-align: center;
+    }
+    .cta h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      letter-spacing: -0.025em;
+      line-height: 1.08;
+      margin: 0 0 1rem;
+    }
+    .cta h2 em { font-style: normal; color: var(--color-accent); }
+    .cta p {
+      color: var(--color-text-secondary);
+      font-size: 1.1rem;
+      max-width: 52ch;
+      margin: 0 auto 2.25rem;
+    }
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 1rem 1.85rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 0.98rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background var(--duration-fast);
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow {
+      display: inline-block;
+      transition: transform var(--duration-normal) var(--ease-out);
+    }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+    .secondary {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      padding: 0.5rem 1rem;
+      transition: color var(--duration-fast);
+    }
+    .secondary:hover { color: var(--color-accent); }
+
+    /* ============ FOOTER ============ */
+    .foot {
+      border-top: 1px solid var(--color-border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+    }
+    .foot a { color: var(--color-text-secondary); text-decoration: none; }
+    .foot a:hover { color: var(--color-accent); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 980px) {
+      .demo-grid { grid-template-columns: 1fr; }
+      .bento { grid-template-columns: repeat(4, 1fr); }
+      .tile.span-3 { grid-column: span 2; }
+      .tile.span-4 { grid-column: span 4; }
+      .tile.span-2 { grid-column: span 2; }
+      .landscape-row { grid-template-columns: 1fr; gap: 0.5rem; }
+      .landscape-row.head { display: none; }
+      .ls-shape, .ls-best, .ls-note { font-size: 0.85rem; }
+      .ls-shape::before { content: "Shape · "; color: var(--color-text-muted); font-size: 0.7rem; }
+      .ls-best::before { content: "Best for · "; color: var(--color-text-muted); font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
+      .ls-note::before { content: "Note · "; color: var(--color-text-muted); font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
+      .safety-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .bento { grid-template-columns: 1fr; }
+      .tile, .tile.span-2, .tile.span-3, .tile.span-4 { grid-column: span 1; }
+      .frame-content { height: 280px; }
+      .scene { padding: 1.25rem 1rem; }
+      .scene-logo { font-size: 1.25rem; }
+      .search-box { padding: 0.5rem 0.75rem; }
+      .topbar-inner { padding: 0.7rem 1rem; }
+      .crumb { display: none; }
+      .hero { padding-top: 3rem; }
+      .safety { padding: 1.5rem 1.25rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .hero .word, .hero-sub, .meta-row, .eyebrow,
+      .browser-frame, .action-log, .tile {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .cursor { display: none; }
+      .search-typed::after, .gmail-compose-body::after { display: none; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="../"><strong>CETI</strong> · LOOKBOOK</a>
+      <span class="crumb">Computer Use<span class="dot"></span>Browser Agents<span class="dot"></span>2026</span>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">COMPUTER USE · BROWSER AGENTS · 2026</p>
+    <h1 class="hero-title">
+      <span class="word">When</span>
+      <span class="word">the</span>
+      <span class="word"><em>agent</em></span>
+      <span class="word">uses your</span>
+      <span class="word">computer.</span>
+    </h1>
+    <p class="hero-sub">Click, type, ship. The autonomous browser is no longer a demo — it's an API call. A mid-level engineer's tour of Claude Computer Use, OpenAI Operator, Browserbase, and the rest of the stack that's quietly absorbing the manual-work layer.</p>
+    <div class="meta-row">
+      <span>Mid-level audience</span>
+      <span>OSWorld 72.5%</span>
+      <span>Sandboxes &amp; safety</span>
+      <span>~6 min read</span>
+    </div>
+  </section>
+
+  <!-- BROWSER DEMO + LOG -->
+  <section class="demo-section">
+    <div class="demo-grid">
+      <!-- Simulated browser frame -->
+      <div class="browser-frame" id="frame" aria-label="Simulated browser controlled by an autonomous cursor.">
+        <div class="frame-titlebar">
+          <span class="light r"></span>
+          <span class="light y"></span>
+          <span class="light g"></span>
+          <span class="frame-title-spacer"></span>
+          <span class="frame-title-text">claude-computer-use · session 01</span>
+          <span class="frame-title-spacer"></span>
+        </div>
+
+        <div class="frame-tabs">
+          <div class="tab active" id="tab-1"><span class="fav"></span>Search</div>
+          <div class="tab" id="tab-2"><span class="fav"></span>Inbox</div>
+        </div>
+
+        <div class="frame-urlbar">
+          <span class="url-btn">‹</span>
+          <span class="url-btn">›</span>
+          <span class="url-btn">↻</span>
+          <div class="url-pill">
+            <span class="lock">⌧</span>
+            <span id="url-host">google.com</span><span class="path" id="url-path">/</span>
+          </div>
+        </div>
+
+        <div class="frame-content">
+          <!-- Scene 1: Search -->
+          <div class="scene active" id="scene-search">
+            <div class="scene-logo">
+              <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+            </div>
+            <div class="search-box" id="search-box">
+              <span class="ico">⌕</span>
+              <span class="search-typed" id="search-input"></span>
+            </div>
+            <div class="search-results" id="search-results">
+              <div class="result-item" id="result-1">
+                <div class="result-url">https://nytimes.com › travel › tokyo-flight-deals</div>
+                <div class="result-title">Cheapest flights to Tokyo — May 2026 fare report</div>
+                <div class="result-desc">Direct routes from SFO and LAX dropped 18% this week as carriers reopen capacity…</div>
+              </div>
+              <div class="result-item" id="result-2">
+                <div class="result-url">https://kayak.com › flights › sfo-hnd</div>
+                <div class="result-title">SFO → HND flights from $642 · Kayak</div>
+                <div class="result-desc">Compare 18 airlines, set fare alerts, and book direct overnight routes…</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scene 2: Gmail -->
+          <div class="scene" id="scene-gmail">
+            <div class="gmail-header">
+              <span class="gmail-logo">M</span>
+              <span class="gmail-title">Inbox · 3 unread</span>
+            </div>
+            <div class="gmail-thread" id="thread-1">
+              <span class="gmail-time">9:42</span>
+              <div class="gmail-from">Priya Raman</div>
+              <div class="gmail-subj">Re: Q3 design review — can we move to Thursday?</div>
+            </div>
+            <div class="gmail-thread" id="thread-2">
+              <span class="gmail-time">8:11</span>
+              <div class="gmail-from">Stripe</div>
+              <div class="gmail-subj">Your monthly report is ready</div>
+            </div>
+            <div class="gmail-compose" id="compose-box">
+              <div class="gmail-compose-to">To: priya@aretelabs.co  ·  Subject: Re: Q3 design review</div>
+              <div class="gmail-compose-body" id="compose-body"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Autonomous cursor -->
+        <div class="cursor" id="cursor" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M3 2 L19 11 L11.5 12 L9 19 Z" fill="#2C2A28" stroke="#FAF7F2" stroke-width="1.2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <button class="demo-replay" id="replay" type="button" aria-label="Replay demo">↻ Replay</button>
+      </div>
+
+      <!-- Action log -->
+      <div class="action-log" id="action-log">
+        <div class="log-header">Agent · live action log</div>
+        <div class="log-entries" id="log-entries"></div>
+        <div class="log-foot">
+          <span>Task <span class="task-name" id="task-name">—</span></span>
+          <span id="task-counter">0 / 2</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES BENTO -->
+  <section class="section" id="capabilities">
+    <p class="section-eyebrow">02 — What it can actually do</p>
+    <h2 class="section-heading">Six surfaces it touches today.</h2>
+    <p class="section-sub">Computer use isn't general intelligence — it's a tight, repeatable loop of <code>screenshot → reason → click/type → screenshot</code>. These are the surfaces where that loop already pays for itself.</p>
+
+    <div class="bento">
+      <article class="tile span-3 actor-1">
+        <span class="tile-tag">FORM FILLING</span>
+        <h3 class="tile-title">Long forms, every field, no copy-paste.</h3>
+        <p class="tile-body">Vendor onboarding, expense reports, insurance claims, government portals. The agent reads the source data, the destination form, and stitches the fields in order — even when the labels don't match.</p>
+        <div class="mini-form" aria-hidden="true">
+          <div class="mini-input"></div>
+          <div class="mini-input"></div>
+          <div class="mini-input"></div>
+        </div>
+      </article>
+
+      <article class="tile span-3 actor-2">
+        <span class="tile-tag">DATA EXTRACTION</span>
+        <h3 class="tile-title">Structured rows from any web UI.</h3>
+        <p class="tile-body">Login-walled dashboards, internal admin panels, SaaS exports without an API. The agent navigates, paginates, and returns clean JSON — no DOM selectors to maintain.</p>
+        <div class="mini-extract" aria-hidden="true">
+          <div class="extract-cell"><strong>name</strong> Priya Raman</div>
+          <div class="extract-cell"><strong>amount</strong> $4,820.00</div>
+          <div class="extract-cell"><strong>status</strong> Paid</div>
+          <div class="extract-cell"><strong>date</strong> 2026-05-12</div>
+        </div>
+      </article>
+
+      <article class="tile span-2 actor-3">
+        <span class="tile-tag">MULTI-APP FLOWS</span>
+        <h3 class="tile-title">Crosses tools that don't talk.</h3>
+        <p class="tile-body">Pull from Salesforce, paste into NetSuite, ping Slack. The seams between SaaS tools.</p>
+        <div class="mini-chain" aria-hidden="true">
+          <span class="chain-node">CRM</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node">ERP</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node">Slack</span>
+        </div>
+      </article>
+
+      <article class="tile span-2 actor-4">
+        <span class="tile-tag">END-TO-END QA</span>
+        <h3 class="tile-title">Tests that fail like a human would.</h3>
+        <p class="tile-body">"Sign up, add to cart, check out with the test card, confirm receipt email." Reports the broken flow, not the broken selector.</p>
+        <div class="mini-checks" aria-hidden="true">
+          <div class="check-row">✓ <span class="lbl">signup form</span></div>
+          <div class="check-row">✓ <span class="lbl">cart add</span></div>
+          <div class="check-row fail">✗ <span class="lbl">payment redirect</span></div>
+        </div>
+      </article>
+
+      <article class="tile span-2 actor-5">
+        <span class="tile-tag">RESEARCH &amp; ACCESSIBILITY</span>
+        <h3 class="tile-title">Synthesis from messy web sources.</h3>
+        <p class="tile-body">Open six tabs, read each, compare, summarize. Or: a screen-reader replacement for users who can't operate a pointer at all.</p>
+        <div class="mini-chain" aria-hidden="true">
+          <span class="chain-node">6 tabs</span>
+          <span class="chain-arrow">→</span>
+          <span class="chain-node">brief</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- LANDSCAPE -->
+  <section class="section">
+    <p class="section-eyebrow">03 — The landscape</p>
+    <h2 class="section-heading">Five shapes the market settled into.</h2>
+    <p class="section-sub">Roughly: model-level (Anthropic, OpenAI), infrastructure (Browserbase, Browserless, Steel), and the DIY path (Playwright + your favorite LLM). Pick by where you want the abstraction to live.</p>
+
+    <div class="landscape">
+      <div class="landscape-row head">
+        <div>Tool</div>
+        <div>Shape</div>
+        <div>Best for</div>
+        <div>Note</div>
+      </div>
+      <div class="landscape-row">
+        <div class="ls-name"><span class="ls-dot"></span>Claude Computer Use</div>
+        <div class="ls-shape">Model API · vision + actions</div>
+        <div class="ls-best">Desktop &amp; browser, your sandbox</div>
+        <div class="ls-note">Native to Claude 4.5+. OSWorld jumped from &lt;15% (late 2024) to 72.5% in 2026. You own the sandbox.</div>
+      </div>
+      <div class="landscape-row">
+        <div class="ls-name a3"><span class="ls-dot"></span>OpenAI Operator / ChatGPT Agent</div>
+        <div class="ls-shape">Hosted agent · consumer</div>
+        <div class="ls-best">Consumer/Enterprise web tasks</div>
+        <div class="ls-note">Standalone Operator shut down Aug 2025; capabilities folded into ChatGPT Agent. 87% WebVoyager internal.</div>
+      </div>
+      <div class="landscape-row">
+        <div class="ls-name a2"><span class="ls-dot"></span>Browserbase + Stagehand</div>
+        <div class="ls-shape">Cloud browser infra · SDK</div>
+        <div class="ls-best">Production browser fleets</div>
+        <div class="ls-note">Headless Chromium, stealth, session replay. Stagehand bridges Playwright and full agents in TypeScript.</div>
+      </div>
+      <div class="landscape-row">
+        <div class="ls-name a5"><span class="ls-dot"></span>Browserless &amp; Steel</div>
+        <div class="ls-shape">Headless-as-a-service · OSS</div>
+        <div class="ls-best">High-volume scraping, auth-aware</div>
+        <div class="ls-note">Browserless ships BrowserQL for stealth; Steel is open-source with managed auth + anti-detection.</div>
+      </div>
+      <div class="landscape-row">
+        <div class="ls-name a4"><span class="ls-dot"></span>Playwright + your LLM</div>
+        <div class="ls-shape">DIY · maximum control</div>
+        <div class="ls-best">Bounded flows, deterministic CI</div>
+        <div class="ls-note">Cheapest at scale, no per-action fee. You write selectors, the LLM picks branches. Best for known sites.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAFETY -->
+  <section class="section">
+    <p class="section-eyebrow">04 — The honest part</p>
+    <h2 class="section-heading">Safety isn't a feature — it's the shape of the deployment.</h2>
+    <p class="section-sub">A browser agent that can click anywhere can also be tricked into clicking anywhere. The mitigation isn't a clever prompt — it's the same defense-in-depth you'd give a junior contractor with your laptop password.</p>
+
+    <div class="safety">
+      <h3 class="safety-title">Three boundaries to draw before shipping</h3>
+      <p>When Claude can take screenshots, move your mouse, and type on your keyboard, any prompt-injection vulnerability becomes an OS-level vulnerability. A poisoned webpage, a malicious email preview, an attacker-controlled PDF — each can hijack an unscoped agent. The OWASP <strong>Top 10 for Agentic Applications 2026</strong> formalized five categories: prompt injection, resource exhaustion, data exfiltration, lateral movement, and tool misuse.</p>
+      <p>None of this means "don't ship." It means the agent runs in a <strong>sandbox you trust</strong>, with <strong>credentials scoped to the task</strong>, on a <strong>network you control</strong>. The vendors above expose those primitives — using them is on you.</p>
+      <div class="safety-grid">
+        <div class="safety-pill">
+          <strong>Isolation</strong>
+          Containers (cheap, kernel-shared), gVisor (~15% overhead), Firecracker microVMs (150ms cold start), Kata, WASM. Pick by threat model.
+        </div>
+        <div class="safety-pill">
+          <strong>Credential scope</strong>
+          Short-lived tokens via a credential broker. Don't paste long-lived API keys into a prompt the model can leak.
+        </div>
+        <div class="safety-pill">
+          <strong>Network &amp; FS</strong>
+          Egress allowlist (proxy/IP/port). Write operations confined to the workspace. Manual approval for net-new connections.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CODE BLOCK -->
+  <section class="code-section">
+    <p class="section-eyebrow">05 — What it looks like in code</p>
+    <h2 class="section-heading">A minimum viable computer-use call.</h2>
+    <p class="section-sub">The loop is small. The model returns tool calls, your harness executes them on the sandboxed VM, you send the next screenshot back. Repeat until the task is done.</p>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="light r"></span>
+        <span class="light y"></span>
+        <span class="light g"></span>
+        <span class="code-fname">computer_use_example.py</span>
+        <span class="code-lang">python · anthropic SDK</span>
+      </div>
+<pre class="code-block"><span class="k">from</span> anthropic <span class="k">import</span> Anthropic
+
+client = <span class="f">Anthropic</span>()
+
+response = client.beta.messages.<span class="f">create</span>(
+    model=<span class="s">"claude-opus-4-5"</span>,
+    max_tokens=<span class="n">1024</span>,
+    tools=[{
+        <span class="p">"type"</span>: <span class="s">"computer_20251124"</span>,   <span class="c"># enhanced actions</span>
+        <span class="p">"name"</span>: <span class="s">"computer"</span>,
+        <span class="p">"display_width_px"</span>: <span class="n">1280</span>,
+        <span class="p">"display_height_px"</span>: <span class="n">800</span>,
+    }],
+    messages=[{<span class="p">"role"</span>: <span class="s">"user"</span>, <span class="p">"content"</span>: <span class="s">"Open the inbox and draft a reply to Priya."</span>}],
+    betas=[<span class="s">"computer-use-2025-11-24"</span>],
+)
+<span class="c"># → response.content contains tool_use blocks: click, type, screenshot, zoom…</span>
+<span class="c"># Execute them in your sandbox, send the next screenshot back, loop.</span></pre>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <h2>Build the <em>boring</em> half of the workflow.</h2>
+    <p>Browser agents shine on the repetitive, multi-step, "I shouldn't be doing this by hand" work. CETI helps teams ship those agents safely — sandboxed, scoped, observable, and aligned with the OWASP 2026 guidance.</p>
+    <div class="cta-row">
+      <a class="magnetic" href="https://calendly.com/manutej/30min">
+        Book a working session
+        <span class="arrow">→</span>
+      </a>
+      <a class="secondary" href="../">← Back to lookbook</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    CETI · cetiai.co  ·  Sources: Anthropic docs, OWASP Agentic Top-10, OSWorld benchmarks, vendor docs (Browserbase / Browserless / Steel / Playwright).
+  </footer>
+
+  <script>
+    // ============ HERO REVEAL ============
+    requestAnimationFrame(() => document.getElementById('hero').classList.add('visible'));
+
+    // ============ INTERSECTION REVEALS ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          reveal.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+
+    document.querySelectorAll('.browser-frame, .action-log, .tile').forEach((el) => reveal.observe(el));
+
+    // ============ MAGNETIC BUTTONS ============
+    const STR = 25;
+    document.querySelectorAll('.magnetic').forEach((btn) => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STR;
+        const y = (e.clientY - (r.top + r.height / 2)) / STR;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+
+    // ============ MAGIC-CARD CURSOR GLOW ============
+    document.querySelectorAll('.tile').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ============ AUTONOMOUS BROWSER DEMO ============
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const cursor = document.getElementById('cursor');
+    const frame = document.getElementById('frame');
+    const sceneSearch = document.getElementById('scene-search');
+    const sceneGmail = document.getElementById('scene-gmail');
+    const searchBox = document.getElementById('search-box');
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+    const result1 = document.getElementById('result-1');
+    const result2 = document.getElementById('result-2');
+    const tab1 = document.getElementById('tab-1');
+    const tab2 = document.getElementById('tab-2');
+    const urlHost = document.getElementById('url-host');
+    const urlPath = document.getElementById('url-path');
+    const thread1 = document.getElementById('thread-1');
+    const composeBox = document.getElementById('compose-box');
+    const composeBody = document.getElementById('compose-body');
+    const logEntries = document.getElementById('log-entries');
+    const taskName = document.getElementById('task-name');
+    const taskCounter = document.getElementById('task-counter');
+
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    function moveCursorTo(el, offsetX = 12, offsetY = 12) {
+      const fr = frame.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      const x = er.left - fr.left + offsetX;
+      const y = er.top - fr.top + offsetY;
+      cursor.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    async function click(el) {
+      cursor.classList.remove('click');
+      void cursor.offsetWidth; // restart animation
+      cursor.classList.add('click');
+      await sleep(280);
+    }
+
+    async function typeInto(el, text, perChar = 55) {
+      el.textContent = '';
+      for (const ch of text) {
+        el.textContent += ch;
+        await sleep(perChar + Math.random() * 35);
+      }
+    }
+
+    function addLogEntry(text, opts = {}) {
+      const div = document.createElement('div');
+      div.className = 'log-entry' + (opts.thinking ? ' thinking' : '');
+      div.innerHTML = `<span class="log-tick">${opts.thinking ? '⋯' : '✓'}</span><span class="log-action">${text}</span>`;
+      logEntries.appendChild(div);
+      requestAnimationFrame(() => div.classList.add('show'));
+      // Trim if > 7 entries
+      while (logEntries.children.length > 7) {
+        logEntries.removeChild(logEntries.firstChild);
+      }
+    }
+
+    function clearLog() { logEntries.innerHTML = ''; }
+
+    function showScene(name) {
+      sceneSearch.classList.toggle('active', name === 'search');
+      sceneGmail.classList.toggle('active', name === 'gmail');
+    }
+
+    function resetSearch() {
+      searchInput.textContent = '';
+      searchBox.classList.remove('highlight');
+      searchResults.classList.remove('show');
+      result1.classList.remove('highlight');
+      result2.classList.remove('highlight');
+    }
+
+    function resetGmail() {
+      thread1.classList.remove('highlight');
+      composeBox.classList.remove('show');
+      composeBody.textContent = '';
+    }
+
+    let demoRunning = false;
+    let stopRequested = false;
+
+    async function runTaskSearch() {
+      taskName.textContent = "Search flights to Tokyo";
+      taskCounter.textContent = "1 / 2";
+      tab1.classList.add('active');
+      tab2.classList.remove('active');
+      urlHost.textContent = 'google.com';
+      urlPath.textContent = '/';
+      showScene('search');
+      resetSearch();
+      clearLog();
+
+      addLogEntry('Opened browser at <span class="log-target">google.com</span>');
+      await sleep(700);
+      if (stopRequested) return;
+
+      moveCursorTo(searchBox, 30, 20);
+      await sleep(900);
+      await click(searchBox);
+      searchBox.classList.add('highlight');
+      addLogEntry('Clicked <span class="log-target">search field</span>');
+      await sleep(450);
+      if (stopRequested) return;
+
+      addLogEntry('Typing query…', { thinking: true });
+      await typeInto(searchInput, 'flights SFO to Tokyo May 2026');
+      // Replace thinking entry
+      const last = logEntries.lastChild;
+      if (last) {
+        last.classList.remove('thinking');
+        last.innerHTML = '<span class="log-tick">✓</span><span class="log-action">Typed <span class="log-target">"flights SFO to Tokyo May 2026"</span></span>';
+      }
+      await sleep(450);
+      if (stopRequested) return;
+
+      // Show results
+      searchResults.classList.add('show');
+      addLogEntry('Submitted · 2 results returned');
+      await sleep(800);
+      if (stopRequested) return;
+
+      moveCursorTo(result2, 80, 24);
+      await sleep(750);
+      result2.classList.add('highlight');
+      await click(result2);
+      addLogEntry('Hovered <span class="log-target">Kayak result</span>');
+      await sleep(500);
+      if (stopRequested) return;
+
+      addLogEntry('Extracted <span class="log-target">price: $642 · SFO→HND</span>');
+      await sleep(1200);
+    }
+
+    async function runTaskGmail() {
+      taskName.textContent = "Open inbox and draft reply";
+      taskCounter.textContent = "2 / 2";
+      clearLog();
+      resetGmail();
+
+      moveCursorTo(tab2, 16, 16);
+      await sleep(700);
+      await click(tab2);
+      tab1.classList.remove('active');
+      tab2.classList.add('active');
+      urlHost.textContent = 'mail.google.com';
+      urlPath.textContent = '/u/0/#inbox';
+      showScene('gmail');
+      addLogEntry('Switched to tab <span class="log-target">Inbox</span>');
+      await sleep(700);
+      if (stopRequested) return;
+
+      moveCursorTo(thread1, 100, 18);
+      await sleep(900);
+      await click(thread1);
+      thread1.classList.add('highlight');
+      addLogEntry('Opened thread from <span class="log-target">Priya Raman</span>');
+      await sleep(500);
+      if (stopRequested) return;
+
+      // Show compose box
+      composeBox.classList.add('show');
+      addLogEntry('Drafting reply…', { thinking: true });
+      await sleep(400);
+      moveCursorTo(composeBox, 220, 50);
+      await sleep(450);
+      if (stopRequested) return;
+
+      await typeInto(composeBody, 'Thursday at 2pm works — sending an invite now.', 38);
+      const last = logEntries.lastChild;
+      if (last) {
+        last.classList.remove('thinking');
+        last.innerHTML = '<span class="log-tick">✓</span><span class="log-action">Drafted reply <span class="log-target">(13 words)</span></span>';
+      }
+      await sleep(600);
+      addLogEntry('Returned <span class="log-target">draft.id = d_8a2f</span>');
+      await sleep(1500);
+    }
+
+    async function runDemo() {
+      if (demoRunning || reduced) return;
+      demoRunning = true;
+      stopRequested = false;
+      try {
+        while (!stopRequested) {
+          await runTaskSearch();
+          if (stopRequested) break;
+          await sleep(900);
+          await runTaskGmail();
+          if (stopRequested) break;
+          await sleep(900);
+        }
+      } finally {
+        demoRunning = false;
+      }
+    }
+
+    // Start when frame becomes visible
+    const demoObserver = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting && !demoRunning && !reduced) {
+          setTimeout(runDemo, 700);
+          demoObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    demoObserver.observe(frame);
+
+    // Replay
+    document.getElementById('replay').addEventListener('click', () => {
+      stopRequested = true;
+      setTimeout(() => { stopRequested = false; runDemo(); }, 100);
+    });
+
+    // Pause when off-screen
+    const pauseObserver = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) {
+          stopRequested = true;
+        } else if (!demoRunning && !reduced) {
+          stopRequested = false;
+          setTimeout(runDemo, 400);
+        }
+      });
+    }, { threshold: 0.1 });
+    pauseObserver.observe(frame);
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

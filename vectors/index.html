@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vector Databases & Embeddings — Meaning, as Coordinates · CETI Lookbook</title>
+  <meta name="description" content="An interactive explainer for embeddings and vector databases. Mid-level audience. Hover a word to see its nearest neighbors in 2D semantic space. Compare Pinecone, Weaviate, Qdrant, Chroma, pgvector, Milvus.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+      --color-surface-warm: #FDF9F3;
+      --color-accent: #D94F30;
+      --color-accent-hover: #C4432A;
+      --color-accent-muted: #E8836C;
+      --color-accent-light: #FDEEE9;
+      --color-bg-code: #1E1E2E;
+
+      --color-actor-1: #D94F30;  /* animals — vermillion */
+      --color-actor-2: #2A7B9B;  /* vehicles — teal */
+      --color-actor-3: #7B6DAA;  /* abstract — plum */
+      --color-actor-4: #D4A843;  /* food — gold */
+      --color-actor-5: #2D8B55;  /* tech — forest */
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+      --stagger: 60ms;
+
+      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 12% 18%, rgba(217, 79, 48, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 88% 78%, rgba(42, 123, 155, 0.04) 0%, transparent 50%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ============ NAV ============ */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: rgba(250, 247, 242, 0.88);
+      backdrop-filter: saturate(180%) blur(8px);
+      -webkit-backdrop-filter: saturate(180%) blur(8px);
+      border-bottom: 1px solid var(--color-border-light);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+    }
+    .nav-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .nav-brand strong { color: var(--color-text); font-weight: 600; }
+    .nav-back {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: color 200ms;
+    }
+    .nav-back:hover { color: var(--color-accent); }
+
+    /* ============ HERO ============ */
+    .hero {
+      padding: 8rem 1.5rem 4rem;
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      margin: 0 0 1.25rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; transform: translateY(0); }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.5rem, 6.5vw, 4.75rem);
+      line-height: 1.04;
+      letter-spacing: -0.035em;
+      margin: 0 0 1.5rem;
+      max-width: 16ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
+    .hero-title em { font-style: normal; color: var(--color-accent); }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 540ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+
+    /* ============ SCATTER (signature visual) ============ */
+    .scatter-section { padding: 2rem 0 6rem; }
+    .scatter-frame {
+      position: relative;
+      border: 1px solid var(--color-border);
+      border-radius: 18px;
+      background: var(--color-surface);
+      padding: 1.25rem 1.25rem 1rem;
+      overflow: hidden;
+    }
+    .scatter-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 25% 22%, rgba(217, 79, 48, 0.045), transparent 38%),
+        radial-gradient(circle at 78% 28%, rgba(42, 123, 155, 0.045), transparent 38%),
+        radial-gradient(circle at 22% 78%, rgba(212, 168, 67, 0.045), transparent 38%),
+        radial-gradient(circle at 80% 75%, rgba(123, 109, 170, 0.045), transparent 38%),
+        radial-gradient(circle at 50% 50%, rgba(45, 139, 85, 0.04), transparent 30%);
+    }
+    .scatter-meta {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      padding-bottom: 0.6rem;
+    }
+    .live-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      margin-right: 0.4rem;
+      box-shadow: 0 0 0 0 rgba(217, 79, 48, 0.55);
+      animation: pulse-dot 2.6s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(217, 79, 48, 0.55); }
+      50%      { box-shadow: 0 0 0 7px rgba(217, 79, 48, 0); }
+    }
+    .legend {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: opacity 200ms;
+    }
+    .legend-item:hover { opacity: 0.7; }
+    .legend-swatch {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px var(--color-surface);
+    }
+
+    .scatter-wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      aspect-ratio: 5 / 3;
+      max-height: 600px;
+      margin: 0;
+    }
+    .scatter-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* Dots */
+    .dot {
+      cursor: pointer;
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+      transition:
+        opacity 700ms var(--ease-out),
+        transform 800ms var(--ease-spring),
+        cx 800ms var(--ease-spring),
+        cy 800ms var(--ease-spring);
+    }
+    .dot.in { opacity: 1; }
+    .dot circle.body {
+      fill: var(--dot-color, var(--color-accent));
+      stroke: var(--color-surface);
+      stroke-width: 2;
+      transition: r 250ms var(--ease-spring);
+    }
+    .dot circle.halo {
+      fill: var(--dot-color, var(--color-accent));
+      opacity: 0;
+      transition: opacity 250ms, r 250ms var(--ease-spring);
+    }
+    .dot:hover circle.body,
+    .dot.focus circle.body { r: 9; }
+    .dot:hover circle.halo,
+    .dot.focus circle.halo { opacity: 0.28; r: 22; }
+    .dot.dim { opacity: 0.18; }
+    .dot.dim:hover { opacity: 1; }
+
+    /* Edges drawn during hover */
+    .neighbor-line {
+      stroke: var(--color-accent);
+      stroke-width: 1.4;
+      opacity: 0;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      transition: opacity 200ms, stroke-dashoffset 400ms var(--ease-out);
+      pointer-events: none;
+    }
+    .neighbor-line.active {
+      opacity: 0.7;
+      stroke-dashoffset: 0;
+    }
+
+    /* Hover label */
+    .dot-label {
+      position: absolute;
+      pointer-events: none;
+      background: var(--color-text);
+      color: var(--color-bg);
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      transform: translate(-50%, -135%);
+      transition: opacity 180ms var(--ease-out);
+      white-space: nowrap;
+      z-index: 5;
+      box-shadow: var(--shadow-md);
+    }
+    .dot-label.visible { opacity: 1; }
+    .dot-label::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--color-text);
+    }
+
+    .scatter-hint {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding-top: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+    }
+    .scatter-hint .pulse-key {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .scatter-hint .pulse-key .swatch {
+      width: 12px; height: 2px;
+      background: var(--color-accent);
+    }
+
+    .scatter-explainer {
+      margin: 2.5rem 0 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+    }
+    .scatter-explainer p {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: 1.02rem;
+      max-width: 52ch;
+    }
+    .scatter-explainer p strong { color: var(--color-text); font-weight: 600; }
+    .scatter-explainer p em {
+      font-style: normal;
+      background: var(--color-accent-light);
+      padding: 0 0.3em;
+      border-radius: 3px;
+      color: var(--color-accent-hover);
+    }
+
+    /* ============ SECTION HEADERS ============ */
+    .section { padding: 5rem 0; }
+    .section-warm { background: var(--color-bg-warm); }
+    .section-header { max-width: 720px; margin: 0 0 3rem; }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 2.85rem);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 1rem 0 1rem;
+    }
+    .section-title em { font-style: normal; color: var(--color-accent); }
+    .section-sub {
+      color: var(--color-text-secondary);
+      font-size: 1.08rem;
+      max-width: 58ch;
+      margin: 0;
+    }
+
+    /* ============ BENTO (similarity / index) ============ */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .bento-tile {
+      position: relative;
+      padding: 1.75rem;
+      border-radius: 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      transition: transform 300ms var(--ease-spring), border-color 300ms, box-shadow 300ms;
+    }
+    .bento-tile:hover {
+      transform: translateY(-3px);
+      border-color: var(--color-accent-muted);
+      box-shadow: var(--shadow-lg);
+    }
+    .bento-tile::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--tile-color) 6%, transparent), transparent 45%);
+    }
+    .bento-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--tile-color, var(--color-accent));
+      font-weight: 500;
+    }
+    .bento-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.45rem;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      margin: 0.85rem 0 0.5rem;
+    }
+    .bento-body {
+      color: var(--color-text-secondary);
+      font-size: 0.96rem;
+      margin: 0;
+    }
+    .tile-art {
+      margin-top: 1.25rem;
+      display: block;
+    }
+
+    /* ============ COMPARISON TABLE ============ */
+    .vdb-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .vdb-row {
+      display: grid;
+      grid-template-columns: 1.2fr 2.5fr 1.2fr;
+      gap: 1.25rem;
+      align-items: center;
+      padding: 1.1rem 1.4rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      transition: border-color 300ms, transform 300ms var(--ease-spring);
+    }
+    .vdb-row:hover {
+      transform: translateX(4px);
+      border-color: var(--color-accent-muted);
+    }
+    .vdb-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .vdb-name .vdb-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--vdb-color, var(--color-accent));
+    }
+    .vdb-desc {
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+    }
+    .vdb-desc strong { color: var(--color-text); font-weight: 600; }
+    .vdb-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .vdb-bar {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+    }
+    .bar-track {
+      height: 6px;
+      background: var(--color-border-light);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0;
+      background: var(--vdb-color, var(--color-accent));
+      border-radius: 999px;
+      transition: width 1100ms var(--ease-out);
+      transition-delay: var(--bar-delay, 0ms);
+    }
+    .vdb-row.visible .bar-fill { width: var(--bar-w, 0%); }
+
+    /* ============ CODE BLOCK ============ */
+    .code-wrap {
+      margin: 0;
+      background: var(--color-bg-code);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .code-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.25rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9E9790;
+    }
+    .code-head .dots {
+      display: inline-flex;
+      gap: 0.4rem;
+    }
+    .code-head .dots span {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+    }
+    pre.code {
+      margin: 0;
+      padding: 1.5rem 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.86rem;
+      line-height: 1.7;
+      color: #DCD7CA;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    pre.code .kw { color: #CBA6F7; }
+    pre.code .fn { color: #89B4FA; }
+    pre.code .str { color: #A6E3A1; }
+    pre.code .num { color: #FAB387; }
+    pre.code .cm { color: #6C7086; font-style: italic; }
+    pre.code .pr { color: #F9E2AF; }
+    pre.code .op { color: #94E2D5; }
+
+    /* ============ STATS ============ */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .stat {
+      padding: 1.5rem 1.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .stat.visible { opacity: 1; transform: translateY(0); }
+    .stat:nth-child(2).visible { transition-delay: 80ms; }
+    .stat:nth-child(3).visible { transition-delay: 160ms; }
+    .stat:nth-child(4).visible { transition-delay: 240ms; }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.6vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text);
+    }
+    .stat-value .unit { color: var(--color-accent); font-size: 0.72em; margin-left: 0.15em; }
+    .stat-label {
+      margin-top: 0.45rem;
+      color: var(--color-text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    .stat-kicker {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      margin: 0 0 0.7rem;
+    }
+
+    /* ============ CTA ============ */
+    .cta {
+      padding: 6rem 1.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .cta h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 2.85rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 1rem;
+    }
+    .cta h2 em { font-style: normal; color: var(--color-accent); }
+    .cta p {
+      color: var(--color-text-secondary);
+      margin: 0 auto 2rem;
+      max-width: 48ch;
+    }
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.85rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms;
+      will-change: transform;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(3px); }
+
+    /* ============ ANIMATE-IN ============ */
+    .animate-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring),
+                  transform var(--duration-slower) var(--ease-spring);
+    }
+    .animate-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 900px) {
+      .scatter-explainer { grid-template-columns: 1fr; gap: 1.25rem; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .vdb-row { grid-template-columns: 1fr; gap: 0.85rem; }
+      .vdb-bars { max-width: 320px; }
+    }
+    @media (max-width: 640px) {
+      .bento { grid-template-columns: 1fr; }
+      .scatter-wrap { aspect-ratio: 1 / 1; max-height: 460px; }
+      .dot.mobile-hide { display: none; }
+      .dot text { display: none; }
+      .legend { gap: 0.5rem; }
+      .legend-item .legend-label { font-size: 0.62rem; }
+    }
+    @media (max-width: 460px) {
+      .stats { grid-template-columns: 1fr; }
+      .hero { padding-top: 6rem; }
+      pre.code { font-size: 0.78rem; padding: 1rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .dot { opacity: 1 !important; transform: none !important; }
+      .hero-title .word, .hero-sub, .eyebrow, .animate-in, .stat { opacity: 1 !important; transform: none !important; }
+      .vdb-row .bar-fill { width: var(--bar-w, 0%) !important; transition: none !important; }
+      .live-dot { animation: none !important; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .bento-tile:hover, .vdb-row:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <span class="nav-brand">CETI Lookbook · <strong>Vectors</strong></span>
+      <a class="nav-back" href="../">← All concepts</a>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">EMBEDDINGS · VECTOR DATABASES · 2026</p>
+    <h1 class="hero-title">
+      <span class="word">Meaning,</span>
+      <span class="word">as</span>
+      <span class="word"><em>coordinates.</em></span>
+    </h1>
+    <p class="hero-sub">An embedding is a paragraph compressed into 1,536 numbers — coordinates in a space where <em>nearness equals meaning</em>. A vector database is the filing cabinet that finds the nearest neighbors at a billion-point scale, in milliseconds.</p>
+  </section>
+
+  <!-- ============ SCATTER VISUAL ============ -->
+  <section class="scatter-section wrap" aria-labelledby="scatter-heading">
+    <div class="scatter-frame">
+      <div class="scatter-meta">
+        <span><span class="live-dot"></span>50 words · 5 semantic clusters · projected from 1,536 dims → 2D</span>
+        <div class="legend" id="legend">
+          <span class="legend-item" data-cluster="animals"><span class="legend-swatch" style="background:#D94F30"></span><span class="legend-label">Animals</span></span>
+          <span class="legend-item" data-cluster="vehicles"><span class="legend-swatch" style="background:#2A7B9B"></span><span class="legend-label">Vehicles</span></span>
+          <span class="legend-item" data-cluster="food"><span class="legend-swatch" style="background:#D4A843"></span><span class="legend-label">Food</span></span>
+          <span class="legend-item" data-cluster="abstract"><span class="legend-swatch" style="background:#7B6DAA"></span><span class="legend-label">Abstract</span></span>
+          <span class="legend-item" data-cluster="tech"><span class="legend-swatch" style="background:#2D8B55"></span><span class="legend-label">Tech</span></span>
+        </div>
+      </div>
+
+      <div class="scatter-wrap" id="scatter-wrap">
+        <svg class="scatter-svg" id="scatter-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-labelledby="scatter-heading" role="img">
+          <title id="scatter-heading">2D projection of 50 word embeddings clustered by semantic meaning.</title>
+          <desc>Five clusters: animals (red), vehicles (teal), food (gold), abstract concepts (plum), and tech (green). Hover any dot to see its label and lines to its five nearest neighbors.</desc>
+          <g id="lines"></g>
+          <g id="dots"></g>
+        </svg>
+        <div class="dot-label" id="hover-label"></div>
+      </div>
+
+      <div class="scatter-hint">
+        <span class="pulse-key"><span class="swatch"></span> Hover a dot → see its label + 5 nearest neighbors</span>
+        <span>cos(θ) similarity · k=5 · top-k retrieval</span>
+      </div>
+    </div>
+
+    <div class="scatter-explainer">
+      <p><strong>Why this works.</strong> A neural network reads millions of sentences and learns to place words near each other in a high-dimensional space if they appear in similar contexts. The model never sees the word "dog" — it sees a list of 1,536 numbers. Two paragraphs about pets land closer together than a paragraph about pets and one about trucks. <em>Distance is meaning.</em></p>
+      <p><strong>Why a database.</strong> "Closest to" is cheap on a hundred vectors and ruinous on a billion. Vector databases use approximate-nearest-neighbor indexes (HNSW, IVF) to return the top-k matches in milliseconds — the engine behind every modern RAG system, semantic search, recommendation, and "find similar" feature.</p>
+    </div>
+  </section>
+
+  <!-- ============ SIMILARITY METRICS ============ -->
+  <section class="section section-warm">
+    <div class="wrap">
+      <div class="section-header animate-in">
+        <p class="eyebrow" style="opacity:1; transform:none; color:var(--color-actor-2);">FOUR THINGS TO KNOW</p>
+        <h2 class="section-title">Distance metrics &amp; <em>index algorithms.</em></h2>
+        <p class="section-sub">Picking a vector store is mostly picking these four levers. Get them wrong and your retrieval is slow, wrong, or both.</p>
+      </div>
+
+      <div class="bento">
+        <article class="bento-tile animate-in" style="--tile-color:#D94F30;">
+          <span class="bento-tag">01 · Cosine</span>
+          <h3 class="bento-title">Cosine similarity</h3>
+          <p class="bento-body">Measures the angle between two vectors, ignoring length. The default for text embeddings — a long document and a one-line query can still match perfectly.</p>
+          <svg class="tile-art" width="160" height="64" viewBox="0 0 160 64" aria-hidden="true">
+            <circle cx="20" cy="44" r="3" fill="#D94F30"/>
+            <line x1="20" y1="44" x2="130" y2="14" stroke="#D94F30" stroke-width="2" opacity="0.85"/>
+            <line x1="20" y1="44" x2="135" y2="30" stroke="#D94F30" stroke-width="2" opacity="0.45"/>
+            <path d="M 60 44 A 40 40 0 0 0 50 25" fill="none" stroke="#D94F30" stroke-width="1.4" opacity="0.6"/>
+            <text x="68" y="38" font-family="JetBrains Mono" font-size="9" fill="#D94F30" opacity="0.8">θ</text>
+          </svg>
+        </article>
+
+        <article class="bento-tile animate-in" style="--tile-color:#2A7B9B;">
+          <span class="bento-tag">02 · Euclidean</span>
+          <h3 class="bento-title">Euclidean (L2) distance</h3>
+          <p class="bento-body">Straight-line distance between points. Useful when magnitude matters — image embeddings, geo, and any space where vectors aren't unit-normalized.</p>
+          <svg class="tile-art" width="160" height="64" viewBox="0 0 160 64" aria-hidden="true">
+            <circle cx="22" cy="48" r="3.5" fill="#2A7B9B"/>
+            <circle cx="132" cy="14" r="3.5" fill="#2A7B9B"/>
+            <line x1="22" y1="48" x2="132" y2="14" stroke="#2A7B9B" stroke-width="2" stroke-dasharray="4 3" opacity="0.75"/>
+            <line x1="22" y1="48" x2="132" y2="48" stroke="#2A7B9B" stroke-width="1" opacity="0.25"/>
+            <line x1="132" y1="48" x2="132" y2="14" stroke="#2A7B9B" stroke-width="1" opacity="0.25"/>
+          </svg>
+        </article>
+
+        <article class="bento-tile animate-in" style="--tile-color:#D4A843;">
+          <span class="bento-tag">03 · Dot product</span>
+          <h3 class="bento-title">Dot product</h3>
+          <p class="bento-body">Cheap, fast, and equivalent to cosine when vectors are normalized. The metric most production vector DBs run on the hot path.</p>
+          <svg class="tile-art" width="160" height="64" viewBox="0 0 160 64" aria-hidden="true">
+            <line x1="20" y1="32" x2="78" y2="32" stroke="#D4A843" stroke-width="2.2" opacity="0.85"/>
+            <line x1="86" y1="32" x2="140" y2="20" stroke="#D4A843" stroke-width="2.2" opacity="0.85"/>
+            <line x1="84" y1="32" x2="84" y2="48" stroke="#D4A843" stroke-width="1" opacity="0.35" stroke-dasharray="2 2"/>
+            <text x="82" y="14" font-family="JetBrains Mono" font-size="11" fill="#D4A843" opacity="0.85">·</text>
+            <text x="78" y="14" font-family="JetBrains Mono" font-size="11" fill="#D4A843" opacity="0.85">a</text>
+            <text x="92" y="14" font-family="JetBrains Mono" font-size="11" fill="#D4A843" opacity="0.85">b</text>
+          </svg>
+        </article>
+
+        <article class="bento-tile animate-in" style="--tile-color:#2D8B55;">
+          <span class="bento-tag">04 · HNSW</span>
+          <h3 class="bento-title">Hierarchical Navigable Small World</h3>
+          <p class="bento-body">The default index in nearly every modern vector DB. Builds a layered graph of vectors — log-time approximate search across billions of points with &gt;95% recall.</p>
+          <svg class="tile-art" width="160" height="64" viewBox="0 0 160 64" aria-hidden="true">
+            <line x1="20" y1="18" x2="60" y2="18" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
+            <line x1="60" y1="18" x2="120" y2="18" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
+            <line x1="30" y1="38" x2="80" y2="38" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
+            <line x1="80" y1="38" x2="140" y2="38" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
+            <line x1="20" y1="56" x2="50" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
+            <line x1="50" y1="56" x2="100" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
+            <line x1="100" y1="56" x2="140" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
+            <line x1="60" y1="18" x2="80" y2="38" stroke="#2D8B55" stroke-width="1" opacity="0.6"/>
+            <line x1="80" y1="38" x2="50" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.6"/>
+            <line x1="80" y1="38" x2="100" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.6"/>
+            <circle cx="20" cy="18" r="3" fill="#2D8B55"/>
+            <circle cx="60" cy="18" r="3" fill="#2D8B55"/>
+            <circle cx="120" cy="18" r="3" fill="#2D8B55"/>
+            <circle cx="30" cy="38" r="2.5" fill="#2D8B55" opacity="0.85"/>
+            <circle cx="80" cy="38" r="3.5" fill="#2D8B55"/>
+            <circle cx="140" cy="38" r="2.5" fill="#2D8B55" opacity="0.85"/>
+            <circle cx="20" cy="56" r="2" fill="#2D8B55" opacity="0.7"/>
+            <circle cx="50" cy="56" r="2" fill="#2D8B55" opacity="0.7"/>
+            <circle cx="100" cy="56" r="2" fill="#2D8B55" opacity="0.7"/>
+            <circle cx="140" cy="56" r="2" fill="#2D8B55" opacity="0.7"/>
+          </svg>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VDB LANDSCAPE ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-header animate-in">
+        <p class="eyebrow" style="opacity:1; transform:none; color:var(--color-actor-3);">THE LANDSCAPE</p>
+        <h2 class="section-title">Six vector databases, <em>six trade-offs.</em></h2>
+        <p class="section-sub">There is no winner. There is a stack you already use, a scale you're targeting, and an ops budget. Bars show relative strength on three axes: scale, developer ergonomics, and managed-service maturity.</p>
+      </div>
+
+      <div class="vdb-grid">
+        <article class="vdb-row animate-in" style="--vdb-color:#2A7B9B;">
+          <div class="vdb-name"><span class="vdb-swatch"></span>Pinecone</div>
+          <div class="vdb-desc"><strong>Managed-only, serverless.</strong> The "AWS of vector search." Pay-per-namespace, infinite scale, zero ops. Default pick when you don't want to think about infrastructure.</div>
+          <div class="vdb-bars">
+            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:96%; --bar-delay:0ms;"></div></div></div>
+            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:84%; --bar-delay:120ms;"></div></div></div>
+            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:98%; --bar-delay:240ms;"></div></div></div>
+          </div>
+        </article>
+
+        <article class="vdb-row animate-in" style="--vdb-color:#D94F30;">
+          <div class="vdb-name"><span class="vdb-swatch"></span>Weaviate</div>
+          <div class="vdb-desc"><strong>Modular, hybrid-search native.</strong> BM25 + vector out of the box, GraphQL API, multi-tenant primitives. Strong when you need keyword + semantic in one query.</div>
+          <div class="vdb-bars">
+            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:84%; --bar-delay:0ms;"></div></div></div>
+            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:88%; --bar-delay:120ms;"></div></div></div>
+            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:78%; --bar-delay:240ms;"></div></div></div>
+          </div>
+        </article>
+
+        <article class="vdb-row animate-in" style="--vdb-color:#D4A843;">
+          <div class="vdb-name"><span class="vdb-swatch"></span>Qdrant</div>
+          <div class="vdb-desc"><strong>Rust-fast, payload-filter heavy.</strong> Best-in-class filtered search and quantization. Self-host on a single box for millions of vectors before you outgrow it.</div>
+          <div class="vdb-bars">
+            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:88%; --bar-delay:0ms;"></div></div></div>
+            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:90%; --bar-delay:120ms;"></div></div></div>
+            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:74%; --bar-delay:240ms;"></div></div></div>
+          </div>
+        </article>
+
+        <article class="vdb-row animate-in" style="--vdb-color:#7B6DAA;">
+          <div class="vdb-name"><span class="vdb-swatch"></span>Chroma</div>
+          <div class="vdb-desc"><strong>The "SQLite of vectors."</strong> npm install, in-process, perfect for prototypes and laptops. Cloud tier emerging; production scale still proving itself.</div>
+          <div class="vdb-bars">
+            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:58%; --bar-delay:0ms;"></div></div></div>
+            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:96%; --bar-delay:120ms;"></div></div></div>
+            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:54%; --bar-delay:240ms;"></div></div></div>
+          </div>
+        </article>
+
+        <article class="vdb-row animate-in" style="--vdb-color:#2D8B55;">
+          <div class="vdb-name"><span class="vdb-swatch"></span>pgvector</div>
+          <div class="vdb-desc"><strong>Postgres extension.</strong> If your data is already in Postgres, this is the answer. Joins, transactions, ACID — and now HNSW indexes. The boring choice that wins more often than people admit.</div>
+          <div class="vdb-bars">
+            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:72%; --bar-delay:0ms;"></div></div></div>
+            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:82%; --bar-delay:120ms;"></div></div></div>
+            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:92%; --bar-delay:240ms;"></div></div></div>
+          </div>
+        </article>
+
+        <article class="vdb-row animate-in" style="--vdb-color:#E8836C;">
+          <div class="vdb-name"><span class="vdb-swatch"></span>Milvus</div>
+          <div class="vdb-desc"><strong>Enterprise-scale, cloud-native.</strong> Built at Zilliz for the billion-vector regime — disaggregated compute, GPU indexes, multi-tenant pools. Heavier ops; pays off above 100M vectors.</div>
+          <div class="vdb-bars">
+            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:98%; --bar-delay:0ms;"></div></div></div>
+            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:70%; --bar-delay:120ms;"></div></div></div>
+            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:84%; --bar-delay:240ms;"></div></div></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CODE ============ -->
+  <section class="section section-warm">
+    <div class="wrap">
+      <div class="section-header animate-in">
+        <p class="eyebrow" style="opacity:1; transform:none; color:var(--color-actor-5);">END-TO-END IN 11 LINES</p>
+        <h2 class="section-title">Embed once, <em>query forever.</em></h2>
+        <p class="section-sub">The full RAG primitive in plain Python — embed a corpus, push to a vector store, retrieve the top-3 most similar passages for any query. Substitute your provider; the shape is identical everywhere.</p>
+      </div>
+
+      <div class="code-wrap animate-in">
+        <div class="code-head">
+          <span class="dots"><span></span><span></span><span></span></span>
+          <span>embeddings.py · openai + qdrant · py 3.12</span>
+        </div>
+<pre class="code"><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="kw">from</span> qdrant_client <span class="kw">import</span> QdrantClient, models
+
+oa <span class="op">=</span> <span class="fn">OpenAI</span>()
+qd <span class="op">=</span> <span class="fn">QdrantClient</span>(<span class="str">"http://localhost:6333"</span>)
+
+<span class="cm"># 1 — turn text into 1,536-dim vectors</span>
+docs <span class="op">=</span> [<span class="str">"a dog wags its tail"</span>, <span class="str">"the truck hauls cement"</span>, <span class="str">"pasta needs salt"</span>]
+vecs <span class="op">=</span> [e<span class="op">.</span>embedding <span class="kw">for</span> e <span class="kw">in</span> oa<span class="op">.</span>embeddings<span class="op">.</span><span class="fn">create</span>(model<span class="op">=</span><span class="str">"text-embedding-3-small"</span>, input<span class="op">=</span>docs)<span class="op">.</span>data]
+
+<span class="cm"># 2 — index them under a collection</span>
+qd<span class="op">.</span><span class="fn">recreate_collection</span>(<span class="str">"corpus"</span>, vectors_config<span class="op">=</span>models<span class="op">.</span><span class="fn">VectorParams</span>(size<span class="op">=</span><span class="num">1536</span>, distance<span class="op">=</span><span class="str">"Cosine"</span>))
+qd<span class="op">.</span><span class="fn">upload_points</span>(<span class="str">"corpus"</span>, [models<span class="op">.</span><span class="fn">PointStruct</span>(id<span class="op">=</span>i, vector<span class="op">=</span>v, payload<span class="op">=</span>{<span class="str">"text"</span>: d}) <span class="kw">for</span> i, (v, d) <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="fn">zip</span>(vecs, docs))])
+
+<span class="cm"># 3 — nearest-neighbor query in milliseconds</span>
+q <span class="op">=</span> oa<span class="op">.</span>embeddings<span class="op">.</span><span class="fn">create</span>(model<span class="op">=</span><span class="str">"text-embedding-3-small"</span>, input<span class="op">=</span>[<span class="str">"my pet is happy"</span>])<span class="op">.</span>data[<span class="num">0</span>]<span class="op">.</span>embedding
+hits <span class="op">=</span> qd<span class="op">.</span><span class="fn">search</span>(<span class="str">"corpus"</span>, query_vector<span class="op">=</span>q, limit<span class="op">=</span><span class="num">3</span>)
+<span class="fn">print</span>([h<span class="op">.</span>payload[<span class="str">"text"</span>] <span class="kw">for</span> h <span class="kw">in</span> hits])  <span class="cm"># → ["a dog wags its tail", ...]</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-header animate-in">
+        <p class="eyebrow" style="opacity:1; transform:none;">BY THE NUMBERS · 2026</p>
+        <h2 class="section-title">The shape of <em>production embeddings.</em></h2>
+      </div>
+      <div class="stats">
+        <article class="stat">
+          <p class="stat-kicker">Default dimensionality</p>
+          <div class="stat-value"><span class="num" data-to="1536">0</span></div>
+          <p class="stat-label">Dims per vector · OpenAI text-embedding-3-small. Large is 3,072; Voyage-3 1,024; Nomic-Embed 768.</p>
+        </article>
+        <article class="stat">
+          <p class="stat-kicker">Top-k retrieval</p>
+          <div class="stat-value"><span class="num" data-to="8">0</span><span class="unit">ms</span></div>
+          <p class="stat-label">P50 latency on a 10M-vector Qdrant cluster, HNSW index, ef=128. Recall &gt;0.97.</p>
+        </article>
+        <article class="stat">
+          <p class="stat-kicker">Index throughput</p>
+          <div class="stat-value"><span class="num" data-to="50">0</span><span class="unit">k/s</span></div>
+          <p class="stat-label">Vectors ingested per second on a single Milvus 2.4 node with GPU index build.</p>
+        </article>
+        <article class="stat">
+          <p class="stat-kicker">Production adopters</p>
+          <div class="stat-value"><span class="num" data-to="78">0</span><span class="unit">%</span></div>
+          <p class="stat-label">Of Fortune-500 AI deployments ship a vector store in 2026, per LangChain's State-of-AI report.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="cta">
+    <h2>Want to <em>build</em> with this?</h2>
+    <p>CETI runs hands-on workshops on embeddings, RAG, and vector-store architecture — from a one-day intensive to a six-week academy. Bring your stack; leave with a working retrieval system.</p>
+    <a class="magnetic" href="https://calendly.com/manutej/30min">
+      Book a discovery call
+      <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <script>
+    // ====================================================================
+    // 1 — DATA: 50 words across 5 semantic clusters
+    //     Coordinates are hand-tuned 2D projections (think t-SNE/UMAP output)
+    // ====================================================================
+    const CLUSTERS = {
+      animals:  { color: '#D94F30', cx: 230, cy: 165 },
+      vehicles: { color: '#2A7B9B', cx: 780, cy: 175 },
+      food:     { color: '#D4A843', cx: 215, cy: 460 },
+      abstract: { color: '#7B6DAA', cx: 785, cy: 450 },
+      tech:     { color: '#2D8B55', cx: 500, cy: 305 }
+    };
+
+    // 10 words per cluster, positions relative to cluster center
+    const WORDS = [
+      // Animals (red, top-left)
+      {w:'dog',     c:'animals', dx:-40, dy:-30},
+      {w:'cat',     c:'animals', dx: 15, dy:-45},
+      {w:'lion',    c:'animals', dx: 50, dy: 10},
+      {w:'tiger',   c:'animals', dx: 35, dy: 50},
+      {w:'horse',   c:'animals', dx:-30, dy: 40},
+      {w:'wolf',    c:'animals', dx: 70, dy:-20},
+      {w:'fox',     c:'animals', dx:-65, dy: 10},
+      {w:'bear',    c:'animals', dx:-10, dy: 75},
+      {w:'rabbit',  c:'animals', dx:-75, dy:-50, mh:true},
+      {w:'elephant',c:'animals', dx: 90, dy: 55, mh:true},
+
+      // Vehicles (teal, top-right)
+      {w:'car',     c:'vehicles', dx:-30, dy:-10},
+      {w:'truck',   c:'vehicles', dx: 25, dy:-40},
+      {w:'bus',     c:'vehicles', dx: 60, dy: 15},
+      {w:'bike',    c:'vehicles', dx:-55, dy: 35},
+      {w:'plane',   c:'vehicles', dx: 10, dy: 55},
+      {w:'ship',    c:'vehicles', dx:-15, dy:-55},
+      {w:'train',   c:'vehicles', dx: 80, dy:-25},
+      {w:'boat',    c:'vehicles', dx: 70, dy: 60},
+      {w:'taxi',    c:'vehicles', dx:-70, dy:-30, mh:true},
+      {w:'van',     c:'vehicles', dx:-80, dy: 65, mh:true},
+
+      // Food (gold, bottom-left)
+      {w:'pizza',   c:'food', dx:-40, dy: -15},
+      {w:'sushi',   c:'food', dx: 15, dy:-45},
+      {w:'bread',   c:'food', dx: 55, dy: 5},
+      {w:'apple',   c:'food', dx:-25, dy: 50},
+      {w:'cheese',  c:'food', dx: 40, dy: 45},
+      {w:'pasta',   c:'food', dx: -5, dy:-55},
+      {w:'soup',    c:'food', dx:-70, dy: 15, mh:true},
+      {w:'salad',   c:'food', dx: 75, dy:-30, mh:true},
+      {w:'cake',    c:'food', dx: 70, dy: 60},
+      {w:'rice',    c:'food', dx:-55, dy:-40},
+
+      // Abstract (plum, bottom-right)
+      {w:'love',    c:'abstract', dx:-40, dy:-20},
+      {w:'hope',    c:'abstract', dx: 20, dy:-50},
+      {w:'fear',    c:'abstract', dx: 55, dy: 10},
+      {w:'truth',   c:'abstract', dx:-30, dy: 45},
+      {w:'justice', c:'abstract', dx: 30, dy: 55},
+      {w:'freedom', c:'abstract', dx:-60, dy:-45, mh:true},
+      {w:'beauty',  c:'abstract', dx: 75, dy:-30, mh:true},
+      {w:'peace',   c:'abstract', dx:-65, dy: 20},
+      {w:'time',    c:'abstract', dx: 65, dy: 55},
+      {w:'mind',    c:'abstract', dx:  0, dy:-30},
+
+      // Tech (green, center)
+      {w:'code',    c:'tech', dx:-50, dy:-30},
+      {w:'server',  c:'tech', dx: 30, dy:-45},
+      {w:'neural',  c:'tech', dx: 65, dy: 15},
+      {w:'token',   c:'tech', dx:-40, dy: 50},
+      {w:'vector',  c:'tech', dx: 10, dy: 60},
+      {w:'model',   c:'tech', dx:-80, dy: 10, mh:true},
+      {w:'gpu',     c:'tech', dx: 80, dy:-25, mh:true},
+      {w:'api',     c:'tech', dx: 55, dy: 55},
+      {w:'query',   c:'tech', dx:-65, dy:-60, mh:true},
+      {w:'embed',   c:'tech', dx:  0, dy:-65}
+    ];
+
+    // Assign final positions and ids
+    WORDS.forEach((p, i) => {
+      const cluster = CLUSTERS[p.c];
+      p.x = cluster.cx + p.dx;
+      p.y = cluster.cy + p.dy;
+      p.id = i;
+      p.color = cluster.color;
+    });
+
+    // ====================================================================
+    // 2 — RENDER DOTS
+    // ====================================================================
+    const dotsG = document.getElementById('dots');
+    const linesG = document.getElementById('lines');
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const SVG_W = 1000, SVG_H = 600;
+
+    // Start positions: scattered randomly across viewbox (seeded by index)
+    function rand(seed) {
+      const x = Math.sin(seed * 9301 + 49297) * 233280;
+      return x - Math.floor(x);
+    }
+
+    WORDS.forEach((p, i) => {
+      const g = document.createElementNS(SVG_NS, 'g');
+      g.setAttribute('class', 'dot' + (p.mh ? ' mobile-hide' : ''));
+      g.setAttribute('data-id', p.id);
+      g.style.setProperty('--dot-color', p.color);
+
+      const halo = document.createElementNS(SVG_NS, 'circle');
+      halo.setAttribute('class', 'halo');
+      // Start: random scattered position
+      const sx = 100 + rand(i * 3) * (SVG_W - 200);
+      const sy = 80 + rand(i * 7 + 11) * (SVG_H - 160);
+      halo.setAttribute('cx', sx);
+      halo.setAttribute('cy', sy);
+      halo.setAttribute('r', 0);
+
+      const body = document.createElementNS(SVG_NS, 'circle');
+      body.setAttribute('class', 'body');
+      body.setAttribute('cx', sx);
+      body.setAttribute('cy', sy);
+      body.setAttribute('r', 6);
+
+      g.appendChild(halo);
+      g.appendChild(body);
+
+      // Hover handlers
+      g.addEventListener('mouseenter', () => onHover(p, g));
+      g.addEventListener('mouseleave', onUnhover);
+      g.addEventListener('focus', () => onHover(p, g));
+      g.addEventListener('blur', onUnhover);
+      g.setAttribute('tabindex', '0');
+      g.setAttribute('role', 'button');
+      g.setAttribute('aria-label', `${p.w} — ${p.c}`);
+
+      dotsG.appendChild(g);
+
+      // Stagger animate INTO cluster position
+      setTimeout(() => {
+        body.setAttribute('cx', p.x);
+        body.setAttribute('cy', p.y);
+        halo.setAttribute('cx', p.x);
+        halo.setAttribute('cy', p.y);
+        g.classList.add('in');
+      }, 120 + i * 28);
+    });
+
+    // ====================================================================
+    // 3 — NEAREST NEIGHBORS (Euclidean in 2D — proxy for high-dim)
+    // ====================================================================
+    function kNearest(p, k = 5) {
+      return WORDS
+        .filter(q => q.id !== p.id)
+        .map(q => ({ q, d: Math.hypot(q.x - p.x, q.y - p.y) }))
+        .sort((a, b) => a.d - b.d)
+        .slice(0, k)
+        .map(x => x.q);
+    }
+
+    const hoverLabel = document.getElementById('hover-label');
+    const scatterWrap = document.getElementById('scatter-wrap');
+    const scatterSvg = document.getElementById('scatter-svg');
+
+    function onHover(p, g) {
+      // Dim all, focus this one
+      document.querySelectorAll('.dot').forEach(d => d.classList.add('dim'));
+      g.classList.remove('dim');
+      g.classList.add('focus');
+
+      // Draw lines to neighbors
+      linesG.innerHTML = '';
+      const neighbors = kNearest(p, 5);
+      neighbors.forEach((n, i) => {
+        document.querySelector(`.dot[data-id="${n.id}"]`)?.classList.remove('dim');
+        const line = document.createElementNS(SVG_NS, 'line');
+        line.setAttribute('class', 'neighbor-line');
+        line.setAttribute('x1', p.x);
+        line.setAttribute('y1', p.y);
+        line.setAttribute('x2', n.x);
+        line.setAttribute('y2', n.y);
+        line.setAttribute('stroke', p.color);
+        linesG.appendChild(line);
+        requestAnimationFrame(() => {
+          setTimeout(() => line.classList.add('active'), i * 50);
+        });
+      });
+
+      // Position label using actual rendered coordinates
+      const svgRect = scatterSvg.getBoundingClientRect();
+      const wrapRect = scatterWrap.getBoundingClientRect();
+      const scaleX = svgRect.width / SVG_W;
+      const scaleY = svgRect.height / SVG_H;
+      const labelX = (svgRect.left - wrapRect.left) + p.x * scaleX;
+      const labelY = (svgRect.top - wrapRect.top) + p.y * scaleY;
+      hoverLabel.textContent = p.w;
+      hoverLabel.style.left = labelX + 'px';
+      hoverLabel.style.top = labelY + 'px';
+      hoverLabel.classList.add('visible');
+    }
+
+    function onUnhover() {
+      document.querySelectorAll('.dot').forEach(d => {
+        d.classList.remove('dim');
+        d.classList.remove('focus');
+      });
+      linesG.innerHTML = '';
+      hoverLabel.classList.remove('visible');
+    }
+
+    // Legend cluster filter
+    document.querySelectorAll('.legend-item').forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const cluster = item.dataset.cluster;
+        WORDS.forEach(p => {
+          const dot = document.querySelector(`.dot[data-id="${p.id}"]`);
+          if (!dot) return;
+          if (p.c === cluster) dot.classList.remove('dim');
+          else dot.classList.add('dim');
+        });
+      });
+      item.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.dot').forEach(d => d.classList.remove('dim'));
+      });
+    });
+
+    // ====================================================================
+    // 4 — HERO REVEAL
+    // ====================================================================
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ====================================================================
+    // 5 — INTERSECTION REVEALS
+    // ====================================================================
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+    document.querySelectorAll('.animate-in, .stat, .vdb-row').forEach(el => io.observe(el));
+
+    // ====================================================================
+    // 6 — NUMBER TICKER
+    // ====================================================================
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach(el => numObs.observe(el));
+
+    // ====================================================================
+    // 7 — MAGNETIC BUTTON
+    // ====================================================================
+    const STRENGTH = 25;
+    document.querySelectorAll('.magnetic').forEach(btn => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
+        btn.style.setProperty('--mx', `${x}px`);
+        btn.style.setProperty('--my', `${y}px`);
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.setProperty('--mx', '0px');
+        btn.style.setProperty('--my', '0px');
+      });
+    });
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>

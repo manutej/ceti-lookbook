@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Context Protocol — One protocol. Every tool.</title>
+  <meta name="description" content="A field guide to MCP — Anthropic's open standard that lets any LLM connect to tools, data, and services through a single, uniform protocol. Client, server, three primitives, two transports.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-bg: #FAF7F2;
+      --color-bg-warm: #F5F0E8;
+      --color-bg-code: #1E1E2E;
+      --color-text: #2C2A28;
+      --color-text-secondary: #6B6560;
+      --color-text-muted: #9E9790;
+      --color-border: #E5DFD6;
+      --color-border-light: #EEEBE5;
+      --color-surface: #FFFFFF;
+
+      --color-accent:        #D94F30; /* vermillion */
+      --color-accent-hover:  #C4432A;
+      --color-accent-light:  #FDEEE9;
+      --color-accent-muted:  #E8836C;
+
+      --color-actor-1: #D94F30; /* vermillion */
+      --color-actor-2: #2A7B9B; /* teal */
+      --color-actor-3: #7B6DAA; /* plum */
+      --color-actor-4: #D4A843; /* golden */
+      --color-actor-5: #2D8B55; /* forest */
+
+      --font-display: 'Bricolage Grotesque', Georgia, serif;
+      --font-body:    'DM Sans', -apple-system, sans-serif;
+      --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --duration-fast: 150ms;
+      --duration-normal: 300ms;
+      --duration-slow: 500ms;
+      --duration-slower: 700ms;
+
+      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
+      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      background-image:
+        radial-gradient(ellipse at 18% 22%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 82% 78%, rgba(42, 123, 155, 0.04) 0%, transparent 55%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; }
+
+    /* ============ NAV ============ */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.75rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+    }
+    .topbar .mark { color: var(--color-accent); font-weight: 500; }
+    .topbar a { text-decoration: none; transition: color 200ms; }
+    .topbar a:hover { color: var(--color-accent); }
+
+    /* ============ HERO ============ */
+    .hero {
+      min-height: 88vh;
+      padding: 3rem 1.75rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      opacity: 0;
+      transition: opacity var(--duration-slow) var(--ease-out);
+    }
+    .hero.visible .eyebrow { opacity: 1; }
+    .eyebrow .dot { color: var(--color-text-muted); margin: 0 0.5rem; }
+    .eyebrow .quiet { color: var(--color-text-muted); }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2.75rem, 7vw, 5.25rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 1.75rem 0 1.75rem;
+      max-width: 14ch;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity var(--duration-slower) var(--ease-spring),
+        transform var(--duration-slower) var(--ease-spring);
+    }
+    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
+    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
+    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
+    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 260ms; }
+    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 340ms; }
+    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 420ms; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--color-accent);
+    }
+
+    .hero-sub {
+      font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+      color: var(--color-text-secondary);
+      max-width: 56ch;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
+      transition-delay: 580ms;
+    }
+    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+    .hero-sub b { color: var(--color-text); font-weight: 500; }
+
+    .cta-row {
+      display: flex;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transition: opacity var(--duration-slower) var(--ease-out);
+      transition-delay: 760ms;
+    }
+    .hero.visible .cta-row { opacity: 1; }
+
+    .magnetic {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 1rem 1.85rem;
+      border-radius: 9999px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
+      transition: transform 600ms var(--ease-spring), background 200ms ease, box-shadow 300ms ease;
+      will-change: transform;
+      box-shadow: 0 8px 22px rgba(217, 79, 48, 0.18);
+      text-decoration: none;
+    }
+    .magnetic:hover { background: var(--color-accent-hover); box-shadow: 0 14px 32px rgba(217, 79, 48, 0.26); }
+    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
+    .magnetic:hover .arrow { transform: translateX(4px); }
+
+    .secondary {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 200ms;
+      font-family: var(--font-mono);
+      letter-spacing: 0.04em;
+    }
+    .secondary:hover { color: var(--color-accent); }
+
+    /* ============ SECTION SCAFFOLD ============ */
+    .section {
+      padding: 5rem 1.75rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-accent);
+      margin: 0 0 1rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 4.2vw, 3rem);
+      letter-spacing: -0.025em;
+      margin: 0 0 1rem;
+      max-width: 22ch;
+    }
+    .section-sub {
+      color: var(--color-text-secondary);
+      max-width: 60ch;
+      font-size: 1.05rem;
+      margin: 0 0 3rem;
+    }
+
+    .animate-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    }
+    .animate-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ============ HUB-SPOKE DIAGRAM ============ */
+    .arch {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 1.5rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .arch::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(217, 79, 48, 0.045) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .arch-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 720px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .arch-caption {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+      color: var(--color-text-secondary);
+      font-size: 0.98rem;
+    }
+    .arch-caption b { color: var(--color-text); font-weight: 600; }
+    .arch-caption code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: var(--color-accent-light);
+      color: var(--color-accent);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+    }
+
+    /* Diagram SVG styling */
+    .hub-glow {
+      transform-origin: 360px 240px;
+      animation: hubPulse 3.6s var(--ease-out) infinite;
+    }
+    @keyframes hubPulse {
+      0%, 100% { opacity: 0.55; transform: scale(1); }
+      50% { opacity: 0.95; transform: scale(1.08); }
+    }
+    .hub-core {
+      fill: var(--color-accent);
+    }
+    .hub-ring {
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 1.5;
+      opacity: 0.35;
+    }
+    .spoke {
+      stroke: var(--color-border);
+      stroke-width: 1.25;
+      fill: none;
+      stroke-dasharray: 3 4;
+    }
+    .beam-path {
+      stroke: var(--color-accent);
+      stroke-width: 2;
+      stroke-linecap: round;
+      fill: none;
+      stroke-dasharray: 16 200;
+      stroke-dashoffset: 200;
+      filter: drop-shadow(0 0 6px rgba(217, 79, 48, 0.45));
+      animation: beamFlow 4.2s linear infinite;
+    }
+    .beam-path.b2 { animation-delay: -0.6s; }
+    .beam-path.b3 { animation-delay: -1.2s; }
+    .beam-path.b4 { animation-delay: -1.8s; }
+    .beam-path.b5 { animation-delay: -2.4s; }
+    .beam-path.b6 { animation-delay: -3.0s; }
+    .beam-path.b7 { animation-delay: -3.6s; }
+    .beam-path.b8 { animation-delay: -4.2s; }
+    @keyframes beamFlow {
+      0%   { stroke-dashoffset: 200; }
+      100% { stroke-dashoffset: -16; }
+    }
+    .node-orb circle {
+      fill: var(--color-surface);
+      stroke: var(--color-border);
+      stroke-width: 1.5;
+      transition: stroke 300ms var(--ease-out), filter 300ms;
+    }
+    .node-orb text {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      fill: var(--color-text-secondary);
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .node-orb.pulse circle {
+      stroke: var(--color-accent);
+      filter: drop-shadow(0 0 8px rgba(217, 79, 48, 0.55));
+    }
+    .node-orb.pulse text { fill: var(--color-text); }
+    .center-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      fill: white;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      font-weight: 500;
+    }
+
+    /* ============ PRIMITIVES BENTO ============ */
+    .primitives {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    .prim {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--duration-normal) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
+    }
+    .prim::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%), var(--prim-glow, rgba(217, 79, 48, 0.08)), transparent 42%);
+      pointer-events: none;
+      transition: opacity 200ms;
+    }
+    .prim:hover {
+      transform: translateY(-4px);
+      border-color: var(--prim-accent, var(--color-accent-muted));
+      box-shadow: var(--shadow-lg);
+    }
+    .prim-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: var(--prim-bg, var(--color-accent-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      color: var(--prim-accent, var(--color-accent));
+    }
+    .prim-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--prim-accent, var(--color-accent));
+      margin-bottom: 0.5rem;
+    }
+    .prim h3 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.65rem;
+      letter-spacing: -0.015em;
+      margin: 0 0 0.75rem;
+    }
+    .prim p {
+      color: var(--color-text-secondary);
+      margin: 0;
+      font-size: 0.97rem;
+    }
+    .prim p code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      color: var(--color-text);
+      background: var(--color-bg-warm);
+      padding: 0.08em 0.4em;
+      border-radius: 4px;
+    }
+
+    .prim.tools     { --prim-accent: var(--color-actor-1); --prim-bg: #FDEEE9; --prim-glow: rgba(217, 79, 48, 0.10); }
+    .prim.resources { --prim-accent: var(--color-actor-2); --prim-bg: #E4F2F7; --prim-glow: rgba(42, 123, 155, 0.10); }
+    .prim.prompts   { --prim-accent: var(--color-actor-3); --prim-bg: #EFEAF7; --prim-glow: rgba(123, 109, 170, 0.10); }
+
+    /* ============ MARQUEE ============ */
+    .marquee-wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 0;
+      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    }
+    .marquee {
+      display: flex;
+      gap: 0.75rem;
+      width: max-content;
+      animation: marquee-l 38s linear infinite;
+      will-change: transform;
+    }
+    .marquee.reverse {
+      animation: marquee-r 44s linear infinite;
+      margin-top: 0.75rem;
+    }
+    .marquee-wrap:hover .marquee { animation-play-state: paused; }
+    @keyframes marquee-l {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    @keyframes marquee-r {
+      from { transform: translateX(-50%); }
+      to   { transform: translateX(0); }
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 9999px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      white-space: nowrap;
+      transition: border-color 200ms, color 200ms;
+    }
+    .pill .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--pill-dot, var(--color-accent));
+    }
+    .pill:hover { border-color: var(--pill-dot, var(--color-accent)); color: var(--color-text); }
+
+    /* ============ NUMBERS ============ */
+    .numbers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    .number-tile {
+      padding: 2.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+    .number-tile .v {
+      font-family: var(--font-display);
+      font-size: clamp(2.75rem, 5vw, 3.75rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--color-text);
+      font-variant-numeric: tabular-nums;
+    }
+    .number-tile .v .suffix { color: var(--color-accent); margin-left: 0.1em; }
+    .number-tile .l {
+      margin-top: 0.85rem;
+      color: var(--color-text-secondary);
+      font-size: 0.95rem;
+    }
+    .number-tile .sub {
+      margin-top: 0.4rem;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ============ CODE BLOCK ============ */
+    .code-frame {
+      background: var(--color-bg-code);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.75rem 1.5rem;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      position: relative;
+    }
+    .code-frame::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 36px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .code-dots {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      display: flex;
+      gap: 6px;
+    }
+    .code-dots span {
+      width: 11px; height: 11px; border-radius: 50%; background: #45475A;
+    }
+    .code-dots span:first-child { background: #F38BA8; }
+    .code-dots span:nth-child(2) { background: #F9E2AF; }
+    .code-dots span:nth-child(3) { background: #A6E3A1; }
+    .code-filename {
+      position: absolute;
+      top: 11px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: #9399B2;
+      letter-spacing: 0.04em;
+    }
+    pre.code {
+      margin: 2rem 0 0;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: #CDD6F4;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .code-keyword { color: #CBA6F7; }
+    .code-string  { color: #A6E3A1; }
+    .code-fn      { color: #89B4FA; }
+    .code-comment { color: #6C7086; font-style: italic; }
+    .code-num     { color: #FAB387; }
+    .code-prop    { color: #F9E2AF; }
+    .code-op      { color: #94E2D5; }
+    .code-type    { color: #F5C2E7; }
+
+    /* ============ FINAL CTA ============ */
+    .final {
+      padding: 6rem 1.75rem 7rem;
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4.2vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin: 0 0 1rem;
+    }
+    .final p {
+      color: var(--color-text-secondary);
+      margin: 0 0 2.25rem;
+      font-size: 1.05rem;
+    }
+    .final .row { display: flex; gap: 1.25rem; justify-content: center; flex-wrap: wrap; align-items: center; }
+
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem 3rem;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .footer a { color: var(--color-text-muted); text-decoration: none; }
+    .footer a:hover { color: var(--color-accent); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 860px) {
+      .primitives { grid-template-columns: 1fr; }
+      .numbers { grid-template-columns: 1fr; }
+      .arch-caption { grid-template-columns: 1fr; gap: 1.25rem; }
+      .section { padding: 4rem 1.5rem; }
+      .hero { padding-top: 1rem; }
+    }
+    @media (max-width: 480px) {
+      .topbar { padding: 1rem 1.25rem; font-size: 0.7rem; }
+      .topbar .hide-mobile { display: none; }
+      .hero { padding: 0 1.25rem 3rem; }
+      .arch { padding: 1.75rem 0.75rem; }
+      .code-frame { padding: 1.5rem 1rem 1.25rem; }
+      pre.code { font-size: 0.8rem; }
+    }
+
+    /* ============ REDUCED MOTION ============ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .hero .word, .hero-sub, .cta-row, .eyebrow, .animate-in {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .beam-path { stroke-dashoffset: 0 !important; opacity: 0.5; }
+      .hub-glow { animation: none !important; opacity: 0.7; }
+      .marquee, .marquee.reverse { animation: none !important; transform: translateX(0) !important; }
+    }
+    @media (hover: none) {
+      .magnetic { transform: none !important; }
+      .prim:hover { transform: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <span><span class="mark">CETI.AI</span> <span class="hide-mobile">· lookbook</span></span>
+    <a href="#try">Try it ↗</a>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <p class="eyebrow">Model Context Protocol <span class="dot">·</span> Open Standard <span class="dot">·</span> <span class="quiet">Nov 2024 →</span></p>
+    <h1 class="hero-title">
+      <span class="word">One</span>
+      <span class="word">protocol.</span>
+      <span class="word"><em>Every</em></span>
+      <span class="word">tool</span>
+      <span class="word">you'll need.</span>
+    </h1>
+    <p class="hero-sub">
+      MCP is <b>USB-C for LLMs</b> — Anthropic's open spec that lets any model
+      reach any tool, file system, database, or SaaS through one uniform interface.
+      The N×M integration problem, collapsed to N+M.
+    </p>
+    <div class="cta-row">
+      <a class="magnetic" href="#arch">
+        See how it works
+        <span class="arrow">→</span>
+      </a>
+      <a class="secondary" href="#code">[ jump to code ↓ ]</a>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE (signature visual) -->
+  <section class="section" id="arch">
+    <p class="section-label animate-in">The architecture</p>
+    <h2 class="section-title animate-in">Claude at the center.<br>Every service one beam away.</h2>
+    <p class="section-sub animate-in">A <b>client</b> (Claude Desktop, Cursor, an agent) speaks MCP to one or more <b>servers</b>. Each server wraps a tool, a data source, or a workflow. Beams travel both directions: model intent out, structured results back.</p>
+
+    <div class="arch animate-in">
+      <svg class="arch-svg" viewBox="0 0 720 480" role="img" aria-label="Hub and spoke diagram: Claude at center, eight MCP servers around it.">
+        <defs>
+          <radialGradient id="hubGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#D94F30" stop-opacity="0.55"/>
+            <stop offset="60%" stop-color="#D94F30" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#D94F30" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Hub glow + rings -->
+        <g class="hub-glow">
+          <circle cx="360" cy="240" r="110" fill="url(#hubGrad)"/>
+        </g>
+        <circle class="hub-ring" cx="360" cy="240" r="170"/>
+        <circle class="hub-ring" cx="360" cy="240" r="120" style="opacity:0.18"/>
+
+        <!-- Spokes (dashed guide lines) -->
+        <line class="spoke" x1="360" y1="240" x2="360" y2="60"/>
+        <line class="spoke" x1="360" y1="240" x2="487" y2="113"/>
+        <line class="spoke" x1="360" y1="240" x2="540" y2="240"/>
+        <line class="spoke" x1="360" y1="240" x2="487" y2="367"/>
+        <line class="spoke" x1="360" y1="240" x2="360" y2="420"/>
+        <line class="spoke" x1="360" y1="240" x2="233" y2="367"/>
+        <line class="spoke" x1="360" y1="240" x2="180" y2="240"/>
+        <line class="spoke" x1="360" y1="240" x2="233" y2="113"/>
+
+        <!-- Animated beams (drawn on top of spokes) -->
+        <line class="beam-path b1" x1="360" y1="240" x2="360" y2="60"/>
+        <line class="beam-path b2" x1="360" y1="240" x2="487" y2="113"/>
+        <line class="beam-path b3" x1="360" y1="240" x2="540" y2="240"/>
+        <line class="beam-path b4" x1="360" y1="240" x2="487" y2="367"/>
+        <line class="beam-path b5" x1="360" y1="240" x2="360" y2="420"/>
+        <line class="beam-path b6" x1="360" y1="240" x2="233" y2="367"/>
+        <line class="beam-path b7" x1="360" y1="240" x2="180" y2="240"/>
+        <line class="beam-path b8" x1="360" y1="240" x2="233" y2="113"/>
+
+        <!-- Hub core -->
+        <circle class="hub-core" cx="360" cy="240" r="44"/>
+        <text class="center-label" x="360" y="240">CLAUDE</text>
+
+        <!-- Server nodes (orbs) -->
+        <g class="node-orb" data-i="0" transform="translate(360 60)">
+          <circle r="34"/>
+          <text>FILES</text>
+        </g>
+        <g class="node-orb" data-i="1" transform="translate(487 113)">
+          <circle r="34"/>
+          <text>GITHUB</text>
+        </g>
+        <g class="node-orb" data-i="2" transform="translate(540 240)">
+          <circle r="34"/>
+          <text>DRIVE</text>
+        </g>
+        <g class="node-orb" data-i="3" transform="translate(487 367)">
+          <circle r="34"/>
+          <text>NOTION</text>
+        </g>
+        <g class="node-orb" data-i="4" transform="translate(360 420)">
+          <circle r="34"/>
+          <text>LINEAR</text>
+        </g>
+        <g class="node-orb" data-i="5" transform="translate(233 367)">
+          <circle r="34"/>
+          <text>SLACK</text>
+        </g>
+        <g class="node-orb" data-i="6" transform="translate(180 240)">
+          <circle r="34"/>
+          <text>VERCEL</text>
+        </g>
+        <g class="node-orb" data-i="7" transform="translate(233 113)">
+          <circle r="34"/>
+          <text>CTX7</text>
+        </g>
+      </svg>
+
+      <div class="arch-caption">
+        <div>
+          <p><b>Client → Server (out).</b> The model issues a <code>tools/call</code> or <code>resources/read</code>. The protocol is plain <code>JSON-RPC 2.0</code> over either <b>stdio</b> (local spawn) or <b>HTTP+SSE</b> (remote).</p>
+        </div>
+        <div>
+          <p><b>Server → Client (back).</b> Each server publishes its capabilities — what tools exist, what resources can be read, what prompts it provides. The model discovers and uses them at runtime, no glue code per integration.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THREE PRIMITIVES -->
+  <section class="section" id="primitives">
+    <p class="section-label animate-in">The three primitives</p>
+    <h2 class="section-title animate-in">Tools, resources, prompts.<br>That's the whole spec.</h2>
+    <p class="section-sub animate-in">A server exposes any combination of three primitives. Clients discover them, then the model decides which to invoke. The simplicity is the point — and the reason MCP took off where prior tool-calling specs stalled.</p>
+
+    <div class="primitives">
+      <article class="prim tools animate-in" data-glow>
+        <div class="prim-icon" aria-hidden="true">
+          <!-- function/play icon -->
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z" fill="currentColor" fill-opacity="0.15"/><path d="M5 3l14 9-14 9V3z"/></svg>
+        </div>
+        <div class="prim-tag">01 · Tools</div>
+        <h3>Things the model can <em>do</em>.</h3>
+        <p>Side-effecting functions the LLM can invoke — <code>create_issue</code>, <code>send_email</code>, <code>run_query</code>. Each tool declares a JSON-Schema for its arguments so the model can call it correctly the first time.</p>
+      </article>
+
+      <article class="prim resources animate-in" data-glow>
+        <div class="prim-icon" aria-hidden="true">
+          <!-- document/data icon -->
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="currentColor" fill-opacity="0.12"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg>
+        </div>
+        <div class="prim-tag">02 · Resources</div>
+        <h3>Things the model can <em>read</em>.</h3>
+        <p>Read-only data the server exposes — a file at <code>file://repo/README.md</code>, a row in a database, a fresh API response. Resources give the model context without giving it write access.</p>
+      </article>
+
+      <article class="prim prompts animate-in" data-glow>
+        <div class="prim-icon" aria-hidden="true">
+          <!-- spark/template icon -->
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" fill="currentColor" fill-opacity="0.14"/><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/><path d="M19 19v2M5 19v2M21 5h-2M5 5H3"/></svg>
+        </div>
+        <div class="prim-tag">03 · Prompts</div>
+        <h3>Workflows the server <em>provides</em>.</h3>
+        <p>Reusable prompt templates the server ships — <code>/git-summarize</code>, <code>/code-review</code>. The user picks one and the server returns a structured starting prompt the model can then act on.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- MARQUEE: ecosystem -->
+  <section style="padding: 2rem 0;">
+    <p class="section-label animate-in" style="text-align:center; max-width:1100px; margin:0 auto 0.5rem;">Today's ecosystem</p>
+    <h2 class="section-title animate-in" style="text-align:center; max-width:1100px; margin:0 auto 2rem; padding: 0 1.5rem;">A growing registry of servers.</h2>
+    <div class="marquee-wrap" aria-label="MCP servers — hover to pause">
+      <div class="marquee" id="m1">
+        <!-- list injected by JS for compactness -->
+      </div>
+      <div class="marquee reverse" id="m2"></div>
+    </div>
+  </section>
+
+  <!-- NUMBERS -->
+  <section class="section">
+    <div class="numbers">
+      <article class="number-tile animate-in">
+        <div class="v"><span class="num" data-to="10000">0</span><span class="suffix">+</span></div>
+        <p class="l">Public MCP servers indexed across registries.</p>
+        <p class="sub">As of Q1 2026</p>
+      </article>
+      <article class="number-tile animate-in">
+        <div class="v"><span class="num" data-to="4">0</span></div>
+        <p class="l">First-party SDKs: TypeScript, Python, Kotlin, Swift.</p>
+        <p class="sub">Maintained by Anthropic + community</p>
+      </article>
+      <article class="number-tile animate-in">
+        <div class="v"><span class="num" data-to="2">0</span></div>
+        <p class="l">Transports — <span style="font-family:var(--font-mono); color:var(--color-text);">stdio</span> for local, <span style="font-family:var(--font-mono); color:var(--color-text);">HTTP+SSE</span> for remote.</p>
+        <p class="sub">JSON-RPC 2.0 under the hood</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- CODE -->
+  <section class="section" id="code">
+    <p class="section-label animate-in">What it looks like</p>
+    <h2 class="section-title animate-in">Ten lines of Python.<br>That's a server.</h2>
+    <p class="section-sub animate-in">A minimal MCP server using the Python SDK. One <code style="font-family:var(--font-mono); font-size:0.9em;">@server.tool()</code> decorator declares a callable. Claude can now use it.</p>
+
+    <div class="code-frame animate-in" role="img" aria-label="Python source code for a minimal MCP server with one tool.">
+      <div class="code-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="code-filename">weather_server.py</div>
+<pre class="code"><span class="code-keyword">from</span> mcp.server <span class="code-keyword">import</span> Server
+<span class="code-keyword">from</span> mcp.server.stdio <span class="code-keyword">import</span> stdio_server
+
+server <span class="code-op">=</span> <span class="code-fn">Server</span>(<span class="code-string">"weather"</span>)
+
+<span class="code-op">@</span>server.<span class="code-fn">tool</span>()
+<span class="code-keyword">async def</span> <span class="code-fn">get_forecast</span>(city: <span class="code-type">str</span>) <span class="code-op">-&gt;</span> <span class="code-type">str</span>:
+    <span class="code-string">"""Return today's forecast for a city."""</span>
+    <span class="code-keyword">return</span> <span class="code-keyword">await</span> <span class="code-fn">fetch</span>(<span class="code-string">f"https://api.weather.gov/{city}"</span>)
+
+<span class="code-keyword">if</span> __name__ <span class="code-op">==</span> <span class="code-string">"__main__"</span>:
+    <span class="code-fn">stdio_server</span>(server).<span class="code-fn">run</span>()</pre>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final" id="try">
+    <h2 class="animate-in">Stop writing integration glue.<br>Speak MCP instead.</h2>
+    <p class="animate-in">Pick a server from the registry, drop it into your Claude Desktop config, and the model has new powers in 30 seconds.</p>
+    <div class="row animate-in">
+      <a class="magnetic" href="https://modelcontextprotocol.io" target="_blank" rel="noopener">
+        Read the spec
+        <span class="arrow">→</span>
+      </a>
+      <a class="secondary" href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener">[ browse servers ↗ ]</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    cetiai.co · MCP lookbook · <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">modelcontextprotocol.io</a>
+  </footer>
+
+  <script>
+    // Hero reveal on next frame
+    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+
+    // ===== IntersectionObserver reveals =====
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); reveal.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    document.querySelectorAll('.animate-in').forEach((el) => reveal.observe(el));
+
+    // ===== Number ticker =====
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function animateNum(el) {
+      const to = +el.dataset.to;
+      const dur = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          if (reduced) { e.target.textContent = (+e.target.dataset.to).toLocaleString(); }
+          else { animateNum(e.target); }
+          numObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
+
+    // ===== Magnetic buttons =====
+    const STRENGTH = 25;
+    if (matchMedia('(hover: hover)').matches) {
+      document.querySelectorAll('.magnetic').forEach((btn) => {
+        btn.addEventListener('mousemove', (e) => {
+          const r = btn.getBoundingClientRect();
+          const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
+          const y = (e.clientY - (r.top  + r.height / 2)) / STRENGTH;
+          btn.style.setProperty('--mx', `${x}px`);
+          btn.style.setProperty('--my', `${y}px`);
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.setProperty('--mx', '0px');
+          btn.style.setProperty('--my', '0px');
+        });
+      });
+    }
+
+    // ===== Primitive cards: cursor-following radial glow =====
+    document.querySelectorAll('.prim').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+    });
+
+    // ===== Hub-spoke: highlight orbs in sequence so user sees the rhythm =====
+    if (!reduced) {
+      const orbs = document.querySelectorAll('.node-orb');
+      let i = 0;
+      setInterval(() => {
+        orbs.forEach(o => o.classList.remove('pulse'));
+        orbs[i % orbs.length].classList.add('pulse');
+        i++;
+      }, 600);
+    }
+
+    // ===== Marquee population =====
+    const servers = [
+      { name: 'Filesystem', color: '#D94F30' },
+      { name: 'GitHub',     color: '#2C2A28' },
+      { name: 'Google Drive', color: '#2A7B9B' },
+      { name: 'Notion',     color: '#7B6DAA' },
+      { name: 'Linear',     color: '#5E6AD2' },
+      { name: 'Slack',      color: '#2D8B55' },
+      { name: 'Asana',      color: '#D94F30' },
+      { name: 'Vercel',     color: '#2C2A28' },
+      { name: 'Context7',   color: '#D4A843' },
+      { name: 'Stripe',     color: '#7B6DAA' },
+      { name: 'Sentry',     color: '#D94F30' },
+      { name: 'Postgres',   color: '#2A7B9B' },
+      { name: 'Git',        color: '#D4A843' },
+      { name: 'Memory',     color: '#2D8B55' },
+      { name: 'Sequential Thinking', color: '#7B6DAA' },
+      { name: 'Time',       color: '#2A7B9B' },
+      { name: 'Fetch',      color: '#D94F30' },
+      { name: 'Brave Search', color: '#D4A843' },
+      { name: 'Cloudflare', color: '#D94F30' },
+      { name: 'Heroku',     color: '#7B6DAA' },
+      { name: 'Elasticsearch', color: '#D4A843' },
+      { name: 'Grafana',    color: '#D94F30' },
+      { name: 'Sanity',     color: '#D94F30' },
+      { name: 'Supabase',   color: '#2D8B55' },
+    ];
+    const half = Math.ceil(servers.length / 2);
+    const a = servers.slice(0, half);
+    const b = servers.slice(half).concat(servers.slice(0, 4));
+    function pill(s) {
+      return `<span class="pill" style="--pill-dot:${s.color}"><span class="dot"></span>${s.name}</span>`;
+    }
+    // Duplicate the list so the marquee loops seamlessly (translateX -50%)
+    document.getElementById('m1').innerHTML = (a.map(pill).join('') ).repeat(2);
+    document.getElementById('m2').innerHTML = (b.map(pill).join('') ).repeat(2);
+  </script>
+  <script src="../shared/nav.js" defer></script>
+</body>
+</html>
