@@ -26,3 +26,4 @@ build/
 # Distribution archives
 *.zip
 *.tar.gz
+.vercel
