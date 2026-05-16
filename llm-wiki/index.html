@@ -967,6 +967,390 @@
       .compare tr:last-child { border-bottom: 0; }
     }
 
+    /* ============================================================
+       GRAPH — interactive additions (drag, search, panel, breathe)
+       ============================================================ */
+
+    /* search bar above the graph */
+    .graph-controls {
+      display: flex;
+      gap: 0.55rem;
+      align-items: center;
+      padding: 0.15rem 0.35rem 0.7rem;
+      border-bottom: 1px solid var(--rule-soft);
+      margin-bottom: 0.5rem;
+    }
+    .graph-controls .gc-search {
+      flex: 1 1 auto;
+      position: relative;
+      min-width: 0;
+    }
+    .graph-controls .gc-search input {
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      padding: 0.42rem 0.7rem 0.42rem 1.7rem;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 200ms var(--ease), background-color 200ms var(--ease);
+    }
+    .graph-controls .gc-search input::placeholder {
+      color: var(--ink-3);
+      font-style: italic;
+    }
+    .graph-controls .gc-search input:focus {
+      border-color: var(--teal);
+      background: var(--paper);
+    }
+    .graph-controls .gc-search svg {
+      position: absolute;
+      left: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      color: var(--ink-3);
+      pointer-events: none;
+    }
+    .graph-controls .gc-search .gc-results {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      box-shadow: 0 6px 20px rgba(40, 35, 25, 0.06);
+      z-index: 30;
+      max-height: 180px;
+      overflow-y: auto;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-3px);
+      transition: opacity 220ms var(--ease), transform 220ms var(--ease);
+    }
+    .graph-controls .gc-search.open .gc-results {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .graph-controls .gc-search .gc-result {
+      padding: 0.42rem 0.7rem;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      color: var(--ink-2);
+      cursor: pointer;
+      border-bottom: 1px solid var(--rule-soft);
+      transition: background-color 160ms var(--ease), color 160ms var(--ease);
+    }
+    .graph-controls .gc-search .gc-result:last-child { border-bottom: 0; }
+    .graph-controls .gc-search .gc-result:hover,
+    .graph-controls .gc-search .gc-result.kbd-active {
+      background: var(--teal-soft);
+      color: var(--teal-deep);
+    }
+    .graph-controls .gc-search .gc-result .gr-neighbors {
+      color: var(--ink-3);
+      font-size: 0.7rem;
+      margin-left: 0.5rem;
+    }
+
+    .graph-controls .gc-btn {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 0.42rem 0.75rem;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      color: var(--ink-2);
+      cursor: pointer;
+      transition: border-color 200ms var(--ease), color 200ms var(--ease), background-color 200ms var(--ease);
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .graph-controls .gc-btn:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+    .graph-controls .gc-btn.active {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: var(--paper);
+    }
+    .graph-controls .gc-btn .gc-glyph {
+      font-size: 0.7em;
+      transform: translateY(-0.5px);
+    }
+
+    /* graph stage holds svg + side panel */
+    .graph-stage {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 0fr;
+      gap: 0;
+      transition: gap 420ms var(--ease), grid-template-columns 420ms var(--ease);
+    }
+    .graph-stage.panel-open {
+      grid-template-columns: minmax(0, 1fr) 240px;
+      gap: 1rem;
+    }
+    .graph-stage .gs-svg-host {
+      min-width: 0;
+      position: relative;
+    }
+
+    /* breathe animation on the entire graph host */
+    @keyframes gbreathe {
+      0%, 100% { transform: scale(0.992); }
+      50%      { transform: scale(1.008); }
+    }
+    .graph-svg-wrap {
+      transform-origin: center;
+      animation: gbreathe 8s ease-in-out infinite;
+    }
+
+    /* dragging state */
+    .gnode.dragging circle.dot { fill: var(--teal-deep); }
+    .gnode.dragging circle.ring { opacity: 0.55; r: 22; }
+    .gnode.dragging text { font-weight: 500; fill: var(--ink); }
+    .gnode.drag-hint:hover circle.ring { opacity: 0.5; }
+
+    /* active (clicked) node */
+    .gnode.active circle.dot { fill: var(--teal-deep); }
+    .gnode.active circle.ring {
+      opacity: 0.7;
+      animation: gpulse 2.4s ease-in-out infinite;
+    }
+    .gnode.active text { font-weight: 600; fill: var(--ink); }
+    @keyframes gpulse {
+      0%, 100% { stroke-opacity: 0.6; r: 18; }
+      50%      { stroke-opacity: 0.18; r: 26; }
+    }
+    .gnode.replay-pulse circle.ring {
+      opacity: 1;
+      animation: greplay 900ms ease-out 1;
+    }
+    @keyframes greplay {
+      0%   { stroke-opacity: 0.9; r: 12; }
+      100% { stroke-opacity: 0;   r: 34; }
+    }
+
+    /* node side panel */
+    .gs-panel {
+      align-self: stretch;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 1rem 1rem 1rem;
+      font-family: var(--ui);
+      font-size: 0.82rem;
+      color: var(--ink-2);
+      opacity: 0;
+      transform: translateX(6px);
+      transition: opacity 380ms var(--ease), transform 380ms var(--ease);
+      pointer-events: none;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .graph-stage.panel-open .gs-panel {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+    .gs-panel .gp-path {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      color: var(--ink-3);
+      margin-bottom: 0.45rem;
+      letter-spacing: 0.04em;
+    }
+    .gs-panel .gp-title {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--ink);
+      margin: 0 0 0.5rem;
+      line-height: 1.25;
+    }
+    .gs-panel .gp-body {
+      font-family: var(--serif);
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0 0 0.85rem;
+    }
+    .gs-panel .gp-section {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--ink-3);
+      margin: 0.85rem 0 0.4rem;
+    }
+    .gs-panel .gp-links {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      line-height: 1.7;
+    }
+    .gs-panel .gp-links li { margin: 0; }
+    .gs-panel .gp-links a {
+      color: var(--teal);
+      text-decoration: none;
+      border-bottom: 1px dashed transparent;
+      transition: border-color 180ms var(--ease);
+      cursor: pointer;
+    }
+    .gs-panel .gp-links a:hover { border-bottom-color: var(--teal); }
+    .gs-panel .gp-close {
+      position: absolute;
+      top: 0.45rem;
+      right: 0.55rem;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 0;
+      color: var(--ink-3);
+      font-family: var(--mono);
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: color 180ms var(--ease), background-color 180ms var(--ease);
+    }
+    .gs-panel .gp-close:hover { color: var(--teal); background: var(--bg-soft); }
+
+    /* graph tooltip */
+    .graph-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: var(--ink);
+      color: var(--bg);
+      font-family: var(--ui);
+      font-size: 0.74rem;
+      padding: 0.32rem 0.55rem;
+      border-radius: 3px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      transform: translate(-50%, -100%) translateY(-6px);
+      transition: opacity 220ms var(--ease);
+      z-index: 20;
+      white-space: nowrap;
+    }
+    .graph-tooltip.show { opacity: 1; }
+    .graph-tooltip .tt-meta {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      color: var(--ink-3);
+      opacity: 0.85;
+      margin-top: 0.1em;
+    }
+
+    /* replay progress bar */
+    .replay-bar {
+      height: 2px;
+      width: 0%;
+      background: var(--teal);
+      margin: -0.45rem -1rem 0.6rem;
+      transition: width 200ms linear;
+      opacity: 0;
+    }
+    .replay-bar.active { opacity: 0.7; }
+
+    /* recent-edit highlight flash (sidebar) */
+    .toc .edit-list li.flash > a {
+      color: var(--teal);
+    }
+    .toc .edit-list li.flash {
+      background: var(--teal-soft);
+      border-radius: 2px;
+      transition: background-color 1.4s var(--ease);
+    }
+    .toc .edit-list li.new-entry {
+      animation: editEnter 540ms var(--ease) 1;
+    }
+    @keyframes editEnter {
+      0%   { opacity: 0; transform: translateY(-4px); max-height: 0; }
+      30%  { max-height: 4rem; }
+      100% { opacity: 1; transform: translateY(0); max-height: 4rem; }
+    }
+
+    /* wikilink hover popover */
+    .wl-popover {
+      position: absolute;
+      width: 280px;
+      max-width: calc(100vw - 1.5rem);
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      box-shadow: 0 6px 22px rgba(40, 35, 25, 0.08);
+      padding: 0.7rem 0.85rem 0.75rem;
+      font-family: var(--serif);
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--ink);
+      z-index: 25;
+      opacity: 0;
+      transform: translateY(-3px);
+      transition: opacity 280ms var(--ease), transform 280ms var(--ease);
+      pointer-events: none;
+    }
+    .wl-popover.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .wl-popover .wlp-title {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--teal);
+      margin-bottom: 0.3rem;
+    }
+    .wl-popover .wlp-title::before { content: "[["; color: var(--ink-3); }
+    .wl-popover .wlp-title::after  { content: "]]"; color: var(--ink-3); }
+    .wl-popover .wlp-summary {
+      font-style: italic;
+      color: var(--ink);
+    }
+    .wl-popover .wlp-meta {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      color: var(--ink-3);
+      margin-top: 0.45rem;
+      letter-spacing: 0.04em;
+      font-style: normal;
+    }
+
+    /* small status note under graph caption */
+    .graph-status {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--ink-3);
+      margin-left: 0.5rem;
+      transition: color 220ms var(--ease);
+    }
+    .graph-status.active { color: var(--teal); }
+
+    @media (max-width: 880px) {
+      .graph-stage.panel-open {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .gs-panel { padding: 0.85rem 0.9rem; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -976,6 +1360,10 @@
       .fade-in { opacity: 1 !important; transform: none !important; }
       .gnode { opacity: 1 !important; transform: none !important; }
       .gedge { opacity: 0.55 !important; }
+      .graph-svg-wrap { animation: none !important; }
+      .gnode.active circle.ring { animation: none !important; }
+      .gnode.replay-pulse circle.ring { animation: none !important; }
+      .toc .edit-list li.new-entry { animation: none !important; }
     }
   </style>
 </head>
@@ -1009,7 +1397,26 @@
             <span>graph view · 15 nodes · 23 links</span>
             <span>vault://manu/2026</span>
           </div>
-          <div class="graph-svg-wrap">
+
+          <div class="graph-controls">
+            <label class="gc-search" id="gc-search">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <circle cx="5" cy="5" r="3.2"/>
+                <path d="M7.5 7.5 L10.5 10.5"/>
+              </svg>
+              <input type="text" id="gc-search-input" placeholder="type to find a note…" autocomplete="off" spellcheck="false" aria-label="search graph nodes">
+              <div class="gc-results" id="gc-results" role="listbox"></div>
+            </label>
+            <button class="gc-btn" id="gc-replay" type="button" aria-label="replay today's edits">
+              <span class="gc-glyph">▶</span> replay today's edits
+            </button>
+          </div>
+
+          <div class="replay-bar" id="replay-bar"></div>
+
+          <div class="graph-stage" id="graph-stage">
+            <div class="gs-svg-host">
+              <div class="graph-svg-wrap">
             <svg class="graph-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="g-title">
               <title id="g-title">A graph of personal notes connected by topic.</title>
 
@@ -1115,9 +1522,20 @@
                 <text x="410" y="568">Health</text>
               </g>
             </svg>
+              </div>
+              <div class="graph-tooltip" id="graph-tooltip" aria-hidden="true"></div>
+            </div>
+            <aside class="gs-panel" id="gs-panel" aria-live="polite" aria-hidden="true">
+              <button type="button" class="gp-close" id="gp-close" aria-label="close panel">×</button>
+              <div class="gp-path" id="gp-path">/notes/—.md</div>
+              <h3 class="gp-title" id="gp-title">—</h3>
+              <p class="gp-body" id="gp-body">—</p>
+              <p class="gp-section">Linked from</p>
+              <ul class="gp-links" id="gp-linked-from"></ul>
+            </aside>
           </div>
         </div>
-        <figcaption>Fig 1. The vault as a graph. <span class="fc-key">Teal nodes</span> are notes; warm-gray edges are <a href="#" class="wikilink">backlinks</a>. Hover any node to dim its non-neighbors.</figcaption>
+        <figcaption>Fig 1. The vault as a graph. <span class="fc-key">Teal nodes</span> are notes; warm-gray edges are <a href="#" class="wikilink">backlinks</a>. <span class="fc-key">Drag</span> any node, <span class="fc-key">click</span> to focus, type to find.<span class="graph-status" id="graph-status"></span></figcaption>
       </figure>
 
       <!-- ============== PROSE ============== -->
@@ -1765,6 +2183,10 @@
   </main>
 
   <script>
+    // reduced-motion guard
+    const PRM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const TOUCH = window.matchMedia && window.matchMedia('(hover: none)').matches;
+
     // ============ FADE-IN ============
     const fadeObs = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
@@ -1776,11 +2198,179 @@
     }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
     document.querySelectorAll('.fade-in').forEach((el) => fadeObs.observe(el));
 
-    // ============ GRAPH — calm settle ============
+    // ============================================================
+    // KNOWLEDGE GRAPH — interactive
+    // ============================================================
     const gsvg = document.querySelector('.graph-svg');
+
+    // Node metadata: short page content shown in the side panel
+    const NODE_META = {
+      'transformers': {
+        title: 'Transformers',
+        path: '/notes/transformers.md',
+        body: 'The architecture that ate the field. Attention over sequences became the substrate for nearly every language model after 2017. Every other note in this vault eventually points back here.',
+        linkedFrom: ['attention-is-all-you-need', 'gpt-1-through-5-notes', 'andrej-karpathy-lectures']
+      },
+      'tokenizers': {
+        title: 'Tokenizers',
+        path: '/notes/tokenizers.md',
+        body: 'The boundary layer between text and numbers. BPE, SentencePiece, tiktoken — choices here leak into every downstream behavior, especially around numerals, code, and non-English scripts.',
+        linkedFrom: ['bpe-from-scratch', 'tiktoken-quirks', 'multilingual-tokenization']
+      },
+      'agents': {
+        title: 'Agents',
+        path: '/notes/agents.md',
+        body: 'A language model with hands. The shift from chat-as-output to action-as-output. The most interesting work of 2025–2026 happens here — and most of the failure modes too.',
+        linkedFrom: ['claude-code-as-vault-agent', 'mcp-server-directory', 'overnight-compile-cron']
+      },
+      'mcp': {
+        title: 'MCP',
+        path: '/notes/mcp.md',
+        body: 'Model Context Protocol — the standard that made read-and-write agents portable across tools. Once installed once, an agent gains access to your filesystem, calendar, vault, repo.',
+        linkedFrom: ['mcp-server-directory', 'notion-claude-bridge', 'smart-connections-plugin']
+      },
+      'rag': {
+        title: 'RAG',
+        path: '/notes/rag.md',
+        body: 'Retrieval-augmented generation. The bridge between a context window and a corpus. Increasingly being eaten by long-context models — but the bridge still matters when corpus > context.',
+        linkedFrom: ['rag-vs-long-context-march', 'embedding-models-2026', 'q3-2025-architecture']
+      },
+      'python': {
+        title: 'Python',
+        path: '/notes/python.md',
+        body: 'The default substrate for AI work. Notes here are scratch pads — patterns for async, typed dataclasses, the moments where Rust-or-Go would have been better.',
+        linkedFrom: ['async-patterns-2026', 'pydantic-v3-migration']
+      },
+      'reading': {
+        title: 'Reading List',
+        path: '/notes/reading-list.md',
+        body: 'The running index of things read and worth re-reading. Compiled by the agent overnight from inbox clippings. The half-life of a paper here is about six months.',
+        linkedFrom: ['q2-2026-essays', 'currently-reading', 'recommended-by-friends']
+      },
+      'projects': {
+        title: 'Projects',
+        path: '/notes/projects.md',
+        body: 'Active and dormant work. Each project gets its own subgraph: decisions, retros, open questions. The agent keeps the index page in sync so I never have to.',
+        linkedFrom: ['project-aos', 'project-kochi', 'ceti-website-rebuild']
+      },
+      'writing': {
+        title: 'Writing',
+        path: '/notes/writing.md',
+        body: 'Essays, drafts, fragments. The agent reads finished essays to learn voice; it never drafts the lede — it drafts the middle. The lede stays human.',
+        linkedFrom: ['q2-2026-essays', 'voice-and-register-notes']
+      },
+      'people': {
+        title: 'People',
+        path: '/notes/people.md',
+        body: 'A CRM I never built. Each person gets a page; the agent populates commitments and follow-ups from meeting transcripts. The most valuable subgraph by year five.',
+        linkedFrom: ['ceti-clients-2026', 'collaborators-active', 'people-graph-privacy']
+      },
+      'ai-trends': {
+        title: 'AI Trends',
+        path: '/notes/ai-trends.md',
+        body: 'A derived index — the agent regenerates this page on every commit. What I currently believe is moving fast vs. slow, and where the consensus is wrong.',
+        linkedFrom: ['ai-trends-q2-2026', 'predictions-archive', 'consensus-blindspots']
+      },
+      'q3-notes': {
+        title: 'Q3 Notes',
+        path: '/notes/q3-2026-notes.md',
+        body: 'Quarterly scratch space. Decisions, retros, open questions, things I almost said in meetings. Will get compiled into Q3 retro page in October.',
+        linkedFrom: ['quarterly-retros', 'q3-decisions-pending']
+      },
+      'decisions': {
+        title: 'Decisions',
+        path: '/notes/decisions.md',
+        body: 'Reversible and permanent. Tagged by type, queryable by recency. The agent flags new decisions for review; I tag confidence by hand. Still the highest-signal subgraph.',
+        linkedFrom: ['decisions/reversible-vs-permanent', 'hiring-decisions-2026', 'pricing-decisions']
+      },
+      'habits': {
+        title: 'Habits',
+        path: '/notes/habits.md',
+        body: 'What I am trying to do daily. The agent doesn\'t track this — I do, by hand, because the act of writing it is half the practice. The other half is reading last month\'s version.',
+        linkedFrom: ['daily-practice-log', 'habit-fails-and-restarts']
+      },
+      'health': {
+        title: 'Health',
+        path: '/notes/health.md',
+        body: 'Sleep, training, lab results, what worked, what didn\'t. The most private subgraph. Encrypted at rest, never indexed by anything cloud-side. Still queryable by the local agent.',
+        linkedFrom: ['sleep-experiments-2026', 'training-log-q2']
+      }
+    };
+
+    // Wikilink popover summaries — keyed by visible text content
+    const WIKILINK_SUMMARIES = {
+      'ai-tools': 'Top-level index for everything tagged AI tooling. The folder where the agent files anything related to PKM, MCP, or agentic workflows.',
+      'personal-knowledge-management': 'The category formerly known as note-taking. After 2024, the field changed register — the second reader is now the agent.',
+      'obsidian': 'Markdown-native editor with a strong plugin ecosystem. Local-first by default. Smart Connections is the path-A reference plugin.',
+      'roam': 'The block-level outliner that pioneered backlinks as a first-class primitive. Lost ground to Obsidian after 2022 over local-first concerns.',
+      'logseq': 'Open-source local-first alternative to Roam. Block-based, file-backed, has an MCP-flavored agent integration.',
+      'notion': 'Block-based docs + databases tool. Cloud-first. Notion AI ships chat-with-pages; Notion MCP server enables external agents.',
+      'backlinks': 'Reverse-direction links. Page A says [[B]]; B\'s backlinks panel shows A. The cheapest possible graph operation that matters.',
+      'sources': 'Raw inbound material — articles, transcripts, voice memos. The "untouched" tier. The agent reads but does not modify.',
+      'tiago-forte': 'Author of Building a Second Brain. Popular foundation for the PKM category, pre-agent era.',
+      'andy-matuschak': 'Researcher and tool-builder. Originated the evergreen-notes framework that the agent era now industrializes.',
+      'maggie-appleton': 'Designer and writer who shaped the digital-garden aesthetic. Garden-over-stream framing.',
+      'claude-sonnet-4': 'Anthropic\'s mid-tier 2025 model. The first one fast enough and good enough to traverse a 10,000-note vault in a single request.',
+      'mcp': 'Model Context Protocol. The standard that made read-and-write agents portable across tools after late 2024.',
+      'rag-vs-long-context': 'Personal synthesis page on when to retrieve and when to dump-it-all-in-context. Compiled by the agent, edited by hand.',
+      'q1-architecture-decisions': 'Quarterly archive of architecture choices made in Q1 2026. Still being referenced by current work.',
+      'tending-a-garden': 'The Maggie Appleton framing — notes are tended, not stored. Survives intact into the agent era; it\'s the framing of PKM-as-hobby that does not.',
+      'roam-research': 'See [[roam]]. Block references and a research-grade graph view. Cloud-first; ceded ground to Obsidian after 2022.',
+      'google-docs': 'Proprietary document format. Strong real-time editing. Weak as a substrate for agents — every operation pays an API tax.',
+      'wikilinks': 'The double-bracket syntax. [[concept-name]] declares an edge. Bidirectional by convention, one-way by format.',
+      'rag': 'See node [[rag]] in the graph. Retrieval-augmented generation. The bridge between context window and corpus.',
+      'long-context': 'The other side of the RAG debate. Models with 200k+ context can sometimes skip retrieval entirely and just read.',
+      'notebooklm': 'Google\'s research-assistant product. Reads sources, drafts summaries. The category-defining example of "propose summaries" mode.',
+      'karpathy': 'Andrej Karpathy. Posted the original llm-wiki.md gist that this page is about.',
+      'decisions': 'See node [[decisions]] in the graph. Reversible vs permanent, queryable by recency, tagged by confidence.',
+      'decision': 'A single recorded decision in the vault. Tagged by reversibility, surfaced by recency, queryable by category.',
+      'people': 'See node [[people]] in the graph. The CRM you never built. Agent-populated from meeting transcripts.',
+      'reversible': 'Tag for decisions that can be unwound at low cost. The opposite is "permanent" — and those should be made slowly.',
+      'manu': 'Manu Mulaveesala. Author of this page. Runs CETI.AI training programs and consults on agentic systems.',
+      'claude-code': 'Anthropic\'s CLI for Claude — the agent that runs the path-C overnight compile loop. The reference implementation for filesystem-native agents.'
+    };
+
+    // Day-of-edits replay — sequence of node IDs the agent touched today
+    const REPLAY_SEQUENCE = [
+      { id: 'reading',     label: 'compiled summary · reading list', delay: 0 },
+      { id: 'rag',         label: 'drafted synthesis · rag-vs-long-context', delay: 900 },
+      { id: 'ai-trends',   label: 'regenerated index · ai-trends',   delay: 1800 },
+      { id: 'people',      label: 'updated · 3 people pages',         delay: 2700 },
+      { id: 'decisions',   label: 'filed new · 2 decisions',          delay: 3600 },
+      { id: 'projects',    label: 'linked · projects ↔ decisions',    delay: 4500 },
+      { id: 'q3-notes',    label: 'appended to q3 scratch',           delay: 5400 },
+      { id: 'mcp',         label: 'refreshed · mcp server entry',     delay: 6300 },
+      { id: 'agents',      label: 'linked · agents ↔ mcp',            delay: 7200 },
+      { id: 'writing',     label: 'co-wrote · proposal draft',        delay: 8100 }
+    ];
+
     if (gsvg) {
+      const stage = document.getElementById('graph-stage');
       const nodes = Array.from(gsvg.querySelectorAll('.gnode'));
       const edges = Array.from(gsvg.querySelectorAll('.gedge'));
+      const tooltip = document.getElementById('graph-tooltip');
+      const statusEl = document.getElementById('graph-status');
+
+      // Parse node positions from circle attributes
+      const nodePos = {}; // id -> {x, y, baseX, baseY, dot, ring, text, circleRing, circleDot, textY}
+      nodes.forEach((node) => {
+        const id = node.dataset.id;
+        const dot = node.querySelector('circle.dot');
+        const ring = node.querySelector('circle.ring');
+        const text = node.querySelector('text');
+        const x = parseFloat(dot.getAttribute('cx'));
+        const y = parseFloat(dot.getAttribute('cy'));
+        const ty = parseFloat(text.getAttribute('y'));
+        nodePos[id] = {
+          x, y,
+          baseX: x, baseY: y,
+          dot, ring, text,
+          textOffset: ty - y,
+          el: node
+        };
+      });
+
+      // Adjacency
       const adj = {};
       edges.forEach((e) => {
         const a = e.dataset.from, b = e.dataset.to;
@@ -1788,11 +2378,54 @@
         (adj[b] = adj[b] || new Set()).add(a);
       });
 
+      // Parse edges into endpoint references (data-from / data-to are reliable)
+      // Store original path for reference, we rebuild as smooth quadratic with sag toward midpoint
+      const edgeInfo = edges.map((edge) => {
+        const from = edge.dataset.from;
+        const to = edge.dataset.to;
+        // pull control point from original 'd' attribute
+        const dAttr = edge.getAttribute('d');
+        const match = dAttr.match(/Q\s*([\d.\-]+)\s+([\d.\-]+)/);
+        const a = nodePos[from], b = nodePos[to];
+        let cxOff = 0, cyOff = 0;
+        if (match && a && b) {
+          const mx = (a.baseX + b.baseX) / 2;
+          const my = (a.baseY + b.baseY) / 2;
+          cxOff = parseFloat(match[1]) - mx;
+          cyOff = parseFloat(match[2]) - my;
+        }
+        return { edge, from, to, cxOff, cyOff };
+      });
+
+      // --- redraw edges to match current node positions ---
+      function redrawEdges() {
+        edgeInfo.forEach((ei) => {
+          const a = nodePos[ei.from];
+          const b = nodePos[ei.to];
+          if (!a || !b) return;
+          const mx = (a.x + b.x) / 2 + ei.cxOff;
+          const my = (a.y + b.y) / 2 + ei.cyOff;
+          ei.edge.setAttribute('d', `M ${a.x} ${a.y} Q ${mx} ${my}, ${b.x} ${b.y}`);
+        });
+      }
+
+      // --- redraw a node's visual elements from its current pos ---
+      function redrawNode(id) {
+        const p = nodePos[id];
+        if (!p) return;
+        p.dot.setAttribute('cx', p.x);
+        p.dot.setAttribute('cy', p.y);
+        p.ring.setAttribute('cx', p.x);
+        p.ring.setAttribute('cy', p.y);
+        p.text.setAttribute('x', p.x);
+        p.text.setAttribute('y', p.y + p.textOffset);
+      }
+
+      // Initial fade-in
       const gobs = new IntersectionObserver((entries) => {
         entries.forEach((e) => {
           if (!e.isIntersecting) return;
           gobs.unobserve(e.target);
-          // gentle in-order settle (not random — calmer)
           nodes.forEach((n, i) => setTimeout(() => n.classList.add('in'), 80 + i * 50));
           setTimeout(() => edges.forEach((edge, i) => {
             setTimeout(() => edge.classList.add('in'), i * 22);
@@ -1801,33 +2434,410 @@
       }, { threshold: 0.2 });
       gobs.observe(gsvg);
 
+      // ============================================================
+      // HOVER / FOCUS — dim non-neighbors, highlight edges
+      // ============================================================
+      let activeId = null;
+      function applyFocus(id) {
+        const neighbors = adj[id] || new Set();
+        nodes.forEach((n) => {
+          const nid = n.dataset.id;
+          if (nid === id || neighbors.has(nid)) n.classList.remove('dim');
+          else n.classList.add('dim');
+        });
+        edges.forEach((edge) => {
+          const on = (edge.dataset.from === id || edge.dataset.to === id);
+          edge.classList.toggle('hl', on);
+          edge.classList.toggle('dim', !on);
+        });
+      }
+      function clearFocus() {
+        nodes.forEach((n) => n.classList.remove('dim'));
+        edges.forEach((edge) => edge.classList.remove('hl', 'dim'));
+      }
+
+      // tooltip
+      function showTooltip(id, sourceEl) {
+        if (PRM) return;
+        const meta = NODE_META[id];
+        const neighborCount = (adj[id] || new Set()).size;
+        const title = meta ? meta.title : id;
+        tooltip.innerHTML =
+          title +
+          '<span class="tt-meta">' + neighborCount + ' link' + (neighborCount === 1 ? '' : 's') + '</span>';
+        // position relative to .gs-svg-host
+        const host = tooltip.parentElement;
+        const hostRect = host.getBoundingClientRect();
+        const elRect = sourceEl.getBoundingClientRect();
+        const cx = elRect.left + elRect.width / 2 - hostRect.left;
+        const cy = elRect.top - hostRect.top;
+        tooltip.style.left = cx + 'px';
+        tooltip.style.top = cy + 'px';
+        tooltip.classList.add('show');
+      }
+      function hideTooltip() {
+        tooltip.classList.remove('show');
+      }
+
+      // ============================================================
+      // CLICK / ACTIVATE — open side panel
+      // ============================================================
+      const panel = document.getElementById('gs-panel');
+      const gpPath = document.getElementById('gp-path');
+      const gpTitle = document.getElementById('gp-title');
+      const gpBody = document.getElementById('gp-body');
+      const gpLinkedFrom = document.getElementById('gp-linked-from');
+      const gpClose = document.getElementById('gp-close');
+
+      function activate(id) {
+        const meta = NODE_META[id];
+        if (!meta) return;
+        nodes.forEach((n) => n.classList.toggle('active', n.dataset.id === id));
+        applyFocus(id);
+        activeId = id;
+        gpPath.textContent = meta.path;
+        gpTitle.textContent = meta.title;
+        gpBody.textContent = meta.body;
+        gpLinkedFrom.innerHTML = '';
+        meta.linkedFrom.forEach((bk) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.textContent = '[[' + bk + ']]';
+          li.appendChild(a);
+          gpLinkedFrom.appendChild(li);
+        });
+        stage.classList.add('panel-open');
+        panel.setAttribute('aria-hidden', 'false');
+        statusEl.textContent = ' · focused: ' + meta.title;
+        statusEl.classList.add('active');
+      }
+      function deactivate() {
+        nodes.forEach((n) => n.classList.remove('active'));
+        clearFocus();
+        activeId = null;
+        stage.classList.remove('panel-open');
+        panel.setAttribute('aria-hidden', 'true');
+        statusEl.textContent = '';
+        statusEl.classList.remove('active');
+      }
+      gpClose.addEventListener('click', deactivate);
+
+      // ============================================================
+      // DRAG — node drag with simple spring relaxation
+      // ============================================================
+      let dragId = null;
+      let dragStart = null;
+      let dragOffset = { x: 0, y: 0 };
+      let dragMoved = false;
+      let rafId = null;
+
+      // velocity per node — used to lerp connected nodes toward target
+      // simple: only adjust neighbor positions slightly during drag, then settle back
+      const settling = {}; // id -> {targetX, targetY}
+
+      function pointerToSvg(clientX, clientY) {
+        const pt = gsvg.createSVGPoint();
+        pt.x = clientX;
+        pt.y = clientY;
+        const ctm = gsvg.getScreenCTM();
+        if (!ctm) return { x: 0, y: 0 };
+        const local = pt.matrixTransform(ctm.inverse());
+        return { x: local.x, y: local.y };
+      }
+
+      function startDrag(e, id) {
+        if (PRM || TOUCH) return; // drag disabled in reduced-motion / touch
+        dragId = id;
+        dragMoved = false;
+        const isTouch = e.type === 'touchstart';
+        const cX = isTouch ? e.touches[0].clientX : e.clientX;
+        const cY = isTouch ? e.touches[0].clientY : e.clientY;
+        const svgPt = pointerToSvg(cX, cY);
+        const p = nodePos[id];
+        dragOffset.x = svgPt.x - p.x;
+        dragOffset.y = svgPt.y - p.y;
+        dragStart = { x: cX, y: cY };
+        p.el.classList.add('dragging');
+        e.preventDefault();
+      }
+
+      function onPointerMove(e) {
+        if (!dragId) return;
+        const isTouch = e.type === 'touchmove';
+        const cX = isTouch ? e.touches[0].clientX : e.clientX;
+        const cY = isTouch ? e.touches[0].clientY : e.clientY;
+        if (!dragMoved) {
+          const dx = cX - dragStart.x;
+          const dy = cY - dragStart.y;
+          if (dx * dx + dy * dy > 16) dragMoved = true;
+        }
+        const svgPt = pointerToSvg(cX, cY);
+        const p = nodePos[dragId];
+        // clamp to viewBox (1000x600) with small margin
+        p.x = Math.max(40, Math.min(960, svgPt.x - dragOffset.x));
+        p.y = Math.max(40, Math.min(560, svgPt.y - dragOffset.y));
+        // pull neighbors toward dragged node (very slightly — flex effect)
+        const neighbors = adj[dragId] || new Set();
+        neighbors.forEach((nid) => {
+          const np = nodePos[nid];
+          if (!np) return;
+          const tx = np.baseX + (p.x - p.baseX) * 0.08;
+          const ty = np.baseY + (p.y - p.baseY) * 0.08;
+          np.x = np.x + (tx - np.x) * 0.18;
+          np.y = np.y + (ty - np.y) * 0.18;
+          redrawNode(nid);
+        });
+        redrawNode(dragId);
+        redrawEdges();
+      }
+
+      function endDrag() {
+        if (!dragId) return;
+        const id = dragId;
+        const p = nodePos[id];
+        p.el.classList.remove('dragging');
+        // if this was effectively a click (no movement), activate the node
+        if (!dragMoved) {
+          if (activeId === id) deactivate();
+          else activate(id);
+        } else {
+          // settle: lerp dragged node back toward base, neighbors will follow
+          startSettle();
+        }
+        dragId = null;
+        dragStart = null;
+      }
+
+      function startSettle() {
+        cancelAnimationFrame(rafId);
+        const STIFFNESS = 0.07;
+        const DAMPING = 0.86;
+        const vel = {};
+        nodes.forEach((n) => { vel[n.dataset.id] = { vx: 0, vy: 0 }; });
+
+        function step() {
+          let stillMoving = false;
+          nodes.forEach((n) => {
+            const id = n.dataset.id;
+            const p = nodePos[id];
+            const v = vel[id];
+            const dx = (p.baseX - p.x) * STIFFNESS;
+            const dy = (p.baseY - p.y) * STIFFNESS;
+            v.vx = (v.vx + dx) * DAMPING;
+            v.vy = (v.vy + dy) * DAMPING;
+            p.x += v.vx;
+            p.y += v.vy;
+            if (Math.abs(p.x - p.baseX) > 0.15 || Math.abs(p.y - p.baseY) > 0.15 ||
+                Math.abs(v.vx) > 0.05 || Math.abs(v.vy) > 0.05) {
+              stillMoving = true;
+            } else {
+              p.x = p.baseX;
+              p.y = p.baseY;
+            }
+            redrawNode(id);
+          });
+          redrawEdges();
+          if (stillMoving) rafId = requestAnimationFrame(step);
+        }
+        rafId = requestAnimationFrame(step);
+      }
+
+      // Bind node interactions
       nodes.forEach((node) => {
         const id = node.dataset.id;
-        const neighbors = adj[id] || new Set();
-        const focus = () => {
-          nodes.forEach((n) => {
-            const nid = n.dataset.id;
-            if (nid === id || neighbors.has(nid)) n.classList.remove('dim');
-            else n.classList.add('dim');
-          });
-          edges.forEach((edge) => {
-            const on = (edge.dataset.from === id || edge.dataset.to === id);
-            edge.classList.toggle('hl', on);
-            edge.classList.toggle('dim', !on);
-          });
-        };
-        const blur = () => {
-          nodes.forEach((n) => n.classList.remove('dim'));
-          edges.forEach((edge) => edge.classList.remove('hl', 'dim'));
-        };
-        node.addEventListener('mouseenter', focus);
-        node.addEventListener('mouseleave', blur);
-        node.addEventListener('focus', focus);
-        node.addEventListener('blur', blur);
+        node.addEventListener('mousedown', (e) => startDrag(e, id));
+        node.addEventListener('touchstart', (e) => {
+          // mobile: tap-to-activate (no drag)
+          e.preventDefault();
+          if (activeId === id) deactivate();
+          else activate(id);
+        }, { passive: false });
+        node.addEventListener('mouseenter', () => {
+          if (!activeId && !dragId) applyFocus(id);
+          showTooltip(id, node);
+          node.classList.add('drag-hint');
+        });
+        node.addEventListener('mouseleave', () => {
+          if (!activeId && !dragId) clearFocus();
+          hideTooltip();
+          node.classList.remove('drag-hint');
+        });
+        node.addEventListener('focus', () => {
+          if (!activeId) applyFocus(id);
+          showTooltip(id, node);
+        });
+        node.addEventListener('blur', () => {
+          if (!activeId) clearFocus();
+          hideTooltip();
+        });
+        // keyboard
+        node.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (activeId === id) deactivate();
+            else activate(id);
+          } else if (e.key === 'Escape') {
+            deactivate();
+          }
+        });
       });
+
+      window.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('mouseup', endDrag);
+      window.addEventListener('touchmove', onPointerMove, { passive: false });
+      window.addEventListener('touchend', endDrag);
+
+      // click outside to close panel
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && activeId) deactivate();
+      });
+
+      // ============================================================
+      // SEARCH — type-to-find
+      // ============================================================
+      const searchWrap = document.getElementById('gc-search');
+      const searchInput = document.getElementById('gc-search-input');
+      const searchResults = document.getElementById('gc-results');
+
+      function renderResults(query) {
+        const q = (query || '').trim().toLowerCase();
+        searchResults.innerHTML = '';
+        if (!q) { searchWrap.classList.remove('open'); return; }
+        const matches = Object.entries(NODE_META)
+          .filter(([id, m]) => id.includes(q) || m.title.toLowerCase().includes(q))
+          .slice(0, 8);
+        if (!matches.length) {
+          const empty = document.createElement('div');
+          empty.className = 'gc-result';
+          empty.textContent = 'no match';
+          searchResults.appendChild(empty);
+        } else {
+          matches.forEach(([id, m], i) => {
+            const r = document.createElement('div');
+            r.className = 'gc-result';
+            r.dataset.id = id;
+            const neighborCount = (adj[id] || new Set()).size;
+            r.innerHTML = m.title + '<span class="gr-neighbors">' + neighborCount + ' links</span>';
+            r.addEventListener('mousedown', (ev) => {
+              ev.preventDefault();
+              activate(id);
+              searchInput.value = m.title;
+              searchWrap.classList.remove('open');
+              searchInput.blur();
+            });
+            searchResults.appendChild(r);
+          });
+        }
+        searchWrap.classList.add('open');
+      }
+      searchInput.addEventListener('input', (e) => renderResults(e.target.value));
+      searchInput.addEventListener('focus', (e) => {
+        if (e.target.value) renderResults(e.target.value);
+      });
+      searchInput.addEventListener('blur', () => {
+        setTimeout(() => searchWrap.classList.remove('open'), 180);
+      });
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const first = searchResults.querySelector('.gc-result[data-id]');
+          if (first) {
+            const id = first.dataset.id;
+            activate(id);
+            searchInput.value = NODE_META[id].title;
+            searchWrap.classList.remove('open');
+            searchInput.blur();
+          }
+        } else if (e.key === 'Escape') {
+          searchInput.value = '';
+          searchWrap.classList.remove('open');
+          searchInput.blur();
+        }
+      });
+
+      // ============================================================
+      // REPLAY — animate today's edits
+      // ============================================================
+      const replayBtn = document.getElementById('gc-replay');
+      const replayBar = document.getElementById('replay-bar');
+      let replayTimers = [];
+      let replayActive = false;
+
+      function stopReplay() {
+        replayTimers.forEach((t) => clearTimeout(t));
+        replayTimers = [];
+        replayActive = false;
+        replayBtn.classList.remove('active');
+        replayBtn.innerHTML = '<span class="gc-glyph">▶</span> replay today\'s edits';
+        replayBar.classList.remove('active');
+        replayBar.style.width = '0%';
+        statusEl.textContent = activeId ? ' · focused: ' + NODE_META[activeId].title : '';
+      }
+
+      function runReplay() {
+        if (replayActive) { stopReplay(); return; }
+        replayActive = true;
+        replayBtn.classList.add('active');
+        replayBtn.innerHTML = '<span class="gc-glyph">■</span> stop replay';
+        replayBar.classList.add('active');
+        const total = REPLAY_SEQUENCE[REPLAY_SEQUENCE.length - 1].delay + 900;
+        // progress bar
+        const startTs = performance.now();
+        function tickBar() {
+          if (!replayActive) return;
+          const elapsed = performance.now() - startTs;
+          const pct = Math.min(100, (elapsed / total) * 100);
+          replayBar.style.width = pct + '%';
+          if (pct < 100 && replayActive) requestAnimationFrame(tickBar);
+        }
+        requestAnimationFrame(tickBar);
+
+        REPLAY_SEQUENCE.forEach((step, i) => {
+          const t = setTimeout(() => {
+            if (!replayActive) return;
+            const node = document.querySelector('.gnode[data-id="' + step.id + '"]');
+            if (node) {
+              node.classList.remove('replay-pulse');
+              // force reflow to restart animation
+              void node.getBoundingClientRect();
+              node.classList.add('replay-pulse');
+              setTimeout(() => node.classList.remove('replay-pulse'), 950);
+            }
+            statusEl.textContent = ' · ' + step.label;
+            statusEl.classList.add('active');
+            flashSidebarEdit(i);
+          }, step.delay);
+          replayTimers.push(t);
+        });
+
+        const endTimer = setTimeout(() => {
+          stopReplay();
+        }, total + 200);
+        replayTimers.push(endTimer);
+      }
+      replayBtn.addEventListener('click', runReplay);
+
+      // initial: dim no edges, all visible
+      redrawEdges();
     }
 
-    // ============ TOC active-on-scroll ============
+    // ============================================================
+    // FLASH a sidebar edit during replay
+    // ============================================================
+    function flashSidebarEdit(index) {
+      const editItems = document.querySelectorAll('.toc .edit-list li');
+      // map replay-index to one of the first ~10 items, wrapping
+      const target = editItems[index % editItems.length];
+      if (!target) return;
+      target.classList.add('flash');
+      // scroll into view within the TOC sidebar (gentle)
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      setTimeout(() => target.classList.remove('flash'), 1600);
+    }
+
+    // ============================================================
+    // TOC active-on-scroll
+    // ============================================================
     const headings = Array.from(document.querySelectorAll('.prose h2[id], #graph'));
     const tocLinks = Array.from(document.querySelectorAll('.toc a[data-toc]'));
     const setActive = (id) => {
@@ -1842,9 +2852,48 @@
     }, { rootMargin: '-20% 0px -65% 0px', threshold: 0 });
     headings.forEach((h) => hObs.observe(h));
 
-    // ============ WIKILINK gentle hover-sync ============
-    // when you hover a wikilink, briefly highlight others with the same text
+    // ============================================================
+    // WIKILINK — gentle hover-sync AND popover preview
+    // ============================================================
     const links = Array.from(document.querySelectorAll('.wikilink'));
+    const popover = (() => {
+      const el = document.createElement('div');
+      el.className = 'wl-popover';
+      el.setAttribute('role', 'tooltip');
+      el.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(el);
+      return el;
+    })();
+    let popoverTimer = null;
+    let popoverFor = null;
+
+    function showWikilinkPopover(link) {
+      if (PRM) return;
+      const text = link.textContent.trim().toLowerCase();
+      const summary = WIKILINK_SUMMARIES[text];
+      if (!summary) return;
+      popoverFor = link;
+      popover.innerHTML =
+        '<span class="wlp-title">' + link.textContent + '</span>' +
+        '<span class="wlp-summary">' + summary + '</span>' +
+        '<span class="wlp-meta">linked from this page · 2 backlinks</span>';
+      // position
+      const rect = link.getBoundingClientRect();
+      const popW = 280;
+      const left = Math.max(8, Math.min(window.innerWidth - popW - 8,
+                            rect.left + rect.width / 2 - popW / 2 + window.scrollX));
+      const top = rect.bottom + 8 + window.scrollY;
+      popover.style.left = left + 'px';
+      popover.style.top = top + 'px';
+      popover.classList.add('show');
+      popover.setAttribute('aria-hidden', 'false');
+    }
+    function hideWikilinkPopover() {
+      popover.classList.remove('show');
+      popover.setAttribute('aria-hidden', 'true');
+      popoverFor = null;
+    }
+
     links.forEach((link) => {
       link.addEventListener('mouseenter', () => {
         const t = link.textContent;
@@ -1853,11 +2902,76 @@
             other.style.backgroundColor = 'var(--teal-soft)';
           }
         });
+        clearTimeout(popoverTimer);
+        popoverTimer = setTimeout(() => showWikilinkPopover(link), 280);
       });
       link.addEventListener('mouseleave', () => {
         links.forEach((other) => { other.style.backgroundColor = ''; });
+        clearTimeout(popoverTimer);
+        popoverTimer = setTimeout(hideWikilinkPopover, 120);
       });
+      link.addEventListener('focus', () => {
+        clearTimeout(popoverTimer);
+        showWikilinkPopover(link);
+      });
+      link.addEventListener('blur', hideWikilinkPopover);
     });
+    // keep popover visible when hovering it
+    popover.addEventListener('mouseenter', () => clearTimeout(popoverTimer));
+    popover.addEventListener('mouseleave', hideWikilinkPopover);
+
+    // ============================================================
+    // LIVE-UPDATE recent-edits log (cosmetic — feels alive)
+    // ============================================================
+    (function liveEdits() {
+      if (PRM) return;
+      const editList = document.querySelector('.toc .edit-list');
+      if (!editList) return;
+
+      const FAKE_EDITS = [
+        { kind: 'add', text: 'linked · agents ↔ writing' },
+        { kind: 'mod', text: 'tightened §2 paragraph 3' },
+        { kind: 'add', text: 'compiled · weekly index page' },
+        { kind: 'add', text: 'drafted summary · sources/voice/0517-am' },
+        { kind: 'mod', text: 'rebalanced graph node positions' },
+        { kind: 'add', text: 'backlink suggested · q3 ↔ decisions' },
+        { kind: 'add', text: 'filed · sources/podcast-0516.md' },
+        { kind: 'mod', text: 'updated reading list · 2 entries' },
+        { kind: 'add', text: 'queried vault · "rag vs lc q1"' },
+        { kind: 'add', text: 'auto-commit · overnight pass #214' }
+      ];
+      let idx = 0;
+
+      function pad(n) { return n < 10 ? '0' + n : '' + n; }
+      function fmtNow() {
+        const d = new Date();
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+             + ' · ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+      }
+
+      function tick() {
+        const ed = FAKE_EDITS[idx % FAKE_EDITS.length];
+        idx++;
+        const li = document.createElement('li');
+        li.className = 'new-entry';
+        const glyph = ed.kind === 'mod' ? 'edit-mod' : (ed.kind === 'del' ? 'edit-del' : 'edit-add');
+        const symbol = ed.kind === 'mod' ? '~' : (ed.kind === 'del' ? '−' : '+');
+        li.innerHTML =
+          '<span class="edate">' + fmtNow() + '</span>' +
+          '<a href="#"><span class="' + glyph + '">' + symbol + '</span>' + ed.text + '</a>';
+        editList.insertBefore(li, editList.firstChild);
+        // prune to 25
+        while (editList.children.length > 25) {
+          editList.removeChild(editList.lastChild);
+        }
+        // remove the new-entry class after enter animation to free the max-height clamp
+        setTimeout(() => li.classList.remove('new-entry'), 700);
+      }
+
+      // first one quickly, then every ~8s
+      setTimeout(tick, 4500);
+      setInterval(tick, 8200);
+    })();
   </script>
   <script src="../shared/nav.js" defer></script>
 </body>

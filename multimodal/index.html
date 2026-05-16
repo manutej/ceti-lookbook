@@ -221,6 +221,28 @@
     .pix-grid-demo div.h  { background: var(--pixel-yellow); }
     .pix-grid-demo div.g  { background: var(--pixel-green); }
     .pix-grid-demo div.c  { background: var(--pixel-cyan); }
+    .pix-grid-demo div { cursor: crosshair; position: relative; }
+    .pix-grid-demo div:hover { outline: 2px solid var(--pixel-yellow); outline-offset: -1px; z-index: 2; }
+    .pix-tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: #000;
+      border: 2px solid var(--pixel-yellow);
+      color: var(--pixel-yellow);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      padding: 0.5rem 0.65rem;
+      letter-spacing: 0.08em;
+      z-index: 1000;
+      white-space: nowrap;
+      transform: translate(-50%, calc(-100% - 8px));
+      box-shadow: 4px 4px 0 var(--pixel-red);
+      opacity: 0;
+      transition: opacity 80ms;
+    }
+    .pix-tooltip.on { opacity: 1; }
+    .pix-tooltip .v { color: var(--pixel-pink); }
+    .pix-tooltip .a { color: var(--pixel-cyan); display: block; margin-top: 0.3em; font-size: 0.5rem; }
 
     .pix-card {
       border: 4px solid var(--pixel-yellow);
@@ -369,6 +391,63 @@
       font-size: 0.7rem; letter-spacing: 0.2em; color: var(--paper-red);
       text-transform: uppercase; display: block; margin-bottom: 0.4rem;
     }
+
+    /* Cycling typewriter demo */
+    .typ-machine {
+      border: 2px solid var(--paper-fg);
+      background: rgba(255,255,255,0.55);
+      padding: 1.25rem 1.4rem;
+      margin: 2rem 0;
+      position: relative;
+      box-shadow: 4px 4px 0 rgba(43,37,32,0.2);
+    }
+    .typ-machine-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px dashed var(--paper-stain);
+      padding-bottom: 0.65rem; margin-bottom: 0.85rem;
+    }
+    .typ-machine-head .ttl {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem; letter-spacing: 0.15em; color: var(--paper-red);
+      text-transform: uppercase;
+    }
+    .typ-arrows { display: flex; gap: 0.35rem; }
+    .typ-arrow {
+      width: 30px; height: 30px;
+      border: 2px solid var(--paper-fg);
+      background: var(--paper-bg);
+      font-family: 'Special Elite', monospace;
+      font-size: 0.95rem;
+      color: var(--paper-fg);
+      cursor: pointer;
+      line-height: 1;
+      padding: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .typ-arrow:hover { background: var(--paper-fg); color: var(--paper-bg); }
+    .typ-arrow:focus-visible { outline: 2px solid var(--paper-red); outline-offset: 2px; }
+    .typ-machine .typed {
+      font-family: 'Special Elite', monospace;
+      font-size: 1.05rem;
+      color: var(--paper-fg);
+      min-height: 4.5em;
+      line-height: 1.65;
+    }
+    .typ-machine .meta {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.78rem;
+      color: var(--paper-stain);
+      margin-top: 0.6rem;
+      padding-top: 0.55rem;
+      border-top: 1px dashed var(--paper-stain);
+    }
+    .typ-machine .meta em { color: var(--paper-red); font-style: italic; }
+    .typ-counter {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.7rem;
+      color: var(--paper-stain);
+      letter-spacing: 0.15em;
+    }
     .typ-foot {
       font-family: 'Special Elite', monospace;
       font-size: 0.75rem;
@@ -476,6 +555,44 @@
       display: flex; flex-direction: column; justify-content: space-between;
       height: calc(100% - 2rem);
     }
+    .scope-bars {
+      position: absolute; inset: 1rem;
+      display: flex; align-items: center; gap: 2px;
+      opacity: 0; transition: opacity 200ms;
+    }
+    .scope-bars.on { opacity: 1; }
+    .scope-bars span {
+      flex: 1; min-width: 2px;
+      background: var(--osc-fg);
+      box-shadow: 0 0 6px rgba(57,255,20,0.7);
+      height: 4px;
+      transition: height 60ms ease-out;
+      align-self: center;
+    }
+    .scope-controls {
+      display: flex; gap: 0.6rem; align-items: center;
+      margin: 1rem 0 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--osc-fg);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .scope-btn {
+      background: transparent;
+      border: 1px solid var(--osc-fg);
+      color: var(--osc-fg);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      padding: 0.45rem 0.9rem;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .scope-btn:hover { background: rgba(57,255,20,0.15); box-shadow: 0 0 10px rgba(57,255,20,0.3); }
+    .scope-btn.playing { background: var(--osc-fg); color: var(--osc-bg); }
+    .scope-btn:focus-visible { outline: 2px dashed var(--osc-amber); outline-offset: 2px; }
+    .scope-readout { color: var(--osc-amber); }
 
     .osc-stats {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -619,6 +736,39 @@
       height: 4px; border-top: 1px dashed #444;
     }
     .cine-frame .ts { z-index: 2; }
+    .cine-frame.active {
+      border-color: var(--cine-accent);
+      box-shadow: 0 0 0 1px var(--cine-accent);
+    }
+    .cine-frame .scene {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cine-scrubber {
+      display: flex; align-items: center; gap: 0.85rem;
+      margin: 1rem 0 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: var(--cine-dim);
+      letter-spacing: 0.18em; text-transform: uppercase;
+    }
+    .cine-btn {
+      background: transparent;
+      border: 1px solid var(--cine-accent);
+      color: var(--cine-accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.7rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .cine-btn:hover { background: var(--cine-accent); color: var(--cine-bg); }
+    .cine-btn:focus-visible { outline: 2px dashed var(--cine-accent); outline-offset: 3px; }
+    .cine-scrubber .tc { color: var(--cine-accent); }
+    .cine-scrubber .caption {
+      flex: 1; color: var(--cine-fg); font-family: 'Inter', sans-serif;
+      font-size: 0.85rem; letter-spacing: 0; text-transform: none;
+      font-style: italic; min-height: 1.2em;
+    }
 
     .cine-code {
       background: #000;
@@ -772,6 +922,302 @@
       border-top: 4px solid var(--brut-fg);
       padding-top: 1rem;
       text-transform: uppercase;
+    }
+
+    /* ============================================================
+       MODALITY FUSION DEMO — the signature interactive
+       3-input selector → tokenize → fuse → unified transformer → response
+       ============================================================ */
+    .fusion {
+      border: 4px solid var(--brut-fg);
+      background: var(--brut-bg);
+      margin: 2.5rem 0;
+      position: relative;
+    }
+    .fusion-head {
+      background: var(--brut-fg); color: var(--brut-bg);
+      padding: 0.85rem 1.25rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    .fusion-head .ttl {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .fusion-head .ttl b { color: var(--brut-yellow); }
+    .fusion-head .sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; color: #999; letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* === 3-input selector row === */
+    .fusion-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 4px;
+      background: var(--brut-fg);
+      border-bottom: 4px solid var(--brut-fg);
+    }
+    .fusion-input { padding: 1.1rem 1rem; min-height: 200px; position: relative; }
+    .fusion-input.v { background: var(--pixel-bg); color: var(--pixel-fg); }
+    .fusion-input.t { background: var(--paper-bg); color: var(--paper-fg); }
+    .fusion-input.a { background: var(--osc-bg); color: var(--osc-fg); }
+    .fusion-input h5 {
+      margin: 0 0 0.85rem;
+      font-size: 0.6rem; letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .fusion-input.v h5 { font-family: 'Press Start 2P', monospace; color: var(--pixel-yellow); }
+    .fusion-input.t h5 { font-family: 'Special Elite', monospace; color: var(--paper-red); letter-spacing: 0.2em; font-size: 0.7rem; }
+    .fusion-input.a h5 { font-family: 'JetBrains Mono', monospace; color: var(--osc-amber); }
+    .fusion-input .hint {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; opacity: 0.55;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 0.8rem;
+    }
+
+    /* Vision thumbnails */
+    .vthumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .vthumb {
+      aspect-ratio: 1;
+      border: 3px solid var(--pixel-cyan);
+      background: #000;
+      padding: 0; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 100ms;
+      image-rendering: pixelated;
+    }
+    .vthumb svg { width: 100%; height: 100%; display: block; }
+    .vthumb:hover { transform: translate(-2px,-2px); box-shadow: 4px 4px 0 var(--pixel-pink); }
+    .vthumb.sel { border-color: var(--pixel-yellow); box-shadow: 4px 4px 0 var(--pixel-yellow); }
+    .vthumb:focus-visible { outline: 2px dashed var(--pixel-yellow); outline-offset: 3px; }
+    .vthumb .label {
+      position: absolute; bottom: 2px; left: 4px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem; color: var(--pixel-yellow);
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    /* Text input */
+    .tinput {
+      width: 100%;
+      background: rgba(255,255,255,0.55);
+      border: 2px solid var(--paper-fg);
+      font-family: 'Special Elite', monospace;
+      font-size: 0.95rem;
+      color: var(--paper-fg);
+      padding: 0.7rem;
+      min-height: 80px;
+      resize: vertical;
+      line-height: 1.5;
+      box-sizing: border-box;
+    }
+    .tinput:focus { outline: 2px solid var(--paper-red); outline-offset: 2px; }
+    .tpresets { margin-top: 0.7rem; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .tpreset {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.7rem;
+      background: transparent;
+      border: 1px solid var(--paper-stain);
+      color: var(--paper-fg);
+      padding: 0.25rem 0.55rem;
+      cursor: pointer;
+    }
+    .tpreset:hover { background: var(--paper-fg); color: var(--paper-bg); }
+
+    /* Audio thumbnails — mini-scopes */
+    .athumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .athumb {
+      aspect-ratio: 16/9;
+      background: #000;
+      border: 2px solid var(--osc-fg);
+      cursor: pointer;
+      position: relative;
+      padding: 0;
+      transition: transform 100ms;
+    }
+    .athumb:hover { transform: translate(-2px,-2px); box-shadow: 4px 4px 0 var(--osc-amber); }
+    .athumb.sel { border-color: var(--osc-amber); box-shadow: 4px 4px 0 var(--osc-amber); }
+    .athumb:focus-visible { outline: 2px dashed var(--osc-amber); outline-offset: 3px; }
+    .athumb svg { width: 100%; height: 100%; display: block; }
+    .athumb .label {
+      position: absolute; bottom: 1px; left: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem; color: var(--osc-amber);
+      letter-spacing: 0.05em;
+    }
+
+    /* === Token budget calculator === */
+    .fusion-budget {
+      background: #fafafa;
+      border-bottom: 4px solid var(--brut-fg);
+      padding: 1rem 1.25rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      align-items: stretch;
+    }
+    .budget-cell {
+      background: var(--brut-bg);
+      border: 2px solid var(--brut-fg);
+      padding: 0.7rem 0.85rem;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .budget-cell .lbl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: #666;
+    }
+    .budget-cell .v {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 1.6rem; line-height: 1;
+      margin-top: 0.45rem;
+      transition: color 200ms;
+    }
+    .budget-cell .u {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; color: #888;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .budget-cell.v-mod .v { color: var(--brut-blue); }
+    .budget-cell.t-mod .v { color: var(--paper-red); }
+    .budget-cell.a-mod .v { color: var(--brut-green); }
+    .budget-cell.total {
+      background: var(--brut-fg); color: var(--brut-bg);
+    }
+    .budget-cell.total .lbl { color: var(--brut-yellow); }
+    .budget-cell.total .v { color: var(--brut-yellow); font-size: 1.9rem; }
+    .budget-cell.total .u { color: #aaa; }
+
+    /* === Fuse button + stage === */
+    .fusion-action {
+      background: #fafafa;
+      border-bottom: 4px solid var(--brut-fg);
+      padding: 1.1rem 1.25rem;
+      display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+    }
+    .fuse-btn {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.95rem;
+      background: var(--brut-fg); color: var(--brut-yellow);
+      border: 4px solid var(--brut-fg);
+      padding: 0.85rem 1.4rem;
+      cursor: pointer;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: transform 80ms, box-shadow 80ms;
+    }
+    .fuse-btn:hover { transform: translate(-3px,-3px); box-shadow: 6px 6px 0 var(--brut-red); }
+    .fuse-btn:active { transform: translate(0,0); box-shadow: 2px 2px 0 var(--brut-red); }
+    .fuse-btn:focus-visible { outline: 3px dashed var(--brut-red); outline-offset: 4px; }
+    .fuse-btn.running { background: var(--brut-red); color: var(--brut-bg); cursor: progress; }
+    .fuse-btn.done { background: var(--brut-green); color: var(--brut-bg); }
+    .fuse-btn .arrow { display: inline-block; transform: translateY(-1px); margin-right: 0.4em; }
+    .fuse-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #555;
+    }
+    .fuse-status b { color: var(--brut-fg); }
+    .reset-btn {
+      background: transparent;
+      border: 2px solid var(--brut-fg);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.15em;
+      padding: 0.5rem 0.85rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      color: var(--brut-fg);
+    }
+    .reset-btn:hover { background: var(--brut-fg); color: var(--brut-bg); }
+
+    /* === Fuse stage (the animation lives here) === */
+    .fuse-stage {
+      background: #fafafa;
+      padding: 1.25rem;
+      position: relative;
+      min-height: 320px;
+      overflow: hidden;
+    }
+    .fuse-stage::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+    }
+    .fuse-svg {
+      width: 100%;
+      height: 360px;
+      display: block;
+      position: relative; z-index: 2;
+    }
+    @media (max-width: 720px) {
+      .fuse-svg { height: 480px; }
+    }
+
+    /* The streaming tokens are SVG <rect>s with classes */
+    .tk { transition: transform 280ms cubic-bezier(.4,0,.2,1), opacity 200ms; }
+    .tk-v { fill: var(--pixel-pink); stroke: var(--pixel-cyan); stroke-width: 1; }
+    .tk-t { fill: var(--paper-bg); stroke: var(--paper-fg); stroke-width: 1; }
+    .tk-a { fill: var(--osc-fg); stroke: var(--osc-amber); stroke-width: 1; }
+    @keyframes tk-pop { 0% { transform: scale(0.2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+    .think-dot {
+      fill: var(--brut-fg);
+    }
+    @keyframes think {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .fuse-svg.thinking .think-dot { animation: think 1.2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    .fuse-svg.thinking .think-dot:nth-child(2) { animation-delay: 0.15s; }
+    .fuse-svg.thinking .think-dot:nth-child(3) { animation-delay: 0.3s; }
+
+    .fuse-response {
+      background: #000; color: var(--brut-bg);
+      padding: 1rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      border-top: 4px solid var(--brut-fg);
+      min-height: 4.5em;
+      position: relative;
+    }
+    .fuse-response .lbl {
+      position: absolute; top: -10px; left: 1rem;
+      background: var(--brut-yellow); color: #000;
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.6rem; padding: 0.15rem 0.5rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .fuse-response .word { opacity: 0; }
+    .fuse-response .word.in { opacity: 1; transition: opacity 80ms; }
+    .fuse-response .word.accent { color: var(--brut-yellow); }
+    .fuse-response .cur {
+      display: inline-block; width: 0.5em; height: 1em;
+      background: var(--brut-yellow);
+      vertical-align: -2px;
+      animation: blink 1.1s steps(2) infinite;
+    }
+    .fuse-response.idle { color: #666; font-style: italic; }
+    @media (prefers-reduced-motion: reduce) {
+      .tk { transition: none; }
+      .fuse-svg.thinking .think-dot { animation: none; opacity: 1; transform: scale(1); }
+      .fuse-response .cur { animation: none; }
+    }
+
+    @media (max-width: 720px) {
+      .fusion-inputs { grid-template-columns: 1fr; }
+      .fusion-budget { grid-template-columns: repeat(2, 1fr); }
+      .fusion-input { min-height: 0; }
     }
 
     /* ============================================================
@@ -1089,6 +1535,20 @@ msg = anthropic.<span class="key">Anthropic</span>().messages.create(
         <em>&rarr; ~40 text tokens + 3 &times; 1,334 image tokens &asymp; $0.06 in.</em>
       </div>
 
+      <div class="typ-machine" id="typMachine">
+        <div class="typ-machine-head">
+          <span class="ttl">Specimen carriage &middot; cycle prompts</span>
+          <div class="typ-arrows">
+            <button class="typ-arrow" data-step="-1" aria-label="Previous prompt">&lsaquo;</button>
+            <button class="typ-arrow" data-step="1" aria-label="Next prompt">&rsaquo;</button>
+          </div>
+        </div>
+        <div class="typed" id="typTyped" aria-live="polite"></div>
+        <div class="meta">
+          <em id="typMetaTokens">~8 tokens</em> &middot; <span id="typMetaCost">&lt; $0.0002</span> &middot; <span class="typ-counter" id="typCounter">01 / 04</span>
+        </div>
+      </div>
+
       <div class="typ-body">
         <p>Notice the second prompt isn&rsquo;t doing anything fancy. It&rsquo;s just <em>asking a question in words about pictures</em>. The model knows what &ldquo;most prominently&rdquo; means because of language pretraining; it knows what the dashboards look like because of vision pretraining; and the cross-modal attention layer is what lets the two pieces of knowledge meet. The text isn&rsquo;t just glue &mdash; it&rsquo;s the <strong>handle</strong> we use to grab the model and point it at a question.</p>
 
@@ -1124,7 +1584,13 @@ msg = anthropic.<span class="key">Anthropic</span>().messages.create(
         <svg class="scope-trace" viewBox="0 0 400 180" preserveAspectRatio="none">
           <polyline points="0,90 10,85 20,60 30,72 40,40 50,55 60,30 70,48 80,25 90,42 100,32 110,58 120,45 130,75 140,68 150,95 160,82 170,110 180,98 190,125 200,115 210,135 220,118 230,140 240,122 250,130 260,108 270,118 280,90 290,98 300,72 310,82 320,58 330,68 340,45 350,55 360,35 370,48 380,28 390,40 400,30" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linejoin="round"/>
         </svg>
+        <div class="scope-bars" id="scopeBars"></div>
         <div class="scope-label">TIME &rarr; (25ms / div) &middot; AMPLITUDE (dB)</div>
+      </div>
+      <div class="scope-controls">
+        <button class="scope-btn" id="scopePlay" aria-label="Play waveform visualization">&#9655; PLAY WAVEFORM</button>
+        <span>STATUS: <span class="scope-readout" id="scopeStatus">IDLE</span></span>
+        <span class="scope-readout" id="scopeClock">00:00.00</span>
       </div>
 
       <div class="osc-body">
@@ -1195,15 +1661,45 @@ msg = anthropic.<span class="key">Anthropic</span>().messages.create(
         <p>The two knobs that matter are <strong>sampling rate</strong> and <strong>context window</strong>. Gemini 3 Pro samples up to <code>10 FPS</code> &mdash; fine enough to catch a basketball shot or a UI animation &mdash; while Claude Opus 4.7 typically takes <em>keyframes</em> (one per few seconds, plus shot-change detection) to keep token counts down for long narrative content. Both approaches are correct for different problems.</p>
       </div>
 
-      <div class="cine-filmstrip" aria-hidden="true">
-        <div class="cine-frame"><span class="ts">00:01</span></div>
-        <div class="cine-frame"><span class="ts">00:02</span></div>
-        <div class="cine-frame"><span class="ts">00:03</span></div>
-        <div class="cine-frame"><span class="ts">00:04</span></div>
-        <div class="cine-frame"><span class="ts">00:05</span></div>
-        <div class="cine-frame"><span class="ts">00:06</span></div>
-        <div class="cine-frame"><span class="ts">00:07</span></div>
-        <div class="cine-frame"><span class="ts">00:08</span></div>
+      <div class="cine-filmstrip" id="cineStrip">
+        <div class="cine-frame" data-cap="Wide. Empty conference room.">
+          <span class="scene" aria-hidden="true"><svg viewBox="0 0 130 75"><rect width="130" height="75" fill="#1a1a1c"/><rect x="10" y="40" width="110" height="6" fill="#333"/><rect x="22" y="46" width="8" height="22" fill="#222"/><rect x="100" y="46" width="8" height="22" fill="#222"/></svg></span>
+          <span class="ts">00:01</span>
+        </div>
+        <div class="cine-frame" data-cap="Speaker enters frame, left.">
+          <span class="scene" aria-hidden="true"><svg viewBox="0 0 130 75"><rect width="130" height="75" fill="#1a1a1c"/><circle cx="40" cy="32" r="8" fill="#d4af37" opacity="0.7"/><rect x="32" y="40" width="16" height="20" fill="#3a3a3c"/></svg></span>
+          <span class="ts">00:02</span>
+        </div>
+        <div class="cine-frame" data-cap="Cut: laptop screen close-up.">
+          <span class="scene" aria-hidden="true"><svg viewBox="0 0 130 75"><rect width="130" height="75" fill="#0a0a0c"/><rect x="20" y="15" width="90" height="50" fill="#1a4dff" opacity="0.4"/><rect x="28" y="22" width="60" height="3" fill="#d4af37"/><rect x="28" y="30" width="40" height="3" fill="#fff" opacity="0.5"/></svg></span>
+          <span class="ts">00:03</span>
+        </div>
+        <div class="cine-frame" data-cap="Two-shot: speaker + interviewer.">
+          <span class="scene" aria-hidden="true"><svg viewBox="0 0 130 75"><rect width="130" height="75" fill="#1a1a1c"/><circle cx="40" cy="32" r="8" fill="#d4af37" opacity="0.7"/><circle cx="90" cy="32" r="8" fill="#888"/><rect x="32" y="40" width="16" height="22" fill="#3a3a3c"/><rect x="82" y="40" width="16" height="22" fill="#2a2a2c"/></svg></span>
+          <span class="ts">00:04</span>
+        </div>
+        <div class="cine-frame" data-cap="Chart overlay appears.">
+          <span class="scene" aria-hidden="true"><svg viewBox="0 0 130 75"><rect width="130" height="75" fill="#1a1a1c"/><polyline points="20,55 40,48 60,38 80,25 100,20 110,15" fill="none" stroke="#d4af37" stroke-width="1.5"/><line x1="20" y1="60" x2="115" y2="60" stroke="#444"/><line x1="20" y1="15" x2="20" y2="60" stroke="#444"/></svg></span>
+          <span class="ts">00:05</span>
+        </div>
+        <div class="cine-frame" data-cap="Close-up: speaker emphasizes a point.">
+          <span class="scene" aria-hidden="true"><svg viewBox="0 0 130 75"><rect width="130" height="75" fill="#1a1a1c"/><circle cx="65" cy="35" r="18" fill="#d4af37" opacity="0.6"/><rect x="55" y="48" width="20" height="20" fill="#3a3a3c"/></svg></span>
+          <span class="ts">00:06</span>
+        </div>
+        <div class="cine-frame" data-cap="Back to wide: applause.">
+          <span class="scene" aria-hidden="true"><svg viewBox="0 0 130 75"><rect width="130" height="75" fill="#1a1a1c"/><rect x="8" y="55" width="6" height="14" fill="#444"/><rect x="20" y="50" width="6" height="19" fill="#555"/><rect x="32" y="55" width="6" height="14" fill="#444"/><rect x="50" y="45" width="6" height="24" fill="#666"/><rect x="62" y="50" width="6" height="19" fill="#555"/><rect x="80" y="55" width="6" height="14" fill="#444"/><rect x="98" y="50" width="6" height="19" fill="#555"/><rect x="110" y="55" width="6" height="14" fill="#444"/></svg></span>
+          <span class="ts">00:07</span>
+        </div>
+        <div class="cine-frame" data-cap="Cut to black. Title card.">
+          <span class="scene" aria-hidden="true"><svg viewBox="0 0 130 75"><rect width="130" height="75" fill="#000"/><text x="65" y="42" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="6" fill="#d4af37" letter-spacing="1">FADE</text></svg></span>
+          <span class="ts">00:08</span>
+        </div>
+      </div>
+      <div class="cine-scrubber" aria-label="Filmstrip scrubber">
+        <button class="cine-btn" id="cinePrev" aria-label="Previous frame">&lsaquo;</button>
+        <span class="tc" id="cineTC">00:01</span>
+        <span class="caption" id="cineCap">Wide. Empty conference room.</span>
+        <button class="cine-btn" id="cineNext" aria-label="Next frame">&rsaquo;</button>
       </div>
 
       <div class="cine-body">
@@ -1249,6 +1745,149 @@ resp = client.models.generate_content(
       <div class="brut-tag">05 / UNIFIED REASONING</div>
       <h2 class="brut-h2">FOUR STREAMS.<br>ONE TRANSFORMER.<br>ONE ANSWER.</h2>
       <p class="brut-sub">The whole point of all of the above is that a single attention layer treats them as one substance. The model doesn&rsquo;t &ldquo;switch modes.&rdquo; It just attends.</p>
+
+      <!-- ============================================================
+           MODALITY FUSION DEMO — pick image + text + audio,
+           watch them tokenize and converge into one stream.
+           ============================================================ -->
+      <div class="fusion" id="fusion" aria-label="Interactive multimodal fusion demo">
+        <div class="fusion-head">
+          <span class="ttl">FUSION DEMO &middot; <b>PICK · TOKENIZE · FUSE</b></span>
+          <span class="sub">3 inputs &rarr; 1 token stream &rarr; 1 model</span>
+        </div>
+
+        <!-- 3-input selector -->
+        <div class="fusion-inputs">
+          <div class="fusion-input v">
+            <h5>&gt; IMAGE</h5>
+            <div class="vthumbs" id="vthumbs" role="radiogroup" aria-label="Select an image">
+              <button class="vthumb sel" data-key="grid" data-tokens="1334" role="radio" aria-checked="true" aria-label="Pixel grid"><svg viewBox="0 0 40 40"><rect width="40" height="40" fill="#1a1a2e"/><rect x="6" y="6" width="6" height="6" fill="#e74c3c"/><rect x="16" y="6" width="6" height="6" fill="#f1c40f"/><rect x="26" y="6" width="6" height="6" fill="#00d4ff"/><rect x="6" y="16" width="6" height="6" fill="#2ecc71"/><rect x="16" y="16" width="6" height="6" fill="#ff69b4"/><rect x="26" y="16" width="6" height="6" fill="#e74c3c"/><rect x="6" y="26" width="6" height="6" fill="#00d4ff"/><rect x="16" y="26" width="6" height="6" fill="#f1c40f"/><rect x="26" y="26" width="6" height="6" fill="#2ecc71"/></svg></button>
+              <button class="vthumb" data-key="circle" data-tokens="1024" role="radio" aria-checked="false" aria-label="Circle"><svg viewBox="0 0 40 40"><rect width="40" height="40" fill="#1a1a2e"/><circle cx="20" cy="20" r="12" fill="#ff69b4"/><circle cx="20" cy="20" r="6" fill="#f1c40f"/></svg></button>
+              <button class="vthumb" data-key="tri" data-tokens="768" role="radio" aria-checked="false" aria-label="Triangle"><svg viewBox="0 0 40 40"><rect width="40" height="40" fill="#1a1a2e"/><polygon points="20,6 34,32 6,32" fill="#00d4ff"/></svg></button>
+              <button class="vthumb" data-key="cross" data-tokens="1564" role="radio" aria-checked="false" aria-label="Cross"><svg viewBox="0 0 40 40"><rect width="40" height="40" fill="#1a1a2e"/><rect x="16" y="6" width="8" height="28" fill="#2ecc71"/><rect x="6" y="16" width="28" height="8" fill="#2ecc71"/></svg></button>
+            </div>
+            <div class="hint" id="vthumbHint">GRID &middot; 1334 tok</div>
+          </div>
+
+          <div class="fusion-input t">
+            <h5>Text instruction</h5>
+            <textarea class="tinput" id="tinput" rows="3" aria-label="Text prompt">Describe this image and the mood of the audio in one sentence.</textarea>
+            <div class="tpresets">
+              <button class="tpreset" data-text="Describe this image and the mood of the audio in one sentence.">describe</button>
+              <button class="tpreset" data-text="Extract the totals and return as JSON.">extract</button>
+              <button class="tpreset" data-text="Compare the visual style with the tone of voice.">compare</button>
+              <button class="tpreset" data-text="What is the speaker most concerned about?">analyze</button>
+            </div>
+          </div>
+
+          <div class="fusion-input a">
+            <h5>// AUDIO</h5>
+            <div class="athumbs" id="athumbs" role="radiogroup" aria-label="Select an audio clip">
+              <button class="athumb sel" data-key="speech" data-tokens="96" role="radio" aria-checked="true" aria-label="Speech 0.96s"><svg viewBox="0 0 100 40"><rect width="100" height="40" fill="#0a0e0a"/><polyline points="2,20 8,12 14,28 20,8 26,32 32,15 38,25 44,10 50,30 56,14 62,26 68,8 74,32 80,12 86,28 92,16 98,22" fill="none" stroke="#39ff14" stroke-width="1.2"/></svg><span class="label">SPEECH 0.96s</span></button>
+              <button class="athumb" data-key="music" data-tokens="180" role="radio" aria-checked="false" aria-label="Music 1.8s"><svg viewBox="0 0 100 40"><rect width="100" height="40" fill="#0a0e0a"/><polyline points="2,30 6,22 10,18 14,12 18,18 22,22 26,16 30,8 34,16 38,22 42,28 46,18 50,12 54,16 58,22 62,30 66,22 70,16 74,10 78,16 82,22 86,28 90,22 94,16 98,20" fill="none" stroke="#39ff14" stroke-width="1.2"/></svg><span class="label">MUSIC 1.80s</span></button>
+              <button class="athumb" data-key="noise" data-tokens="48" role="radio" aria-checked="false" aria-label="Noise 0.48s"><svg viewBox="0 0 100 40"><rect width="100" height="40" fill="#0a0e0a"/><polyline points="2,18 6,28 10,12 14,32 18,8 22,30 26,16 30,24 34,10 38,28 42,18 46,30 50,12 54,26 58,16 62,32 66,14 70,28 74,18 78,22 82,30 86,12 90,26 94,16 98,28" fill="none" stroke="#39ff14" stroke-width="1.2"/></svg><span class="label">NOISE 0.48s</span></button>
+              <button class="athumb" data-key="long" data-tokens="320" role="radio" aria-checked="false" aria-label="Voice memo 3.2s"><svg viewBox="0 0 100 40"><rect width="100" height="40" fill="#0a0e0a"/><polyline points="2,22 8,18 14,24 20,16 26,28 32,14 38,26 44,12 50,30 56,10 62,24 68,18 74,28 80,16 86,22 92,20 98,20" fill="none" stroke="#39ff14" stroke-width="1.2" opacity="0.7"/><polyline points="2,30 8,8 14,32 20,6 26,34 32,4 38,32 44,8 50,30 56,10 62,28 68,12 74,30 80,14 86,28 92,20 98,18" fill="none" stroke="#39ff14" stroke-width="1.2"/></svg><span class="label">MEMO 3.20s</span></button>
+            </div>
+            <div class="hint" id="athumbHint">SPEECH &middot; 96 tok</div>
+          </div>
+        </div>
+
+        <!-- Token budget calculator -->
+        <div class="fusion-budget" aria-label="Token budget calculator">
+          <div class="budget-cell v-mod">
+            <span class="lbl">Image</span>
+            <span class="v" id="bImg">1334</span>
+            <span class="u">tokens</span>
+          </div>
+          <div class="budget-cell t-mod">
+            <span class="lbl">Text</span>
+            <span class="v" id="bTxt">14</span>
+            <span class="u">tokens</span>
+          </div>
+          <div class="budget-cell a-mod">
+            <span class="lbl">Audio</span>
+            <span class="v" id="bAud">96</span>
+            <span class="u">tokens</span>
+          </div>
+          <div class="budget-cell total">
+            <span class="lbl">Total &middot; one fwd pass</span>
+            <span class="v" id="bTot">1444</span>
+            <span class="u" id="bCost">&asymp; $0.0217 on Opus 4.7</span>
+          </div>
+        </div>
+
+        <!-- Fuse action -->
+        <div class="fusion-action">
+          <button class="fuse-btn" id="fuseBtn" type="button">
+            <span class="arrow">&#9655;</span>TOKENIZE &amp; FUSE
+          </button>
+          <span class="fuse-status" id="fuseStatus">STATUS: <b>READY</b></span>
+          <button class="reset-btn" id="resetBtn" type="button">RESET</button>
+        </div>
+
+        <!-- Fuse stage — the animation lives here -->
+        <div class="fuse-stage">
+          <svg class="fuse-svg" id="fuseSvg" viewBox="0 0 800 360" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <!-- Left rail: source modality labels -->
+            <g font-family="Archivo Black, sans-serif" font-size="10" fill="#000">
+              <rect x="10" y="40" width="92" height="40" fill="#1a1a2e" stroke="#000" stroke-width="2"/>
+              <text x="56" y="58" text-anchor="middle" fill="#00d4ff" font-family="Press Start 2P, monospace" font-size="7">VISION</text>
+              <text x="56" y="72" text-anchor="middle" fill="#ff69b4" font-family="VT323, monospace" font-size="11" id="lblV">14 patches</text>
+
+              <rect x="10" y="155" width="92" height="40" fill="#f4ede0" stroke="#000" stroke-width="2"/>
+              <text x="56" y="175" text-anchor="middle" fill="#8b2c1e" font-family="Special Elite, monospace" font-size="10">Text BPE</text>
+              <text x="56" y="188" text-anchor="middle" fill="#2b2520" font-family="Special Elite, monospace" font-size="10" id="lblT">8 tokens</text>
+
+              <rect x="10" y="270" width="92" height="40" fill="#0a0e0a" stroke="#000" stroke-width="2"/>
+              <text x="56" y="288" text-anchor="middle" fill="#39ff14" font-family="JetBrains Mono, monospace" font-size="9">MEL-SPEC</text>
+              <text x="56" y="302" text-anchor="middle" fill="#ffb000" font-family="JetBrains Mono, monospace" font-size="9" id="lblA">12 frames</text>
+            </g>
+
+            <!-- Convergence funnel (subtle guides) -->
+            <g stroke="#000" stroke-width="1" stroke-dasharray="2,3" fill="none" opacity="0.25">
+              <line x1="105" y1="60"  x2="430" y2="175"/>
+              <line x1="105" y1="175" x2="430" y2="175"/>
+              <line x1="105" y1="290" x2="430" y2="175"/>
+            </g>
+
+            <!-- Stream containers — token <rect>s injected by JS as children of these -->
+            <g id="streamV" transform="translate(115,52)"></g>
+            <g id="streamT" transform="translate(115,167)"></g>
+            <g id="streamA" transform="translate(115,282)"></g>
+
+            <!-- Unified transformer box -->
+            <g id="transformerBox">
+              <rect x="430" y="125" width="180" height="105" fill="#fff" stroke="#000" stroke-width="3"/>
+              <text x="520" y="150" text-anchor="middle" fill="#000" font-family="Archivo Black, sans-serif" font-size="11" letter-spacing="1">UNIFIED</text>
+              <text x="520" y="165" text-anchor="middle" fill="#000" font-family="Archivo Black, sans-serif" font-size="11" letter-spacing="1">TRANSFORMER</text>
+              <text x="520" y="183" text-anchor="middle" fill="#666" font-family="JetBrains Mono, monospace" font-size="8" letter-spacing="1">d=4096 &middot; cross-modal</text>
+              <!-- thinking dots -->
+              <g id="thinkDots">
+                <circle class="think-dot" cx="495" cy="208" r="5"/>
+                <circle class="think-dot" cx="520" cy="208" r="5"/>
+                <circle class="think-dot" cx="545" cy="208" r="5"/>
+              </g>
+              <!-- token count chip -->
+              <rect id="bufChip" x="445" y="100" width="150" height="20" fill="#ffd400" stroke="#000" stroke-width="2" opacity="0"/>
+              <text id="bufChipTxt" x="520" y="114" text-anchor="middle" fill="#000" font-family="Archivo Black, sans-serif" font-size="10" opacity="0">BUFFER 0 / 0</text>
+            </g>
+
+            <!-- Output arrow → response landing pad on right -->
+            <g id="outArrow" opacity="0">
+              <line x1="610" y1="175" x2="700" y2="175" stroke="#000" stroke-width="3"/>
+              <polygon points="700,170 712,175 700,180" fill="#000"/>
+              <rect x="715" y="155" width="78" height="40" fill="#000" stroke="#000" stroke-width="2"/>
+              <text x="754" y="180" text-anchor="middle" fill="#ffd400" font-family="Archivo Black, sans-serif" font-size="10">ANSWER</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Generated response stream -->
+        <div class="fuse-response idle" id="fuseResponse">
+          <span class="lbl">RESPONSE</span>
+          Press <b>TOKENIZE &amp; FUSE</b> to run one cross-modal forward pass through a single transformer.
+        </div>
+      </div>
 
       <div class="brut-grid">
         <div class="brut-cell v">
@@ -1525,29 +2164,567 @@ resp = client.models.generate_content(
   </footer>
 
   <script>
-    // Pixel-grid demo — 14x14 = 196 cells, light up ~38 in a focal pattern
+    'use strict';
+
+    // ========================================================================
+    // PRELUDE
+    // ========================================================================
+    const PRM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ========================================================================
+    // §1 VISION — pixel-grid + hover tooltip
+    // ========================================================================
     (function () {
       var grid = document.getElementById('pixGrid');
       if (!grid) return;
       var lit = [
-        // central object cluster
         45,46,47,48, 59,60,61,62, 73,74,75,76, 87,88,89,90,
-        // accent dots (corners + edges)
         16,29, 168,181,
-        // diagonal sample
         14,28,42,56,70, 27,41,55,69,83,
-        // a "totals" band
         130,131,132,133,134,135,136,137,138,139,
       ];
-      var hi = [60,74,75,88,89]; // brightest centroid
+      var hi = [60,74,75,88,89];
+      // Deterministic-ish "attention" weights derived from class
+      function attnFor(i) {
+        if (hi.indexOf(i) > -1) return (0.78 + ((i * 13) % 22) / 100).toFixed(2);
+        if (lit.indexOf(i) > -1) return (0.30 + ((i * 7) % 35) / 100).toFixed(2);
+        return (0.01 + ((i * 11) % 12) / 100).toFixed(2);
+      }
       for (var i = 0; i < 196; i++) {
         var d = document.createElement('div');
         if (hi.indexOf(i) > -1) d.className = 'h';
         else if (lit.indexOf(i) > -1) d.className = 'on';
         else if (i % 31 === 0) d.className = 'c';
         else if (i % 47 === 0) d.className = 'g';
+        d.setAttribute('data-i', i);
         grid.appendChild(d);
       }
+      // Tooltip
+      var tip = document.createElement('div');
+      tip.className = 'pix-tooltip';
+      document.body.appendChild(tip);
+      grid.addEventListener('mouseover', function (e) {
+        var cell = e.target.closest('[data-i]');
+        if (!cell) return;
+        var i = +cell.getAttribute('data-i');
+        var row = (i / 14 | 0) + 1;
+        var col = (i % 14) + 1;
+        var a = attnFor(i);
+        tip.innerHTML = 'PATCH <span class="v">' + col + ',' + row + '</span><span class="a">attn ' + a + '</span>';
+        tip.classList.add('on');
+        var r = cell.getBoundingClientRect();
+        tip.style.left = (r.left + r.width / 2) + 'px';
+        tip.style.top = r.top + 'px';
+      });
+      grid.addEventListener('mouseout', function () {
+        tip.classList.remove('on');
+      });
+      grid.addEventListener('mouseleave', function () {
+        tip.classList.remove('on');
+      });
+    })();
+
+    // ========================================================================
+    // §2 TEXT — cycling typewriter machine (4 example prompts)
+    // ========================================================================
+    (function () {
+      var typed = document.getElementById('typTyped');
+      if (!typed) return;
+      var counterEl = document.getElementById('typCounter');
+      var tokensEl = document.getElementById('typMetaTokens');
+      var costEl = document.getElementById('typMetaCost');
+      var arrows = document.querySelectorAll('#typMachine .typ-arrow');
+
+      var examples = [
+        { text: 'Summarise the attached invoice in two lines.', tokens: '~8 tokens', cost: '< $0.0002' },
+        { text: 'Describe what the speaker sounds upset about. Quote the most emotional 8 seconds.', tokens: '~18 tokens + 3,000 audio', cost: '~ $0.045' },
+        { text: 'From this screenshot, extract the dashboard\'s top three KPIs as a JSON object.', tokens: '~22 tokens + 1,398 image', cost: '~ $0.021' },
+        { text: 'Watch the first 30 seconds of this video and tell me at what timestamp the chart first appears.', tokens: '~26 tokens + 39,000 video', cost: '~ $0.59' },
+      ];
+      var idx = 0;
+      var typingTimer = null;
+      var cursorSpan = '<span class="typ-cursor"></span>';
+
+      function typeOut(text) {
+        if (typingTimer) clearTimeout(typingTimer);
+        if (PRM) { typed.innerHTML = text + cursorSpan; return; }
+        typed.innerHTML = cursorSpan;
+        var i = 0;
+        function step() {
+          i++;
+          typed.innerHTML = text.slice(0, i) + cursorSpan;
+          if (i < text.length) typingTimer = setTimeout(step, 22 + (Math.random() * 35));
+        }
+        step();
+      }
+
+      function render() {
+        var ex = examples[idx];
+        typeOut(ex.text);
+        tokensEl.textContent = ex.tokens;
+        costEl.textContent = ex.cost;
+        counterEl.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(examples.length).padStart(2, '0');
+      }
+
+      arrows.forEach(function (b) {
+        b.addEventListener('click', function () {
+          var step = +b.getAttribute('data-step');
+          idx = (idx + step + examples.length) % examples.length;
+          render();
+        });
+      });
+      render();
+    })();
+
+    // ========================================================================
+    // §3 AUDIO — play-waveform animated bars
+    // ========================================================================
+    (function () {
+      var btn = document.getElementById('scopePlay');
+      var bars = document.getElementById('scopeBars');
+      var status = document.getElementById('scopeStatus');
+      var clock = document.getElementById('scopeClock');
+      if (!btn || !bars) return;
+
+      var BARS = 64;
+      for (var i = 0; i < BARS; i++) {
+        var s = document.createElement('span');
+        bars.appendChild(s);
+      }
+      var bSpans = bars.querySelectorAll('span');
+      var raf = null, t0 = 0, playing = false;
+
+      function stop() {
+        playing = false;
+        cancelAnimationFrame(raf);
+        bars.classList.remove('on');
+        btn.classList.remove('playing');
+        btn.innerHTML = '&#9655; PLAY WAVEFORM';
+        status.textContent = 'IDLE';
+        clock.textContent = '00:00.00';
+        bSpans.forEach(function (s) { s.style.height = '4px'; });
+      }
+
+      function frame(ts) {
+        if (!playing) return;
+        if (!t0) t0 = ts;
+        var t = (ts - t0) / 1000; // seconds
+        var maxT = 4.2;
+        if (t >= maxT) { stop(); return; }
+        // synth audio amplitude pattern — sine sweep + envelope + noise
+        for (var i = 0; i < BARS; i++) {
+          var f = i / BARS;
+          var env = Math.sin(Math.PI * (t / maxT));
+          var sweep = Math.sin(t * 6 + f * 14) * 0.5 + 0.5;
+          var noise = (Math.sin(i * 47.3 + t * 23) * 0.5 + 0.5) * 0.4;
+          var amp = (sweep * 0.6 + noise * 0.4) * env;
+          var h = 4 + amp * 140;
+          bSpans[i].style.height = h.toFixed(0) + 'px';
+        }
+        // clock readout
+        var s = t.toFixed(2).padStart(5, '0');
+        clock.textContent = '00:' + s;
+        raf = requestAnimationFrame(frame);
+      }
+
+      btn.addEventListener('click', function () {
+        if (playing) { stop(); return; }
+        if (PRM) {
+          // static fill
+          bars.classList.add('on');
+          bSpans.forEach(function (s, i) {
+            var f = i / BARS;
+            var amp = Math.sin(f * Math.PI) * 0.8 + 0.2;
+            s.style.height = (4 + amp * 120) + 'px';
+          });
+          status.textContent = 'STATIC';
+          clock.textContent = '00:04.20';
+          btn.classList.add('playing');
+          btn.innerHTML = '&#9633; STOP';
+          playing = true;
+          return;
+        }
+        playing = true;
+        t0 = 0;
+        bars.classList.add('on');
+        btn.classList.add('playing');
+        btn.innerHTML = '&#9633; STOP';
+        status.textContent = 'PLAYING';
+        raf = requestAnimationFrame(frame);
+      });
+    })();
+
+    // ========================================================================
+    // §4 VIDEO — filmstrip scrubber
+    // ========================================================================
+    (function () {
+      var strip = document.getElementById('cineStrip');
+      var prev = document.getElementById('cinePrev');
+      var next = document.getElementById('cineNext');
+      var tc = document.getElementById('cineTC');
+      var cap = document.getElementById('cineCap');
+      if (!strip || !prev || !next) return;
+      var frames = strip.querySelectorAll('.cine-frame');
+      var i = 0;
+
+      function render() {
+        frames.forEach(function (f, n) { f.classList.toggle('active', n === i); });
+        var f = frames[i];
+        tc.textContent = (f.querySelector('.ts') || {}).textContent || '';
+        cap.textContent = f.getAttribute('data-cap') || '';
+        // scroll into view inside the strip
+        f.scrollIntoView({ behavior: PRM ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
+      }
+      prev.addEventListener('click', function () { i = (i - 1 + frames.length) % frames.length; render(); });
+      next.addEventListener('click', function () { i = (i + 1) % frames.length; render(); });
+      frames.forEach(function (f, n) {
+        f.addEventListener('click', function () { i = n; render(); });
+      });
+      render();
+    })();
+
+    // ========================================================================
+    // §5 UNIFIED — MODALITY FUSION DEMO
+    // The big one: pick image + text + audio, watch them tokenize and fuse.
+    // ========================================================================
+    (function () {
+      var root = document.getElementById('fusion');
+      if (!root) return;
+
+      // ---- state ----
+      var state = {
+        vKey: 'grid', vTokens: 1334,
+        tText: 'Describe this image and the mood of the audio in one sentence.', tTokens: 14,
+        aKey: 'speech', aTokens: 96,
+        running: false,
+      };
+
+      // Per-key animated token counts (capped for visual budget)
+      var V_DRAW = {grid: 14, circle: 12, tri: 9, cross: 16};
+      var A_DRAW = {speech: 12, music: 14, noise: 6, long: 18};
+
+      // Cost in $ per 1K input tokens on Opus 4.7 ≈ $0.015
+      function cost(tok) { return '$' + ((tok / 1000) * 0.015).toFixed(4); }
+
+      function countTextTokens(s) {
+        // Cheap BPE-ish approximation: ~0.75 token per word + punctuation adjustment
+        var trimmed = (s || '').trim();
+        if (!trimmed) return 0;
+        var words = trimmed.split(/\s+/).length;
+        var puncts = (trimmed.match(/[.,;:!?\-—()"']/g) || []).length;
+        return Math.max(1, Math.round(words * 1.35 + puncts * 0.3));
+      }
+
+      // ---- DOM refs ----
+      var vthumbs = root.querySelectorAll('#vthumbs .vthumb');
+      var athumbs = root.querySelectorAll('#athumbs .athumb');
+      var tinput = document.getElementById('tinput');
+      var tpresets = root.querySelectorAll('.tpreset');
+      var vHint = document.getElementById('vthumbHint');
+      var aHint = document.getElementById('athumbHint');
+      var bImg = document.getElementById('bImg');
+      var bTxt = document.getElementById('bTxt');
+      var bAud = document.getElementById('bAud');
+      var bTot = document.getElementById('bTot');
+      var bCost = document.getElementById('bCost');
+      var fuseBtn = document.getElementById('fuseBtn');
+      var resetBtn = document.getElementById('resetBtn');
+      var fuseStatus = document.getElementById('fuseStatus');
+      var fuseSvg = document.getElementById('fuseSvg');
+      var streamV = document.getElementById('streamV');
+      var streamT = document.getElementById('streamT');
+      var streamA = document.getElementById('streamA');
+      var bufChip = document.getElementById('bufChip');
+      var bufChipTxt = document.getElementById('bufChipTxt');
+      var outArrow = document.getElementById('outArrow');
+      var lblV = document.getElementById('lblV');
+      var lblT = document.getElementById('lblT');
+      var lblA = document.getElementById('lblA');
+      var response = document.getElementById('fuseResponse');
+
+      // ---- selector wiring ----
+      function selectV(btn) {
+        vthumbs.forEach(function (b) { b.classList.remove('sel'); b.setAttribute('aria-checked','false'); });
+        btn.classList.add('sel'); btn.setAttribute('aria-checked','true');
+        state.vKey = btn.getAttribute('data-key');
+        state.vTokens = +btn.getAttribute('data-tokens');
+        vHint.textContent = state.vKey.toUpperCase() + ' · ' + state.vTokens + ' tok';
+        updateBudget();
+      }
+      function selectA(btn) {
+        athumbs.forEach(function (b) { b.classList.remove('sel'); b.setAttribute('aria-checked','false'); });
+        btn.classList.add('sel'); btn.setAttribute('aria-checked','true');
+        state.aKey = btn.getAttribute('data-key');
+        state.aTokens = +btn.getAttribute('data-tokens');
+        aHint.textContent = state.aKey.toUpperCase() + ' · ' + state.aTokens + ' tok';
+        updateBudget();
+      }
+      vthumbs.forEach(function (b) { b.addEventListener('click', function () { selectV(b); }); });
+      athumbs.forEach(function (b) { b.addEventListener('click', function () { selectA(b); }); });
+      tinput.addEventListener('input', function () { state.tText = tinput.value; updateBudget(); });
+      tpresets.forEach(function (p) {
+        p.addEventListener('click', function () {
+          tinput.value = p.getAttribute('data-text');
+          state.tText = tinput.value;
+          updateBudget();
+        });
+      });
+
+      function updateBudget() {
+        state.tTokens = countTextTokens(state.tText);
+        bImg.textContent = state.vTokens.toLocaleString();
+        bTxt.textContent = state.tTokens.toLocaleString();
+        bAud.textContent = state.aTokens.toLocaleString();
+        var total = state.vTokens + state.tTokens + state.aTokens;
+        bTot.textContent = total.toLocaleString();
+        bCost.textContent = '≈ ' + cost(total) + ' on Opus 4.7';
+      }
+      updateBudget();
+
+      // ---- token rendering ----
+      function svgNS(tag, attrs) {
+        var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        if (attrs) for (var k in attrs) el.setAttribute(k, attrs[k]);
+        return el;
+      }
+
+      function clearStreams() {
+        [streamV, streamT, streamA].forEach(function (g) { g.innerHTML = ''; });
+        bufChip.setAttribute('opacity', '0');
+        bufChipTxt.setAttribute('opacity', '0');
+        outArrow.setAttribute('opacity', '0');
+        fuseSvg.classList.remove('thinking');
+      }
+
+      function buildTokens() {
+        clearStreams();
+        var nV = V_DRAW[state.vKey] || 14;
+        var nT = Math.min(10, Math.max(3, Math.round(state.tTokens * 0.55)));
+        var nA = A_DRAW[state.aKey] || 12;
+
+        // Vision: small colored squares (pixel patches)
+        // x/y kept at 0; positioning is done via style.transform so CSS transitions can animate it.
+        var palV = ['#ff69b4','#00d4ff','#f1c40f','#2ecc71','#e74c3c'];
+        for (var i = 0; i < nV; i++) {
+          var r = svgNS('rect', {
+            class: 'tk tk-v',
+            x: 0, y: 0, width: 12, height: 12,
+            fill: palV[i % palV.length], opacity: 0
+          });
+          r.style.transform = 'translate(' + (i * 16) + 'px, 0px)';
+          streamV.appendChild(r);
+        }
+        // Text: letterpress-ish chips (rounded rect)
+        for (var j = 0; j < nT; j++) {
+          var r2 = svgNS('rect', {
+            class: 'tk tk-t',
+            x: 0, y: 0, width: 22, height: 12, rx: 1, opacity: 0
+          });
+          r2.style.transform = 'translate(' + (j * 26) + 'px, 0px)';
+          streamT.appendChild(r2);
+        }
+        // Audio: spectrogram bars
+        for (var k = 0; k < nA; k++) {
+          var h = 6 + ((k * 31) % 8);
+          var r3 = svgNS('rect', {
+            class: 'tk tk-a',
+            x: 0, y: (12 - h) / 2, width: 14, height: h, opacity: 0
+          });
+          r3.style.transform = 'translate(' + (k * 18) + 'px, 0px)';
+          streamA.appendChild(r3);
+        }
+        lblV.textContent = nV + ' patches';
+        lblT.textContent = nT + ' tokens';
+        lblA.textContent = nA + ' frames';
+        return { nV: nV, nT: nT, nA: nA };
+      }
+
+      // ---- the orchestration ----
+      function setStatus(s) {
+        fuseStatus.innerHTML = 'STATUS: <b>' + s + '</b>';
+      }
+
+      function fadeIn(el, delay) {
+        if (PRM) { el.setAttribute('opacity', '1'); return; }
+        setTimeout(function () { el.setAttribute('opacity', '1'); }, delay);
+      }
+
+      function moveTo(el, x, y, delay) {
+        // Position via inline style.transform so the CSS transition on .tk applies.
+        // (rect's own x/y are already 0 — see buildTokens.)
+        function apply() {
+          el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+        }
+        if (PRM) { apply(); return; }
+        setTimeout(apply, delay);
+      }
+
+      function streamGenerate(words, accentIdxs) {
+        response.classList.remove('idle');
+        response.innerHTML = '<span class="lbl">RESPONSE</span> ';
+        var spans = [];
+        words.forEach(function (w, i) {
+          var s = document.createElement('span');
+          s.className = 'word' + (accentIdxs.indexOf(i) > -1 ? ' accent' : '');
+          s.textContent = w + ' ';
+          response.appendChild(s);
+          spans.push(s);
+        });
+        var cur = document.createElement('span');
+        cur.className = 'cur';
+        response.appendChild(cur);
+        if (PRM) {
+          spans.forEach(function (s) { s.classList.add('in'); });
+          return Promise.resolve();
+        }
+        return new Promise(function (resolve) {
+          var i = 0;
+          function step() {
+            if (i >= spans.length) { resolve(); return; }
+            spans[i].classList.add('in');
+            i++;
+            setTimeout(step, 70 + Math.random() * 60);
+          }
+          step();
+        });
+      }
+
+      function responseFor() {
+        // Compose a plausible response based on selections
+        var v = state.vKey, a = state.aKey;
+        var vDesc = ({
+          grid: 'a 14×14 pixel grid in five colors',
+          circle: 'a magenta target with a yellow core',
+          tri: 'a single cyan triangle pointing up',
+          cross: 'a green cross on a navy field'
+        })[v];
+        var aDesc = ({
+          speech: 'speech, measured, neutral pitch',
+          music: 'rhythmic music with a falling melodic line',
+          noise: 'a short burst of broadband noise',
+          long: 'a longer voice memo with rising emphasis'
+        })[a];
+        var sent = 'The image shows ' + vDesc + ' and the audio sounds like ' + aDesc + '.';
+        var words = sent.split(' ');
+        // Highlight the modality-specific descriptors
+        var accent = [];
+        words.forEach(function (w, i) {
+          if (/grid|target|triangle|cross|magenta|cyan|green|navy|colors|core/i.test(w)) accent.push(i);
+          if (/speech|music|noise|memo|rhythmic|broadband|emphasis/i.test(w)) accent.push(i);
+        });
+        return { words: words, accent: accent };
+      }
+
+      // Main animation timeline
+      function run() {
+        if (state.running) return;
+        state.running = true;
+        fuseBtn.classList.remove('done');
+        fuseBtn.classList.add('running');
+        fuseBtn.disabled = true;
+        setStatus('TOKENIZING…');
+        response.classList.add('idle');
+        response.innerHTML = '<span class="lbl">RESPONSE</span> Computing…';
+
+        var counts = buildTokens();
+        var Vs = streamV.querySelectorAll('.tk');
+        var Ts = streamT.querySelectorAll('.tk');
+        var As = streamA.querySelectorAll('.tk');
+        var STEP = PRM ? 0 : 70;
+
+        // Phase 1: fade in each source token in place
+        Vs.forEach(function (n, i) { fadeIn(n, STEP * i); });
+        Ts.forEach(function (n, i) { fadeIn(n, STEP * i + STEP * counts.nV * 0.4); });
+        As.forEach(function (n, i) { fadeIn(n, STEP * i + STEP * counts.nV * 0.7); });
+
+        var phaseInDur = PRM ? 0 : STEP * (Math.max(counts.nV, counts.nT, counts.nA) + 4);
+
+        // Phase 2: stream all tokens rightward toward the transformer box
+        setTimeout(function () {
+          setStatus('STREAMING → TRANSFORMER');
+          var converge = PRM ? 0 : 60;
+          // Tokens converge inside the unified transformer box (x:430-610, y:125-230).
+          // Stream <g> origins:  V=(115,52)  T=(115,167)  A=(115,282)
+          // We jitter inside a small 80×24 cluster centered around (520, 175).
+          function jitter(i, n) {
+            var col = (i % 6), row = ((i / 6) | 0);
+            return { dx: 0 + col * 4, dy: 0 + row * 4 };
+          }
+          // Vision tokens cluster in top band of the box (~y=140 absolute)
+          Vs.forEach(function (n, i) {
+            var j = jitter(i, Vs.length);
+            // absolute target ~ (430 + j.dx, 140 + j.dy)
+            // child offset from V parent = (430-115 + j.dx, 140-52 + j.dy) = (315 + j.dx, 88 + j.dy)
+            moveTo(n, 315 + j.dx, 88 + j.dy, converge * i);
+          });
+          // Text tokens cluster in middle band of box (~y=175 absolute)
+          Ts.forEach(function (n, i) {
+            var j = jitter(i, Ts.length);
+            // child offset from T parent = (315 + j.dx, 175-167 + j.dy) = (315 + j.dx, 8 + j.dy)
+            moveTo(n, 315 + j.dx, 8 + j.dy, converge * i);
+          });
+          // Audio tokens cluster in bottom band of box (~y=210 absolute)
+          As.forEach(function (n, i) {
+            var j = jitter(i, As.length);
+            // child offset from A parent = (315 + j.dx, 210-282 + j.dy) = (315 + j.dx, -72 + j.dy)
+            moveTo(n, 315 + j.dx, -72 + j.dy, converge * i);
+          });
+
+          // Reveal buffer chip
+          setTimeout(function () {
+            var total = counts.nV + counts.nT + counts.nA;
+            bufChipTxt.textContent = 'BUFFER ' + total + ' tokens';
+            bufChip.setAttribute('opacity', '1');
+            bufChipTxt.setAttribute('opacity', '1');
+          }, PRM ? 0 : converge * Math.max(counts.nV, counts.nT, counts.nA) + 100);
+        }, phaseInDur + 100);
+
+        // Phase 3: think
+        var streamDur = PRM ? 0 : (60 * Math.max(counts.nV, counts.nT, counts.nA) + 600);
+        setTimeout(function () {
+          setStatus('REASONING…');
+          fuseSvg.classList.add('thinking');
+          // fade out the converged tokens (now "inside" the model)
+          if (!PRM) {
+            [].concat(
+              [].slice.call(Vs), [].slice.call(Ts), [].slice.call(As)
+            ).forEach(function (n) { n.setAttribute('opacity', '0.18'); });
+          }
+        }, phaseInDur + 100 + streamDur);
+
+        // Phase 4: generate response
+        setTimeout(function () {
+          fuseSvg.classList.remove('thinking');
+          outArrow.setAttribute('opacity', '1');
+          setStatus('GENERATING');
+          var r = responseFor();
+          streamGenerate(r.words, r.accent).then(function () {
+            setStatus('DONE');
+            fuseBtn.classList.remove('running');
+            fuseBtn.classList.add('done');
+            fuseBtn.innerHTML = '<span class="arrow">&#10003;</span>FUSED';
+            fuseBtn.disabled = false;
+            state.running = false;
+          });
+        }, phaseInDur + 100 + streamDur + (PRM ? 0 : 1400));
+      }
+
+      function reset() {
+        clearStreams();
+        fuseBtn.classList.remove('running','done');
+        fuseBtn.innerHTML = '<span class="arrow">&#9655;</span>TOKENIZE &amp; FUSE';
+        fuseBtn.disabled = false;
+        setStatus('READY');
+        response.classList.add('idle');
+        response.innerHTML = '<span class="lbl">RESPONSE</span> Press <b>TOKENIZE &amp; FUSE</b> to run one cross-modal forward pass through a single transformer.';
+        lblV.textContent = '14 patches';
+        lblT.textContent = '8 tokens';
+        lblA.textContent = '12 frames';
+        state.running = false;
+      }
+
+      fuseBtn.addEventListener('click', run);
+      resetBtn.addEventListener('click', reset);
     })();
   </script>
 

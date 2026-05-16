@@ -788,6 +788,349 @@ a:hover { color: var(--phosphor); border-color: var(--phosphor); text-shadow: 0 
   .bezel-label { display: none; }
 }
 
+/* ============================================
+   SESSION CHOOSER — tabs above terminal
+   ============================================ */
+.session-chooser {
+  margin: 22px 0 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px dashed var(--phosphor-faint);
+  padding-bottom: 14px;
+}
+.session-tab {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--phosphor-dim);
+  background: var(--bg-deeper);
+  border: 1px solid var(--phosphor-faint);
+  padding: 7px 12px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-transform: lowercase;
+  transition: color 0.15s steps(2), border-color 0.15s steps(2), background 0.15s steps(2);
+  white-space: nowrap;
+}
+.session-tab:hover {
+  color: var(--phosphor);
+  border-color: var(--phosphor-dim);
+  text-shadow: 0 0 4px var(--phosphor);
+}
+.session-tab.active {
+  color: var(--bg);
+  background: var(--phosphor);
+  border-color: var(--phosphor);
+  text-shadow: none;
+  box-shadow: 0 0 10px rgba(51, 255, 51, 0.45);
+}
+.session-tab .tab-idx {
+  color: var(--amber);
+  margin-right: 6px;
+}
+.session-tab.active .tab-idx { color: var(--bg); }
+
+/* ============================================
+   REPLAY CONTROLS
+   ============================================ */
+.replay-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--phosphor-dim);
+}
+.replay-btn {
+  background: var(--bg-deeper);
+  border: 1px solid var(--phosphor-faint);
+  color: var(--phosphor);
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-transform: lowercase;
+  transition: color 0.15s steps(2), border-color 0.15s steps(2), background 0.15s steps(2);
+}
+.replay-btn:hover:not(:disabled) {
+  border-color: var(--phosphor);
+  background: rgba(51, 255, 51, 0.08);
+  text-shadow: 0 0 4px var(--phosphor);
+}
+.replay-btn:disabled {
+  color: var(--phosphor-faint);
+  border-color: var(--phosphor-faint);
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.replay-btn.is-paused {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.5);
+}
+.speed-toggle {
+  display: inline-flex;
+  border: 1px solid var(--phosphor-faint);
+  margin-left: auto;
+}
+.speed-btn {
+  background: var(--bg-deeper);
+  border: none;
+  border-left: 1px solid var(--phosphor-faint);
+  color: var(--phosphor-dim);
+  padding: 6px 11px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: color 0.15s steps(2), background 0.15s steps(2);
+}
+.speed-btn:first-child { border-left: none; }
+.speed-btn:hover { color: var(--phosphor); }
+.speed-btn.active {
+  background: var(--phosphor);
+  color: var(--bg);
+  text-shadow: none;
+}
+.session-status {
+  font-size: 11px;
+  color: var(--phosphor-faint);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.session-status .dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  background: var(--phosphor);
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  box-shadow: 0 0 6px var(--phosphor);
+}
+.session-status.paused .dot { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.session-status.idle .dot { background: var(--phosphor-faint); box-shadow: none; }
+
+/* ============================================
+   INTERACTIVE PROMPT (bottom of terminal)
+   ============================================ */
+.prompt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--bg-deeper);
+  border: 1px solid var(--phosphor-dim);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.prompt-row .prompt-sigil {
+  color: var(--phosphor);
+  text-shadow: 0 0 4px var(--phosphor);
+  white-space: nowrap;
+}
+.prompt-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--cyan);
+  text-shadow: 0 0 4px rgba(0, 255, 255, 0.5);
+  padding: 2px 0;
+  caret-color: var(--phosphor);
+}
+.prompt-row input::placeholder {
+  color: var(--phosphor-faint);
+  opacity: 0.7;
+}
+.prompt-row .prompt-submit {
+  background: transparent;
+  border: 1px solid var(--phosphor-faint);
+  color: var(--phosphor-dim);
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: color 0.15s steps(2), border-color 0.15s steps(2);
+}
+.prompt-row .prompt-submit:hover {
+  color: var(--phosphor);
+  border-color: var(--phosphor);
+  text-shadow: 0 0 4px var(--phosphor);
+}
+.prompt-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--phosphor-faint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+.prompt-hint .chip {
+  display: inline-block;
+  border: 1px dashed var(--phosphor-faint);
+  padding: 2px 7px;
+  margin: 4px 4px 0 0;
+  cursor: pointer;
+  color: var(--phosphor-dim);
+  font-size: 10px;
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
+  transition: color 0.15s steps(2), border-color 0.15s steps(2);
+}
+.prompt-hint .chip:hover {
+  color: var(--phosphor);
+  border-color: var(--phosphor);
+  border-style: solid;
+}
+
+/* session fade between switches — CRT step-cut */
+.term-session.swapping {
+  opacity: 0.15;
+  transition: opacity 200ms steps(3, end);
+}
+
+/* ============================================
+   MANPAGE HOVER GLOW
+   ============================================ */
+.manpage .section-name {
+  cursor: default;
+  transition: text-shadow 0.2s steps(2), color 0.2s steps(2);
+}
+.manpage .section-name:hover {
+  color: var(--amber);
+  text-shadow: 0 0 6px var(--amber), 0 0 16px rgba(255, 176, 0, 0.55);
+}
+
+/* ============================================
+   BENCHMARK TICKER
+   ============================================ */
+.bench-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 14px;
+  align-items: baseline;
+  padding: 6px 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  border-bottom: 1px dotted rgba(34, 170, 34, 0.18);
+}
+.bench-row:last-child { border-bottom: none; }
+.bench-row .bench-name { color: var(--phosphor-dim); }
+.bench-row.lead .bench-name { color: var(--phosphor); }
+.bench-row .bench-score {
+  color: var(--phosphor-dim);
+  font-variant-numeric: tabular-nums;
+  min-width: 4.5ch;
+  text-align: right;
+}
+.bench-row.lead .bench-score {
+  color: var(--phosphor);
+  text-shadow: 0 0 4px var(--phosphor);
+  font-weight: 600;
+}
+.bench-row .bench-date {
+  color: var(--phosphor-faint);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+.bench-bar {
+  grid-column: 1 / -1;
+  height: 3px;
+  background: rgba(34, 170, 34, 0.12);
+  position: relative;
+  margin-top: 4px;
+  overflow: hidden;
+}
+.bench-bar-fill {
+  height: 100%;
+  width: 0;
+  background: var(--phosphor-dim);
+}
+.bench-row.lead .bench-bar-fill {
+  background: var(--phosphor);
+  box-shadow: 0 0 6px var(--phosphor);
+}
+
+/* ============================================
+   PRICING TIER — expandable
+   ============================================ */
+.manpage .plan-entry {
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  padding-left: 8px;
+  transition: border-color 0.2s steps(2), background 0.2s steps(2);
+}
+.manpage .plan-entry:hover {
+  border-left-color: var(--phosphor-dim);
+  background: rgba(51, 255, 51, 0.03);
+}
+.manpage .plan-entry.expanded {
+  border-left-color: var(--phosphor);
+  background: rgba(51, 255, 51, 0.06);
+}
+.plan-toggle {
+  display: inline-block;
+  color: var(--phosphor-faint);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  margin-left: 10px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+.manpage .plan-entry.expanded .plan-toggle {
+  color: var(--phosphor);
+  text-shadow: 0 0 4px var(--phosphor);
+}
+.plan-detail {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-left: 2px dashed var(--phosphor-faint);
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 12px;
+  color: var(--phosphor-dim);
+  line-height: 1.65;
+}
+.manpage .plan-entry.expanded .plan-detail { display: block; }
+.plan-detail .detail-row {
+  display: grid;
+  grid-template-columns: 14ch 1fr;
+  gap: 12px;
+  padding: 3px 0;
+}
+.plan-detail .detail-row .k {
+  color: var(--amber);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.plan-detail .detail-row .v { color: var(--phosphor); }
+
+/* mobile responsiveness for new elements */
+@media (max-width: 720px) {
+  .session-chooser {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .session-tab { flex-shrink: 0; font-size: 11px; padding: 6px 10px; }
+  .replay-controls { gap: 6px; }
+  .replay-btn { padding: 5px 9px; font-size: 11px; }
+  .speed-toggle { margin-left: 0; margin-top: 6px; }
+  .prompt-row { font-size: 12px; padding: 10px 12px; }
+  .prompt-row input { font-size: 12px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -859,10 +1202,50 @@ a:hover { color: var(--phosphor); border-color: var(--phosphor); text-shadow: 0 
           generating. The skill isn't typing. The skill is knowing what to ask for.
         </p>
 
-        <div class="term-session" id="term-body" role="img" aria-label="An animated demo of a Claude Code terminal session organizing a Notion workspace."></div>
+        <!-- session chooser tabs -->
+        <div class="session-chooser" id="session-chooser" role="tablist" aria-label="Choose a Claude Code session to replay">
+          <button class="session-tab active" data-session="0" role="tab" aria-selected="true"><span class="tab-idx">[01]</span>refactor.sh</button>
+          <button class="session-tab" data-session="1" role="tab" aria-selected="false"><span class="tab-idx">[02]</span>new-feature.sh</button>
+          <button class="session-tab" data-session="2" role="tab" aria-selected="false"><span class="tab-idx">[03]</span>debug-test.sh</button>
+          <button class="session-tab" data-session="3" role="tab" aria-selected="false"><span class="tab-idx">[04]</span>write-docs.sh</button>
+          <button class="session-tab" data-session="4" role="tab" aria-selected="false"><span class="tab-idx">[05]</span>deploy.sh</button>
+        </div>
+
+        <!-- replay controls -->
+        <div class="replay-controls" id="replay-controls">
+          <span class="session-status" id="session-status"><span class="dot"></span><span class="status-text">running</span></span>
+          <button class="replay-btn" data-action="play" aria-label="Play">[ &#9654; play ]</button>
+          <button class="replay-btn" data-action="pause" aria-label="Pause">[ &#10074;&#10074; pause ]</button>
+          <button class="replay-btn" data-action="skip" aria-label="Skip to end">[ &#9197; skip ]</button>
+          <button class="replay-btn" data-action="restart" aria-label="Restart">[ &#8634; restart ]</button>
+          <div class="speed-toggle" role="group" aria-label="Playback speed">
+            <button class="speed-btn active" data-speed="1">1x</button>
+            <button class="speed-btn" data-speed="2">2x</button>
+            <button class="speed-btn" data-speed="4">4x</button>
+          </div>
+        </div>
+
+        <div class="term-session" id="term-body" role="img" aria-label="An animated demo of a Claude Code terminal session."></div>
+
+        <!-- interactive prompt -->
+        <form class="prompt-row" id="prompt-form" autocomplete="off">
+          <span class="prompt-sigil">$ claude</span>
+          <input type="text" id="prompt-input" placeholder="ask claude something..." aria-label="Type a question for Claude" maxlength="180">
+          <button type="submit" class="prompt-submit">[ submit ]</button>
+        </form>
+
+        <div class="prompt-hint">
+          &gt; try:
+          <span class="chip" data-q="what does this codebase do?">what does this codebase do?</span>
+          <span class="chip" data-q="run the tests">run the tests</span>
+          <span class="chip" data-q="find the slowest function">find the slowest function</span>
+          <span class="chip" data-q="add error handling">add error handling</span>
+          <span class="chip" data-q="explain this file">explain this file</span>
+          <span class="chip" data-q="ship it">ship it</span>
+        </div>
 
         <p style="font-family:var(--font-mono);font-size:11px;color:var(--phosphor-faint);letter-spacing:0.1em;margin-top:14px;">
-          &gt; A plain-English request &middot; A plan &middot; Four real actions, each verified &middot; A finished result you could use.
+          &gt; A plain-English request &middot; A plan &middot; Real actions, each verified &middot; A finished result you could use.
         </p>
 
         <!-- ============ ADDITIONAL SESSION DEMOS ============ -->
@@ -1234,34 +1617,70 @@ a:hover { color: var(--phosphor); border-color: var(--phosphor); text-shadow: 0 
 
           <div class="section-name">PLANS</div>
 
-          <div class="plan-entry">
-            <span class="plan-name">Free</span> &mdash; <span class="plan-price">$0 / month</span>
+          <div class="plan-entry" data-plan="free" tabindex="0" role="button" aria-expanded="false">
+            <span class="plan-name">Free</span> &mdash; <span class="plan-price">$0 / month</span> <span class="plan-toggle">[ + expand ]</span>
             <span class="plan-desc">Try the chat. Limited daily usage. Claude Code <em>not</em> included.</span>
+            <div class="plan-detail">
+              <div class="detail-row"><span class="k">usage</span><span class="v">~30 messages/day on web claude.ai</span></div>
+              <div class="detail-row"><span class="k">models</span><span class="v">haiku-4 default, sonnet-4.6 occasional</span></div>
+              <div class="detail-row"><span class="k">claude-code</span><span class="v">not included &mdash; chat only</span></div>
+              <div class="detail-row"><span class="k">good for</span><span class="v">kicking the tires before upgrading</span></div>
+              <div class="detail-row"><span class="k">limits</span><span class="v">no file uploads, no projects, no MCP</span></div>
+            </div>
           </div>
 
-          <div class="plan-entry">
-            <span class="plan-name">Pro</span> &mdash; <span class="plan-price">$20 / month</span> <span class="plan-tag">recommended</span>
+          <div class="plan-entry" data-plan="pro" tabindex="0" role="button" aria-expanded="false">
+            <span class="plan-name">Pro</span> &mdash; <span class="plan-price">$20 / month</span> <span class="plan-tag">recommended</span> <span class="plan-toggle">[ + expand ]</span>
             <span class="plan-desc"><span class="plan-feat">Claude Code included.</span> ~5x the chat usage of Free.</span>
             <span class="plan-desc">Projects, Artifacts, file uploads. $17/mo if billed annually.</span>
+            <div class="plan-detail">
+              <div class="detail-row"><span class="k">usage</span><span class="v">~5x free tier &middot; ~150 msg/day rough cap</span></div>
+              <div class="detail-row"><span class="k">models</span><span class="v">opus-4.7 (limited), sonnet-4.6 (heavy), haiku-4</span></div>
+              <div class="detail-row"><span class="k">claude-code</span><span class="v">full access &middot; same login &middot; no extra cost</span></div>
+              <div class="detail-row"><span class="k">good for</span><span class="v">solo devs, founders, daily 1&ndash;3hr usage</span></div>
+              <div class="detail-row"><span class="k">extras</span><span class="v">Projects, Artifacts, MCP, file uploads to 30MB</span></div>
+              <div class="detail-row"><span class="k">annual</span><span class="v">$17/mo billed yearly &middot; saves $36/yr</span></div>
+            </div>
           </div>
 
-          <div class="plan-entry">
-            <span class="plan-name">Max</span> &mdash; <span class="plan-price">$100+ / month</span>
+          <div class="plan-entry" data-plan="max" tabindex="0" role="button" aria-expanded="false">
+            <span class="plan-name">Max</span> &mdash; <span class="plan-price">$100+ / month</span> <span class="plan-toggle">[ + expand ]</span>
             <span class="plan-desc">Everything in Pro. 5x&ndash;20x the usage of Pro.</span>
             <span class="plan-desc">Priority access at peak hours.</span>
+            <div class="plan-detail">
+              <div class="detail-row"><span class="k">tiers</span><span class="v">$100/mo (5x pro) &middot; $200/mo (20x pro)</span></div>
+              <div class="detail-row"><span class="k">opus-4.7</span><span class="v">generous quota &middot; rarely throttled</span></div>
+              <div class="detail-row"><span class="k">peak access</span><span class="v">priority queue &middot; minimal "try again" walls</span></div>
+              <div class="detail-row"><span class="k">good for</span><span class="v">power users in claude-code 4+ hr/day</span></div>
+              <div class="detail-row"><span class="k">break-even</span><span class="v">~1 week if you live in opus &middot; less context churn</span></div>
+            </div>
           </div>
 
-          <div class="plan-entry">
-            <span class="plan-name">Team</span> &mdash; <span class="plan-price">$20 / seat / month</span>
+          <div class="plan-entry" data-plan="team" tabindex="0" role="button" aria-expanded="false">
+            <span class="plan-name">Team</span> &mdash; <span class="plan-price">$20 / seat / month</span> <span class="plan-toggle">[ + expand ]</span>
             <span class="plan-desc">Claude Code + Cowork. Central admin &amp; billing.</span>
             <span class="plan-desc">Premium tier at $100/seat.</span>
+            <div class="plan-detail">
+              <div class="detail-row"><span class="k">seats</span><span class="v">min 5 &middot; standard $20/mo &middot; premium $100/mo</span></div>
+              <div class="detail-row"><span class="k">admin</span><span class="v">central billing, seat management, usage console</span></div>
+              <div class="detail-row"><span class="k">cowork</span><span class="v">shared projects + collaborative artifacts</span></div>
+              <div class="detail-row"><span class="k">good for</span><span class="v">5&ndash;50 person teams &middot; one invoice instead of N</span></div>
+              <div class="detail-row"><span class="k">data</span><span class="v">conversations excluded from training by default</span></div>
+            </div>
           </div>
 
-          <div class="plan-entry">
-            <span class="plan-name">Enterprise</span> &mdash; <span class="plan-price">quote / workspace</span>
+          <div class="plan-entry" data-plan="enterprise" tabindex="0" role="button" aria-expanded="false">
+            <span class="plan-name">Enterprise</span> &mdash; <span class="plan-price">quote / workspace</span> <span class="plan-toggle">[ + expand ]</span>
             <span class="plan-desc">SSO/SAML, audit logs, data-residency, custom retention.</span>
             <span class="plan-desc">Includes admin console + per-team usage analytics + SCIM.</span>
             <span class="plan-desc">Volume seat-pricing typically $60&ndash;$120 / seat / month.</span>
+            <div class="plan-detail">
+              <div class="detail-row"><span class="k">auth</span><span class="v">SSO via SAML/OIDC &middot; SCIM provisioning</span></div>
+              <div class="detail-row"><span class="k">compliance</span><span class="v">SOC2 Type II &middot; HIPAA-eligible (BAA) &middot; DPA on file</span></div>
+              <div class="detail-row"><span class="k">data</span><span class="v">custom retention &middot; data-residency options &middot; zero-retention available</span></div>
+              <div class="detail-row"><span class="k">support</span><span class="v">dedicated CSM &middot; SLA &middot; private slack channel</span></div>
+              <div class="detail-row"><span class="k">good for</span><span class="v">~50+ seats or anywhere legal needs paper</span></div>
+            </div>
           </div>
 
           <div class="plan-foot">
@@ -1391,18 +1810,58 @@ a:hover { color: var(--phosphor); border-color: var(--phosphor); text-shadow: 0 
           is better. claude-code drives the agent harness here.
         </p>
 
-        <div class="term-session" style="min-height:auto;">
-<span class="term-line body" style="color:var(--amber);">  AGENT                                       SCORE        RELEASE</span>
-<span class="term-line body" style="color:var(--phosphor-faint);">  ----------------------------------------------------------------</span>
-<span class="term-line body" style="color:var(--phosphor);">  claude-code &middot; opus 4.7 &middot; 1M ctx          82.4 %        2026-01</span>
-<span class="term-line body" style="color:var(--phosphor-dim);">  claude-code &middot; sonnet 4.6                   77.2 %        2025-09</span>
-<span class="term-line body" style="color:var(--phosphor-dim);">  claude-code &middot; opus 4.1                     74.5 %        2025-08</span>
-<span class="term-line body" style="color:var(--phosphor-dim);">  cursor agent &middot; (closed)                    73.8 %        2026-03</span>
-<span class="term-line body" style="color:var(--phosphor-dim);">  openai codex-1                               69.1 %        2025-12</span>
-<span class="term-line body" style="color:var(--phosphor-dim);">  gemini 2.5 pro &middot; jules                     65.4 %        2025-11</span>
-<span class="term-line body" style="color:var(--phosphor-dim);">  aider &middot; with claude sonnet 4.5             62.8 %        2025-10</span>
-<span class="term-line body" style="color:var(--phosphor-dim);">  devin &middot; cognition                          57.6 %        2025-09</span>
-<span class="term-line body" style="color:var(--phosphor-faint);">  ----------------------------------------------------------------</span>
+        <div class="term-session" id="bench-table" style="min-height:auto;padding:18px 22px;">
+          <div style="color:var(--amber);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--phosphor-faint);padding-bottom:8px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto auto;gap:14px;">
+            <span>AGENT</span><span>SCORE</span><span>RELEASE</span>
+          </div>
+          <div class="bench-row lead" data-target="82.4">
+            <span class="bench-name">claude-code &middot; opus 4.7 &middot; 1M ctx</span>
+            <span class="bench-score">0.0%</span>
+            <span class="bench-date">2026-01</span>
+            <span class="bench-bar"></span>
+          </div>
+          <div class="bench-row" data-target="77.2">
+            <span class="bench-name">claude-code &middot; sonnet 4.6</span>
+            <span class="bench-score">0.0%</span>
+            <span class="bench-date">2025-09</span>
+            <span class="bench-bar"></span>
+          </div>
+          <div class="bench-row" data-target="74.5">
+            <span class="bench-name">claude-code &middot; opus 4.1</span>
+            <span class="bench-score">0.0%</span>
+            <span class="bench-date">2025-08</span>
+            <span class="bench-bar"></span>
+          </div>
+          <div class="bench-row" data-target="73.8">
+            <span class="bench-name">cursor agent &middot; (closed)</span>
+            <span class="bench-score">0.0%</span>
+            <span class="bench-date">2026-03</span>
+            <span class="bench-bar"></span>
+          </div>
+          <div class="bench-row" data-target="69.1">
+            <span class="bench-name">openai codex-1</span>
+            <span class="bench-score">0.0%</span>
+            <span class="bench-date">2025-12</span>
+            <span class="bench-bar"></span>
+          </div>
+          <div class="bench-row" data-target="65.4">
+            <span class="bench-name">gemini 2.5 pro &middot; jules</span>
+            <span class="bench-score">0.0%</span>
+            <span class="bench-date">2025-11</span>
+            <span class="bench-bar"></span>
+          </div>
+          <div class="bench-row" data-target="62.8">
+            <span class="bench-name">aider &middot; with claude sonnet 4.5</span>
+            <span class="bench-score">0.0%</span>
+            <span class="bench-date">2025-10</span>
+            <span class="bench-bar"></span>
+          </div>
+          <div class="bench-row" data-target="57.6">
+            <span class="bench-name">devin &middot; cognition</span>
+            <span class="bench-score">0.0%</span>
+            <span class="bench-date">2025-09</span>
+            <span class="bench-bar"></span>
+          </div>
         </div>
 
         <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);margin-top:16px;line-height:1.65;">
@@ -1609,11 +2068,12 @@ function tick() {
 }
 tick(); setInterval(tick, 1000);
 
-// ============ HERO TAGLINE TYPEWRITER ============
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+// ============ HERO TAGLINE TYPEWRITER ============
 const tagEl = document.getElementById('hero-tagline');
 const tagText = '> NOT A CHATBOT. A TEAMMATE._';
-function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }
 async function typeTagline() {
   if (reduce) { tagEl.textContent = tagText; return; }
   tagEl.textContent = '';
@@ -1624,27 +2084,241 @@ async function typeTagline() {
 }
 typeTagline();
 
-// ============ MAIN TERMINAL TYPEWRITER ============
-const termBody = document.getElementById('term-body');
+// ============ SESSION SCRIPTS ============
+const SESSIONS = [
+  // [0] refactor.sh — original notion organizer + a flavor of refactor
+  [
+    { type: 'cmd', text: 'claude' },
+    { type: 'blank' },
+    { type: 'user-q', text: '> the lib/ folder has 11 modules that all wrap fetch differently. consolidate.' },
+    { type: 'blank' },
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: 'reading lib/. found 4 distinct fetch wrappers with overlapping retry logic.' },
+    { type: 'body', text: 'plan: extract lib/http/client.ts, route call-sites through it, run tests.' },
+    { type: 'blank' },
+    { type: 'check', text: 'scanned lib/ &middot; 11 files, 1,840 LOC', meta: 'cyclomatic avg 6.4' },
+    { type: 'check', text: 'extracted HttpClient wrapper', meta: 'lib/http/client.ts +94' },
+    { type: 'check', text: 'rewired call-sites in 8 modules', meta: '-181 / +24 LOC' },
+    { type: 'check', text: 'vitest &middot; 142 passed in 3.8s', meta: '0 failures' },
+    { type: 'check', text: 'tsc --noEmit &middot; clean', meta: '0 type errors' },
+    { type: 'blank' },
+    { type: 'body', text: '  net: -157 LOC, identical coverage. ready to commit?' },
+  ],
 
-const script = [
-  { type: 'cmd', text: 'claude' },
-  { type: 'blank' },
-  { type: 'user-q', text: '> I need help organizing my Notion database' },
-  { type: 'blank' },
-  { type: 'label', text: 'Claude:' },
-  { type: 'body', text: 'I see you have 247 pages across 3 databases.' },
-  { type: 'body', text: 'Let me help structure them...' },
-  { type: 'blank' },
-  { type: 'check', text: 'Scanning Notion workspace', meta: '247 pages indexed' },
-  { type: 'check', text: 'Identifying duplicates', meta: 'found 23' },
-  { type: 'check', text: 'Generating new taxonomy', meta: '4 top-level themes' },
-  { type: 'check', text: 'Drafting migration plan', meta: 'awaiting your review' },
+  // [1] new-feature.sh — TDD endpoint
+  [
+    { type: 'cmd', text: 'claude --plan' },
+    { type: 'blank' },
+    { type: 'user-q', text: '> add /api/exports endpoint &mdash; signed s3 url for latest report. tests first.' },
+    { type: 'blank' },
+    { type: 'label', text: 'claude (plan):' },
+    { type: 'body', text: '  1. write src/routes/exports.spec.ts &mdash; happy + 401 + 404' },
+    { type: 'body', text: '  2. confirm tests fail (red)' },
+    { type: 'body', text: '  3. implement src/routes/exports.ts via existing s3Service' },
+    { type: 'body', text: '  4. confirm tests pass (green)' },
+    { type: 'body', text: '  5. wire into src/server.ts router' },
+    { type: 'blank' },
+    { type: 'check', text: 'wrote exports.spec.ts', meta: '3 tests &middot; failing as expected' },
+    { type: 'check', text: 'wrote exports.ts', meta: '42 LOC' },
+    { type: 'check', text: 'npm test &middot; 3 passed', meta: 'happy / 401 / 404' },
+    { type: 'check', text: 'wired router in server.ts', meta: 'GET /api/exports' },
+    { type: 'check', text: 'npm run typecheck &middot; clean', meta: '0 type errors' },
+    { type: 'blank' },
+    { type: 'body', text: '  feature ready. open a draft PR?' },
+  ],
+
+  // [2] debug-test.sh — flaky test
+  [
+    { type: 'cmd', text: 'claude' },
+    { type: 'blank' },
+    { type: 'user-q', text: '> jobs.spec.ts "drains the queue" is flaky &mdash; ~1 in 8 fails in CI. fix it.' },
+    { type: 'blank' },
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: '  running test 30x locally to reproduce.' },
+    { type: 'check', text: 'vitest jobs --repeat 30', meta: '4/30 failed' },
+    { type: 'body', text: '  failure mode: timer not advanced before queue.drain() awaits.' },
+    { type: 'body', text: '  root cause: Date.now() in setTimeout, not vi.useFakeTimers().' },
+    { type: 'blank' },
+    { type: 'check', text: 'patched jobs.ts &mdash; injected clock interface', meta: '+8 / -3 LOC' },
+    { type: 'check', text: 'updated jobs.spec.ts &mdash; vi.useFakeTimers', meta: 'deterministic' },
+    { type: 'check', text: 'vitest jobs --repeat 100', meta: '100/100 passed' },
+    { type: 'blank' },
+    { type: 'body', text: '  diagnosis: test read wall-clock. fix: injected a fake clock.' },
+    { type: 'body', text: '  flake eliminated. 100 consecutive passes confirmed.' },
+  ],
+
+  // [3] write-docs.sh — README from scratch
+  [
+    { type: 'cmd', text: 'claude' },
+    { type: 'blank' },
+    { type: 'user-q', text: '> this repo has no README. read the whole codebase, write one a contributor could follow.' },
+    { type: 'blank' },
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: '  scanning repo tree, package.json, and entry-points.' },
+    { type: 'blank' },
+    { type: 'check', text: 'indexed 312 files', meta: '73,420 LOC &middot; ts/py/sh' },
+    { type: 'check', text: 'identified stack', meta: 'next.js 15 + fastapi + postgres' },
+    { type: 'check', text: 'traced entry-points', meta: 'apps/web, services/api, scripts/seed' },
+    { type: 'check', text: 'extracted env vars from .env.example', meta: '14 documented' },
+    { type: 'check', text: 'drafted README.md', meta: 'install/dev/test/deploy/troubleshooting' },
+    { type: 'check', text: 'verified install on clean clone', meta: 'npm ci &middot; ok in 38s' },
+    { type: 'blank' },
+    { type: 'body', text: '  README.md written. 1,140 words. preview? open README.md ?' },
+  ],
+
+  // [4] deploy.sh — Vercel
+  [
+    { type: 'cmd', text: 'claude' },
+    { type: 'blank' },
+    { type: 'user-q', text: '> deploy this to vercel. set env from .env.production. report the URL.' },
+    { type: 'blank' },
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: '  pre-flight: build clean? env vars defined? vercel.json sane?' },
+    { type: 'blank' },
+    { type: 'check', text: 'npm run build &middot; ok', meta: '3.2 MB &middot; 18.4s' },
+    { type: 'check', text: 'next.config.js validated', meta: 'edge runtime &middot; node 20' },
+    { type: 'check', text: 'pushed 14 env vars', meta: 'DATABASE_URL, STRIPE_KEY, ...' },
+    { type: 'check', text: 'vercel --prod', meta: 'building...' },
+    { type: 'check', text: 'deployment ready', meta: '42.1s &middot; cdn warm' },
+    { type: 'check', text: 'smoke test &middot; GET /api/health', meta: '200 ok &middot; 84ms' },
+    { type: 'blank' },
+    { type: 'body', text: '  live at: https://lead-router-abc123.vercel.app' },
+    { type: 'body', text: '  alias bound: lead-router.cetiai.co (dns propagating).' },
+  ],
 ];
 
-function buildEmptyLines() {
-  termBody.innerHTML = '';
-  script.forEach((s, i) => {
+// answers Claude gives to chip prompts (for interactive prompt)
+const ANSWER_TABLE = {
+  'what does this codebase do?': [
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: 'reading repo structure, package.json, entry-points.' },
+    { type: 'check', text: 'indexed 312 files &middot; next.js 15 + fastapi', meta: 'ts/py' },
+    { type: 'body', text: 'this is a lead-routing service. web form at /intake collects leads,' },
+    { type: 'body', text: 'the api scores them, postgres stores them, sales sees them in /admin.' },
+    { type: 'body', text: '  primary entry: apps/web/app/intake/page.tsx' },
+    { type: 'body', text: '  background jobs: services/api/scoring.py' },
+  ],
+  'run the tests': [
+    { type: 'label', text: 'claude:' },
+    { type: 'check', text: 'vitest run --reporter=verbose', meta: '142 tests' },
+    { type: 'check', text: '140 passed &middot; 2 skipped', meta: '3.8s' },
+    { type: 'check', text: 'pytest services/api &middot; 38 passed', meta: '1.2s' },
+    { type: 'check', text: 'tsc --noEmit &middot; clean', meta: '0 errors' },
+    { type: 'body', text: '  all green. 2 skipped (manual-only). safe to ship.' },
+  ],
+  'find the slowest function': [
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: 'profiling apps/web with --prof for 30s under typical load...' },
+    { type: 'check', text: 'collected 4,218 stack samples', meta: 'v8 cpu profile' },
+    { type: 'check', text: 'hot path: scoreLead() in scoring.py', meta: '38% wall time' },
+    { type: 'body', text: '  cause: re-fetches geo data per row instead of batching.' },
+    { type: 'body', text: '  fix: lift the fetch out of the loop. ~12x speed-up estimated.' },
+  ],
+  'add error handling': [
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: 'auditing 14 async call-sites for unhandled rejections.' },
+    { type: 'check', text: 'found 6 unhandled await chains', meta: 'src/routes, src/jobs' },
+    { type: 'check', text: 'wrapped with typed Result&lt;T,E&gt; helper', meta: '+47 LOC' },
+    { type: 'check', text: 'added 6 logger.error() with request_id', meta: 'sentry-tagged' },
+    { type: 'check', text: 'tests still green &middot; 142/142', meta: '0 regressions' },
+    { type: 'body', text: '  error surface is now explicit. ready to PR?' },
+  ],
+  'explain this file': [
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: 'reading the current file (apps/web/app/intake/page.tsx).' },
+    { type: 'body', text: '  it is the public lead-intake form. server component renders the' },
+    { type: 'body', text: '  shell, a client child handles input + zod validation, then POSTs' },
+    { type: 'body', text: '  to /api/leads. the response includes a tracking id which the page' },
+    { type: 'body', text: '  shows on a success screen.' },
+    { type: 'body', text: '  notable: revalidatePath() fires after submit so /admin updates live.' },
+  ],
+  'ship it': [
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: 'pre-flight checks before shipping.' },
+    { type: 'check', text: 'lint &middot; clean', meta: '0 warnings' },
+    { type: 'check', text: 'typecheck &middot; clean', meta: '0 errors' },
+    { type: 'check', text: 'tests &middot; 142/142', meta: 'green' },
+    { type: 'check', text: 'opened PR #428', meta: 'auto-assigned to @manu' },
+    { type: 'check', text: 'preview deploy ready', meta: 'pr-428.cetiai.co' },
+    { type: 'body', text: '  PR ready for review. merge button is yours.' },
+  ],
+};
+
+// fallback answer for unknown questions
+function fallbackAnswer(q) {
+  return [
+    { type: 'label', text: 'claude:' },
+    { type: 'body', text: 'parsing intent: "' + q.slice(0, 60) + '"' },
+    { type: 'check', text: 'scanned cwd &middot; 312 files indexed', meta: 'ready' },
+    { type: 'body', text: '  i can do that. drafting a plan...' },
+    { type: 'check', text: 'plan: 4 steps, ~2 min', meta: 'awaiting your approval' },
+    { type: 'body', text: '  shall i proceed? (y/n)' },
+  ];
+}
+
+// ============ PLAYER STATE ============
+const termBody = document.getElementById('term-body');
+const tabs = document.querySelectorAll('.session-tab');
+const statusEl = document.getElementById('session-status');
+const statusText = statusEl.querySelector('.status-text');
+const replayBtns = document.querySelectorAll('.replay-btn');
+const speedBtns = document.querySelectorAll('.speed-btn');
+
+let current = 0;          // session index
+let speed = 1;            // 1 / 2 / 4
+let isPaused = false;     // pause flag
+let pauseGate = null;     // promise resolver while paused
+let skipFlag = false;     // skip-to-end flag
+let token = 0;            // run-id; bumps on switch/restart to cancel in-flight loop
+let appendMode = false;   // when true, runtime appends instead of replacing
+
+function setStatus(s) {
+  statusEl.classList.remove('paused', 'idle', 'reduced');
+  if (s === 'paused') { statusEl.classList.add('paused'); statusText.textContent = 'paused'; }
+  else if (s === 'idle') { statusEl.classList.add('idle'); statusText.textContent = 'idle'; }
+  else if (s === 'reduced') { statusEl.classList.add('idle'); statusText.textContent = 'static'; }
+  else if (s === 'typing') { statusText.textContent = 'typing &hellip;'.replace('&hellip;', '…'); }
+  else { statusText.textContent = s; }
+}
+
+async function gatePause() {
+  if (!isPaused) return;
+  await new Promise((res) => { pauseGate = res; });
+}
+
+async function pacedWait(ms) {
+  if (skipFlag) return;
+  const adj = Math.max(0, ms / speed);
+  await wait(adj);
+  await gatePause();
+}
+
+// decode html entities in a single pass (so SESSIONS can use &middot; etc.)
+function decodeEntities(s) {
+  if (!s.includes('&')) return s;
+  const t = document.createElement('textarea');
+  t.innerHTML = s;
+  return t.value;
+}
+
+// ============ TYPEWRITER ENGINE ============
+async function typeInto(targetEl, rawText, minDelay = 38, maxDelay = 78, runId) {
+  const text = decodeEntities(rawText);
+  for (let i = 0; i < text.length; i++) {
+    if (runId !== token) return;
+    if (skipFlag) { targetEl.textContent = text; return; }
+    await gatePause();
+    targetEl.textContent += text[i];
+    const ch = text[i];
+    let d = minDelay + Math.random() * (maxDelay - minDelay);
+    if (ch === ',' || ch === '.') d += 100;
+    if (ch === ' ') d *= 0.55;
+    await pacedWait(d);
+  }
+}
+
+function buildEmptyLines(scriptArr, container) {
+  scriptArr.forEach((s, i) => {
     const span = document.createElement('span');
     span.className = 'term-line ' + s.type;
     span.dataset.idx = i;
@@ -1657,95 +2331,328 @@ function buildEmptyLines() {
     } else {
       span.innerHTML = '<span class="content"></span>';
     }
-    termBody.appendChild(span);
+    container.appendChild(span);
   });
 }
 
-function renderStatic() {
-  termBody.innerHTML = '';
-  script.forEach((s) => {
+function renderStatic(scriptArr, container) {
+  scriptArr.forEach((s) => {
     const span = document.createElement('span');
     span.className = 'term-line ' + s.type;
+    const text = decodeEntities(s.text || '');
+    const meta = decodeEntities(s.meta || '');
     if (s.type === 'cmd') {
-      span.innerHTML = '<span class="prompt">$</span>' + s.text;
+      const p = document.createElement('span'); p.className = 'prompt'; p.textContent = '$';
+      span.appendChild(p);
+      span.appendChild(document.createTextNode(text));
     } else if (s.type === 'check') {
-      span.innerHTML = '<span class="mark">[OK]</span>' + s.text + '<span class="meta">' + (s.meta || '') + '</span>';
+      const m = document.createElement('span'); m.className = 'mark'; m.textContent = '[OK]';
+      span.appendChild(m);
+      span.appendChild(document.createTextNode(text));
+      const me = document.createElement('span'); me.className = 'meta'; me.textContent = meta;
+      span.appendChild(me);
       span.classList.add('in');
     } else if (s.type === 'blank') {
       span.innerHTML = '&nbsp;';
     } else {
-      span.textContent = s.text;
+      span.textContent = text;
     }
-    termBody.appendChild(span);
+    container.appendChild(span);
   });
 }
 
-async function typeInto(targetEl, text, minDelay = 38, maxDelay = 78) {
-  for (let i = 0; i < text.length; i++) {
-    targetEl.textContent += text[i];
-    const ch = text[i];
-    let d = minDelay + Math.random() * (maxDelay - minDelay);
-    if (ch === ',' || ch === '.') d += 120;
-    if (ch === ' ') d *= 0.55;
-    await wait(d);
-  }
-}
+async function playScript(scriptArr, runId, opts) {
+  const append = opts && opts.append;
+  // build container fragments
+  const startIdx = append ? termBody.childElementCount : 0;
+  if (!append) termBody.innerHTML = '';
+  buildEmptyLines(scriptArr, termBody);
+  const allLines = termBody.querySelectorAll('.term-line');
 
-async function runTypewriter() {
-  buildEmptyLines();
-  const lines = [...termBody.querySelectorAll('.term-line')];
+  for (let i = 0; i < scriptArr.length; i++) {
+    if (runId !== token) return;
+    const s = scriptArr[i];
+    const line = allLines[startIdx + i];
+    if (!line) continue;
 
-  for (let i = 0; i < script.length; i++) {
-    const s = script[i];
-    const line = lines[i];
+    if (skipFlag) {
+      const text = decodeEntities(s.text || '');
+      const meta = decodeEntities(s.meta || '');
+      if (s.type === 'cmd') {
+        line.innerHTML = '';
+        const p = document.createElement('span'); p.className = 'prompt'; p.textContent = '$';
+        line.appendChild(p);
+        line.appendChild(document.createTextNode(text));
+      } else if (s.type === 'check') {
+        line.innerHTML = '';
+        const m = document.createElement('span'); m.className = 'mark'; m.textContent = '[OK]';
+        line.appendChild(m);
+        line.appendChild(document.createTextNode(text));
+        const me = document.createElement('span'); me.className = 'meta'; me.textContent = meta;
+        line.appendChild(me);
+        line.classList.add('in');
+      } else if (s.type === 'blank') {
+        line.innerHTML = '&nbsp;';
+      } else {
+        line.textContent = text;
+      }
+      continue;
+    }
 
     if (s.type === 'cmd') {
       const cmdText = line.querySelector('.cmd-text');
-      await typeInto(cmdText, s.text, 70, 130);
-      await wait(420);
-      const c = line.querySelector('.caret');
-      if (c) c.remove();
+      await typeInto(cmdText, s.text, 70, 130, runId);
+      await pacedWait(380);
+      const c = line.querySelector('.caret'); if (c) c.remove();
     } else if (s.type === 'user-q') {
       const content = line.querySelector('.content');
-      const caret = document.createElement('span');
-      caret.className = 'caret';
+      const caret = document.createElement('span'); caret.className = 'caret';
       line.appendChild(caret);
-      await typeInto(content, s.text, 28, 58);
+      await typeInto(content, s.text, 28, 58, runId);
       caret.remove();
-      await wait(540);
+      await pacedWait(500);
     } else if (s.type === 'label') {
       line.querySelector('.content').textContent = s.text;
-      await wait(380);
+      await pacedWait(340);
     } else if (s.type === 'body') {
       const content = line.querySelector('.content');
-      await typeInto(content, s.text, 16, 34);
-      await wait(180);
+      await typeInto(content, s.text, 16, 34, runId);
+      await pacedWait(170);
     } else if (s.type === 'check') {
-      line.querySelector('.check-text').textContent = s.text;
-      if (s.meta) line.querySelector('.meta').textContent = s.meta;
+      line.querySelector('.check-text').textContent = decodeEntities(s.text);
+      if (s.meta) line.querySelector('.meta').textContent = decodeEntities(s.meta);
       requestAnimationFrame(() => line.classList.add('in'));
-      await wait(560);
+      await pacedWait(520);
     } else {
-      await wait(120);
+      await pacedWait(120);
     }
   }
-  await wait(3600);
-  runTypewriter();
+  if (runId === token) {
+    skipFlag = false;
+    setStatus('idle');
+  }
 }
 
+// ============ SESSION SWITCHING ============
+async function loadSession(idx, opts) {
+  const autoplay = !(opts && opts.noAutoplay);
+  current = idx;
+  tabs.forEach((t) => {
+    const active = parseInt(t.dataset.session, 10) === idx;
+    t.classList.toggle('active', active);
+    t.setAttribute('aria-selected', String(active));
+  });
+  // fade swap
+  termBody.classList.add('swapping');
+  token++;
+  const myToken = token;
+  skipFlag = false;
+  isPaused = false;
+  if (pauseGate) { const r = pauseGate; pauseGate = null; r(); }
+  await wait(180);
+  if (myToken !== token) return;
+  termBody.classList.remove('swapping');
+  termBody.innerHTML = '';
+  if (reduce) {
+    renderStatic(SESSIONS[idx], termBody);
+    setStatus('reduced');
+    return;
+  }
+  if (autoplay) {
+    setStatus('running');
+    await playScript(SESSIONS[idx], myToken);
+  } else {
+    renderStatic(SESSIONS[idx], termBody);
+    setStatus('idle');
+  }
+}
+
+// ============ CONTROL HANDLERS ============
+tabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    const idx = parseInt(tab.dataset.session, 10);
+    if (idx === current && termBody.childElementCount > 0) {
+      // re-run current
+      restartCurrent();
+    } else {
+      loadSession(idx);
+    }
+  });
+});
+
+function restartCurrent() {
+  token++;
+  isPaused = false;
+  if (pauseGate) { const r = pauseGate; pauseGate = null; r(); }
+  skipFlag = false;
+  loadSession(current);
+}
+
+function playPause(action) {
+  if (reduce) return;
+  if (action === 'play') {
+    if (isPaused) {
+      isPaused = false;
+      setStatus('running');
+      if (pauseGate) { const r = pauseGate; pauseGate = null; r(); }
+    } else if (statusText.textContent === 'idle' || statusText.textContent === 'static') {
+      restartCurrent();
+    }
+  } else if (action === 'pause') {
+    if (!isPaused) {
+      isPaused = true;
+      setStatus('paused');
+    }
+  } else if (action === 'skip') {
+    skipFlag = true;
+    if (isPaused) { isPaused = false; if (pauseGate) { const r = pauseGate; pauseGate = null; r(); } }
+  } else if (action === 'restart') {
+    restartCurrent();
+  }
+}
+
+replayBtns.forEach((btn) => {
+  if (reduce) { btn.disabled = true; btn.setAttribute('aria-disabled', 'true'); }
+  btn.addEventListener('click', () => playPause(btn.dataset.action));
+});
+
+speedBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    speed = parseInt(btn.dataset.speed, 10);
+    speedBtns.forEach((b) => b.classList.toggle('active', b === btn));
+  });
+});
+
+// ============ INTERACTIVE PROMPT ============
+const promptForm = document.getElementById('prompt-form');
+const promptInput = document.getElementById('prompt-input');
+const chips = document.querySelectorAll('.prompt-hint .chip');
+
+async function appendAnswer(question) {
+  if (reduce) {
+    // just render statically
+    const ans = ANSWER_TABLE[question.toLowerCase().trim()] || fallbackAnswer(question);
+    const userQ = document.createElement('span');
+    userQ.className = 'term-line cmd';
+    userQ.innerHTML = '<span class="prompt">$</span>claude';
+    termBody.appendChild(userQ);
+    const q = document.createElement('span');
+    q.className = 'term-line user-q';
+    q.textContent = '> ' + question;
+    termBody.appendChild(q);
+    const blank = document.createElement('span');
+    blank.className = 'term-line blank';
+    blank.innerHTML = '&nbsp;';
+    termBody.appendChild(blank);
+    renderStatic(ans, termBody);
+    termBody.scrollTop = termBody.scrollHeight;
+    return;
+  }
+  token++;
+  const myToken = token;
+  skipFlag = false;
+  isPaused = false;
+  setStatus('running');
+
+  // append user input as cmd + user-q
+  const userCmd = { type: 'cmd', text: 'claude' };
+  const userQ = { type: 'user-q', text: '> ' + question };
+  const blank = { type: 'blank' };
+  const ans = ANSWER_TABLE[question.toLowerCase().trim()] || fallbackAnswer(question);
+  const appendScript = [userCmd, userQ, blank, ...ans, blank];
+  await playScript(appendScript, myToken, { append: true });
+  // auto-scroll
+  termBody.scrollTop = termBody.scrollHeight;
+}
+
+promptForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const v = promptInput.value.trim();
+  if (!v) return;
+  appendAnswer(v);
+  promptInput.value = '';
+});
+
+chips.forEach((c) => {
+  c.addEventListener('click', () => {
+    const q = c.dataset.q;
+    promptInput.value = q;
+    appendAnswer(q);
+    promptInput.value = '';
+  });
+});
+
+// ============ INITIAL AUTOPLAY (on viewport entry) ============
 if (reduce) {
-  renderStatic();
+  renderStatic(SESSIONS[0], termBody);
+  setStatus('reduced');
 } else {
   const termObs = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (e.isIntersecting) {
-        runTypewriter();
+        loadSession(0);
         termObs.unobserve(e.target);
       }
     });
   }, { threshold: 0.2 });
   termObs.observe(termBody);
 }
+
+// ============ BENCHMARK TICKER ============
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+function animateBench() {
+  const rows = document.querySelectorAll('#bench-table .bench-row');
+  // pre-inject fill children
+  rows.forEach((row) => {
+    const bar = row.querySelector('.bench-bar');
+    if (bar && !bar.querySelector('.bench-bar-fill')) {
+      const fill = document.createElement('div');
+      fill.className = 'bench-bar-fill';
+      bar.appendChild(fill);
+    }
+  });
+  const duration = reduce ? 0 : 1400;
+  const start = performance.now();
+  function frame(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = reduce ? 1 : easeOutCubic(t);
+    rows.forEach((row) => {
+      const target = parseFloat(row.dataset.target);
+      const v = target * eased;
+      row.querySelector('.bench-score').textContent = v.toFixed(1) + '%';
+      const fill = row.querySelector('.bench-bar-fill');
+      if (fill) fill.style.width = v + '%';
+    });
+    if (t < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+const benchTable = document.getElementById('bench-table');
+if (benchTable) {
+  const benchObs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) { animateBench(); benchObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.3 });
+  benchObs.observe(benchTable);
+}
+
+// ============ PRICING TIER EXPAND ============
+document.querySelectorAll('.manpage .plan-entry[data-plan]').forEach((el) => {
+  const toggle = (e) => {
+    if (e && e.target && (e.target.tagName === 'A')) return;
+    const open = el.classList.toggle('expanded');
+    el.setAttribute('aria-expanded', String(open));
+    const t = el.querySelector('.plan-toggle');
+    if (t) t.textContent = open ? '[ − collapse ]' : '[ + expand ]';
+  };
+  el.addEventListener('click', toggle);
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
+});
 </script>
 <script src="../shared/nav.js" defer></script>
 </body>

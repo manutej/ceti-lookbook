@@ -447,6 +447,246 @@
       opacity: 0.7;
     }
 
+    /* ====== INTERACTIVE DIAGRAM ====== */
+    figure.diagram {
+      position: relative;
+    }
+    .diagram-wrap {
+      position: relative;
+    }
+    .diag-instruction {
+      position: absolute;
+      top: -1.25rem;
+      right: 0.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      transition: opacity 600ms var(--ease);
+      pointer-events: none;
+    }
+    .diag-instruction.visible { opacity: 0.85; }
+    .diag-instruction .key {
+      color: var(--amber);
+    }
+
+    /* interactive orb states */
+    figure.diagram svg .orb {
+      cursor: pointer;
+    }
+    figure.diagram svg .orb circle {
+      transition: fill 280ms var(--ease), stroke-width 280ms var(--ease);
+    }
+    figure.diagram svg .orb:hover circle,
+    figure.diagram svg .orb.active circle,
+    figure.diagram svg .orb:focus-visible circle {
+      fill: var(--amber);
+      stroke-width: 1.5;
+    }
+    figure.diagram svg .orb:hover text,
+    figure.diagram svg .orb.active text,
+    figure.diagram svg .orb:focus-visible text {
+      fill: var(--paper);
+    }
+    figure.diagram svg .orb text {
+      transition: fill 280ms var(--ease);
+      pointer-events: none;
+    }
+    figure.diagram svg .orb:focus { outline: none; }
+
+    /* trace line that draws from center to orb */
+    figure.diagram svg .trace-line {
+      stroke: var(--amber);
+      stroke-width: 1.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-dasharray: 260;
+      stroke-dashoffset: 260;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 280ms var(--ease);
+    }
+    figure.diagram svg .trace-line.draw {
+      opacity: 1;
+      animation: traceDraw 700ms var(--ease) forwards;
+    }
+    @keyframes traceDraw {
+      from { stroke-dashoffset: 260; }
+      to   { stroke-dashoffset: 0; }
+    }
+
+    /* callout panel — editorial italic */
+    .inspector {
+      max-width: var(--measure);
+      margin: -1rem auto 3rem;
+      padding: 0 1.5rem;
+      min-height: 0;
+      transition: min-height 400ms var(--ease);
+    }
+    .inspector.has-content { min-height: 11rem; }
+    .callout {
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 700ms var(--ease), transform 700ms var(--ease);
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      padding: 1.25rem 0 1.5rem;
+      position: relative;
+    }
+    .callout.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .callout .who {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .callout .who .pin-status {
+      color: var(--muted);
+      font-size: 0.58rem;
+      opacity: 0;
+      transition: opacity 280ms var(--ease);
+    }
+    .callout.pinned .who .pin-status { opacity: 1; }
+    .callout .messages {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--ink);
+      margin-bottom: 0.85rem;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .callout .messages .arrow-out { color: var(--amber); }
+    .callout .messages .arrow-in { color: var(--secondary); }
+    .callout .messages .cm-line { color: var(--muted); font-style: italic; }
+    .callout .gloss {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.02rem;
+      line-height: 1.55;
+      color: var(--secondary);
+      margin: 0;
+      max-width: 36rem;
+    }
+    .callout .pin-hint {
+      position: absolute;
+      bottom: -1.4rem;
+      left: 0;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.6;
+    }
+
+    /* pull quote — subtle amber rule grow on hover */
+    blockquote.pull {
+      transition: border-left-width 380ms var(--ease), padding-left 380ms var(--ease);
+    }
+    blockquote.pull:hover {
+      border-left-width: 3px;
+      padding-left: 1.65rem;
+    }
+
+    /* drop cap one-shot scale on load */
+    @keyframes dropcapSettle {
+      from { transform: scale(0.92); opacity: 0.5; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    p.lede.in::first-letter,
+    p.section-open.in::first-letter {
+      display: inline-block;
+      animation: dropcapSettle 800ms var(--ease) both;
+    }
+
+    /* footnote markers as scroll-to links */
+    sup.fn { cursor: pointer; }
+
+    /* code-block trace button */
+    .code-trace-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin: 2rem 0 -1rem;
+    }
+    .trace-btn {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber);
+      background: transparent;
+      border: 1px solid var(--rule);
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      transition: background-color 240ms var(--ease), border-color 240ms var(--ease), color 240ms var(--ease);
+      border-radius: 1px;
+    }
+    .trace-btn:hover, .trace-btn:focus-visible {
+      background: var(--amber);
+      color: var(--paper);
+      border-color: var(--amber);
+      outline: none;
+    }
+    .trace-btn .glyph {
+      display: inline-block;
+      transform: translateY(-0.04em);
+      margin-right: 0.3em;
+    }
+    .trace-btn[aria-expanded="true"] .glyph { color: var(--paper); }
+
+    .code-trace {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 600ms var(--ease), opacity 500ms var(--ease), margin 400ms var(--ease);
+      margin: 0;
+      border-left: 2px solid var(--amber);
+      padding-left: 0;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.75;
+      color: var(--ink);
+    }
+    .code-trace.open {
+      max-height: 26rem;
+      opacity: 1;
+      padding: 1rem 0 1rem 1.25rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .code-trace .step {
+      display: block;
+      padding: 0.1rem 0;
+      white-space: pre-wrap;
+    }
+    .code-trace .step .pre {
+      font-family: var(--font-mono);
+      color: var(--amber);
+      font-size: 0.66rem;
+      letter-spacing: 0.14em;
+      margin-right: 0.6rem;
+      text-transform: uppercase;
+    }
+    .code-trace .step .gloss {
+      font-family: var(--font-serif);
+      font-style: italic;
+      color: var(--secondary);
+      font-size: 0.92rem;
+      margin-left: 0.4rem;
+    }
+
     /* ====== RESPONSIVE ====== */
     @media (max-width: 640px) {
       body { font-size: 1.0625rem; line-height: 1.6; }
@@ -462,6 +702,12 @@
       p.lede::first-letter,
       p.section-open::first-letter { font-size: 3.5em; }
       figure.diagram { margin: 2.5rem 0; }
+      .diag-instruction { font-size: 0.56rem; top: -1rem; }
+      .inspector { padding: 0 1.25rem; }
+      .callout .messages { font-size: 0.7rem; }
+      .callout .gloss { font-size: 0.95rem; }
+      .code-trace { font-size: 0.72rem; }
+      .code-trace.open { max-height: 32rem; }
     }
 
     /* ====== REDUCED MOTION ====== */
@@ -471,6 +717,12 @@
         animation-duration: 0.001ms !important;
       }
       .fade { opacity: 1 !important; transform: none !important; }
+      .callout { opacity: 1 !important; transform: none !important; }
+      figure.diagram svg .trace-line.draw {
+        stroke-dashoffset: 0 !important;
+        animation: none !important;
+      }
+      .code-trace { transition: none !important; }
     }
   </style>
 </head>
@@ -502,42 +754,70 @@
     <p class="fade">What it asks for is one of three things, and the entire specification turns on these three primitives. <strong>Tools</strong> are things the model can <em>do</em>: side-effecting functions like <code>create_issue</code> or <code>send_email</code>, each declared with a JSON-Schema so the model can call it correctly on the first try. <strong>Resources</strong> are things the model can <em>read</em>: a file at <code>file://repo/README.md</code>, a row in a database, a fresh response from an API — read-only context the model can pull in without ever being granted write access. <strong>Prompts</strong> are workflows the server <em>provides</em>: reusable templates like <code>/git-summarize</code> or <code>/code-review</code> that the user can invoke as a starting point. That is the whole spec. The discipline of refusing a fourth primitive is, I think, why it caught on where earlier tool-calling proposals stalled.</p>
 
     <figure class="diagram fade" role="img" aria-label="Diagram: a client at the center speaks MCP to eight servers arranged around it.">
-      <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg">
-        <!-- Dashed orbital ring -->
-        <ellipse class="diag-dash" cx="300" cy="195" rx="220" ry="135"/>
+      <div class="diagram-wrap">
+        <div class="diag-instruction" id="diag-instruction" aria-hidden="true">
+          <span class="key">Hover</span> any server &nbsp;·&nbsp; <span class="key">Click</span> to pin
+        </div>
+        <svg id="mcp-diagram" viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg">
+          <!-- Dashed orbital ring -->
+          <ellipse class="diag-dash" cx="300" cy="195" rx="220" ry="135"/>
 
-        <!-- Spokes (dashed, hand-feel) -->
-        <line class="diag-dash" x1="300" y1="195" x2="300" y2="70"/>
-        <line class="diag-dash" x1="300" y1="195" x2="455" y2="105"/>
-        <line class="diag-dash" x1="300" y1="195" x2="510" y2="195"/>
-        <line class="diag-dash" x1="300" y1="195" x2="455" y2="285"/>
-        <line class="diag-dash" x1="300" y1="195" x2="300" y2="320"/>
-        <line class="diag-dash" x1="300" y1="195" x2="145" y2="285"/>
-        <line class="diag-dash" x1="300" y1="195" x2="90"  y2="195"/>
-        <line class="diag-dash" x1="300" y1="195" x2="145" y2="105"/>
+          <!-- Spokes (dashed, hand-feel) -->
+          <line class="diag-dash" x1="300" y1="195" x2="300" y2="70"/>
+          <line class="diag-dash" x1="300" y1="195" x2="455" y2="105"/>
+          <line class="diag-dash" x1="300" y1="195" x2="510" y2="195"/>
+          <line class="diag-dash" x1="300" y1="195" x2="455" y2="285"/>
+          <line class="diag-dash" x1="300" y1="195" x2="300" y2="320"/>
+          <line class="diag-dash" x1="300" y1="195" x2="145" y2="285"/>
+          <line class="diag-dash" x1="300" y1="195" x2="90"  y2="195"/>
+          <line class="diag-dash" x1="300" y1="195" x2="145" y2="105"/>
 
-        <!-- Center: client -->
-        <circle class="diag-amber" cx="300" cy="195" r="38"/>
-        <text class="diag-center" x="300" y="195">CLIENT</text>
+          <!-- Amber trace lines (one per server; CSS-driven draw on activation) -->
+          <line class="trace-line" data-trace="files"  x1="300" y1="195" x2="300" y2="70"/>
+          <line class="trace-line" data-trace="github" x1="300" y1="195" x2="455" y2="105"/>
+          <line class="trace-line" data-trace="drive"  x1="300" y1="195" x2="510" y2="195"/>
+          <line class="trace-line" data-trace="notion" x1="300" y1="195" x2="455" y2="285"/>
+          <line class="trace-line" data-trace="linear" x1="300" y1="195" x2="300" y2="320"/>
+          <line class="trace-line" data-trace="slack"  x1="300" y1="195" x2="145" y2="285"/>
+          <line class="trace-line" data-trace="vercel" x1="300" y1="195" x2="90"  y2="195"/>
+          <line class="trace-line" data-trace="ctx7"   x1="300" y1="195" x2="145" y2="105"/>
 
-        <!-- Eight server nodes -->
-        <g><circle class="diag-fill" cx="300" cy="70"  r="26"/><text class="diag-label" x="300" y="70">FILES</text></g>
-        <g><circle class="diag-fill" cx="455" cy="105" r="26"/><text class="diag-label" x="455" y="105">GITHUB</text></g>
-        <g><circle class="diag-fill" cx="510" cy="195" r="26"/><text class="diag-label" x="510" y="195">DRIVE</text></g>
-        <g><circle class="diag-fill" cx="455" cy="285" r="26"/><text class="diag-label" x="455" y="285">NOTION</text></g>
-        <g><circle class="diag-fill" cx="300" cy="320" r="26"/><text class="diag-label" x="300" y="320">LINEAR</text></g>
-        <g><circle class="diag-fill" cx="145" cy="285" r="26"/><text class="diag-label" x="145" y="285">SLACK</text></g>
-        <g><circle class="diag-fill" cx="90"  cy="195" r="26"/><text class="diag-label" x="90"  y="195">VERCEL</text></g>
-        <g><circle class="diag-fill" cx="145" cy="105" r="26"/><text class="diag-label" x="145" y="105">CTX7</text></g>
+          <!-- Center: client -->
+          <circle class="diag-amber" cx="300" cy="195" r="38"/>
+          <text class="diag-center" x="300" y="195">CLIENT</text>
 
-        <!-- Small annotation -->
-        <text x="300" y="362" class="diag-label" style="fill: var(--secondary); font-size: 8.5px; letter-spacing: 0.12em;">JSON-RPC 2.0 · stdio · HTTP+SSE</text>
-      </svg>
+          <!-- Eight server nodes (interactive) -->
+          <g class="orb" data-server="files"  tabindex="0" role="button" aria-label="Filesystem MCP server"><circle class="diag-fill" cx="300" cy="70"  r="26"/><text class="diag-label" x="300" y="70">FILES</text></g>
+          <g class="orb" data-server="github" tabindex="0" role="button" aria-label="GitHub MCP server"><circle class="diag-fill" cx="455" cy="105" r="26"/><text class="diag-label" x="455" y="105">GITHUB</text></g>
+          <g class="orb" data-server="drive"  tabindex="0" role="button" aria-label="Google Drive MCP server"><circle class="diag-fill" cx="510" cy="195" r="26"/><text class="diag-label" x="510" y="195">DRIVE</text></g>
+          <g class="orb" data-server="notion" tabindex="0" role="button" aria-label="Notion MCP server"><circle class="diag-fill" cx="455" cy="285" r="26"/><text class="diag-label" x="455" y="285">NOTION</text></g>
+          <g class="orb" data-server="linear" tabindex="0" role="button" aria-label="Linear MCP server"><circle class="diag-fill" cx="300" cy="320" r="26"/><text class="diag-label" x="300" y="320">LINEAR</text></g>
+          <g class="orb" data-server="slack"  tabindex="0" role="button" aria-label="Slack MCP server"><circle class="diag-fill" cx="145" cy="285" r="26"/><text class="diag-label" x="145" y="285">SLACK</text></g>
+          <g class="orb" data-server="vercel" tabindex="0" role="button" aria-label="Vercel MCP server"><circle class="diag-fill" cx="90"  cy="195" r="26"/><text class="diag-label" x="90"  y="195">VERCEL</text></g>
+          <g class="orb" data-server="ctx7"   tabindex="0" role="button" aria-label="Context7 MCP server"><circle class="diag-fill" cx="145" cy="105" r="26"/><text class="diag-label" x="145" y="105">CTX7</text></g>
+
+          <!-- Small annotation -->
+          <text x="300" y="362" class="diag-label" style="fill: var(--secondary); font-size: 8.5px; letter-spacing: 0.12em;">JSON-RPC 2.0 · stdio · HTTP+SSE</text>
+        </svg>
+      </div>
       <figcaption>
         <span class="fig-no">Fig. 1</span>
         A client speaks MCP to one or more servers. Each server wraps a tool, a data source, or a workflow.
       </figcaption>
     </figure>
+
+    <!-- Inspector callout (populated by JS on orb hover / click) -->
+    <aside class="inspector fade" id="mcp-inspector" aria-live="polite">
+      <div class="callout" id="mcp-callout" hidden>
+        <div class="who">
+          <span><span id="callout-name">FILES</span> &nbsp;·&nbsp; <span id="callout-kind">tool</span></span>
+          <span class="pin-status">Pinned · click again to release</span>
+        </div>
+        <div class="messages" id="callout-messages"></div>
+        <p class="gloss" id="callout-gloss"></p>
+        <span class="pin-hint" id="callout-hint">Click the orb to pin this trace.</span>
+      </div>
+    </aside>
 
     <div class="ornament fleuron fade">❦</div>
 
@@ -646,6 +926,24 @@ server = Server(<span class="st">"notion"</span>)
     stdio_server(server).run()</pre>
     <figcaption>The shape of an MCP server in roughly sixty lines: one tool, one resource template, one prompt. The framework handles the rest.</figcaption>
 
+    <div class="code-trace-bar fade">
+      <button class="trace-btn" type="button" id="trace-toggle" aria-expanded="false" aria-controls="trace-panel">
+        <span class="glyph" aria-hidden="true">▷</span><span class="trace-label">Trace the call</span>
+      </button>
+    </div>
+    <div class="code-trace" id="trace-panel" role="region" aria-label="Message trace for the Notion server">
+      <span class="step"><span class="pre">01 · client → server</span> initialize {"protocolVersion": "2024-11-05"} <span class="gloss">— the handshake. The client announces what it speaks.</span></span>
+      <span class="step"><span class="pre">02 · server → client</span> {"capabilities": { "tools": {}, "resources": {}, "prompts": {} }} <span class="gloss">— the server lists what it offers.</span></span>
+      <span class="step"><span class="pre">03 · client → server</span> tools/list <span class="gloss">— the client asks what verbs are available.</span></span>
+      <span class="step"><span class="pre">04 · server → client</span> [{ "name": "search", "inputSchema": {…} }] <span class="gloss">— one tool, with a JSON-Schema for arguments.</span></span>
+      <span class="step"><span class="pre">05 · model decides</span> "I should search for last quarter's planning doc."</span>
+      <span class="step"><span class="pre">06 · client → server</span> tools/call {"name": "search", "arguments": {"query": "Q1 planning"}} <span class="gloss">— first try, well-formed, no retry needed.</span></span>
+      <span class="step"><span class="pre">07 · server → client</span> [{ "id": "abc…", "title": "Q1 2026 Planning" }]</span>
+      <span class="step"><span class="pre">08 · client → server</span> resources/read {"uri": "notion://page/abc…"} <span class="gloss">— read, not write. A different primitive entirely.</span></span>
+      <span class="step"><span class="pre">09 · server → client</span> { "contents": "# Q1 Planning\n\n…" } <span class="gloss">— markdown returned, model integrates into next turn.</span></span>
+      <span class="step"><span class="pre">10 · prompts/get</span> weekly_review { "database_id": "…" } <span class="gloss">— the server's own recipe finishes the work.</span></span>
+    </div>
+
     <p class="fade">You register this server with Claude Desktop by adding a five-line entry to a config file: a command to run it, an argument list, the environment variable that holds the token. The next time you open the application, Claude will discover the server, list its tool and prompt in the available capabilities, and let you ask, in plain English, to "search my Notion for last quarter's planning doc and draft a weekly review." The model will call <code>search</code>, read the page through the resource URI, invoke the prompt, and return a draft. You have not written a single line of agent code. You have not had to think about parsing the model's JSON or handling tool errors or formatting the conversation history. You have written, essentially, a Notion adapter — and because you wrote it against MCP rather than against a specific model, every MCP-speaking client now benefits. Cursor will work. The Continue plugin in VS Code will work. The custom internal agent your colleague built last month will work. The integration is, at last, the integration.</p>
 
     <div class="ornament fade">· · ·</div>
@@ -747,43 +1045,43 @@ server = Server(<span class="st">"notion"</span>)
     <section class="reading fade">
       <h3>A reading list.</h3>
       <ol>
-        <li>
+        <li id="fn-1">
           Anthropic, <a href="https://www.anthropic.com/news/model-context-protocol" target="_blank" rel="noopener">"Introducing the Model Context Protocol"</a> &mdash;
           <span class="annot">the announcement post from November 2024. Short, calm, useful as a primary source for the framing.</span>
         </li>
-        <li>
+        <li id="fn-2">
           <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">modelcontextprotocol.io</a> &mdash;
           <span class="annot">the canonical home for the spec, the SDKs, and the protocol's evolving documentation. Bookmark this one.</span>
         </li>
-        <li>
+        <li id="fn-3">
           <a href="https://modelcontextprotocol.io/specification" target="_blank" rel="noopener">The MCP specification</a> &mdash;
           <span class="annot">the formal document. Worth reading end to end at least once; it is shorter than you expect.</span>
         </li>
-        <li>
+        <li id="fn-4">
           <a href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener">modelcontextprotocol/servers</a> &mdash;
           <span class="annot">the reference server registry on GitHub. Start here for canonical implementations of Filesystem, GitHub, Drive, Slack, and friends.</span>
         </li>
-        <li>
+        <li id="fn-5">
           <a href="https://github.com/modelcontextprotocol/typescript-sdk" target="_blank" rel="noopener">@modelcontextprotocol/sdk</a> &nbsp;and&nbsp; <a href="https://github.com/modelcontextprotocol/python-sdk" target="_blank" rel="noopener">python-sdk</a> &mdash;
           <span class="annot">the two SDKs you will probably reach for first. Mature, well-typed, well-documented.</span>
         </li>
-        <li>
+        <li id="fn-6">
           <a href="https://github.com/punkpeye/awesome-mcp-servers" target="_blank" rel="noopener">awesome-mcp-servers</a> &mdash;
           <span class="annot">a curated community list, useful for understanding the shape of the long tail.</span>
         </li>
-        <li>
+        <li id="fn-7">
           <a href="https://github.com/upstash/context7" target="_blank" rel="noopener">Context7</a> &mdash;
           <span class="annot">a working example of a resource-shaped server worth studying for its scope discipline.</span>
         </li>
-        <li>
+        <li id="fn-8">
           <a href="https://www.latent.space/p/mcp" target="_blank" rel="noopener">Latent Space on MCP</a> &mdash;
           <span class="annot">one of the better long-form podcasts on the protocol's design choices, with the authors.</span>
         </li>
-        <li>
+        <li id="fn-9">
           <a href="https://blog.cloudflare.com/remote-model-context-protocol-servers-mcp/" target="_blank" rel="noopener">Cloudflare on remote MCP</a> &mdash;
           <span class="annot">useful read on the HTTP+SSE side of the protocol once you have outgrown <code>stdio</code>-only setups.</span>
         </li>
-        <li>
+        <li id="fn-10">
           <a href="https://docs.anthropic.com/en/docs/build-with-claude/mcp" target="_blank" rel="noopener">Anthropic's MCP guide for Claude</a> &mdash;
           <span class="annot">the practical onboarding for connecting servers to Claude Desktop, Claude Code, and the API.</span>
         </li>
@@ -821,6 +1119,285 @@ server = Server(<span class="st">"notion"</span>)
       }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
       document.querySelectorAll('.fade:not(.in)').forEach(el => io.observe(el));
     }
+
+    /* =================================================================
+       INTERACTIVE MCP DIAGRAM — hover-to-trace inspector
+       Editorial register: ease-out only, no springs, no glow.
+       ================================================================= */
+    (function mcpInspector() {
+      const svg        = document.getElementById('mcp-diagram');
+      const inspector  = document.getElementById('mcp-inspector');
+      const callout    = document.getElementById('mcp-callout');
+      const nameEl     = document.getElementById('callout-name');
+      const kindEl     = document.getElementById('callout-kind');
+      const msgEl      = document.getElementById('callout-messages');
+      const glossEl    = document.getElementById('callout-gloss');
+      const hintEl     = document.getElementById('callout-hint');
+      const instr      = document.getElementById('diag-instruction');
+      if (!svg || !callout) return;
+
+      // JSON-RPC handshake transcripts and editorial gloss per server.
+      const SERVERS = {
+        files: {
+          label: 'Filesystem',
+          kind: 'tool · resource',
+          messages:
+            '→ tools/call    {"name": "read_file",\n                  "arguments": {"path": "src/api/users.ts"}}\n← {"content": "import { db } from \'../db\';\\n…"}',
+          gloss: 'The most-installed piece of agent infrastructure in the world. It converts the daily friction of "let me find that file" into a sentence.'
+        },
+        github: {
+          label: 'GitHub',
+          kind: 'tool · prompt',
+          messages:
+            '→ tools/call    {"name": "list_issues",\n                  "arguments": {"state": "open", "labels": ["bug"]}}\n← [{"number": 142, "title": "Auth fails after rotation"}, …]\n→ prompts/get   /triage\n← {"description": "Group, prioritise, propose owners."}',
+          gloss: 'Ships a thoughtful /triage prompt that knows to fetch open issues, group them by label, summarise recurring themes, and propose an order. The user types two words; the model does the rest.'
+        },
+        drive: {
+          label: 'Google Drive',
+          kind: 'resource',
+          messages:
+            '→ resources/list  {"cursor": null}\n← [{"uri": "gdrive://doc/abc123",\n     "name": "Q1 Planning.gdoc",\n     "mimeType": "application/vnd.google-apps.document"}]\n→ resources/read  {"uri": "gdrive://doc/abc123"}\n← {"contents": "# Q1 Planning\\n…"}',
+          gloss: 'Serves the same purpose as Filesystem for teams whose knowledge lives somewhere other than a repo — read-only, freshness-aware, watchable.'
+        },
+        notion: {
+          label: 'Notion',
+          kind: 'tool · resource · prompt',
+          messages:
+            '→ tools/call    {"name": "search",\n                  "arguments": {"query": "Q1 planning"}}\n← [{"id": "abc…", "title": "Q1 2026 Planning"}]\n→ resources/read {"uri": "notion://page/abc…"}\n← {"contents": "# Q1 Planning\\n…"}',
+          gloss: 'The worked example in this essay. Sixty lines of Python, one tool, one resource template, one prompt — and every MCP-speaking client now knows your workspace.'
+        },
+        linear: {
+          label: 'Linear',
+          kind: 'tool · resource',
+          messages:
+            '→ tools/call    {"name": "create_issue",\n                  "arguments": {"team": "ENG",\n                                "title": "Rate limit on /search",\n                                "priority": "high"}}\n← {"id": "ENG-481", "url": "https://linear.app/…"}',
+          gloss: 'Among the first SaaS vendors to ship an official server, before the end of 2024. Wraps the parts of a working day that used to require context-switching between browser tabs.'
+        },
+        slack: {
+          label: 'Slack',
+          kind: 'tool · resource',
+          messages:
+            '→ resources/read {"uri": "slack://channel/eng-incidents/last-hour"}\n← {"contents": [\n    {"user": "U07…", "text": "deploy started"},\n    {"user": "U07…", "text": "p99 spiked"}, …\n   ]}\n→ tools/call    {"name": "post_message",\n                  "arguments": {"channel": "eng",\n                                "text": "Investigating spike — see thread."}}',
+          gloss: 'Reading a channel is a resource. Posting to one is a tool. The boundary between the two does real work for permissioning.'
+        },
+        vercel: {
+          label: 'Vercel',
+          kind: 'tool · resource',
+          messages:
+            '→ tools/call    {"name": "get_runtime_logs",\n                  "arguments": {"project": "ceti-ai",\n                                "since": "1h"}}\n← {"logs": [\n    "[INFO] Build succeeded in 18s",\n    "[ERROR] 502 from upstream at /api/whales", …\n   ]}',
+          gloss: 'A way to manage deployments and logs from inside any agent. The on-call engineer can ask, in English, what changed in the last hour. The dashboard finally has a colleague.'
+        },
+        ctx7: {
+          label: 'Context7',
+          kind: 'resource',
+          messages:
+            '→ resources/read {"uri": "context7://lib/next/15/app-router"}\n← {"contents": "# App Router (Next.js 15)\\n\\nServer Components are…",\n   "lastUpdated": "2026-05-12"}',
+          gloss: 'A continuously updated index of library documentation, callable as a resource. The model is no longer reasoning from a 2024 training cutoff when you ask about a 2026 library.'
+        }
+      };
+
+      const orbs = svg.querySelectorAll('.orb');
+      const traces = svg.querySelectorAll('.trace-line');
+      let pinned = null;
+      let hovered = null;
+      let firstInteraction = true;
+
+      const showInstruction = () => {
+        if (firstInteraction && instr) {
+          instr.classList.add('visible');
+        }
+      };
+      const hideInstruction = () => {
+        if (instr) instr.classList.remove('visible');
+      };
+
+      // Reveal the instruction the first time the diagram comes into view.
+      if (instr) {
+        const ioInstr = new IntersectionObserver((entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              setTimeout(showInstruction, 400);
+              ioInstr.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.4 });
+        ioInstr.observe(svg);
+      }
+
+      const clearTraces = () => {
+        traces.forEach(t => t.classList.remove('draw'));
+      };
+      const drawTrace = (id) => {
+        clearTraces();
+        const line = svg.querySelector('.trace-line[data-trace="' + id + '"]');
+        if (line) {
+          // Force a reflow so the animation restarts every time.
+          line.classList.remove('draw');
+          void line.offsetWidth;
+          line.classList.add('draw');
+        }
+      };
+
+      const formatMessages = (raw) => {
+        // Apply subtle amber/secondary coloring to → / ← markers.
+        return raw
+          .split('\n')
+          .map(line => {
+            if (line.startsWith('→')) {
+              return '<span class="arrow-out">' + escapeHtml(line) + '</span>';
+            }
+            if (line.startsWith('←')) {
+              return '<span class="arrow-in">' + escapeHtml(line) + '</span>';
+            }
+            return escapeHtml(line);
+          })
+          .join('\n');
+      };
+      const escapeHtml = (s) => s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      const showCallout = (id, fromPin) => {
+        const data = SERVERS[id];
+        if (!data) return;
+        nameEl.textContent  = data.label;
+        kindEl.textContent  = data.kind;
+        msgEl.innerHTML     = formatMessages(data.messages);
+        glossEl.textContent = data.gloss;
+        hintEl.textContent  = fromPin
+          ? 'Click again to release.'
+          : 'Click the orb to pin this trace.';
+        callout.hidden = false;
+        inspector.classList.add('has-content');
+        // Force reflow so the CSS transition runs on every reveal.
+        void callout.offsetWidth;
+        callout.classList.add('visible');
+        callout.classList.toggle('pinned', !!fromPin);
+        drawTrace(id);
+      };
+
+      const hideCallout = () => {
+        callout.classList.remove('visible');
+        callout.classList.remove('pinned');
+        clearTraces();
+        // Let the fade complete before removing min-height.
+        setTimeout(() => {
+          if (!callout.classList.contains('visible')) {
+            callout.hidden = true;
+            inspector.classList.remove('has-content');
+          }
+        }, 720);
+      };
+
+      // Tap-vs-hover detection: coarse pointer = touch device.
+      const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+      orbs.forEach(orb => {
+        const id = orb.dataset.server;
+        if (!isTouch) {
+          orb.addEventListener('mouseenter', () => {
+            firstInteraction = false;
+            hideInstruction();
+            hovered = id;
+            if (!pinned) showCallout(id, false);
+            else if (pinned !== id) {
+              // Hover preview without unpinning.
+              showCallout(id, false);
+            }
+          });
+          orb.addEventListener('mouseleave', () => {
+            hovered = null;
+            if (pinned) {
+              // Restore the pinned view.
+              showCallout(pinned, true);
+            } else {
+              hideCallout();
+            }
+          });
+        }
+        orb.addEventListener('click', (e) => {
+          e.preventDefault();
+          firstInteraction = false;
+          hideInstruction();
+          if (pinned === id) {
+            pinned = null;
+            if (isTouch) hideCallout();
+            else if (hovered === id) showCallout(id, false);
+            else hideCallout();
+          } else {
+            pinned = id;
+            showCallout(id, true);
+          }
+        });
+        orb.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            orb.click();
+          } else if (e.key === 'Escape' && pinned) {
+            pinned = null;
+            hideCallout();
+          }
+        });
+        orb.addEventListener('focus', () => {
+          firstInteraction = false;
+          hideInstruction();
+          if (!pinned) showCallout(id, false);
+        });
+        orb.addEventListener('blur', () => {
+          if (!pinned) hideCallout();
+        });
+      });
+
+      // Click outside the diagram to release a pinned trace.
+      document.addEventListener('click', (e) => {
+        if (!pinned) return;
+        if (svg.contains(e.target)) return;
+        if (callout.contains(e.target)) return;
+        pinned = null;
+        hideCallout();
+      });
+    })();
+
+    /* =================================================================
+       CODE-BLOCK TRACE — reveal the message flow for the Notion server
+       ================================================================= */
+    (function codeTrace() {
+      const btn   = document.getElementById('trace-toggle');
+      const panel = document.getElementById('trace-panel');
+      if (!btn || !panel) return;
+      const label = btn.querySelector('.trace-label');
+      btn.addEventListener('click', () => {
+        const open = panel.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (label) label.textContent = open ? 'Hide trace' : 'Trace the call';
+      });
+    })();
+
+    /* =================================================================
+       FOOTNOTE MARKERS — clicking a sup.fn link scrolls to its reference
+       (Forward-compatible: works for any <sup class="fn">
+        <a href="#fn-N">N</a></sup> markers added to the prose.)
+       ================================================================= */
+    (function footnoteScroll() {
+      document.querySelectorAll('sup.fn a[href^="#fn-"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          const id = a.getAttribute('href').slice(1);
+          const target = document.getElementById(id);
+          if (!target) return;
+          e.preventDefault();
+          target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+          // brief amber wash as visual confirmation
+          const old = target.style.transition;
+          target.style.transition = 'background-color 1200ms cubic-bezier(0.22, 1, 0.36, 1)';
+          target.style.backgroundColor = 'rgba(200, 116, 60, 0.10)';
+          setTimeout(() => {
+            target.style.backgroundColor = 'transparent';
+            setTimeout(() => { target.style.transition = old; }, 1200);
+          }, 600);
+        });
+      });
+    })();
   </script>
   <script src="../shared/nav.js" defer></script>
 </body>

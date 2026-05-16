@@ -1018,16 +1018,374 @@
       bottom: 44px !important;
       font-family: var(--font-ui-label) !important;
     }
+
+    /* ================ DRAG / WINDOW MANAGEMENT ================ */
+    .window {
+      position: relative;
+      will-change: transform;
+    }
+    .window.dragging {
+      transition: none !important;
+      cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'><path d='M11 2 L8 5 L10 5 L10 9 L6 9 L6 7 L3 10 L6 13 L6 11 L10 11 L10 15 L8 15 L11 18 L14 15 L12 15 L12 11 L16 11 L16 13 L19 10 L16 7 L16 9 L12 9 L12 5 L14 5 Z' fill='%23FFFFFF' stroke='%23000' stroke-width='1.2'/></svg>") 11 11, move;
+    }
+    .window.floating {
+      position: fixed;
+      width: auto;
+      min-width: 320px;
+      max-width: 92vw;
+      z-index: 100;
+      box-shadow: var(--bevel-out), 4px 4px 0 rgba(0,0,0,0.45);
+    }
+    .window.minimized {
+      display: none;
+    }
+    .window.maximized {
+      position: fixed !important;
+      top: 0 !important; left: 0 !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: calc(100vh - 36px) !important;
+      z-index: 500;
+      transform: none !important;
+    }
+    .window.maximized .window-body {
+      max-height: calc(100vh - 110px);
+      overflow: auto;
+    }
+    .titlebar {
+      cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'><path d='M11 2 L8 5 L10 5 L10 9 L6 9 L6 7 L3 10 L6 13 L6 11 L10 11 L10 15 L8 15 L11 18 L14 15 L12 15 L12 11 L16 11 L16 13 L19 10 L16 7 L16 9 L12 9 L12 5 L14 5 Z' fill='%23FFFFFF' stroke='%23000' stroke-width='1.2'/></svg>") 11 11, move;
+      touch-action: none;
+    }
+    .window.inactive .titlebar {
+      background: linear-gradient(to right, var(--inactive-bar), #A0A0A0);
+    }
+    .warning-win.inactive .titlebar {
+      background: linear-gradient(to right, #606060, #909090);
+    }
+    .tb-btn {
+      user-select: none;
+    }
+
+    /* ================ CLOSE-CONFIRM MODAL ================ */
+    .modal-veil {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.0);
+      display: none;
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-veil.show { display: flex; }
+    .modal-win {
+      background: var(--chrome);
+      box-shadow: var(--bevel-out), 6px 6px 0 rgba(0,0,0,0.4);
+      min-width: 340px;
+      max-width: 90vw;
+      font-family: var(--font-body);
+      animation: modalPop 180ms steps(4) both;
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.6); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .modal-win { animation: none; }
+    }
+    .modal-body {
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+    .modal-ico {
+      width: 40px; height: 40px;
+      background: var(--warn-yellow);
+      box-shadow: var(--bevel-out);
+      font-family: var(--font-pixel-display);
+      font-size: 26px;
+      color: #000;
+      text-align: center;
+      line-height: 40px;
+    }
+    .modal-text {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .modal-text strong { font-family: var(--font-ui-label); font-size: 14px; display:block; margin-bottom: 4px; }
+    .modal-buttons {
+      padding: 0 20px 18px;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* ================ DEMO ENHANCEMENTS ================ */
+    .demo-controls {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 6px 6px 4px;
+      background: var(--chrome);
+      border-bottom: 1px solid #808080;
+    }
+    .demo-controls .btn {
+      padding: 3px 10px;
+      min-width: 0;
+      font-size: 11px;
+    }
+    .demo-controls .btn.run-task {
+      background: #E8F5D8;
+    }
+    .demo-controls .btn.stop {
+      background: #FFD8D8;
+    }
+    .demo-controls .demo-pill {
+      background: var(--paper);
+      box-shadow: var(--bevel-thin-in);
+      padding: 3px 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      display: flex; align-items: center; gap: 4px;
+      margin-left: auto;
+    }
+    .demo-controls .demo-pill .dot {
+      width: 8px; height: 8px;
+      background: var(--ok-green);
+      box-shadow: var(--bevel-thin-out);
+      border-radius: 0;
+    }
+    .demo-controls .demo-pill .dot.idle { background: #808080; }
+    .demo-controls .demo-pill .dot.running { background: #00C800; animation: pulse 800ms steps(2) infinite; }
+    @keyframes pulse { 50% { opacity: 0.3; } }
+
+    /* Calendar scene */
+    .calendar-scene {
+      padding: 14px 18px;
+      position: relative;
+    }
+    .cal-head {
+      display: flex; align-items: center; gap: 10px;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--chrome-lo);
+    }
+    .cal-logo {
+      width: 28px; height: 28px;
+      background: #4285F4;
+      color: #FFF;
+      font-family: var(--font-pixel-display);
+      font-size: 18px;
+      text-align: center; line-height: 28px;
+      box-shadow: var(--bevel-thin-out);
+    }
+    .cal-title { font-family: var(--font-ui-label); font-size: 13px; }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: 50px repeat(5, 1fr);
+      gap: 1px;
+      background: var(--chrome-lo);
+      box-shadow: var(--bevel-thin-in);
+    }
+    .cal-cell {
+      background: var(--paper);
+      padding: 4px 6px;
+      font-size: 10px;
+      min-height: 28px;
+      font-family: var(--font-mono);
+      position: relative;
+    }
+    .cal-cell.head {
+      background: var(--chrome);
+      text-align: center;
+      font-family: var(--font-ui-label);
+      font-weight: 600;
+      font-size: 11px;
+    }
+    .cal-event {
+      position: absolute;
+      left: 2px; right: 2px;
+      background: #4285F4;
+      color: #FFF;
+      font-size: 9px;
+      padding: 2px 4px;
+      line-height: 1.2;
+      box-shadow: var(--bevel-thin-out);
+      font-family: var(--font-ui-label);
+    }
+    .cal-event.new-event {
+      background: var(--ok-green);
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 200ms steps(3), transform 200ms steps(3);
+    }
+    .cal-event.new-event.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .cal-event-modal {
+      position: absolute;
+      top: 60px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--chrome);
+      box-shadow: var(--bevel-out), 4px 4px 0 rgba(0,0,0,0.4);
+      width: 280px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms steps(3);
+      z-index: 30;
+    }
+    .cal-event-modal.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .cal-event-modal .titlebar { cursor: default; }
+    .cal-event-modal .me-body {
+      background: var(--paper);
+      padding: 10px 12px;
+      font-size: 12px;
+      box-shadow: var(--bevel-in);
+      margin: 8px;
+    }
+    .cal-event-modal .me-row {
+      display: grid; grid-template-columns: 60px 1fr;
+      gap: 6px; margin-bottom: 4px;
+      font-family: var(--font-mono); font-size: 11px;
+    }
+    .cal-event-modal .me-row strong {
+      font-family: var(--font-ui-label);
+    }
+    .cal-event-modal .me-btns {
+      display: flex; gap: 6px; padding: 0 8px 8px;
+    }
+
+    /* Sort indicators on spreadsheet headers */
+    .ss-row.head > div { cursor: pointer; user-select: none; position: relative; }
+    .ss-row.head > div:hover { background: #D8D8D8; }
+    .ss-row.head > div.sort-asc::after  { content: " ▲"; font-size: 9px; color: var(--title-bar); }
+    .ss-row.head > div.sort-desc::after { content: " ▼"; font-size: 9px; color: var(--title-bar); }
+
+    /* Tutorial run-step buttons */
+    .step-run-btn {
+      display: inline-block;
+      background: var(--chrome);
+      box-shadow: var(--bevel-thin-out);
+      padding: 2px 8px;
+      font-family: var(--font-ui-label);
+      font-size: 11px;
+      cursor: pointer;
+      border: 1px solid #000;
+      margin-top: 4px;
+      color: #000;
+    }
+    .step-run-btn:active { box-shadow: var(--bevel-thin-in); }
+    .step-run-btn .arr { color: var(--ok-green); }
+
+    /* Start menu */
+    .start-menu {
+      position: fixed;
+      left: 4px;
+      bottom: 40px;
+      width: 220px;
+      background: var(--chrome);
+      box-shadow: var(--bevel-out), 4px 4px 0 rgba(0,0,0,0.4);
+      z-index: 1500;
+      display: none;
+      font-family: var(--font-ui-label);
+      font-size: 12px;
+    }
+    .start-menu.show {
+      display: block;
+      animation: startSlide 140ms steps(3) both;
+    }
+    @keyframes startSlide {
+      from { transform: translateY(20px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .start-menu.show { animation: none; }
+    }
+    .start-menu-banner {
+      background: linear-gradient(to bottom, #404040, #808080);
+      color: #FFF;
+      padding: 18px 8px 18px 14px;
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 24px;
+      font-family: var(--font-pixel-display);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .start-menu-banner b { color: var(--warn-yellow); }
+    .start-menu-items {
+      margin-left: 24px;
+      padding: 4px 0;
+    }
+    .start-menu-item {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      align-items: center;
+      color: #000;
+      text-decoration: none;
+    }
+    .start-menu-item:hover {
+      background: var(--select);
+      color: var(--select-text);
+    }
+    .start-menu-item:hover .smi-ico {
+      filter: invert(1);
+    }
+    .smi-ico {
+      width: 22px; height: 22px;
+      background: var(--chrome);
+      box-shadow: var(--bevel-thin-out);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-pixel-display);
+      font-size: 14px;
+      color: #000;
+    }
+    .start-menu-sep {
+      height: 0;
+      border-top: 1px solid #808080;
+      border-bottom: 1px solid #FFFFFF;
+      margin: 4px 0 4px 24px;
+    }
+
+    /* Desktop icons clickable */
+    .desk-icon { cursor: pointer; }
+    .desk-icon:hover .ico-label { background: var(--select); color: var(--select-text); }
+    .desk-icon.selected .ico-art {
+      filter: brightness(0.9);
+      outline: 1px dotted #FFF;
+      outline-offset: 2px;
+    }
+    .desk-icon.selected .ico-label { background: var(--select); color: var(--select-text); padding: 1px 2px; }
+    .ico-label { display: inline-block; padding: 1px 2px; }
+
+    /* Taskbar minimized window button */
+    .task-win.minimized-tag::before {
+      content: "▭ ";
+      font-family: var(--font-mono);
+      color: #555;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Desktop icons (decorative) -->
-  <div class="desk-icons" aria-hidden="true">
-    <div class="desk-icon"><div class="ico-art">DOS</div>MS-DOS<br>Prompt</div>
-    <div class="desk-icon"><div class="ico-art">M</div>My<br>Computer</div>
-    <div class="desk-icon"><div class="ico-art">N</div>Network<br>Neighborhood</div>
-    <div class="desk-icon"><div class="ico-art">R</div>Recycle<br>Bin</div>
+  <!-- Desktop icons (clickable: double-click to open the window) -->
+  <div class="desk-icons">
+    <div class="desk-icon" data-target="win-demo" title="Double-click to open DEMO.exe"><div class="ico-art">▶</div><span class="ico-label">DEMO<br>.exe</span></div>
+    <div class="desk-icon" data-target="win-cap" title="Double-click to open CAPABILITIES"><div class="ico-art">★</div><span class="ico-label">Capabilities</span></div>
+    <div class="desk-icon" data-target="win-tutorial" title="Double-click to open TUTORIAL"><div class="ico-art">?</div><span class="ico-label">Tutorial<br>.hlp</span></div>
+    <div class="desk-icon" data-target="win-warn" title="Double-click to open WARNING"><div class="ico-art" style="color: #C00">!</div><span class="ico-label">Warning<br>.exe</span></div>
+    <div class="desk-icon" data-target="win-apis" title="Double-click to open APIS"><div class="ico-art">{}</div><span class="ico-label">APIS<br>.txt</span></div>
   </div>
 
   <main class="desktop">
@@ -1130,6 +1488,13 @@
         <span><u>F</u>ile</span><span><u>R</u>un</span><span><u>D</u>ebug</span><span><u>V</u>iew</span><span><u>H</u>elp</span>
       </div>
       <div class="window-body">
+        <div class="demo-controls">
+          <button class="btn run-task" type="button" data-task="search">▷ run task A · search flights</button>
+          <button class="btn run-task" type="button" data-task="gmail">▷ run task B · reply to inbox</button>
+          <button class="btn run-task" type="button" data-task="calendar">▷ run task C · send invite</button>
+          <button class="btn stop" type="button" id="demo-stop">■ stop</button>
+          <div class="demo-pill"><span class="dot idle" id="demo-dot"></span> <span id="demo-status">idle</span></div>
+        </div>
         <div class="demo-row">
           <!-- Simulated browser frame -->
           <div class="browser-frame" id="frame" aria-label="Simulated browser controlled by an autonomous cursor.">
@@ -1141,8 +1506,9 @@
               </div>
             </div>
             <div class="frame-tabs">
-              <div class="ftab active" id="tab-1"><span class="fav"></span>Search</div>
-              <div class="ftab" id="tab-2"><span class="fav"></span>Inbox</div>
+              <div class="ftab active" id="tab-1" data-scene="search"><span class="fav"></span>Google</div>
+              <div class="ftab" id="tab-2" data-scene="gmail"><span class="fav" style="background:#DB4437"></span>Mail</div>
+              <div class="ftab" id="tab-3" data-scene="calendar"><span class="fav" style="background:#4285F4"></span>Calendar</div>
             </div>
             <div class="frame-urlbar">
               <span class="url-btn">‹</span>
@@ -1196,6 +1562,85 @@
                   <div class="gmail-compose-body" id="compose-body"></div>
                 </div>
               </div>
+
+              <div class="scene calendar-scene" id="scene-calendar">
+                <div class="cal-head">
+                  <div class="cal-logo">31</div>
+                  <div class="cal-title">May 11 - May 15, 2026 · Working hours</div>
+                </div>
+                <div class="cal-grid" id="cal-grid">
+                  <div class="cal-cell head"></div>
+                  <div class="cal-cell head">MON 11</div>
+                  <div class="cal-cell head">TUE 12</div>
+                  <div class="cal-cell head" id="cell-wed-head">WED 13</div>
+                  <div class="cal-cell head" id="cell-thu-head">THU 14</div>
+                  <div class="cal-cell head">FRI 15</div>
+
+                  <div class="cal-cell">10am</div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"><div class="cal-event">All-hands</div></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell" id="cell-thu-10"></div>
+                  <div class="cal-cell"></div>
+
+                  <div class="cal-cell">11am</div>
+                  <div class="cal-cell"><div class="cal-event">1:1 / Aaron</div></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+
+                  <div class="cal-cell">12pm</div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"><div class="cal-event">Lunch w/ Sam</div></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+
+                  <div class="cal-cell">1pm</div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+
+                  <div class="cal-cell">2pm</div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell" id="cell-thu-2pm">
+                    <div class="cal-event new-event" id="event-new">Q3 Review / Priya</div>
+                  </div>
+                  <div class="cal-cell"></div>
+
+                  <div class="cal-cell">3pm</div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"><div class="cal-event">Design crit</div></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                </div>
+
+                <div class="cal-event-modal" id="cal-event-modal">
+                  <div class="titlebar">
+                    <div class="tb-ico">📅</div>
+                    <div class="tb-text">New event</div>
+                    <div class="tb-controls">
+                      <div class="tb-btn" id="cal-modal-close">×</div>
+                    </div>
+                  </div>
+                  <div class="me-body">
+                    <div class="me-row"><strong>Title:</strong> Q3 Review / Priya</div>
+                    <div class="me-row"><strong>When:</strong> Thu May 14 · 2:00–3:00pm</div>
+                    <div class="me-row"><strong>Guests:</strong> priya@aretelabs.co</div>
+                    <div class="me-row"><strong>Notes:</strong> moved from Tue per email thread</div>
+                  </div>
+                  <div class="me-btns">
+                    <button class="btn default" id="cal-save">Save</button>
+                    <button class="btn" id="cal-cancel">Cancel</button>
+                  </div>
+                </div>
+              </div>
             </div>
             <!-- Autonomous cursor -->
             <div class="cursor" id="cursor" aria-hidden="true">
@@ -1203,7 +1648,6 @@
                 <path d="M2 1 L2 16 L6 13 L9 19 L11 18 L8 12 L13 12 Z" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" stroke-linejoin="miter"/>
               </svg>
             </div>
-            <button class="demo-replay" id="replay" type="button" aria-label="Replay demo">↻ Run</button>
           </div>
 
           <!-- Console sub-window -->
@@ -1892,6 +2336,73 @@ console.<span class="f">log</span>(top);     <span class="c">// { airline: "ANA"
   </main>
 
   <!-- ============================================================
+       CLOSE-CONFIRM MODAL
+       ============================================================ -->
+  <div class="modal-veil" id="close-modal">
+    <div class="modal-win">
+      <div class="titlebar" style="cursor:default;">
+        <div class="tb-ico">?</div>
+        <div class="tb-text" id="close-modal-title">Close</div>
+        <div class="tb-controls"><div class="tb-btn" id="close-modal-x">×</div></div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-ico">?</div>
+        <div class="modal-text">
+          <strong id="close-modal-strong">Close window?</strong>
+          <span>Are you sure you want to close this window? Any unsaved progress will be lost. (You can reopen from the desktop icons or Start menu.)</span>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn default" id="close-modal-yes">OK</button>
+        <button class="btn" id="close-modal-no">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       WARNING.exe POPUP (re-emerges after 30s)
+       ============================================================ -->
+  <div class="modal-veil" id="warning-popup">
+    <div class="modal-win warning-win" style="min-width: 380px;">
+      <div class="titlebar" style="cursor:default; background: linear-gradient(to right, #800000, #C00000);">
+        <div class="tb-ico">!</div>
+        <div class="tb-text">WARNING.exe</div>
+        <div class="tb-controls"><div class="tb-btn" id="warn-x">×</div></div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-ico" style="background: var(--warn-yellow);">!</div>
+        <div class="modal-text">
+          <strong>Read this before shipping.</strong>
+          <span>A browser agent that can click anywhere can also be tricked into clicking anywhere. Have you sandboxed the agent, scoped credentials, and added a kill-switch?</span>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn default" id="warn-ack">Acknowledge</button>
+        <button class="btn" id="warn-later">Remind me later</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       START MENU
+       ============================================================ -->
+  <div class="start-menu" id="start-menu">
+    <div class="start-menu-banner">CETI <b>95</b></div>
+    <div class="start-menu-items">
+      <a class="start-menu-item" href="../"><span class="smi-ico">↑</span><span>Lookbook · Index</span></a>
+      <a class="start-menu-item" href="../skills/"><span class="smi-ico">★</span><span>Skills</span></a>
+      <a class="start-menu-item" href="../prompt-engineering/"><span class="smi-ico">✎</span><span>Prompt Engineering</span></a>
+      <a class="start-menu-item" href="../agents/"><span class="smi-ico">▶</span><span>Agents</span></a>
+      <div class="start-menu-sep"></div>
+      <a class="start-menu-item" href="#win-readme" data-open="win-readme"><span class="smi-ico">≡</span><span>Open README.TXT</span></a>
+      <a class="start-menu-item" href="#win-demo" data-open="win-demo"><span class="smi-ico">▶</span><span>Run DEMO.exe</span></a>
+      <a class="start-menu-item" href="#win-tutorial" data-open="win-tutorial"><span class="smi-ico">?</span><span>Tutorial.hlp</span></a>
+      <div class="start-menu-sep"></div>
+      <a class="start-menu-item" href="https://cetiai.co" target="_blank" rel="noopener"><span class="smi-ico">@</span><span>cetiai.co</span></a>
+    </div>
+  </div>
+
+  <!-- ============================================================
        TASKBAR
        ============================================================ -->
   <div class="taskbar" role="navigation" aria-label="Desktop taskbar">
@@ -1926,37 +2437,308 @@ console.<span class="f">log</span>(top);     <span class="c">// { airline: "ANA"
     // Always show hero immediately
     requestAnimationFrame(() => document.getElementById('win-hero').classList.add('visible'));
 
-    // ============ TASKBAR — fill window list ============
-    const taskWins = document.getElementById('task-windows');
-    const labels = [
-      ['win-readme', 'README.TXT'],
-      ['win-demo', 'DEMO.exe'],
-      ['win-cap', 'CAPABILITIES'],
-      ['win-landscape', 'LANDSCAPE.csv'],
-      ['win-tutorial', 'TUTORIAL.hlp'],
-      ['win-warn', 'WARNING.exe'],
-      ['win-apis', 'APIS.txt'],
-      ['win-apps', 'APPLICATIONS'],
-      ['win-credits', 'CREDITS.txt'],
-    ];
-    labels.forEach(([id, name]) => {
-      const t = document.createElement('a');
-      t.className = 'task-win';
-      t.href = '#' + id;
-      t.textContent = name;
-      taskWins.appendChild(t);
-    });
-
-    // ============ CLOCK ============
+    // ============ CLOCK (ticks every second) ============
     function tickClock() {
       const d = new Date();
       const h = d.getHours();
       const m = d.getMinutes().toString().padStart(2,'0');
+      const s = d.getSeconds().toString().padStart(2,'0');
       const ampm = h >= 12 ? 'PM' : 'AM';
       const h12 = ((h + 11) % 12) + 1;
-      document.getElementById('clock').textContent = `${h12}:${m} ${ampm}`;
+      document.getElementById('clock').textContent = `${h12}:${m}:${s} ${ampm}`;
     }
-    tickClock(); setInterval(tickClock, 30000);
+    tickClock(); setInterval(tickClock, 1000);
+
+    // ============ WINDOW MANAGEMENT ============
+    // All sections with class .window — each gets: drag, focus (z-index), min/max/close.
+    const WIN_LABELS = {
+      'win-hero': 'Setup Wizard',
+      'win-readme': 'README.TXT',
+      'win-demo': 'DEMO.exe',
+      'win-cap': 'CAPABILITIES',
+      'win-landscape': 'LANDSCAPE.csv',
+      'win-tutorial': 'TUTORIAL.hlp',
+      'win-warn': 'WARNING.exe',
+      'win-apis': 'APIS.txt',
+      'win-apps': 'APPLICATIONS',
+      'win-credits': 'CREDITS.txt',
+    };
+    const TASKBAR_ORDER = ['win-readme','win-demo','win-cap','win-landscape','win-tutorial','win-warn','win-apis','win-apps','win-credits'];
+
+    const taskWins = document.getElementById('task-windows');
+    const taskBtns = {}; // id -> button el
+    const winState = {}; // id -> { minimized, maximized, closed, draggedOnce, x, y, savedRect }
+    let zCounter = 50;
+    let activeWin = null;
+
+    function setActive(id) {
+      if (activeWin === id) return;
+      Object.keys(WIN_LABELS).forEach((wid) => {
+        const w = document.getElementById(wid);
+        if (!w) return;
+        if (wid === id) { w.classList.remove('inactive'); }
+        else { w.classList.add('inactive'); }
+      });
+      Object.values(taskBtns).forEach((b) => b.classList.remove('active'));
+      if (taskBtns[id]) taskBtns[id].classList.add('active');
+      activeWin = id;
+    }
+    function bringToFront(id) {
+      const w = document.getElementById(id);
+      if (!w) return;
+      zCounter += 1;
+      w.style.zIndex = zCounter;
+      setActive(id);
+    }
+
+    // ----- build taskbar buttons -----
+    TASKBAR_ORDER.forEach((id) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'task-win';
+      btn.textContent = WIN_LABELS[id];
+      btn.addEventListener('click', () => {
+        const w = document.getElementById(id);
+        if (!w) return;
+        const st = winState[id] = winState[id] || {};
+        if (st.closed) {
+          w.style.display = '';
+          w.classList.remove('minimized');
+          st.closed = false;
+          btn.classList.remove('minimized-tag');
+          bringToFront(id);
+          w.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        } else if (st.minimized) {
+          w.classList.remove('minimized');
+          st.minimized = false;
+          btn.classList.remove('minimized-tag');
+          bringToFront(id);
+          w.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        } else if (activeWin === id) {
+          // already active -> minimize
+          w.classList.add('minimized');
+          st.minimized = true;
+          btn.classList.add('minimized-tag');
+          btn.classList.remove('active');
+          activeWin = null;
+        } else {
+          bringToFront(id);
+          w.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        }
+      });
+      taskBtns[id] = btn;
+      taskWins.appendChild(btn);
+    });
+
+    // ----- attach controls + drag to every window -----
+    function makeFloating(w) {
+      const st = winState[w.id] = winState[w.id] || {};
+      if (st.floatingApplied) return;
+      const rect = w.getBoundingClientRect();
+      // Convert to fixed positioning at current visual location
+      w.classList.add('floating');
+      w.style.left = rect.left + 'px';
+      w.style.top  = rect.top  + 'px';
+      w.style.width = rect.width + 'px';
+      st.floatingApplied = true;
+    }
+
+    function setupWindow(id) {
+      const w = document.getElementById(id);
+      if (!w) return;
+      const tb = w.querySelector(':scope > .titlebar');
+      if (!tb) return;
+
+      // Button binding
+      const btns = tb.querySelectorAll('.tb-btn');
+      // Order assumed: [_, ▢, ×]
+      if (btns.length >= 3) {
+        const [minBtn, maxBtn, closeBtn] = btns;
+        minBtn.setAttribute('aria-label', 'Minimize');
+        maxBtn.setAttribute('aria-label', 'Maximize');
+        closeBtn.setAttribute('aria-label', 'Close');
+        minBtn.addEventListener('click', (ev) => { ev.stopPropagation(); minimize(id); });
+        maxBtn.addEventListener('click', (ev) => { ev.stopPropagation(); toggleMax(id); });
+        closeBtn.addEventListener('click', (ev) => { ev.stopPropagation(); confirmClose(id); });
+      }
+
+      // Focus on click
+      w.addEventListener('mousedown', () => bringToFront(id));
+      w.addEventListener('touchstart', () => bringToFront(id), { passive: true });
+
+      // Drag
+      let dragging = false;
+      let startX, startY, origLeft, origTop;
+      function onDown(clientX, clientY, ev) {
+        // ignore drags from buttons
+        if (ev.target.closest('.tb-btn') || ev.target.closest('.tb-controls')) return;
+        if (w.classList.contains('maximized')) return;
+        makeFloating(w);
+        const rect = w.getBoundingClientRect();
+        origLeft = rect.left;
+        origTop = rect.top;
+        startX = clientX;
+        startY = clientY;
+        dragging = true;
+        w.classList.add('dragging');
+        bringToFront(id);
+        ev.preventDefault();
+      }
+      function onMove(clientX, clientY) {
+        if (!dragging) return;
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        let nx = origLeft + dx;
+        let ny = origTop + dy;
+        // Loose viewport clamping (keep titlebar reachable)
+        const w0 = w.offsetWidth;
+        nx = Math.max(-w0 + 80, Math.min(window.innerWidth - 60, nx));
+        ny = Math.max(0, Math.min(window.innerHeight - 60, ny));
+        w.style.left = nx + 'px';
+        w.style.top  = ny + 'px';
+      }
+      function onUp() {
+        if (dragging) {
+          dragging = false;
+          w.classList.remove('dragging');
+        }
+      }
+      tb.addEventListener('mousedown', (ev) => onDown(ev.clientX, ev.clientY, ev));
+      window.addEventListener('mousemove', (ev) => onMove(ev.clientX, ev.clientY));
+      window.addEventListener('mouseup', onUp);
+      tb.addEventListener('touchstart', (ev) => {
+        const t = ev.touches[0]; onDown(t.clientX, t.clientY, ev);
+      }, { passive: false });
+      window.addEventListener('touchmove', (ev) => {
+        if (!dragging) return;
+        const t = ev.touches[0]; onMove(t.clientX, t.clientY);
+        ev.preventDefault();
+      }, { passive: false });
+      window.addEventListener('touchend', onUp);
+    }
+
+    Object.keys(WIN_LABELS).forEach(setupWindow);
+
+    function minimize(id) {
+      const w = document.getElementById(id); if (!w) return;
+      const st = winState[id] = winState[id] || {};
+      w.classList.add('minimized');
+      st.minimized = true;
+      if (taskBtns[id]) {
+        taskBtns[id].classList.add('minimized-tag');
+        taskBtns[id].classList.remove('active');
+      }
+      if (activeWin === id) activeWin = null;
+    }
+    function toggleMax(id) {
+      const w = document.getElementById(id); if (!w) return;
+      const st = winState[id] = winState[id] || {};
+      if (w.classList.contains('maximized')) {
+        w.classList.remove('maximized');
+        // Restore floating position if it had one
+        if (st.preMaxLeft != null) {
+          makeFloating(w);
+          w.style.left = st.preMaxLeft + 'px';
+          w.style.top  = st.preMaxTop  + 'px';
+          w.style.width = st.preMaxWidth + 'px';
+        }
+      } else {
+        if (w.classList.contains('floating')) {
+          st.preMaxLeft = parseFloat(w.style.left) || 0;
+          st.preMaxTop  = parseFloat(w.style.top)  || 0;
+          st.preMaxWidth = parseFloat(w.style.width) || w.offsetWidth;
+        }
+        w.classList.add('maximized');
+        bringToFront(id);
+      }
+    }
+    function closeWin(id) {
+      const w = document.getElementById(id); if (!w) return;
+      const st = winState[id] = winState[id] || {};
+      w.style.display = 'none';
+      st.closed = true;
+      if (taskBtns[id]) {
+        taskBtns[id].classList.add('minimized-tag');
+        taskBtns[id].classList.remove('active');
+      }
+      if (activeWin === id) activeWin = null;
+    }
+
+    // ----- close confirmation modal -----
+    const closeModal = document.getElementById('close-modal');
+    const closeModalTitle = document.getElementById('close-modal-title');
+    const closeModalStrong = document.getElementById('close-modal-strong');
+    let pendingCloseId = null;
+    function confirmClose(id) {
+      pendingCloseId = id;
+      closeModalTitle.textContent = 'Close ' + (WIN_LABELS[id] || 'window');
+      closeModalStrong.textContent = 'Close "' + (WIN_LABELS[id] || 'window') + '"?';
+      closeModal.classList.add('show');
+    }
+    function dismissClose() {
+      closeModal.classList.remove('show');
+      pendingCloseId = null;
+    }
+    document.getElementById('close-modal-yes').addEventListener('click', () => {
+      if (pendingCloseId) closeWin(pendingCloseId);
+      dismissClose();
+    });
+    document.getElementById('close-modal-no').addEventListener('click', dismissClose);
+    document.getElementById('close-modal-x').addEventListener('click', dismissClose);
+    closeModal.addEventListener('click', (ev) => {
+      if (ev.target === closeModal) dismissClose();
+    });
+
+    // ============ DESKTOP ICONS — double-click to open ============
+    document.querySelectorAll('.desk-icon[data-target]').forEach((di) => {
+      di.addEventListener('click', () => {
+        document.querySelectorAll('.desk-icon').forEach((x) => x.classList.remove('selected'));
+        di.classList.add('selected');
+      });
+      di.addEventListener('dblclick', () => {
+        const id = di.dataset.target;
+        const w = document.getElementById(id); if (!w) return;
+        const st = winState[id] = winState[id] || {};
+        st.closed = false; st.minimized = false;
+        w.style.display = '';
+        w.classList.remove('minimized');
+        if (taskBtns[id]) taskBtns[id].classList.remove('minimized-tag');
+        bringToFront(id);
+        w.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      });
+    });
+    // Click outside deselects
+    document.addEventListener('click', (ev) => {
+      if (!ev.target.closest('.desk-icon')) {
+        document.querySelectorAll('.desk-icon').forEach((x) => x.classList.remove('selected'));
+      }
+    });
+
+    // ============ START MENU ============
+    const startMenu = document.getElementById('start-menu');
+    const startBtn = document.querySelector('.start-btn');
+    startBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      startMenu.classList.toggle('show');
+    });
+    document.addEventListener('click', (ev) => {
+      if (!ev.target.closest('#start-menu') && !ev.target.closest('.start-btn')) {
+        startMenu.classList.remove('show');
+      }
+    });
+    document.querySelectorAll('.start-menu-item[data-open]').forEach((mi) => {
+      mi.addEventListener('click', (ev) => {
+        const id = mi.dataset.open;
+        const w = document.getElementById(id); if (!w) return;
+        const st = winState[id] = winState[id] || {};
+        st.closed = false; st.minimized = false;
+        w.style.display = '';
+        w.classList.remove('minimized');
+        if (taskBtns[id]) taskBtns[id].classList.remove('minimized-tag');
+        bringToFront(id);
+        startMenu.classList.remove('show');
+      });
+    });
 
     // ============ API TABS ============
     document.querySelectorAll('.api-tab').forEach((tab) => {
@@ -1968,11 +2750,52 @@ console.<span class="f">log</span>(top);     <span class="c">// { airline: "ANA"
       });
     });
 
+    // ============ SPREADSHEET SORTING ============
+    (function initSort() {
+      const sheet = document.querySelector('#win-landscape .spreadsheet');
+      if (!sheet) return;
+      const headRow = sheet.querySelector('.ss-row.head');
+      const dataRows = Array.from(sheet.querySelectorAll('.ss-row:not(.head)'));
+      const heads = Array.from(headRow.children); // [empty, A, B, C, D, E]
+      let sortState = { col: 0, dir: 'asc' }; // col is row-number column (default order)
+      heads.forEach((h, idx) => {
+        if (idx === 0) return; // rownum gutter
+        h.addEventListener('click', () => {
+          // Sort by idx using textContent of that column in dataRows
+          if (sortState.col === idx) {
+            sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+          } else {
+            sortState.col = idx; sortState.dir = 'asc';
+          }
+          heads.forEach((hh) => hh.classList.remove('sort-asc', 'sort-desc'));
+          h.classList.add('sort-' + sortState.dir);
+          const sorted = dataRows.slice().sort((a, b) => {
+            const av = (a.children[idx]?.textContent || '').trim().toLowerCase();
+            const bv = (b.children[idx]?.textContent || '').trim().toLowerCase();
+            // numeric-aware
+            const an = parseFloat(av.replace(/[^0-9.\-]/g,''));
+            const bn = parseFloat(bv.replace(/[^0-9.\-]/g,''));
+            let cmp;
+            if (!isNaN(an) && !isNaN(bn)) cmp = an - bn;
+            else cmp = av.localeCompare(bv);
+            return sortState.dir === 'asc' ? cmp : -cmp;
+          });
+          // Re-append in sorted order and renumber
+          sorted.forEach((row, i) => {
+            sheet.appendChild(row);
+            const rn = row.querySelector('.rownum');
+            if (rn) rn.textContent = (i + 1).toString();
+          });
+        });
+      });
+    })();
+
     // ============ AUTONOMOUS BROWSER DEMO ============
     const cursor = document.getElementById('cursor');
     const frame = document.getElementById('frame');
     const sceneSearch = document.getElementById('scene-search');
     const sceneGmail = document.getElementById('scene-gmail');
+    const sceneCal = document.getElementById('scene-calendar');
     const searchBox = document.getElementById('search-box');
     const searchInput = document.getElementById('search-input');
     const searchResults = document.getElementById('search-results');
@@ -1980,6 +2803,7 @@ console.<span class="f">log</span>(top);     <span class="c">// { airline: "ANA"
     const result2 = document.getElementById('result-2');
     const tab1 = document.getElementById('tab-1');
     const tab2 = document.getElementById('tab-2');
+    const tab3 = document.getElementById('tab-3');
     const urlHost = document.getElementById('url-host');
     const urlPath = document.getElementById('url-path');
     const thread1 = document.getElementById('thread-1');
@@ -1988,16 +2812,54 @@ console.<span class="f">log</span>(top);     <span class="c">// { airline: "ANA"
     const logEntries = document.getElementById('log-entries');
     const taskName = document.getElementById('task-name');
     const taskCounter = document.getElementById('task-counter');
+    const demoDot = document.getElementById('demo-dot');
+    const demoStatus = document.getElementById('demo-status');
+    const calEventNew = document.getElementById('event-new');
+    const calEventModal = document.getElementById('cal-event-modal');
+    const calThuHead = document.getElementById('cell-thu-head');
+    const calThu2pm = document.getElementById('cell-thu-2pm');
+    const calModalClose = document.getElementById('cal-modal-close');
+    const calSave = document.getElementById('cal-save');
+    const calCancel = document.getElementById('cal-cancel');
 
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+    // Spring-eased cursor movement: position interpolated each frame.
+    let cursorState = { x: 40, y: 40, vx: 0, vy: 0, tx: 40, ty: 40 };
+    let cursorRaf = null;
+
+    function setCursorImmediate(x, y) {
+      cursorState.x = x; cursorState.y = y;
+      cursorState.tx = x; cursorState.ty = y;
+      cursorState.vx = 0; cursorState.vy = 0;
+      cursor.style.transform = `translate(${x}px, ${y}px)`;
+    }
+    function cursorAnimate() {
+      const k = 0.18; // spring k
+      const d = 0.72; // damping
+      const dx = cursorState.tx - cursorState.x;
+      const dy = cursorState.ty - cursorState.y;
+      cursorState.vx = (cursorState.vx + dx * k) * d;
+      cursorState.vy = (cursorState.vy + dy * k) * d;
+      cursorState.x += cursorState.vx;
+      cursorState.y += cursorState.vy;
+      cursor.style.transform = `translate(${cursorState.x.toFixed(1)}px, ${cursorState.y.toFixed(1)}px)`;
+      const settled = Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(cursorState.vx) < 0.5;
+      if (!settled) cursorRaf = requestAnimationFrame(cursorAnimate);
+      else cursorRaf = null;
+    }
     function moveCursorTo(el, offsetX = 12, offsetY = 12) {
       if (!el || !frame) return;
       const fr = frame.getBoundingClientRect();
       const er = el.getBoundingClientRect();
-      const x = er.left - fr.left + offsetX;
-      const y = er.top - fr.top + offsetY;
-      cursor.style.transform = `translate(${x}px, ${y}px)`;
+      cursorState.tx = er.left - fr.left + offsetX;
+      cursorState.ty = er.top - fr.top + offsetY;
+      if (!cursorRaf) cursorRaf = requestAnimationFrame(cursorAnimate);
+    }
+    function moveCursorXY(x, y) {
+      cursorState.tx = x;
+      cursorState.ty = y;
+      if (!cursorRaf) cursorRaf = requestAnimationFrame(cursorAnimate);
     }
     async function clickAt(el) {
       cursor.classList.remove('click');
@@ -2008,6 +2870,7 @@ console.<span class="f">log</span>(top);     <span class="c">// { airline: "ANA"
     async function typeInto(el, text, perChar = 55) {
       el.textContent = '';
       for (const ch of text) {
+        if (stopRequested) return;
         el.textContent += ch;
         await sleep(perChar + Math.random() * 35);
       }
@@ -2015,18 +2878,36 @@ console.<span class="f">log</span>(top);     <span class="c">// { airline: "ANA"
     function addLog(text, opts = {}) {
       const div = document.createElement('div');
       div.className = 'log-entry' + (opts.thinking ? ' thinking' : '');
-      div.innerHTML = `<span class="log-tick">${opts.thinking ? '...' : '&gt;'}</span> ${text}`;
+      const prefix = opts.thinking ? '...' : (opts.check ? '✓' : '&gt;');
+      div.innerHTML = `<span class="log-tick">${prefix}</span> ${text}`;
       logEntries.appendChild(div);
       requestAnimationFrame(() => div.classList.add('show'));
-      while (logEntries.children.length > 9) {
+      while (logEntries.children.length > 11) {
         logEntries.removeChild(logEntries.firstChild);
       }
       logEntries.scrollTop = logEntries.scrollHeight;
+      return div;
+    }
+    function replaceLastLog(text, opts = {}) {
+      const last = logEntries.lastChild;
+      if (!last) return addLog(text, opts);
+      last.classList.remove('thinking');
+      const prefix = opts.check ? '✓' : '&gt;';
+      last.innerHTML = `<span class="log-tick">${prefix}</span> ${text}`;
+      return last;
     }
     function clearLog() { logEntries.innerHTML = ''; }
     function showScene(name) {
       sceneSearch.classList.toggle('active', name === 'search');
       sceneGmail.classList.toggle('active', name === 'gmail');
+      sceneCal.classList.toggle('active', name === 'calendar');
+      // tab visual state
+      tab1.classList.toggle('active', name === 'search');
+      tab2.classList.toggle('active', name === 'gmail');
+      tab3.classList.toggle('active', name === 'calendar');
+      if (name === 'search') { urlHost.textContent = 'google.com'; urlPath.textContent = '/'; }
+      if (name === 'gmail')  { urlHost.textContent = 'mail.google.com'; urlPath.textContent = '/u/0/#inbox'; }
+      if (name === 'calendar') { urlHost.textContent = 'calendar.google.com'; urlPath.textContent = '/r/week'; }
     }
     function resetSearch() {
       searchInput.textContent = '';
@@ -2040,103 +2921,292 @@ console.<span class="f">log</span>(top);     <span class="c">// { airline: "ANA"
       composeBox.classList.remove('show');
       composeBody.textContent = '';
     }
+    function resetCalendar() {
+      calEventNew.classList.remove('show');
+      calEventModal.classList.remove('show');
+    }
+    function setStatus(s, dotState) {
+      demoStatus.textContent = s;
+      demoDot.classList.remove('idle','running');
+      demoDot.classList.add(dotState);
+    }
 
     let demoRunning = false;
     let stopRequested = false;
+    let currentTaskNum = 0;
+    const TOTAL_TASKS = 3;
 
     async function runTaskSearch() {
+      currentTaskNum = 1;
       taskName.textContent = "Search flights to Tokyo";
-      taskCounter.textContent = "1 / 2";
-      tab1.classList.add('active');
-      tab2.classList.remove('active');
-      urlHost.textContent = 'google.com';
-      urlPath.textContent = '/';
+      taskCounter.textContent = currentTaskNum + " / " + TOTAL_TASKS;
       showScene('search');
       resetSearch();
       clearLog();
 
-      addLog('Opened <span class="log-target">google.com</span>');
-      await sleep(700); if (stopRequested) return;
+      addLog('Opened <span class="log-target">google.com</span>', { check: true });
+      await sleep(600); if (stopRequested) return;
 
       moveCursorTo(searchBox, 30, 20);
-      await sleep(900);
+      await sleep(750);
       await clickAt(searchBox);
       searchBox.classList.add('highlight');
-      addLog('Clicked <span class="log-target">search field</span>');
-      await sleep(400); if (stopRequested) return;
+      addLog('Clicked <span class="log-target">search field</span>', { check: true });
+      await sleep(300); if (stopRequested) return;
 
       addLog('typing query...', { thinking: true });
       await typeInto(searchInput, 'flights SFO to Tokyo May 2026');
-      const last = logEntries.lastChild;
-      if (last) { last.classList.remove('thinking'); last.innerHTML = '<span class="log-tick">&gt;</span> Typed <span class="log-target">"flights SFO to Tokyo May 2026"</span>'; }
-      await sleep(400); if (stopRequested) return;
+      replaceLastLog('Typed <span class="log-target">"flights SFO to Tokyo May 2026"</span>', { check: true });
+      await sleep(350); if (stopRequested) return;
 
       searchResults.classList.add('show');
-      addLog('Submitted - <span class="log-target">2 results</span>');
-      await sleep(700); if (stopRequested) return;
+      addLog('Submitted - <span class="log-target">2 results</span>', { check: true });
+      await sleep(600); if (stopRequested) return;
 
       moveCursorTo(result2, 80, 24);
-      await sleep(750);
+      await sleep(700);
       result2.classList.add('highlight');
       await clickAt(result2);
-      addLog('Hovered <span class="log-target">Kayak result</span>');
-      await sleep(450); if (stopRequested) return;
-      addLog('Extracted <span class="log-target">$642 SFO-HND</span>');
-      await sleep(1200);
+      addLog('Clicked <span class="log-target">Kayak result</span>', { check: true });
+      await sleep(400); if (stopRequested) return;
+      addLog('Extracted price: <span class="log-target">$642 SFO-HND</span>', { check: true });
+      await sleep(1100);
     }
 
     async function runTaskGmail() {
+      currentTaskNum = 2;
       taskName.textContent = "Open inbox; draft reply";
-      taskCounter.textContent = "2 / 2";
+      taskCounter.textContent = currentTaskNum + " / " + TOTAL_TASKS;
       clearLog();
       resetGmail();
 
       moveCursorTo(tab2, 16, 16);
-      await sleep(700);
+      await sleep(600);
       await clickAt(tab2);
-      tab1.classList.remove('active');
-      tab2.classList.add('active');
-      urlHost.textContent = 'mail.google.com';
-      urlPath.textContent = '/u/0/#inbox';
       showScene('gmail');
-      addLog('Switched to <span class="log-target">Inbox</span>');
-      await sleep(700); if (stopRequested) return;
+      addLog('Switched tab → <span class="log-target">Mail</span>', { check: true });
+      await sleep(500); if (stopRequested) return;
 
       moveCursorTo(thread1, 100, 18);
-      await sleep(900);
+      await sleep(750);
       await clickAt(thread1);
       thread1.classList.add('highlight');
-      addLog('Opened thread <span class="log-target">Priya Raman</span>');
-      await sleep(450); if (stopRequested) return;
-
-      composeBox.classList.add('show');
-      addLog('drafting reply...', { thinking: true });
-      await sleep(350);
-      moveCursorTo(composeBox, 220, 50);
+      addLog('Opened thread <span class="log-target">Priya Raman</span>', { check: true });
       await sleep(400); if (stopRequested) return;
 
-      await typeInto(composeBody, 'Thursday at 2pm works - sending invite now.', 38);
-      const last = logEntries.lastChild;
-      if (last) { last.classList.remove('thinking'); last.innerHTML = '<span class="log-tick">&gt;</span> Drafted reply <span class="log-target">(11 words)</span>'; }
-      await sleep(550);
-      addLog('Returned <span class="log-target">draft.id = d_8a2f</span>');
-      await sleep(1400);
+      composeBox.classList.add('show');
+      addLog('Clicked <span class="log-target">Reply</span>', { check: true });
+      await sleep(300);
+      moveCursorTo(composeBox, 220, 50);
+      await sleep(350); if (stopRequested) return;
+
+      addLog('drafting reply...', { thinking: true });
+      await typeInto(composeBody, 'Thursday at 2pm works - sending an invite now.', 36);
+      replaceLastLog('Typed reply <span class="log-target">(9 words)</span>', { check: true });
+      await sleep(500);
+      addLog('Clicked <span class="log-target">Send</span> - draft.id = d_8a2f', { check: true });
+      await sleep(1100);
+    }
+
+    async function runTaskCalendar() {
+      currentTaskNum = 3;
+      taskName.textContent = "Send invite for Thu 2pm";
+      taskCounter.textContent = currentTaskNum + " / " + TOTAL_TASKS;
+      clearLog();
+      resetCalendar();
+
+      moveCursorTo(tab3, 16, 16);
+      await sleep(600);
+      await clickAt(tab3);
+      showScene('calendar');
+      addLog('Switched tab → <span class="log-target">Calendar</span>', { check: true });
+      await sleep(600); if (stopRequested) return;
+
+      // Hover the Thursday column
+      moveCursorTo(calThuHead, 30, 14);
+      await sleep(650);
+      addLog('Located <span class="log-target">Thu May 14</span>', { check: true });
+      if (stopRequested) return;
+
+      // Move down to the 2pm cell
+      moveCursorTo(calThu2pm, 30, 14);
+      await sleep(700);
+      await clickAt(calThu2pm);
+      addLog('Clicked <span class="log-target">2pm slot</span>', { check: true });
+      await sleep(300); if (stopRequested) return;
+
+      // Show modal
+      calEventModal.classList.add('show');
+      addLog('Opened <span class="log-target">event editor</span>', { check: true });
+      await sleep(600); if (stopRequested) return;
+
+      // Cursor to Save button
+      moveCursorTo(calSave, 22, 12);
+      await sleep(750);
+      await clickAt(calSave);
+      addLog('Clicked <span class="log-target">Save</span>', { check: true });
+      await sleep(250);
+      // Hide modal, show new event chip
+      calEventModal.classList.remove('show');
+      calEventNew.classList.add('show');
+      await sleep(500);
+      addLog('Event created: <span class="log-target">Q3 Review · Thu 2pm</span>', { check: true });
+      await sleep(400);
+      addLog('Invite sent to <span class="log-target">priya@aretelabs.co</span>', { check: true });
+      await sleep(1300);
     }
 
     async function runDemo() {
       if (demoRunning || reduced) return;
       demoRunning = true;
       stopRequested = false;
+      setStatus('running', 'running');
       try {
         while (!stopRequested) {
           await runTaskSearch();
           if (stopRequested) break;
-          await sleep(900);
+          await sleep(800);
           await runTaskGmail();
           if (stopRequested) break;
-          await sleep(900);
+          await sleep(800);
+          await runTaskCalendar();
+          if (stopRequested) break;
+          await sleep(1100);
         }
-      } finally { demoRunning = false; }
+      } finally {
+        demoRunning = false;
+        setStatus(stopRequested ? 'stopped' : 'idle', 'idle');
+      }
+    }
+
+    async function runSingleTask(name) {
+      if (demoRunning) {
+        stopRequested = true;
+        await sleep(200);
+      }
+      demoRunning = true;
+      stopRequested = false;
+      setStatus('running', 'running');
+      try {
+        if (name === 'search') await runTaskSearch();
+        else if (name === 'gmail') await runTaskGmail();
+        else if (name === 'calendar') await runTaskCalendar();
+      } finally {
+        demoRunning = false;
+        setStatus('idle', 'idle');
+      }
+    }
+
+    // ============ DEMO CONTROL BUTTONS ============
+    document.querySelectorAll('.demo-controls .run-task').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = 'win-demo';
+        const w = document.getElementById(id);
+        const st = winState[id] = winState[id] || {};
+        if (st.closed || st.minimized) {
+          w.style.display = '';
+          w.classList.remove('minimized');
+          st.closed = false; st.minimized = false;
+          if (taskBtns[id]) taskBtns[id].classList.remove('minimized-tag');
+        }
+        bringToFront(id);
+        runSingleTask(btn.dataset.task);
+      });
+    });
+    document.getElementById('demo-stop').addEventListener('click', () => {
+      stopRequested = true;
+      setStatus('stopping...', 'idle');
+    });
+
+    // Calendar modal close (manual)
+    calModalClose.addEventListener('click', () => calEventModal.classList.remove('show'));
+    calCancel.addEventListener('click', () => calEventModal.classList.remove('show'));
+
+    // Manual tab switching
+    [['tab-1','search'],['tab-2','gmail'],['tab-3','calendar']].forEach(([tid,scene]) => {
+      const t = document.getElementById(tid);
+      t.addEventListener('click', () => {
+        if (!demoRunning) showScene(scene);
+      });
+    });
+
+    // ============ TUTORIAL · per-step run buttons ============
+    // Map each tutorial step to a small browser-demo bit
+    const STEP_TASKS = {
+      'step-1': { msg: 'Provisioning sandbox...', logs: ['$ firecracker --create vm-01', '✓ Microvm running on port 8080','Network egress: allowlist'] },
+      'step-2': { msg: 'Installing browser...',   logs: ['$ apt install -y xvfb chromium-browser','✓ chromium 120.0.6099.71 installed','✓ Xvfb :99 1280x800x24 up'] },
+      'step-3': { msg: 'Minting scoped key...',   logs: ['$ anthropic keys create --scope computer-use', '✓ key sk-***agent-01 (cap: $50/day)'] },
+      'step-4': { msg: 'Defining tool...',        logs: ['tools=[{type:"computer_20251124",','       display_width_px:1280, display_height_px:800}]','✓ tool registered'] },
+      'step-5': { msg: 'Screenshot helper...',    logs: ['scrot /tmp/s.png','b64 encode → 124 KB image block','✓ helper ready'] },
+      'step-6': { msg: 'Action executor...',      logs: ['xdotool mousemove 720 410 click 1','sleep 300ms; screenshot','✓ executor up'] },
+      'step-7': { msg: 'Looping...',              logs: ['while tool_use blocks:','  execute → screenshot → re-call','✓ loop running (2/50)'] },
+      'step-8': { msg: 'Hard cap...',             logs: ['ITER_CAP=50 WALL_CLOCK=600s','✓ kill-switch armed'] },
+      'step-9': { msg: 'Observability...',        logs: ['log[03:02:11] click(720,410)','log[03:02:14] screenshot(124KB)','✓ langfuse trace 0xA72'] },
+      'step-10':{ msg: 'Approval choke...',       logs: ['action=send_email → PAUSED','posting to #ops-approvals','✓ awaiting human'] },
+      'step-11':{ msg: 'Budget cap...',           logs: ['tokens=0.42M / 1.00M cap','browser-hours=0.6 / 2.0 cap','✓ within budget'] },
+      'step-12':{ msg: 'Feature flag...',         logs: ['flag computer_use.rollout=0.10','✓ shipped to 10% of org','watching error rates'] },
+    };
+    Object.keys(STEP_TASKS).forEach((sid) => {
+      const step = document.getElementById(sid);
+      if (!step) return;
+      const content = step.querySelector('.step-content');
+      if (!content) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'step-run-btn';
+      btn.innerHTML = '<span class="arr">▷</span> run step';
+      btn.addEventListener('click', async () => {
+        // Bring demo window forward & scroll to it
+        const w = document.getElementById('win-demo');
+        const st = winState['win-demo'] = winState['win-demo'] || {};
+        st.closed = false; st.minimized = false;
+        w.style.display = '';
+        w.classList.remove('minimized');
+        if (taskBtns['win-demo']) taskBtns['win-demo'].classList.remove('minimized-tag');
+        bringToFront('win-demo');
+        w.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+        // Halt active loop, replay this step's logs into the console
+        if (demoRunning) { stopRequested = true; await sleep(220); }
+        const task = STEP_TASKS[sid];
+        taskName.textContent = sid.toUpperCase() + ' · ' + task.msg;
+        taskCounter.textContent = sid.replace('step-','') + ' / 12';
+        clearLog();
+        setStatus('step replay', 'running');
+        addLog(task.msg, { thinking: true });
+        await sleep(450);
+        replaceLastLog(task.msg, { check: true });
+        for (const line of task.logs) {
+          await sleep(450);
+          addLog(line.replace(/✓/g, '✓ '));
+        }
+        setStatus('idle', 'idle');
+      });
+      content.appendChild(btn);
+    });
+
+    // ============ WARNING POPUP — re-emerges every 30s ============
+    const warnPopup = document.getElementById('warning-popup');
+    const warnAck = document.getElementById('warn-ack');
+    const warnLater = document.getElementById('warn-later');
+    const warnX = document.getElementById('warn-x');
+    let warnTimer = null;
+    function showWarn() {
+      warnPopup.classList.add('show');
+    }
+    function dismissWarn(delay) {
+      warnPopup.classList.remove('show');
+      clearTimeout(warnTimer);
+      warnTimer = setTimeout(showWarn, delay);
+    }
+    warnAck.addEventListener('click', () => dismissWarn(30000));
+    warnLater.addEventListener('click', () => dismissWarn(10000));
+    warnX.addEventListener('click', () => dismissWarn(30000));
+    warnPopup.addEventListener('click', (ev) => {
+      if (ev.target === warnPopup) dismissWarn(30000);
+    });
+    // First trigger ~25s after load
+    if (!reduced) {
+      setTimeout(showWarn, 25000);
     }
 
     // Start when frame becomes visible
@@ -2150,22 +3220,12 @@ console.<span class="f">log</span>(top);     <span class="c">// { airline: "ANA"
         });
       }, { threshold: 0.4 });
       demoObserver.observe(frame);
-
-      // Replay button
-      document.getElementById('replay').addEventListener('click', () => {
-        stopRequested = true;
-        setTimeout(() => { stopRequested = false; runDemo(); }, 120);
-      });
-
-      // Pause when off-screen
-      const pauseObserver = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (!e.isIntersecting) { stopRequested = true; }
-          else if (!demoRunning) { stopRequested = false; setTimeout(runDemo, 400); }
-        });
-      }, { threshold: 0.1 });
-      pauseObserver.observe(frame);
+    } else {
+      setStatus('reduced-motion · static', 'idle');
     }
+
+    // Initial focus on hero
+    setActive('win-hero');
   </script>
   <script src="../shared/nav.js" defer></script>
 </body>

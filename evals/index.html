@@ -518,6 +518,456 @@
       .animate-in { opacity: 1; transform: none; }
     }
 
+    /* ======= LIVE DASHBOARD ADDITIONS ======= */
+
+    /* Filter pills + actions bar above the dashboard */
+    .dash-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .filter-pills { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .filter-pills .lbl {
+      font-family: var(--font-mono); font-size: 10.5px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-3); margin-right: 4px;
+    }
+    .fpill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 11px; border-radius: 999px;
+      font-family: var(--font-mono); font-size: 11.5px; font-weight: 500;
+      color: var(--text-2);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 200ms var(--ease);
+      font-variant-numeric: tabular-nums;
+    }
+    .fpill:hover { color: var(--text); border-color: var(--border-strong); }
+    .fpill[aria-pressed="true"] {
+      background: var(--text); color: var(--text-inv); border-color: var(--text);
+    }
+    .fpill .swatch { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); }
+    .fpill[data-model="gpt5"] .swatch    { background: var(--mint); }
+    .fpill[data-model="claude"] .swatch  { background: var(--indigo); }
+    .fpill[data-model="gemini"] .swatch  { background: var(--sky); }
+
+    .run-eval-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 14px; border-radius: var(--r-sm);
+      font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      background: var(--mint-deep); color: var(--text-inv);
+      border: 1px solid var(--mint-deep);
+      cursor: pointer;
+      transition: all 200ms var(--ease);
+    }
+    .run-eval-btn:hover { background: #036746; }
+    .run-eval-btn::before {
+      content: ''; width: 0; height: 0;
+      border-left: 6px solid currentColor;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+    }
+
+    /* Live indicator */
+    .live-indicator {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--text-2);
+    }
+    .live-indicator .ld {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+      animation: pulse 2s infinite;
+    }
+
+    /* Trace timeline (live stream variant) */
+    .stream-rows { display: grid; gap: 0; max-height: 280px; overflow: hidden; }
+    .stream-row {
+      display: grid;
+      grid-template-columns: 60px 56px 1fr 60px 52px;
+      gap: 10px; align-items: center;
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border-2);
+      font-size: 12px;
+      animation: streamSlideIn 460ms var(--ease) both;
+      will-change: transform, opacity;
+    }
+    .stream-row:last-child { border-bottom: 0; }
+    @keyframes streamSlideIn {
+      from { transform: translateY(-10px); opacity: 0; background: rgba(16,185,129,0.10); }
+      to   { transform: translateY(0); opacity: 1; background: transparent; }
+    }
+    .stream-row .ts {
+      font-family: var(--font-mono); font-size: 10.5px;
+      color: var(--text-3); font-variant-numeric: tabular-nums;
+    }
+    .stream-row .mdl {
+      font-family: var(--font-mono); font-size: 10.5px;
+      padding: 1px 6px; border-radius: 4px;
+      background: var(--slate-soft); color: var(--text-2);
+      text-align: center; letter-spacing: 0.02em;
+    }
+    .stream-row[data-model="gpt5"] .mdl    { background: var(--mint-soft); color: var(--mint-deep); }
+    .stream-row[data-model="claude"] .mdl  { background: var(--indigo-soft); color: var(--indigo); }
+    .stream-row[data-model="gemini"] .mdl  { background: var(--sky-soft); color: #0369A1; }
+    .stages {
+      display: flex; gap: 3px; align-items: center;
+    }
+    .stage {
+      flex: 1; height: 6px; border-radius: 2px;
+      background: var(--slate-soft);
+      position: relative; overflow: hidden;
+    }
+    .stage .pf {
+      position: absolute; inset: 0; width: 0;
+      background: currentColor;
+      animation: stageFill 1000ms var(--ease) both;
+    }
+    .stage[data-s="prompt"]   { color: var(--text-3); }
+    .stage[data-s="retrieve"] { color: var(--sky); }
+    .stage[data-s="llm"]      { color: var(--indigo); }
+    .stage[data-s="judge"]    { color: var(--amber); }
+    .stage:nth-child(2) .pf { animation-delay: 100ms; }
+    .stage:nth-child(3) .pf { animation-delay: 200ms; }
+    .stage:nth-child(4) .pf { animation-delay: 300ms; }
+    @keyframes stageFill { from { width: 0 } to { width: 100% } }
+    .stream-row .latms {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-2); text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .verdict {
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
+      padding: 2px 6px; border-radius: 4px; letter-spacing: 0.04em;
+    }
+    .verdict.pass { background: var(--mint-soft); color: var(--mint-deep); }
+    .verdict.fail { background: var(--red-soft); color: var(--red-deep); }
+
+    /* Run-eval modal */
+    .modal-mask {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 100;
+      animation: maskIn 200ms var(--ease);
+    }
+    .modal-mask.open { display: flex; }
+    @keyframes maskIn { from { opacity: 0 } to { opacity: 1 } }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-pop);
+      width: min(420px, calc(100% - 32px));
+      padding: 22px 24px;
+      animation: modalIn 320ms var(--ease);
+    }
+    @keyframes modalIn { from { transform: translateY(12px); opacity: 0 } to { transform: none; opacity: 1 } }
+    .modal h3 { margin: 0 0 4px; font-size: 16px; }
+    .modal p.small { margin: 0 0 16px; font-size: 12.5px; color: var(--text-2); }
+    .modal .testsets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+    .testset-pick {
+      padding: 12px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      font-family: var(--font-mono); font-size: 12px;
+      cursor: pointer;
+      transition: all 180ms var(--ease);
+      text-align: center;
+    }
+    .testset-pick:hover { border-color: var(--border-strong); }
+    .testset-pick[aria-pressed="true"] {
+      background: var(--mint-soft); color: var(--mint-deep);
+      border-color: var(--mint);
+    }
+    .testset-pick .sz { display: block; font-size: 10.5px; color: var(--text-3); margin-top: 3px; }
+    .testset-pick[aria-pressed="true"] .sz { color: var(--mint-deep); opacity: 0.8; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-cancel, .btn-go {
+      padding: 7px 14px; border-radius: var(--r-sm);
+      font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      cursor: pointer;
+    }
+    .btn-cancel { background: var(--surface); color: var(--text-2); border: 1px solid var(--border); }
+    .btn-cancel:hover { color: var(--text); }
+    .btn-go { background: var(--mint-deep); color: var(--text-inv); border: 1px solid var(--mint-deep); }
+    .btn-go:disabled { opacity: 0.45; cursor: not-allowed; }
+    .modal .progress {
+      height: 6px; background: var(--slate-soft);
+      border-radius: 3px; overflow: hidden; margin-top: 12px;
+      display: none;
+    }
+    .modal .progress.go { display: block; }
+    .modal .progress .bar {
+      height: 100%; width: 0%; background: var(--mint);
+      transition: width 4000ms linear;
+    }
+    .modal .progress-label {
+      font-family: var(--font-mono); font-size: 11px; color: var(--text-2);
+      margin-top: 8px; display: none;
+    }
+    .modal .progress-label.go { display: block; }
+
+    /* ======= JUDGE DEMO (§2) ======= */
+    .judge-demo {
+      margin: 20px 0 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--surface);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .judge-demo .jd-head {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .judge-demo .jd-head .title {
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--text-2);
+    }
+    .judge-demo .jd-head .nav { display: flex; gap: 6px; align-items: center; }
+    .jd-nav-btn {
+      background: transparent; border: 1px solid var(--border);
+      border-radius: var(--r-xs);
+      width: 24px; height: 22px;
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--text-2); cursor: pointer;
+      display: grid; place-items: center;
+    }
+    .jd-nav-btn:hover { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
+    .jd-counter { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); padding: 0 4px; }
+    .jd-pair {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+    .jd-cell {
+      padding: 14px 16px;
+      border-right: 1px solid var(--border);
+    }
+    .jd-cell:last-child { border-right: 0; }
+    .jd-cell .lbl {
+      font-family: var(--font-mono); font-size: 10px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-3); margin-bottom: 6px;
+    }
+    .jd-cell .txt { font-size: 13px; color: var(--text); line-height: 1.55; }
+    .jd-question {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-alt);
+      font-size: 12.5px; color: var(--text-2);
+    }
+    .jd-question b { color: var(--text); font-weight: 500; }
+    .jd-actions {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px;
+      gap: 12px;
+    }
+    .judge-run {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 13px; border-radius: var(--r-sm);
+      font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      background: var(--indigo); color: var(--text-inv);
+      border: 1px solid var(--indigo);
+      cursor: pointer;
+    }
+    .judge-run:hover { background: #4F46E5; }
+    .judge-run:disabled { opacity: 0.5; cursor: not-allowed; }
+    .judge-score {
+      display: inline-flex; align-items: baseline; gap: 4px;
+      font-family: var(--font-mono); font-weight: 600;
+      color: var(--text-3); font-size: 14px;
+    }
+    .judge-score .v { font-size: 22px; font-variant-numeric: tabular-nums; color: var(--text); }
+    .judge-score .max { color: var(--text-3); font-size: 12px; }
+    .judge-score.set .v { color: var(--mint-deep); }
+    .jd-reasoning {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-2);
+      font-size: 13px; color: var(--text-2);
+      line-height: 1.6; min-height: 0;
+      max-height: 0; overflow: hidden;
+      transition: max-height 600ms var(--ease), padding 200ms var(--ease);
+    }
+    .jd-reasoning.show {
+      max-height: 220px;
+      padding: 14px 16px;
+    }
+    .jd-reasoning .lbl {
+      font-family: var(--font-mono); font-size: 10px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-3); margin-bottom: 6px;
+    }
+    .jd-reasoning .typed::after {
+      content: '▍'; color: var(--indigo); opacity: 0.6;
+      animation: blink 800ms steps(2) infinite;
+    }
+    .jd-reasoning.done .typed::after { content: ''; }
+    @keyframes blink { 50% { opacity: 0 } }
+
+    /* ======= Maturity stage indicator ======= */
+    #maturity .steps .step {
+      cursor: pointer;
+      transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease), background 200ms var(--ease);
+      position: relative;
+    }
+    #maturity .steps .step:hover { border-color: var(--border-strong); }
+    #maturity .steps .step.active {
+      border-color: var(--mint);
+      background: var(--mint-soft);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.10);
+    }
+    #maturity .steps .step.active .num { background: var(--mint-deep); }
+    #maturity .steps .step .stage-tag {
+      position: absolute; top: 14px; right: 18px;
+      font-family: var(--font-mono); font-size: 10.5px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-3);
+    }
+    #maturity .steps .step.active .stage-tag { color: var(--mint-deep); font-weight: 600; }
+    .stage-indicator {
+      margin: 24px 0 4px;
+      padding: 16px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; gap: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stage-indicator .lbl {
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--text-2); flex: 0 0 auto;
+    }
+    .stage-bar {
+      flex: 1; height: 8px; background: var(--slate-soft);
+      border-radius: 4px; overflow: hidden;
+      display: flex; gap: 2px;
+    }
+    .stage-bar .seg {
+      flex: 1; background: var(--slate-soft);
+      transition: background 400ms var(--ease);
+    }
+    .stage-bar .seg.on { background: var(--mint); }
+    .stage-indicator .val {
+      font-family: var(--font-mono); font-size: 12px;
+      color: var(--text); font-weight: 600;
+      font-variant-numeric: tabular-nums; flex: 0 0 auto;
+    }
+
+    /* ======= Walkthrough "show" interactions ======= */
+    .step .show-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 10px;
+      padding: 5px 11px;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.04em;
+      background: var(--surface); color: var(--text-2);
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: all 180ms var(--ease);
+    }
+    .step .show-btn::before {
+      content: '▷'; color: var(--mint-deep); font-size: 9px;
+    }
+    .step .show-btn:hover { color: var(--text); border-color: var(--border-strong); }
+    .step .show-btn[aria-pressed="true"] { background: var(--text); color: var(--text-inv); border-color: var(--text); }
+    .step .show-btn[aria-pressed="true"]::before { color: var(--mint); }
+    .step-vis {
+      margin-top: 12px;
+      max-height: 0; overflow: hidden;
+      transition: max-height 500ms var(--ease);
+      border-radius: var(--r-sm);
+    }
+    .step-vis.show { max-height: 240px; }
+    .step-vis-inner {
+      padding: 12px 14px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      font-family: var(--font-mono); font-size: 11.5px;
+      color: var(--text-2);
+    }
+    .step-vis-inner .row {
+      display: flex; justify-content: space-between;
+      padding: 3px 0; border-bottom: 1px dashed var(--border-2);
+    }
+    .step-vis-inner .row:last-child { border-bottom: 0; }
+    .step-vis-inner .row .v { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .step-vis-inner .mini-bar {
+      height: 6px; border-radius: 3px;
+      background: var(--slate-soft); overflow: hidden;
+      margin: 6px 0 8px;
+    }
+    .step-vis-inner .mini-bar .fill {
+      height: 100%; background: var(--mint);
+      animation: barGrow 800ms var(--ease) both;
+    }
+    @keyframes barGrow { from { width: 0 } }
+
+    /* ======= Benchmark hover sparklines ======= */
+    .bench { position: relative; overflow: hidden; transition: border-color 200ms var(--ease); }
+    .bench:hover { border-color: var(--border-strong); }
+    .bench-spark {
+      width: 100%; height: 28px; margin-top: 10px;
+      display: block;
+    }
+    .bench-spark .bsline {
+      fill: none; stroke: var(--mint); stroke-width: 1.5;
+      stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 200; stroke-dashoffset: 200;
+      transition: stroke-dashoffset 1200ms var(--ease);
+    }
+    .bench:hover .bench-spark .bsline,
+    .bench.in-view .bench-spark .bsline {
+      stroke-dashoffset: 0;
+    }
+    .bench-spark .bsdot {
+      fill: var(--mint); stroke: var(--surface); stroke-width: 1.5;
+      opacity: 0;
+      transition: opacity 200ms var(--ease) 1100ms;
+    }
+    .bench:hover .bench-spark .bsdot,
+    .bench.in-view .bench-spark .bsdot { opacity: 1; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stream-row { animation: none !important; }
+      .stage .pf { animation: none !important; width: 100% !important; }
+      .bench-spark .bsline { stroke-dashoffset: 0 !important; transition: none !important; }
+      .bench-spark .bsdot { opacity: 1 !important; }
+    }
+
+    @media (max-width: 620px) {
+      .dash-actions { padding: 12px 14px; }
+      .filter-pills .lbl { display: none; }
+      .stream-row {
+        grid-template-columns: 48px 46px 1fr 44px;
+        gap: 6px; padding: 8px 10px;
+        font-size: 11px;
+      }
+      .stream-row .latms { display: none; }
+      .jd-pair { grid-template-columns: 1fr; }
+      .jd-cell { border-right: 0; border-bottom: 1px solid var(--border-2); }
+      .modal .testsets { grid-template-columns: 1fr; }
+    }
+
     /* ======= Responsive ======= */
     @media (max-width: 920px) {
       .metrics-bento { grid-template-columns: 1fr 1fr; }
@@ -633,9 +1083,21 @@
             <span class="breadcrumb">workspace / <b>support-rag</b> / dashboards</span>
           </div>
           <div class="right">
-            <span>last 24h</span>
+            <span class="live-indicator"><span class="ld"></span>Live · streaming</span>
             <span style="color: var(--mint-deep);">&bull; healthy</span>
           </div>
+        </div>
+
+        <!-- Filter pills + Run-eval -->
+        <div class="dash-actions">
+          <div class="filter-pills" role="tablist" aria-label="Filter by model">
+            <span class="lbl">Model</span>
+            <button class="fpill" data-model="all" aria-pressed="true">All</button>
+            <button class="fpill" data-model="gpt5" aria-pressed="false"><span class="swatch"></span>GPT-5</button>
+            <button class="fpill" data-model="claude" aria-pressed="false"><span class="swatch"></span>Claude</button>
+            <button class="fpill" data-model="gemini" aria-pressed="false"><span class="swatch"></span>Gemini</button>
+          </div>
+          <button class="run-eval-btn" id="run-eval-open">Run new eval</button>
         </div>
 
         <div class="dash-grid">
@@ -709,34 +1171,63 @@
             </div>
           </div>
 
-          <!-- Trace -->
+          <!-- Live trace stream -->
           <div class="cell c6">
-            <div class="kpi-label">Live trace &middot; run #4,812 <span class="delta up" id="trace-status">PASS</span></div>
-            <div class="trace-rows" id="trace">
-              <div class="trace-row" data-step="0" data-ms="42">
-                <span class="name">prompt</span>
-                <div class="trace-bar"><div class="fill"></div></div>
-                <span class="ms">42 ms</span>
+            <div class="kpi-label">Live trace stream <span class="small" style="color: var(--text-3);">prompt → retrieve → llm → judge</span></div>
+            <div class="stream-rows" id="stream" aria-live="polite" aria-label="Live evaluation stream">
+              <!-- rows injected by JS; seeded statically below for reduced-motion + initial paint -->
+              <div class="stream-row" data-model="gpt5">
+                <span class="ts">10:42:01</span>
+                <span class="mdl">GPT-5</span>
+                <span class="stages">
+                  <span class="stage" data-s="prompt"><span class="pf"></span></span>
+                  <span class="stage" data-s="retrieve"><span class="pf"></span></span>
+                  <span class="stage" data-s="llm"><span class="pf"></span></span>
+                  <span class="stage" data-s="judge"><span class="pf"></span></span>
+                </span>
+                <span class="latms">1,840 ms</span>
+                <span class="verdict pass">PASS</span>
               </div>
-              <div class="trace-row" data-step="1" data-ms="318" data-color="sky">
-                <span class="name">retrieve</span>
-                <div class="trace-bar"><div class="fill"></div></div>
-                <span class="ms">318 ms</span>
+              <div class="stream-row" data-model="claude">
+                <span class="ts">10:41:54</span>
+                <span class="mdl">Claude</span>
+                <span class="stages">
+                  <span class="stage" data-s="prompt"><span class="pf"></span></span>
+                  <span class="stage" data-s="retrieve"><span class="pf"></span></span>
+                  <span class="stage" data-s="llm"><span class="pf"></span></span>
+                  <span class="stage" data-s="judge"><span class="pf"></span></span>
+                </span>
+                <span class="latms">2,120 ms</span>
+                <span class="verdict pass">PASS</span>
               </div>
-              <div class="trace-row" data-step="2" data-ms="1240" data-color="indigo">
-                <span class="name">llm call</span>
-                <div class="trace-bar"><div class="fill"></div></div>
-                <span class="ms">1,240 ms</span>
+              <div class="stream-row" data-model="gemini">
+                <span class="ts">10:41:48</span>
+                <span class="mdl">Gemini</span>
+                <span class="stages">
+                  <span class="stage" data-s="prompt"><span class="pf"></span></span>
+                  <span class="stage" data-s="retrieve"><span class="pf"></span></span>
+                  <span class="stage" data-s="llm"><span class="pf"></span></span>
+                  <span class="stage" data-s="judge"><span class="pf"></span></span>
+                </span>
+                <span class="latms">1,520 ms</span>
+                <span class="verdict fail">FAIL</span>
               </div>
-              <div class="trace-row" data-step="3" data-ms="240" data-color="amber">
-                <span class="name">judge</span>
-                <div class="trace-bar"><div class="fill"></div></div>
-                <span class="ms">240 ms</span>
+              <div class="stream-row" data-model="gpt5">
+                <span class="ts">10:41:42</span>
+                <span class="mdl">GPT-5</span>
+                <span class="stages">
+                  <span class="stage" data-s="prompt"><span class="pf"></span></span>
+                  <span class="stage" data-s="retrieve"><span class="pf"></span></span>
+                  <span class="stage" data-s="llm"><span class="pf"></span></span>
+                  <span class="stage" data-s="judge"><span class="pf"></span></span>
+                </span>
+                <span class="latms">1,780 ms</span>
+                <span class="verdict pass">PASS</span>
               </div>
             </div>
             <div class="trace-foot">
-              <span>faithfulness 0.962 &middot; relevance 0.91</span>
-              <span>1,840 ms</span>
+              <span id="stream-summary">avg 1,840 ms &middot; pass-rate 93%</span>
+              <span id="stream-count">1,313 evals · 24h</span>
             </div>
           </div>
 
@@ -762,6 +1253,25 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </div>
+
+    <!-- Run-eval modal -->
+    <div class="modal-mask" id="run-eval-mask" role="dialog" aria-modal="true" aria-labelledby="run-eval-title">
+      <div class="modal">
+        <h3 id="run-eval-title">Run new eval</h3>
+        <p class="small">Pick a public test set. The harness will stream results back into the dashboard.</p>
+        <div class="testsets" role="radiogroup" aria-label="Test set">
+          <button class="testset-pick" data-set="mmlu" aria-pressed="false">MMLU<span class="sz">12,032 items</span></button>
+          <button class="testset-pick" data-set="humaneval" aria-pressed="false">HumanEval<span class="sz">164 items</span></button>
+          <button class="testset-pick" data-set="swebench" aria-pressed="false">SWE-bench<span class="sz">500 items</span></button>
+        </div>
+        <div class="progress" id="run-progress"><div class="bar" id="run-bar"></div></div>
+        <div class="progress-label" id="run-label">Running…</div>
+        <div class="modal-actions">
+          <button class="btn-cancel" id="run-cancel">Cancel</button>
+          <button class="btn-go" id="run-go" disabled>Run</button>
         </div>
       </div>
     </div>
@@ -849,6 +1359,39 @@ by the Source passages. Output JSON:
                    <span class="s">"content"</span>: JUDGE_PROMPT.<span class="f">format</span>(...)}],
     )
     <span class="k">return</span> json.<span class="f">loads</span>(msg.content[<span class="n">0</span>].text)</pre>
+
+        <!-- Interactive judge demo -->
+        <div class="judge-demo" id="judge-demo">
+          <div class="jd-head">
+            <span class="title">Judge demo &middot; faithfulness</span>
+            <div class="nav">
+              <button class="jd-nav-btn" id="jd-prev" aria-label="Previous example">‹</button>
+              <span class="jd-counter"><span id="jd-idx">1</span>/3</span>
+              <button class="jd-nav-btn" id="jd-next" aria-label="Next example">›</button>
+            </div>
+          </div>
+          <div class="jd-question">
+            <b>Question:</b> <span id="jd-question">What is your refund policy?</span>
+          </div>
+          <div class="jd-pair">
+            <div class="jd-cell">
+              <div class="lbl">Reference</div>
+              <div class="txt" id="jd-reference">30 days from purchase, full refund, no questions asked.</div>
+            </div>
+            <div class="jd-cell">
+              <div class="lbl">Candidate</div>
+              <div class="txt" id="jd-candidate">We offer a 30-day, no-questions-asked refund window. Contact support to start the process.</div>
+            </div>
+          </div>
+          <div class="jd-actions">
+            <button class="judge-run" id="jd-run">Have judge score it</button>
+            <div class="judge-score" id="jd-score"><span class="v">—</span><span class="max">/10</span></div>
+          </div>
+          <div class="jd-reasoning" id="jd-reasoning">
+            <div class="lbl">Judge reasoning</div>
+            <div class="typed" id="jd-typed"></div>
+          </div>
+        </div>
 
         <h3>Calibrating the judge</h3>
         <p>An uncalibrated judge is a liability. Before trusting a judge in production, validate it the same way you would validate any classifier:</p>
@@ -1082,6 +1625,18 @@ by the Source passages. Output JSON:
           <div class="step-body">
             <h3>Pick 20 representative examples.</h3>
             <p>Pull 20 inputs from production logs in the last 30 days. Stratify across your top-3 user intents. If you don&rsquo;t have logs yet, write 20 from a PM&rsquo;s memory and an engineer&rsquo;s &mdash; you can rotate them out once real traffic arrives.</p>
+            <button class="show-btn" data-target="step-vis-1" aria-pressed="false">show stratification</button>
+            <div class="step-vis" id="step-vis-1">
+              <div class="step-vis-inner">
+                <div class="row"><span>refund_policy</span><span class="v">7 items</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 70%"></div></div>
+                <div class="row"><span>order_status</span><span class="v">8 items</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 80%"></div></div>
+                <div class="row"><span>account_billing</span><span class="v">5 items</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 50%"></div></div>
+                <div class="row"><span>total</span><span class="v">20 items · 3 intents</span></div>
+              </div>
+            </div>
           </div>
         </article>
 
@@ -1110,6 +1665,18 @@ by the Source passages. Output JSON:
           <div class="step-body">
             <h3>Calibrate the judge against humans.</h3>
             <p>Run the judge on the labeled set. Compute Cohen&rsquo;s &kappa; vs. the human labels. If &kappa; &lt; 0.6, rewrite the rubric and re-run. Do not proceed past this step with a noisy judge.</p>
+            <button class="show-btn" data-target="step-vis-4" aria-pressed="false">show κ scores</button>
+            <div class="step-vis" id="step-vis-4">
+              <div class="step-vis-inner">
+                <div class="row"><span>iteration 1 (v0 rubric)</span><span class="v">κ = 0.38</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 38%; background: var(--red);"></div></div>
+                <div class="row"><span>iteration 2 (added length penalty)</span><span class="v">κ = 0.54</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 54%; background: var(--amber);"></div></div>
+                <div class="row"><span>iteration 3 (split into 3 rubric items)</span><span class="v">κ = 0.71</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 71%;"></div></div>
+                <div class="row"><span>ship threshold</span><span class="v">κ ≥ 0.60</span></div>
+              </div>
+            </div>
           </div>
         </article>
 
@@ -1127,6 +1694,17 @@ braintrust.<span class="f">Eval</span>(
     task=<span class="k">lambda</span> q: rag_pipeline(q),
     scores=[Factuality, FaithfulnessJudge, Latency],
 )</pre>
+            <button class="show-btn" data-target="step-vis-5" aria-pressed="false">show baseline run</button>
+            <div class="step-vis" id="step-vis-5">
+              <div class="step-vis-inner">
+                <div class="row"><span>accuracy</span><span class="v">0.85 · 17/20</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 85%;"></div></div>
+                <div class="row"><span>faithfulness</span><span class="v">0.91</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 91%;"></div></div>
+                <div class="row"><span>P95 latency</span><span class="v">2,140 ms</span></div>
+                <div class="row"><span>cost / 1K calls</span><span class="v">$3.05</span></div>
+              </div>
+            </div>
           </div>
         </article>
 
@@ -1143,6 +1721,18 @@ braintrust.<span class="f">Eval</span>(
           <div class="step-body">
             <h3>Wire the eval into CI.</h3>
             <p>Block merges that regress accuracy by &gt; 2% or P95 latency by &gt; 15%. From now on, eval failures show up next to test failures, in the same PR comment, with the same authority.</p>
+            <button class="show-btn" data-target="step-vis-7" aria-pressed="false">show CI gate</button>
+            <div class="step-vis" id="step-vis-7">
+              <div class="step-vis-inner">
+                <div class="row"><span>main (baseline)</span><span class="v">94.2% · 1,840ms</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 94%;"></div></div>
+                <div class="row"><span>PR #318 — prompt rewrite</span><span class="v">95.1% · 1,810ms ✓</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 95%;"></div></div>
+                <div class="row"><span>PR #319 — model swap (4o-mini)</span><span class="v">91.8% · 1,420ms ✗ blocked</span></div>
+                <div class="mini-bar"><div class="fill" style="width: 92%; background: var(--red);"></div></div>
+                <div class="row"><span>gate</span><span class="v">Δ acc ≤ −2% &nbsp;||&nbsp; Δ P95 ≥ +15%</span></div>
+              </div>
+            </div>
           </div>
         </article>
 
@@ -1207,41 +1797,58 @@ braintrust.<span class="f">Eval</span>(
       <h2 class="animate-in">Where on the curve is your team?</h2>
       <p class="lead animate-in">Five stages, measured not by tooling but by what the team can answer in a Monday meeting. Most production AI teams in 2026 are at stage 2 or 3 and don&rsquo;t know it.</p>
 
-      <div class="steps">
-        <article class="step animate-in">
+      <div class="stage-indicator animate-in">
+        <span class="lbl">You are at</span>
+        <div class="stage-bar" id="stage-bar">
+          <span class="seg" data-i="0"></span>
+          <span class="seg" data-i="1"></span>
+          <span class="seg" data-i="2"></span>
+          <span class="seg" data-i="3"></span>
+          <span class="seg" data-i="4"></span>
+        </div>
+        <span class="val" id="stage-val">— click a stage below —</span>
+      </div>
+
+      <div class="steps" id="maturity-steps">
+        <article class="step animate-in" data-stage="0" tabindex="0" role="button" aria-pressed="false">
           <span class="num">0</span>
           <div class="step-body">
             <h3>Vibes-driven.</h3>
             <p>No dashboard, no eval set. Quality is &ldquo;feels good in demos.&rdquo; Regression detection is a user complaint. Every model upgrade is a leap of faith. Most pre-launch teams live here, which is fine &mdash; until they ship.</p>
           </div>
+          <span class="stage-tag">Stage 0</span>
         </article>
-        <article class="step animate-in">
+        <article class="step animate-in" data-stage="1" tabindex="0" role="button" aria-pressed="false">
           <span class="num">1</span>
           <div class="step-body">
             <h3>Spreadsheet evals.</h3>
             <p>A PM maintains a Google Sheet of 30 example inputs and grades outputs manually after each prompt change. The signal is real; the workflow does not scale beyond one person and breaks the day she goes on PTO.</p>
           </div>
+          <span class="stage-tag">Stage 1</span>
         </article>
-        <article class="step animate-in">
+        <article class="step animate-in" data-stage="2" tabindex="0" role="button" aria-pressed="false">
           <span class="num">2</span>
           <div class="step-body">
             <h3>Automated offline evals.</h3>
             <p>The 30 examples live in a JSONL file. A script runs them on every commit. Accuracy and latency are tracked over time. Engineers can self-serve a baseline before opening a PR. This is the inflection point where eval discipline starts paying back its cost.</p>
           </div>
+          <span class="stage-tag">Stage 2</span>
         </article>
-        <article class="step animate-in">
+        <article class="step animate-in" data-stage="3" tabindex="0" role="button" aria-pressed="false">
           <span class="num">3</span>
           <div class="step-body">
             <h3>Judges + production traces.</h3>
             <p>An LLM judge calibrated to &kappa; &gt; 0.6 grades a daily sample of real traffic. Faithfulness, relevance, and helpfulness move on a shared dashboard. The team has a weekly review meeting that surfaces both regressions and product bugs the engineers wouldn&rsquo;t have found.</p>
           </div>
+          <span class="stage-tag">Stage 3</span>
         </article>
-        <article class="step animate-in">
+        <article class="step animate-in" data-stage="4" tabindex="0" role="button" aria-pressed="false">
           <span class="num">4</span>
           <div class="step-body">
             <h3>Closed loop with A/B and humans.</h3>
             <p>Every change ships behind a feature flag with a pre-registered A/B test. Human review feeds the eval set monthly. The judge is re-calibrated quarterly. Offline scores, online metrics, and human grades all line up &mdash; or the discrepancy is the next quarter&rsquo;s research project. Fewer than 10% of production AI teams operate here in 2026.</p>
           </div>
+          <span class="stage-tag">Stage 4</span>
         </article>
       </div>
     </div>
@@ -1254,42 +1861,48 @@ braintrust.<span class="f">Eval</span>(
       <h2 class="animate-in">Public benchmarks worth knowing.</h2>
       <p class="lead animate-in">Frontier scores converge inside a 2-point band on most public benchmarks. The numbers below are May 2026 best-in-class &mdash; use them to sanity-check vendor claims, not to choose models for your domain.</p>
 
-      <div class="bench-grid">
-        <div class="bench">
+      <div class="bench-grid" id="bench-grid">
+        <div class="bench" data-trend="62,68,72,78,82,86,88,89.5,90.1">
           <div class="name">MMLU <span class="src">Hendrycks 2021</span></div>
           <div class="desc">57-subject multiple-choice; the &ldquo;saturated&rdquo; classic.</div>
           <div class="row"><span>SOTA</span><span class="v">90.1%</span></div>
           <div class="row"><span>Human expert</span><span class="v">89.8%</span></div>
+          <svg class="bench-spark" viewBox="0 0 240 28" preserveAspectRatio="none" aria-hidden="true"><path class="bsline"/><circle class="bsdot" r="2.5"/></svg>
         </div>
-        <div class="bench">
+        <div class="bench" data-trend="34,42,52,61,68,72,75,77.4,78.2">
           <div class="name">MMLU-Pro <span class="src">TIGER-Lab 2024</span></div>
           <div class="desc">10-option harder variant; still discriminating.</div>
           <div class="row"><span>SOTA</span><span class="v">78.2%</span></div>
           <div class="row"><span>Frontier band</span><span class="v">76&ndash;78%</span></div>
+          <svg class="bench-spark" viewBox="0 0 240 28" preserveAspectRatio="none" aria-hidden="true"><path class="bsline"/><circle class="bsdot" r="2.5"/></svg>
         </div>
-        <div class="bench">
+        <div class="bench" data-trend="48,62,74,82,87,90,92,93.5,94.0">
           <div class="name">HumanEval <span class="src">Chen 2021</span></div>
           <div class="desc">164 Python coding problems; pass@1.</div>
           <div class="row"><span>SOTA</span><span class="v">94.0%</span></div>
           <div class="row"><span>Saturated</span><span class="v">since 2024</span></div>
+          <svg class="bench-spark" viewBox="0 0 240 28" preserveAspectRatio="none" aria-hidden="true"><path class="bsline"/><circle class="bsdot" r="2.5"/></svg>
         </div>
-        <div class="bench">
+        <div class="bench" data-trend="4,8,12.5,22,35,48,58,67,72.5">
           <div class="name">SWE-bench Verified <span class="src">Princeton 2024</span></div>
           <div class="desc">Real GitHub issues with passing test suites.</div>
           <div class="row"><span>SOTA</span><span class="v">72.5%</span></div>
           <div class="row"><span>2024 start</span><span class="v">12.5%</span></div>
+          <svg class="bench-spark" viewBox="0 0 240 28" preserveAspectRatio="none" aria-hidden="true"><path class="bsline"/><circle class="bsdot" r="2.5"/></svg>
         </div>
-        <div class="bench">
+        <div class="bench" data-trend="32,38,45,52,58,63,67,69.5,71.0">
           <div class="name">GPQA Diamond <span class="src">Rein 2023</span></div>
           <div class="desc">PhD-level science; Google-proof.</div>
           <div class="row"><span>SOTA</span><span class="v">71.0%</span></div>
           <div class="row"><span>Human PhD</span><span class="v">65.0%</span></div>
+          <svg class="bench-spark" viewBox="0 0 240 28" preserveAspectRatio="none" aria-hidden="true"><path class="bsline"/><circle class="bsdot" r="2.5"/></svg>
         </div>
-        <div class="bench">
+        <div class="bench" data-trend="62,68,74,80,85,88,90.5,92.4,93.2">
           <div class="name">MT-Bench <span class="src">LMSYS 2023</span></div>
           <div class="desc">80 multi-turn open-ended; judged by GPT-4.</div>
           <div class="row"><span>SOTA</span><span class="v">9.32 / 10</span></div>
           <div class="row"><span>Note</span><span class="v">saturating</span></div>
+          <svg class="bench-spark" viewBox="0 0 240 28" preserveAspectRatio="none" aria-hidden="true"><path class="bsline"/><circle class="bsdot" r="2.5"/></svg>
         </div>
       </div>
     </div>
@@ -1380,59 +1993,85 @@ braintrust.<span class="f">Eval</span>(
     nums.forEach(n => io.observe(n));
   })();
 
-  // ============ SPARKLINE ============
-  (function () {
+  // ============ SPARKLINE (with live append) ============
+  const Sparkline = (function () {
     const line = document.getElementById('spark-line');
     const area = document.getElementById('spark-area');
     const dot = document.getElementById('spark-dot');
-    if (!line) return;
+    if (!line) return { push: () => {} };
 
     // 30 days of accuracy values — gentle upward trend with noise
-    const data = [89.2, 89.8, 90.1, 89.6, 90.3, 90.7, 91.0, 90.4, 91.2, 91.5,
-                  91.1, 91.8, 92.0, 91.6, 92.3, 92.5, 92.1, 92.8, 93.0, 93.3,
-                  92.9, 93.5, 93.6, 93.4, 93.8, 94.0, 93.7, 94.1, 94.0, 94.2];
+    let data = [89.2, 89.8, 90.1, 89.6, 90.3, 90.7, 91.0, 90.4, 91.2, 91.5,
+                91.1, 91.8, 92.0, 91.6, 92.3, 92.5, 92.1, 92.8, 93.0, 93.3,
+                92.9, 93.5, 93.6, 93.4, 93.8, 94.0, 93.7, 94.1, 94.0, 94.2];
     const W = 320, H = 70, pad = 4;
-    const min = Math.min(...data) - 1, max = Math.max(...data) + 0.5;
-    const stepX = (W - pad * 2) / (data.length - 1);
-    const pts = data.map((v, i) => [
-      pad + i * stepX,
-      pad + (H - pad * 2) * (1 - (v - min) / (max - min))
-    ]);
-    const lineD = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-    const areaD = lineD + ` L ${pts[pts.length-1][0]} ${H} L ${pts[0][0]} ${H} Z`;
 
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (!e.isIntersecting) return;
-        line.setAttribute('d', lineD);
-        area.setAttribute('d', areaD);
+    function render(animateLine) {
+      const min = Math.min(...data) - 1, max = Math.max(...data) + 0.5;
+      const stepX = (W - pad * 2) / (data.length - 1);
+      const pts = data.map((v, i) => [
+        pad + i * stepX,
+        pad + (H - pad * 2) * (1 - (v - min) / (max - min))
+      ]);
+      const lineD = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+      const areaD = lineD + ` L ${pts[pts.length-1][0]} ${H} L ${pts[0][0]} ${H} Z`;
+      line.setAttribute('d', lineD);
+      area.setAttribute('d', areaD);
+      const last = pts[pts.length - 1];
+      dot.setAttribute('cx', last[0]);
+      dot.setAttribute('cy', last[1]);
+      if (animateLine) {
         const len = line.getTotalLength();
         line.style.strokeDasharray = len;
         line.style.strokeDashoffset = len;
         line.getBoundingClientRect();
         line.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(0.16, 1, 0.3, 1)';
         line.style.strokeDashoffset = 0;
-        const last = pts[pts.length - 1];
-        dot.setAttribute('cx', last[0]);
-        dot.setAttribute('cy', last[1]);
+      } else {
+        line.style.strokeDasharray = '';
+        line.style.strokeDashoffset = '';
+      }
+    }
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        render(true);
         io.unobserve(e.target);
       });
     }, { threshold: 0.3 });
     io.observe(line);
+
+    return {
+      push(v) {
+        data.push(v);
+        if (data.length > 30) data.shift();
+        render(false);
+      },
+      last() { return data[data.length - 1]; }
+    };
   })();
 
   // ============ RING ============
-  (function () {
+  const Ring = (function () {
     const bar = document.getElementById('ring-bar');
     const num = document.getElementById('ring-num');
-    if (!bar) return;
+    if (!bar) return { set: () => {} };
     const C = 2 * Math.PI * 48; // 301.59
-    const target = 94; // %
+    let current = 0;
+    let target = 94;
+
+    function setTarget(v) {
+      target = Math.max(0, Math.min(100, v));
+      bar.style.strokeDashoffset = C * (1 - target / 100);
+      num.textContent = Math.round(target);
+      current = target;
+    }
+
     const io = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (!e.isIntersecting) return;
         bar.style.strokeDashoffset = C * (1 - target / 100);
-        // count up text
         const dur = 1400, start = performance.now();
         function tick(t) {
           const p = Math.min(1, (t - start) / dur);
@@ -1441,10 +2080,13 @@ braintrust.<span class="f">Eval</span>(
           if (p < 1) requestAnimationFrame(tick);
         }
         requestAnimationFrame(tick);
+        current = target;
         io.unobserve(e.target);
       });
     }, { threshold: 0.4 });
     io.observe(bar);
+
+    return { set: setTarget, get: () => current };
   })();
 
   // ============ TRACE BARS ============
@@ -1485,6 +2127,472 @@ braintrust.<span class="f">Eval</span>(
       });
     }, { threshold: 0.3 });
     io.observe(hist);
+  })();
+
+  // ============ DASHBOARD STATE (shared) ============
+  const Dash = {
+    filter: 'all',
+    accuracy: 94.2,
+    cost: 2.74,
+    p95: 1840,
+    faith: 0.962,
+    pass: 1221,
+    fail: 78,
+    flag: 14,
+    total: 1313,
+    runCounter: 4812,
+    // Per-model profiles drive the stream rows
+    models: {
+      gpt5:   { name: 'GPT-5',   latMean: 1780, latJitter: 240, passProb: 0.95 },
+      claude: { name: 'Claude',  latMean: 2080, latJitter: 280, passProb: 0.96 },
+      gemini: { name: 'Gemini',  latMean: 1480, latJitter: 220, passProb: 0.91 }
+    }
+  };
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ============ FILTER PILLS ============
+  (function () {
+    const pills = document.querySelectorAll('.fpill');
+    if (!pills.length) return;
+    pills.forEach(p => p.addEventListener('click', () => {
+      pills.forEach(o => o.setAttribute('aria-pressed', o === p ? 'true' : 'false'));
+      Dash.filter = p.dataset.model;
+
+      // Rebalance the static + future stream rows
+      const rows = document.querySelectorAll('#stream .stream-row');
+      rows.forEach(r => {
+        r.style.display = (Dash.filter === 'all' || r.dataset.model === Dash.filter) ? '' : 'none';
+      });
+
+      // Update headline KPIs to reflect filtered profile
+      let baseAcc = 94.2, basePass = 93, baseLat = 1840;
+      if (Dash.filter === 'gpt5')   { baseAcc = 95.1; basePass = 95; baseLat = 1780; }
+      if (Dash.filter === 'claude') { baseAcc = 94.6; basePass = 96; baseLat = 2080; }
+      if (Dash.filter === 'gemini') { baseAcc = 91.4; basePass = 91; baseLat = 1480; }
+      animateKpi(document.querySelector('.cell.c3:nth-child(1) .num'), baseAcc, 1);
+      Dash.accuracy = baseAcc;
+      Dash.p95 = baseLat;
+      Ring.set(basePass);
+      animateKpi(document.querySelector('.cell.c3:nth-child(3) .num'), baseLat, 0);
+    }));
+  })();
+
+  function animateKpi(el, to, prec) {
+    if (!el) return;
+    const from = parseFloat((el.textContent || '0').replace(/[, ]/g, '')) || 0;
+    const dur = 600, start = performance.now();
+    function tick(t) {
+      const p = Math.min(1, (t - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const v = from + (to - from) * eased;
+      el.textContent = v.toLocaleString(undefined, {
+        minimumFractionDigits: prec, maximumFractionDigits: prec
+      });
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    if (reducedMotion) {
+      el.textContent = to.toLocaleString(undefined, {
+        minimumFractionDigits: prec, maximumFractionDigits: prec
+      });
+    } else {
+      requestAnimationFrame(tick);
+    }
+  }
+
+  // ============ LIVE STREAM TICKER ============
+  (function () {
+    const stream = document.getElementById('stream');
+    if (!stream) return;
+    const summary = document.getElementById('stream-summary');
+    const countEl = document.getElementById('stream-count');
+    const MAX_ROWS = 7;
+
+    function fmtTime(d) {
+      const pad = n => String(n).padStart(2, '0');
+      return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+    function pickModel() {
+      if (Dash.filter === 'all') {
+        const keys = Object.keys(Dash.models);
+        return keys[Math.floor(Math.random() * keys.length)];
+      }
+      return Dash.filter;
+    }
+    function randomLat(m) {
+      return Math.round(m.latMean + (Math.random() - 0.5) * 2 * m.latJitter);
+    }
+
+    function tick() {
+      const mk = pickModel();
+      const m = Dash.models[mk];
+      const lat = randomLat(m);
+      const pass = Math.random() < m.passProb;
+      const row = document.createElement('div');
+      row.className = 'stream-row';
+      row.dataset.model = mk;
+      row.innerHTML = `
+        <span class="ts">${fmtTime(new Date())}</span>
+        <span class="mdl">${m.name}</span>
+        <span class="stages">
+          <span class="stage" data-s="prompt"><span class="pf"></span></span>
+          <span class="stage" data-s="retrieve"><span class="pf"></span></span>
+          <span class="stage" data-s="llm"><span class="pf"></span></span>
+          <span class="stage" data-s="judge"><span class="pf"></span></span>
+        </span>
+        <span class="latms">${lat.toLocaleString()} ms</span>
+        <span class="verdict ${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>
+      `;
+      stream.insertBefore(row, stream.firstChild);
+
+      // Trim
+      while (stream.children.length > MAX_ROWS) stream.removeChild(stream.lastChild);
+
+      // Update KPIs
+      Dash.runCounter += 1;
+      Dash.total += 1;
+      if (pass) Dash.pass += 1; else Dash.fail += 1;
+
+      // Tiny accuracy nudge
+      const nudge = (Math.random() - 0.5) * 0.3; // ±0.15
+      Dash.accuracy = Math.max(85, Math.min(99, Dash.accuracy + nudge));
+      animateKpi(document.querySelector('.cell.c3:nth-child(1) .num'), +Dash.accuracy.toFixed(1), 1);
+      // Sparkline headline mirror
+      const sparkHeadEl = document.querySelector('.spark-cell .num');
+      if (sparkHeadEl) animateKpi(sparkHeadEl, +Dash.accuracy.toFixed(1), 1);
+
+      // Faithfulness tiny drift
+      Dash.faith = Math.max(0.90, Math.min(0.99, Dash.faith + (Math.random() - 0.5) * 0.004));
+      animateKpi(document.querySelector('.cell.c3:nth-child(2) .num'), +Dash.faith.toFixed(3), 3);
+
+      // P95 latency drift (small, ±15ms)
+      Dash.p95 = Math.max(800, Math.min(3500, Dash.p95 + Math.round((Math.random() - 0.5) * 30)));
+      animateKpi(document.querySelector('.cell.c3:nth-child(3) .num'), Dash.p95, 0);
+
+      // Cost drift (±$0.02)
+      Dash.cost = Math.max(1.20, Math.min(5.00, Dash.cost + (Math.random() - 0.5) * 0.04));
+      animateKpi(document.querySelector('.cell.c3:nth-child(4) .num'), +Dash.cost.toFixed(2), 2);
+
+      // Push sparkline forward
+      Sparkline.push(+Dash.accuracy.toFixed(2));
+
+      // Pass-rate ring
+      const passRate = Math.round((Dash.pass / Dash.total) * 100);
+      Ring.set(passRate);
+      // Legend
+      const legend = document.querySelectorAll('.ring-legend .v');
+      if (legend.length === 4) {
+        legend[0].textContent = Dash.pass.toLocaleString();
+        legend[1].textContent = Dash.fail.toLocaleString();
+        legend[2].textContent = Dash.flag.toLocaleString();
+        legend[3].textContent = Dash.total.toLocaleString();
+      }
+
+      // Summary line
+      if (summary) summary.textContent = `avg ${Dash.p95.toLocaleString()} ms · pass-rate ${passRate}%`;
+      if (countEl) countEl.textContent = `${Dash.total.toLocaleString()} evals · 24h`;
+    }
+
+    let intervalId = null;
+    function start() {
+      if (intervalId || reducedMotion) return;
+      intervalId = setInterval(() => {
+        if (document.hidden) return;
+        tick();
+      }, 6000);
+    }
+    function stop() { if (intervalId) { clearInterval(intervalId); intervalId = null; } }
+
+    // Start when dashboard scrolls into view
+    const sec = document.getElementById('dashboard');
+    if (sec) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            setTimeout(start, 1800);
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.18 });
+      io.observe(sec);
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop(); else start();
+    });
+
+    // expose for run-eval modal
+    window.__streamTick = tick;
+    window.__streamAppendResult = function (label, score, latms, model) {
+      const row = document.createElement('div');
+      row.className = 'stream-row';
+      row.dataset.model = model || 'gpt5';
+      const verdict = score >= 0.7 ? 'pass' : 'fail';
+      row.innerHTML = `
+        <span class="ts">${fmtTime(new Date())}</span>
+        <span class="mdl">${label}</span>
+        <span class="stages">
+          <span class="stage" data-s="prompt"><span class="pf"></span></span>
+          <span class="stage" data-s="retrieve"><span class="pf"></span></span>
+          <span class="stage" data-s="llm"><span class="pf"></span></span>
+          <span class="stage" data-s="judge"><span class="pf"></span></span>
+        </span>
+        <span class="latms">${latms.toLocaleString()} ms</span>
+        <span class="verdict ${verdict}">${(score * 100).toFixed(1)}%</span>
+      `;
+      stream.insertBefore(row, stream.firstChild);
+      while (stream.children.length > MAX_ROWS) stream.removeChild(stream.lastChild);
+    };
+  })();
+
+  // ============ RUN-EVAL MODAL ============
+  (function () {
+    const openBtn = document.getElementById('run-eval-open');
+    const mask = document.getElementById('run-eval-mask');
+    const cancel = document.getElementById('run-cancel');
+    const go = document.getElementById('run-go');
+    const picks = document.querySelectorAll('.testset-pick');
+    const progress = document.getElementById('run-progress');
+    const bar = document.getElementById('run-bar');
+    const label = document.getElementById('run-label');
+    if (!openBtn || !mask) return;
+
+    const sets = {
+      mmlu:      { label: 'MMLU',      score: 0.901, latMs: 1620, items: 12032 },
+      humaneval: { label: 'HumanEval', score: 0.940, latMs: 1280, items: 164 },
+      swebench:  { label: 'SWE-bench', score: 0.725, latMs: 2880, items: 500 }
+    };
+    let chosen = null;
+
+    function open() { mask.classList.add('open'); }
+    function close() {
+      mask.classList.remove('open');
+      progress.classList.remove('go');
+      label.classList.remove('go');
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+      go.disabled = !chosen;
+      label.textContent = 'Running…';
+    }
+    openBtn.addEventListener('click', open);
+    cancel.addEventListener('click', close);
+    mask.addEventListener('click', (e) => { if (e.target === mask) close(); });
+
+    picks.forEach(p => p.addEventListener('click', () => {
+      picks.forEach(o => o.setAttribute('aria-pressed', o === p ? 'true' : 'false'));
+      chosen = p.dataset.set;
+      go.disabled = false;
+    }));
+
+    go.addEventListener('click', () => {
+      if (!chosen) return;
+      go.disabled = true;
+      progress.classList.add('go');
+      label.classList.add('go');
+      label.textContent = `Running ${sets[chosen].label} (${sets[chosen].items.toLocaleString()} items)…`;
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+      // double-rAF to commit
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        bar.style.transition = 'width 4000ms linear';
+        bar.style.width = '100%';
+      }));
+      setTimeout(() => {
+        const s = sets[chosen];
+        // Push a result row into the stream
+        if (window.__streamAppendResult) {
+          window.__streamAppendResult(s.label, s.score, s.latMs, 'gpt5');
+        }
+        label.textContent = `Done · ${s.label} scored ${(s.score * 100).toFixed(1)}%`;
+        bar.style.background = 'var(--mint-deep)';
+        setTimeout(close, 1100);
+      }, 4100);
+    });
+
+    // ESC to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mask.classList.contains('open')) close();
+    });
+  })();
+
+  // ============ LLM-AS-JUDGE DEMO ============
+  (function () {
+    const root = document.getElementById('judge-demo');
+    if (!root) return;
+    const examples = [
+      {
+        q: 'What is your refund policy?',
+        ref: '30 days from purchase, full refund, no questions asked.',
+        cand: 'We offer a 30-day, no-questions-asked refund window. Contact support to start the process.',
+        score: 9,
+        reasoning: 'Candidate covers the 30-day window and the no-questions-asked policy. Adds a helpful next step ("contact support") not in the reference, which improves usefulness without introducing unsupported claims. All four faithfulness rubric items pass; minor verbosity penalty applied.'
+      },
+      {
+        q: 'Where is your data center located?',
+        ref: 'Primary in us-east-1 (Virginia), DR in us-west-2 (Oregon).',
+        cand: 'Our infrastructure runs across multiple AWS regions globally, including European and Asian locations, for low-latency access worldwide.',
+        score: 3,
+        reasoning: 'Candidate introduces two unsupported claims: "European" and "Asian" locations. Reference only lists us-east-1 and us-west-2. The answer is friendly but factually drifts beyond the source. Hallucinates a global footprint — this is exactly the failure mode faithfulness judges are built to catch.'
+      },
+      {
+        q: 'How do I cancel my subscription?',
+        ref: 'Go to Settings → Billing → Cancel subscription. Cancellation is immediate; you keep access until the end of the current billing period.',
+        cand: 'Open Settings, then Billing, and click Cancel subscription. Your access continues until the end of the billing period.',
+        score: 10,
+        reasoning: 'Candidate matches the reference on every claim: navigation path (Settings → Billing → Cancel) and the access-until-end-of-period detail. No unsupported claims, no contradictions. Wording is slightly more conversational, which the rubric allows. Full score.'
+      }
+    ];
+
+    let idx = 0;
+    const idxEl = document.getElementById('jd-idx');
+    const qEl = document.getElementById('jd-question');
+    const refEl = document.getElementById('jd-reference');
+    const candEl = document.getElementById('jd-candidate');
+    const scoreEl = document.getElementById('jd-score');
+    const scoreV = scoreEl.querySelector('.v');
+    const reasoning = document.getElementById('jd-reasoning');
+    const typed = document.getElementById('jd-typed');
+    const runBtn = document.getElementById('jd-run');
+    const prev = document.getElementById('jd-prev');
+    const next = document.getElementById('jd-next');
+
+    function load() {
+      const e = examples[idx];
+      idxEl.textContent = idx + 1;
+      qEl.textContent = e.q;
+      refEl.textContent = e.ref;
+      candEl.textContent = e.cand;
+      scoreEl.classList.remove('set');
+      scoreV.textContent = '—';
+      reasoning.classList.remove('show', 'done');
+      typed.textContent = '';
+      runBtn.disabled = false;
+      runBtn.textContent = 'Have judge score it';
+    }
+    function typewriter(text, el, done) {
+      if (reducedMotion) { el.textContent = text; if (done) done(); return; }
+      el.textContent = '';
+      let i = 0;
+      function step() {
+        if (i >= text.length) { if (done) done(); return; }
+        // 2-4 chars per step for speed
+        const chunk = Math.min(text.length - i, 2 + Math.floor(Math.random() * 3));
+        el.textContent += text.slice(i, i + chunk);
+        i += chunk;
+        setTimeout(step, 16);
+      }
+      step();
+    }
+    function run() {
+      const e = examples[idx];
+      runBtn.disabled = true;
+      runBtn.textContent = 'Scoring…';
+      reasoning.classList.add('show');
+      reasoning.classList.remove('done');
+      typewriter(e.reasoning, typed, () => {
+        reasoning.classList.add('done');
+        // Reveal score
+        scoreEl.classList.add('set');
+        const dur = 800, start = performance.now();
+        function tick(t) {
+          const p = Math.min(1, (t - start) / dur);
+          const eased = 1 - Math.pow(1 - p, 3);
+          scoreV.textContent = (e.score * eased).toFixed(1);
+          if (p < 1) requestAnimationFrame(tick);
+          else { scoreV.textContent = e.score.toString(); runBtn.disabled = false; runBtn.textContent = 'Re-score'; }
+        }
+        if (reducedMotion) { scoreV.textContent = e.score.toString(); runBtn.disabled = false; runBtn.textContent = 'Re-score'; }
+        else requestAnimationFrame(tick);
+      });
+    }
+    runBtn.addEventListener('click', run);
+    prev.addEventListener('click', () => { idx = (idx - 1 + examples.length) % examples.length; load(); });
+    next.addEventListener('click', () => { idx = (idx + 1) % examples.length; load(); });
+    load();
+  })();
+
+  // ============ MATURITY STAGE INDICATOR ============
+  (function () {
+    const steps = document.querySelectorAll('#maturity-steps .step');
+    const segs = document.querySelectorAll('#stage-bar .seg');
+    const val = document.getElementById('stage-val');
+    if (!steps.length) return;
+    const labels = [
+      'Stage 0 · Vibes-driven',
+      'Stage 1 · Spreadsheet evals',
+      'Stage 2 · Automated offline evals',
+      'Stage 3 · Judges + production traces',
+      'Stage 4 · Closed loop with A/B and humans'
+    ];
+    function setStage(n) {
+      steps.forEach(s => {
+        const isActive = +s.dataset.stage === n;
+        s.classList.toggle('active', isActive);
+        s.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+      segs.forEach((seg, i) => seg.classList.toggle('on', i <= n));
+      val.textContent = labels[n];
+    }
+    steps.forEach(s => {
+      s.addEventListener('click', () => setStage(+s.dataset.stage));
+      s.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setStage(+s.dataset.stage); }
+      });
+    });
+  })();
+
+  // ============ WALKTHROUGH "SHOW" TOGGLES ============
+  (function () {
+    document.querySelectorAll('.show-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.target;
+        const vis = document.getElementById(id);
+        if (!vis) return;
+        const open = vis.classList.toggle('show');
+        btn.setAttribute('aria-pressed', open ? 'true' : 'false');
+        btn.textContent = (open ? 'hide ' : 'show ') + btn.textContent.replace(/^(show|hide)\s+/, '');
+      });
+    });
+  })();
+
+  // ============ BENCH SPARKLINES ============
+  (function () {
+    const cards = document.querySelectorAll('#bench-grid .bench');
+    if (!cards.length) return;
+    const W = 240, H = 28, pad = 2;
+    cards.forEach(card => {
+      const data = (card.dataset.trend || '').split(',').map(Number).filter(n => !isNaN(n));
+      if (data.length < 2) return;
+      const min = Math.min(...data) - 2, max = Math.max(...data) + 1;
+      const stepX = (W - pad * 2) / (data.length - 1);
+      const pts = data.map((v, i) => [
+        pad + i * stepX,
+        pad + (H - pad * 2) * (1 - (v - min) / (max - min))
+      ]);
+      const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+      const line = card.querySelector('.bsline');
+      const dot = card.querySelector('.bsdot');
+      if (line) {
+        line.setAttribute('d', d);
+        // Recompute dasharray based on actual path length
+        const len = line.getTotalLength ? line.getTotalLength() : 240;
+        line.style.strokeDasharray = len;
+        if (!reducedMotion) line.style.strokeDashoffset = len;
+      }
+      if (dot) {
+        dot.setAttribute('cx', pts[pts.length - 1][0]);
+        dot.setAttribute('cy', pts[pts.length - 1][1]);
+      }
+    });
+
+    // Reveal on hover OR when scrolled into view
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in-view');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    cards.forEach(c => io.observe(c));
   })();
   </script>
 

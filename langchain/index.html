@@ -856,6 +856,434 @@
     .foot a:hover { color: var(--accent); }
     .foot .marker { color: var(--fg-3); font-size: 0.6875rem; }
 
+    /* ============ INTERACTIVE LCEL SIMULATOR ============ */
+    .sim {
+      margin-top: 1rem;
+    }
+    .sim-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.5rem 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--bg);
+      box-shadow: var(--shadow-xs);
+      transition: border-color 200ms ease, box-shadow 200ms ease;
+    }
+    .sim-input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.10);
+    }
+    .sim-prompt {
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      color: var(--accent);
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .sim-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 0.9375rem;
+      color: var(--fg);
+      padding: 0.65rem 0;
+      letter-spacing: -0.005em;
+    }
+    .sim-input::placeholder { color: var(--fg-3); }
+    .sim-run {
+      padding: 0.5rem 1rem;
+      font-family: var(--font);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      border-radius: var(--r-sm);
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid var(--accent);
+      cursor: pointer;
+      transition: background 150ms ease, transform 150ms ease;
+    }
+    .sim-run:hover { background: var(--accent-hover); }
+    .sim-run:active { transform: scale(0.98); }
+    .sim-run:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sim-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-top: 0.875rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--fg-3);
+    }
+    .sim-controls .pill-group { display: inline-flex; gap: 0.25rem; }
+    .sim-speed {
+      padding: 0.2rem 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--bg);
+      color: var(--fg-3);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+    .sim-speed:hover { color: var(--fg); border-color: var(--border-strong); }
+    .sim-speed.active { color: var(--accent); border-color: var(--accent); background: rgba(0, 112, 243, 0.04); }
+    .sim-status { margin-left: auto; }
+    .sim-status .dot-led {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--fg-3);
+      margin-right: 0.4rem;
+      vertical-align: 1px;
+    }
+    .sim-status.running .dot-led { background: var(--accent); animation: led-pulse 1s ease-in-out infinite; }
+    .sim-status.done .dot-led { background: var(--accent); }
+    @keyframes led-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0, 112, 243, 0.5); }
+      50% { box-shadow: 0 0 0 4px rgba(0, 112, 243, 0); }
+    }
+
+    .sim-stages {
+      margin-top: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .sim-stage {
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--bg);
+      overflow: hidden;
+      transition: border-color 250ms ease, box-shadow 300ms ease, transform 300ms var(--ease);
+    }
+    .sim-stage.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.08), 0 4px 14px rgba(0, 112, 243, 0.12);
+    }
+    .sim-stage.done {
+      border-color: rgba(0, 112, 243, 0.35);
+    }
+    .sim-stage-head {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-alt);
+      transition: background 250ms ease;
+    }
+    .sim-stage.active .sim-stage-head { background: rgba(0, 112, 243, 0.04); }
+    .sim-stage-idx {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--fg-3);
+      width: 22px;
+      letter-spacing: 0.02em;
+    }
+    .sim-stage.active .sim-stage-idx,
+    .sim-stage.done .sim-stage-idx { color: var(--accent); }
+    .sim-stage-name {
+      font-family: var(--font);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--fg);
+      letter-spacing: -0.01em;
+    }
+    .sim-stage-type {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--fg-3);
+      margin-left: 0.25rem;
+    }
+    .sim-stage-status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--fg-3);
+    }
+    .sim-thinking { display: inline-flex; align-items: center; gap: 3px; }
+    .sim-thinking span {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.3;
+      animation: think-bounce 1.2s ease-in-out infinite;
+    }
+    .sim-thinking span:nth-child(2) { animation-delay: 150ms; }
+    .sim-thinking span:nth-child(3) { animation-delay: 300ms; }
+    @keyframes think-bounce {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(1); }
+      40% { opacity: 1; transform: scale(1.4); }
+    }
+    .sim-check {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-weight: 600;
+    }
+    .sim-stage-body {
+      padding: 0.875rem 1rem 1rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      line-height: 1.65;
+      color: var(--fg-2);
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 500ms var(--ease), opacity 350ms var(--ease), padding 400ms var(--ease);
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    .sim-stage.active .sim-stage-body,
+    .sim-stage.done .sim-stage-body {
+      max-height: 400px;
+      opacity: 1;
+      padding-top: 0.875rem;
+      padding-bottom: 1rem;
+    }
+    .sim-stage-body .key { color: #C792EA; }
+    .sim-stage-body .str { color: #95E2A6; }
+    .sim-stage-body .num { color: #F78C6C; }
+    .sim-stage-body .ck { color: var(--accent); }
+    .sim-stage-body .dim { color: var(--fg-3); }
+    .sim-stage-body .hl { color: var(--fg); font-weight: 500; }
+    .sim-stage-body .stream-out {
+      color: var(--fg);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--mono);
+    }
+    .sim-stage-body .stream-out::after {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 0.95em;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      margin-left: 2px;
+      animation: caret-blink 0.9s steps(2, start) infinite;
+    }
+    .sim-stage.done .sim-stage-body .stream-out::after { display: none; }
+    @keyframes caret-blink {
+      to { visibility: hidden; }
+    }
+    .sim-doc {
+      padding: 0.55rem 0.7rem;
+      border-radius: var(--r-sm);
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      margin-bottom: 0.45rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      align-items: start;
+      opacity: 0;
+      transform: translateY(4px);
+      animation: doc-in 350ms var(--ease) forwards;
+    }
+    .sim-doc:nth-child(2) { animation-delay: 80ms; }
+    .sim-doc:nth-child(3) { animation-delay: 160ms; }
+    @keyframes doc-in {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .sim-doc-text { color: var(--fg-2); font-family: var(--mono); font-size: 0.72rem; line-height: 1.55; }
+    .sim-doc-meta {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      white-space: nowrap;
+      padding-top: 0.05rem;
+    }
+
+    .sim-flow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 14px;
+      margin: -0.1rem 0 0;
+    }
+    .sim-flow-bar {
+      width: 1px;
+      height: 14px;
+      background: var(--border);
+      position: relative;
+    }
+    .sim-flow.active .sim-flow-bar { background: var(--accent); }
+    .sim-flow.active .sim-flow-bar::before {
+      content: '';
+      position: absolute;
+      left: -2px;
+      top: 0;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: bit-drop 600ms var(--ease) infinite;
+    }
+    @keyframes bit-drop {
+      0% { top: 0; opacity: 0; }
+      30% { opacity: 1; }
+      100% { top: 14px; opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      .sim-input-wrap { padding: 0.4rem 0.4rem 0.4rem 0.75rem; }
+      .sim-prompt { font-size: 0.75rem; }
+      .sim-input { font-size: 0.875rem; padding: 0.55rem 0; }
+      .sim-run { padding: 0.45rem 0.75rem; font-size: 0.75rem; }
+      .sim-stage-body { font-size: 0.7rem; }
+      .sim-controls { flex-wrap: wrap; gap: 0.75rem; font-size: 0.68rem; }
+    }
+
+    /* ============ MODE TILE MINI-DEMOS ============ */
+    .tile { position: relative; cursor: default; }
+    .tile-demo {
+      margin-top: 1.125rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+      min-height: 40px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--fg-3);
+    }
+    .tile-demo-label {
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.62rem;
+      margin-bottom: 0.5rem;
+      color: var(--fg-3);
+    }
+    .demo-track {
+      position: relative;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .demo-slot {
+      flex: 1;
+      height: 4px;
+      background: var(--bg-alt);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .demo-slot .demo-fill {
+      position: absolute;
+      left: 0; top: 0;
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      transition: width 250ms var(--ease);
+    }
+    .demo-slot.lit .demo-fill { width: 100%; }
+    .demo-num {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--fg-3);
+      width: 30px;
+      text-align: right;
+    }
+    .demo-num.lit { color: var(--accent); }
+
+    /* invoke: one slot fills slowly */
+    .tile-demo[data-mode="invoke"] .demo-track { gap: 0; }
+    /* batch: 4 slots fill in parallel */
+    /* stream: tokens stream into text */
+    .demo-stream {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--fg);
+      min-height: 1.8em;
+      line-height: 1.55;
+      letter-spacing: -0.005em;
+    }
+    .demo-stream::after {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 0.85em;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      margin-left: 1px;
+      animation: caret-blink 0.9s steps(2, start) infinite;
+      opacity: 0;
+    }
+    .demo-stream.live::after { opacity: 1; }
+    .demo-async {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+    }
+    .demo-async-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--fg-3);
+    }
+    .demo-async-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--border-strong);
+      transition: background 200ms ease;
+    }
+    .demo-async-row.lit .demo-async-dot { background: var(--accent); }
+    .demo-async-row.lit { color: var(--accent); }
+
+    /* ============ LCEL CARD MINI-DIAGRAMS ============ */
+    .lcel-card { position: relative; transition: border-color 200ms ease, transform 200ms ease; cursor: default; }
+    .lcel-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .lcel-diag {
+      margin-top: 1rem;
+      padding: 0.75rem 0.875rem;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--fg-2);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0.5rem;
+      align-items: center;
+      transition: background 200ms ease, border-color 200ms ease;
+    }
+    .lcel-card:hover .lcel-diag { border-color: var(--border-strong); }
+    .lcel-diag .shape {
+      padding: 0.3rem 0.45rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      text-align: center;
+      color: var(--fg);
+      transition: border-color 200ms ease, transform 250ms var(--ease);
+      font-size: 0.65rem;
+      line-height: 1.4;
+    }
+    .lcel-card:hover .lcel-diag .shape { border-color: var(--accent); }
+    .lcel-diag .arr {
+      color: var(--accent);
+      font-size: 0.8rem;
+      text-align: center;
+    }
+    .lcel-diag.split {
+      grid-template-columns: 1fr auto 1fr;
+    }
+    .lcel-diag .branches {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
     /* ============ REDUCED MOTION ============ */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -866,6 +1294,12 @@
       .stat { opacity: 1; transform: none; }
       .h1 .underline::after { transform: scaleX(1); }
       .pipe-packet { display: none; }
+      .sim-stage { border-color: rgba(0, 112, 243, 0.35); }
+      .sim-stage-body { max-height: none !important; opacity: 1 !important; padding-top: 0.875rem !important; padding-bottom: 1rem !important; }
+      .sim-stage-body .stream-out::after { display: none; }
+      .sim-doc { opacity: 1; transform: none; animation: none; }
+      .sim-thinking, .sim-flow.active .sim-flow-bar::before { display: none; }
+      .demo-stream::after { display: none; }
     }
   </style>
 </head>
@@ -943,6 +1377,87 @@
         </div>
 
         <p class="pipe-note">runnable &middot; runnable &middot; runnable &middot; runnable &middot; runnable</p>
+
+        <!-- ============ INTERACTIVE SIMULATOR ============ -->
+        <div class="sim" id="sim" style="margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;">
+            <p style="font-family: var(--mono); font-size: 0.72rem; color: var(--fg-3); margin: 0; letter-spacing: 0.04em; text-transform: uppercase;">Try it · type any question</p>
+            <p style="font-family: var(--mono); font-size: 0.7rem; color: var(--fg-3); margin: 0;">data shown at each stage is the actual transformation a real LCEL chain performs</p>
+          </div>
+
+          <form class="sim-input-wrap" id="simForm" autocomplete="off">
+            <span class="sim-prompt">chain.invoke(</span>
+            <input class="sim-input" id="simInput" type="text" placeholder="What is RAG?" value="What is RAG?" maxlength="120" aria-label="Pipeline query input">
+            <button class="sim-run" id="simRun" type="submit" aria-label="Run pipeline">Run &rarr;</button>
+          </form>
+
+          <div class="sim-controls" aria-label="Simulator controls">
+            <span>speed</span>
+            <span class="pill-group">
+              <button class="sim-speed" data-speed="0.5" type="button">0.5×</button>
+              <button class="sim-speed active" data-speed="1" type="button">1×</button>
+              <button class="sim-speed" data-speed="2" type="button">2×</button>
+              <button class="sim-speed" data-speed="4" type="button">4×</button>
+            </span>
+            <span class="sim-status" id="simStatus"><span class="dot-led"></span><span class="dot-label">idle</span></span>
+          </div>
+
+          <div class="sim-stages" id="simStages">
+            <div class="sim-stage" data-stage="0">
+              <div class="sim-stage-head">
+                <span class="sim-stage-idx">01</span>
+                <span class="sim-stage-name">Prompt</span>
+                <span class="sim-stage-type">ChatPromptTemplate</span>
+                <span class="sim-stage-status"><span class="sim-stage-state">queued</span></span>
+              </div>
+              <div class="sim-stage-body" data-body></div>
+            </div>
+            <div class="sim-flow" data-flow="0"><span class="sim-flow-bar"></span></div>
+
+            <div class="sim-stage" data-stage="1">
+              <div class="sim-stage-head">
+                <span class="sim-stage-idx">02</span>
+                <span class="sim-stage-name">Retriever</span>
+                <span class="sim-stage-type">VectorStore.as_retriever(k=3)</span>
+                <span class="sim-stage-status"><span class="sim-stage-state">queued</span></span>
+              </div>
+              <div class="sim-stage-body" data-body></div>
+            </div>
+            <div class="sim-flow" data-flow="1"><span class="sim-flow-bar"></span></div>
+
+            <div class="sim-stage" data-stage="2">
+              <div class="sim-stage-head">
+                <span class="sim-stage-idx">03</span>
+                <span class="sim-stage-name">Format</span>
+                <span class="sim-stage-type">RunnableLambda(format_docs)</span>
+                <span class="sim-stage-status"><span class="sim-stage-state">queued</span></span>
+              </div>
+              <div class="sim-stage-body" data-body></div>
+            </div>
+            <div class="sim-flow" data-flow="2"><span class="sim-flow-bar"></span></div>
+
+            <div class="sim-stage" data-stage="3">
+              <div class="sim-stage-head">
+                <span class="sim-stage-idx">04</span>
+                <span class="sim-stage-name">LLM</span>
+                <span class="sim-stage-type">ChatOpenAI(streaming=True)</span>
+                <span class="sim-stage-status"><span class="sim-stage-state">queued</span></span>
+              </div>
+              <div class="sim-stage-body" data-body></div>
+            </div>
+            <div class="sim-flow" data-flow="3"><span class="sim-flow-bar"></span></div>
+
+            <div class="sim-stage" data-stage="4">
+              <div class="sim-stage-head">
+                <span class="sim-stage-idx">05</span>
+                <span class="sim-stage-name">Parser</span>
+                <span class="sim-stage-type">JsonOutputParser</span>
+                <span class="sim-stage-status"><span class="sim-stage-state">queued</span></span>
+              </div>
+              <div class="sim-stage-body" data-body></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="prose-grid">
@@ -994,25 +1509,55 @@
       <p class="sect-lead">Every piece of an LCEL chain exposes the same four methods. Write your pipeline once and pick how it runs based on what you need.</p>
 
       <div class="tiles">
-        <article class="tile">
+        <article class="tile" data-tile="invoke">
           <div class="tile-method"><span class="dim">.</span>invoke<span class="dim">()</span></div>
           <h3 class="tile-h">One question, one answer.</h3>
           <p class="tile-p">A single synchronous call: pass an input, wait for the result. The default mode for prototypes, scripts, and CLI tools.</p>
+          <div class="tile-demo" data-mode="invoke">
+            <div class="tile-demo-label">hover · sync · 1 request</div>
+            <div class="demo-track">
+              <div class="demo-slot"><div class="demo-fill"></div></div>
+              <span class="demo-num">0ms</span>
+            </div>
+          </div>
         </article>
-        <article class="tile">
+        <article class="tile" data-tile="batch">
           <div class="tile-method"><span class="dim">.</span>batch<span class="dim">()</span></div>
           <h3 class="tile-h">Many inputs in parallel.</h3>
           <p class="tile-p">Run the same pipeline across a list of inputs concurrently — the I/O-bound ones overlap, latency stays flat instead of multiplying.</p>
+          <div class="tile-demo" data-mode="batch">
+            <div class="tile-demo-label">hover · 4 requests · concurrent</div>
+            <div class="demo-track">
+              <div class="demo-slot"><div class="demo-fill"></div></div>
+              <div class="demo-slot"><div class="demo-fill"></div></div>
+              <div class="demo-slot"><div class="demo-fill"></div></div>
+              <div class="demo-slot"><div class="demo-fill"></div></div>
+              <span class="demo-num">0ms</span>
+            </div>
+          </div>
         </article>
-        <article class="tile">
+        <article class="tile" data-tile="stream">
           <div class="tile-method"><span class="dim">.</span>stream<span class="dim">()</span></div>
           <h3 class="tile-h">Token by token, as it happens.</h3>
           <p class="tile-p">Return the answer as soon as the model starts producing it. Same chain, same code — just a different verb. Chat UIs depend on this.</p>
+          <div class="tile-demo" data-mode="stream">
+            <div class="tile-demo-label">hover · first byte · 250ms</div>
+            <div class="demo-stream" data-stream></div>
+          </div>
         </article>
-        <article class="tile">
+        <article class="tile" data-tile="ainvoke">
           <div class="tile-method"><span class="dim">.</span>ainvoke<span class="dim">()</span></div>
           <h3 class="tile-h">Async for everything else.</h3>
           <p class="tile-p">The same call, async — for web servers, agents, or anywhere you can't afford to block. Each verb has an <span class="kbd">a*</span> twin.</p>
+          <div class="tile-demo" data-mode="ainvoke">
+            <div class="tile-demo-label">hover · event loop free</div>
+            <div class="demo-async">
+              <div class="demo-async-row" data-row="0"><span class="demo-async-dot"></span><span>await chain.ainvoke(req)</span></div>
+              <div class="demo-async-row" data-row="1"><span class="demo-async-dot"></span><span>handle other request</span></div>
+              <div class="demo-async-row" data-row="2"><span class="demo-async-dot"></span><span>handle other request</span></div>
+              <div class="demo-async-row" data-row="3"><span class="demo-async-dot"></span><span>response ready</span></div>
+            </div>
+          </div>
         </article>
       </div>
     </div>
@@ -1104,6 +1649,14 @@ results <span class="ck-dim">=</span> chain.<span class="ck-fn">batch</span>(
     question<span class="ck-dim">=</span>RunnablePassthrough(),
 )
 <span class="ck-cmt"># input → {context, question}</span></pre>
+          <div class="lcel-diag" aria-hidden="true">
+            <div class="shape">"refund?"</div>
+            <span class="arr">&rArr;</span>
+            <div class="branches">
+              <div class="shape">{ context: [...] }</div>
+              <div class="shape">{ question: "..." }</div>
+            </div>
+          </div>
         </article>
 
         <article class="lcel-card">
@@ -1113,6 +1666,11 @@ results <span class="ck-dim">=</span> chain.<span class="ck-fn">batch</span>(
     <span class="ck-kw">lambda</span> q: q.<span class="ck-fn">strip</span>().<span class="ck-fn">lower</span>()
 )
 chain <span class="ck-dim">=</span> normalize <span class="ck-pipe">|</span> prompt <span class="ck-pipe">|</span> model</pre>
+          <div class="lcel-diag" aria-hidden="true">
+            <div class="shape">"  REFUND? "</div>
+            <span class="arr">&rarr;</span>
+            <div class="shape">"refund?"</div>
+          </div>
         </article>
 
         <article class="lcel-card">
@@ -1122,6 +1680,11 @@ chain <span class="ck-dim">=</span> normalize <span class="ck-pipe">|</span> pro
     summary<span class="ck-dim">=</span>summarizer
 ) <span class="ck-pipe">|</span> next_stage
 <span class="ck-cmt"># {x, y} → {x, y, summary}</span></pre>
+          <div class="lcel-diag" aria-hidden="true">
+            <div class="shape">{ x, y }</div>
+            <span class="arr">&rarr;</span>
+            <div class="shape">{ x, y, summary }</div>
+          </div>
         </article>
 
         <article class="lcel-card">
@@ -1132,6 +1695,15 @@ chain <span class="ck-dim">=</span> normalize <span class="ck-pipe">|</span> pro
     (is_math, math_chain),
     default_chain,  <span class="ck-cmt"># fallback</span>
 )</pre>
+          <div class="lcel-diag" aria-hidden="true">
+            <div class="shape">incoming query</div>
+            <span class="arr">&rarr;</span>
+            <div class="branches">
+              <div class="shape">if code &rarr; code_chain</div>
+              <div class="shape">if math &rarr; math_chain</div>
+              <div class="shape">else &rarr; default</div>
+            </div>
+          </div>
         </article>
       </div>
     </div>
@@ -1746,6 +2318,421 @@ chain.<span class="ck-fn">batch</span>([q1, q2, q3])  <span class="ck-cmt"># par
         });
       }, { threshold: 0.3 });
       startObs.observe(document.querySelector('.pipe-frame'));
+    })();
+
+    // ============ INTERACTIVE LCEL SIMULATOR ============
+    (function lcelSimulator() {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const form    = document.getElementById('simForm');
+      const input   = document.getElementById('simInput');
+      const runBtn  = document.getElementById('simRun');
+      const stages  = [...document.querySelectorAll('.sim-stage')];
+      const flows   = [...document.querySelectorAll('.sim-flow')];
+      const status  = document.getElementById('simStatus');
+      const statusLbl = status.querySelector('.dot-label');
+      const speedBtns = [...document.querySelectorAll('.sim-speed')];
+      if (!form) return;
+
+      let speed = 1;
+      let activeRun = 0; // monotonic token to cancel old runs
+      let running = false;
+
+      // ---------- knowledge base of plausible answers ----------
+      const corpus = {
+        rag: {
+          summary: 'retrieval-augmented generation',
+          docs: [
+            { text: 'RAG pairs a retriever with a generator: relevant docs are fetched from a vector store and injected into the LLM prompt as grounded context.', score: 0.92, src: 'rag_intro.md#L12' },
+            { text: 'The retriever embeds the query, performs nearest-neighbour search against a vector index, and returns the top-k passages most likely to contain the answer.', score: 0.86, src: 'arch_overview.md#L48' },
+            { text: 'Unlike fine-tuning, RAG updates knowledge by re-indexing the corpus — no model weights move. This makes it cheap to keep answers current.', score: 0.82, src: 'rag_vs_finetune.md#L7' },
+          ],
+          tokens: ['RAG', ' is', ' a', ' technique', ' that', ' grounds', ' an', ' LLM', '\'s', ' answers', ' in', ' an', ' external', ' knowledge', ' base', '.', ' A', ' retriever', ' embeds', ' the', ' query', ',', ' performs', ' vector', ' search', ',', ' and', ' injects', ' the', ' top', ' passages', ' into', ' the', ' prompt', '.'],
+          json: { answer: 'RAG retrieves relevant docs and feeds them to the LLM as grounded context.', sources: ['rag_intro.md', 'arch_overview.md', 'rag_vs_finetune.md'], confidence: 0.92 },
+        },
+        lcel: {
+          summary: 'LangChain Expression Language',
+          docs: [
+            { text: 'LCEL is the declarative syntax built around the Runnable protocol. The pipe operator overloads __or__ to compose Runnables algebraically.', score: 0.94, src: 'lcel_concepts.md#L3' },
+            { text: 'Every component — prompt, model, retriever, parser — implements .invoke / .batch / .stream / .ainvoke, so chains derive streaming and batching for free.', score: 0.88, src: 'runnable_protocol.md#L21' },
+            { text: 'The Runnable contract is minimal enough to memorize and strict enough to actually compose, which is the entire point.', score: 0.81, src: 'design_rationale.md#L55' },
+          ],
+          tokens: ['LCEL', ' lets', ' you', ' snap', ' together', ' prompts', ',', ' models', ',', ' retrievers', ',', ' and', ' parsers', ' with', ' the', ' pipe', ' operator', '.', ' One', ' contract', ',', ' four', ' execution', ' modes', '.'],
+          json: { answer: 'LCEL composes Runnables via the pipe operator into chains that stream, batch, and run async for free.', sources: ['lcel_concepts.md', 'runnable_protocol.md', 'design_rationale.md'], confidence: 0.94 },
+        },
+        refund: {
+          summary: 'return policy',
+          docs: [
+            { text: 'Standard returns: 30 days from delivery for unworn items with original packaging. Refunds issued to original payment method within 5–7 business days.', score: 0.95, src: 'policy/returns.md#L4' },
+            { text: 'Final-sale items (clearance, custom orders) are non-refundable. Exchanges allowed within 14 days for defects only.', score: 0.84, src: 'policy/returns.md#L22' },
+            { text: 'International returns: customer covers return shipping. Refund excludes original shipping fees. Allow 10–14 days for processing.', score: 0.78, src: 'policy/intl.md#L9' },
+          ],
+          tokens: ['Our', ' return', ' policy', ' allows', ' refunds', ' within', ' 30', ' days', ' of', ' delivery', ' for', ' unworn', ' items', ' in', ' original', ' packaging', '.', ' Refunds', ' are', ' processed', ' within', ' 5', '–', '7', ' business', ' days', '.'],
+          json: { answer: 'Refunds available within 30 days for unworn items with original packaging.', sources: ['policy/returns.md', 'policy/intl.md'], confidence: 0.95 },
+        },
+        streaming: {
+          summary: 'streaming patterns',
+          docs: [
+            { text: 'chain.stream(x) returns an iterator of chunks as the model produces them. Time-to-first-token drops from seconds to ~250ms.', score: 0.91, src: 'streaming.md#L8' },
+            { text: 'chain.astream_events(x, version="v2") emits typed events for every stage — retriever_start, retriever_end, chat_model_stream — so UIs can show stage progress.', score: 0.89, src: 'streaming.md#L34' },
+            { text: 'JsonOutputParser emits partial dicts as tokens arrive, so structured fields can render incrementally instead of waiting for the full response.', score: 0.83, src: 'parsers.md#L17' },
+          ],
+          tokens: ['Use', ' chain.stream', ' for', ' token', '-by', '-token', ' output', ',', ' or', ' chain.astream_events', ' to', ' surface', ' progress', ' from', ' every', ' stage', ' of', ' the', ' pipeline', '.'],
+          json: { answer: 'Use chain.stream() for tokens or astream_events() for typed per-stage events.', sources: ['streaming.md', 'parsers.md'], confidence: 0.91 },
+        },
+        agent: {
+          summary: 'LangGraph agents',
+          docs: [
+            { text: 'LangGraph extends LCEL with stateful graphs: nodes are Runnables, edges are conditional, and the runtime supports cycles and human-in-the-loop checkpoints.', score: 0.90, src: 'langgraph_intro.md#L5' },
+            { text: 'Agents are graphs whose nodes call tools and whose edges depend on the model\'s tool-choice. The state is persisted at every step, so you can resume after a crash.', score: 0.85, src: 'agents.md#L19' },
+            { text: 'When a pipeline needs cycles, branching, or external interrupts, reach for LangGraph instead of an LCEL chain.', score: 0.79, src: 'when_to_use.md#L11' },
+          ],
+          tokens: ['LangGraph', ' adds', ' cycles', ',', ' state', ',', ' and', ' human', '-in', '-the', '-loop', ' checkpoints', ' on', ' top', ' of', ' the', ' LCEL', ' Runnable', ' protocol', '.'],
+          json: { answer: 'LangGraph turns LCEL into a stateful graph with cycles and checkpointing.', sources: ['langgraph_intro.md', 'agents.md', 'when_to_use.md'], confidence: 0.90 },
+        },
+        default: {
+          summary: 'general knowledge',
+          docs: [
+            { text: 'The pipe operator | in LCEL is Python\'s __or__ dunder overloaded on the Runnable base class — nothing more, nothing less.', score: 0.87, src: 'concepts.md#L14' },
+            { text: 'Every Runnable exposes the same four methods: .invoke for a single sync call, .batch for many in parallel, .stream for chunked output, .ainvoke for async.', score: 0.81, src: 'runnable.md#L7' },
+            { text: 'Production chains add retries, timeouts, tracing, caching, and concurrency caps as configuration on each Runnable — not as new code.', score: 0.74, src: 'production.md#L23' },
+          ],
+          tokens: ['LangChain', ' is', ' an', ' open', '-source', ' framework', ' for', ' composing', ' LLM', ' pipelines', ' from', ' a', ' small', ' set', ' of', ' Runnable', ' primitives', '.', ' Pipelines', ' stream', ',', ' batch', ',', ' and', ' run', ' async', ' without', ' extra', ' code', '.'],
+          json: { answer: 'LangChain composes pipelines from Runnable primitives via the pipe operator.', sources: ['concepts.md', 'runnable.md', 'production.md'], confidence: 0.81 },
+        },
+      };
+
+      function pickCorpus(query) {
+        const q = query.toLowerCase();
+        if (q.includes('rag')) return corpus.rag;
+        if (q.includes('lcel') || q.includes('pipe') || q.includes('runnable')) return corpus.lcel;
+        if (q.includes('refund') || q.includes('return') || q.includes('policy')) return corpus.refund;
+        if (q.includes('stream') || q.includes('token')) return corpus.streaming;
+        if (q.includes('agent') || q.includes('graph') || q.includes('cycle')) return corpus.agent;
+        return corpus.default;
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function wait(ms) { return new Promise(r => setTimeout(r, ms / speed)); }
+
+      function resetStages() {
+        stages.forEach(s => {
+          s.classList.remove('active', 'done');
+          s.querySelector('[data-body]').innerHTML = '';
+          const st = s.querySelector('.sim-stage-state');
+          if (st) st.textContent = 'queued';
+        });
+        flows.forEach(f => f.classList.remove('active'));
+      }
+
+      function setStageState(idx, state) {
+        const stage = stages[idx];
+        if (!stage) return;
+        const st = stage.querySelector('.sim-stage-state');
+        if (state === 'thinking') {
+          st.innerHTML = '<span class="sim-thinking"><span></span><span></span><span></span></span>';
+        } else if (state === 'done') {
+          st.innerHTML = '<span class="sim-check">&#10003; ok</span>';
+        } else {
+          st.textContent = state;
+        }
+      }
+
+      function activateStage(idx) {
+        stages[idx].classList.add('active');
+        if (idx > 0) flows[idx - 1].classList.add('active');
+        setStageState(idx, 'thinking');
+      }
+
+      function finishStage(idx) {
+        stages[idx].classList.remove('active');
+        stages[idx].classList.add('done');
+        if (idx > 0) flows[idx - 1].classList.remove('active');
+        setStageState(idx, 'done');
+      }
+
+      function setStatus(state, label) {
+        status.className = 'sim-status' + (state ? ' ' + state : '');
+        statusLbl.textContent = label;
+      }
+
+      // ---------- stage renderers (each produces real intermediate data) ----------
+      function renderPrompt(query) {
+        const body = stages[0].querySelector('[data-body]');
+        const safe = escapeHtml(query || '...');
+        body.innerHTML =
+          '<div class="dim"># ChatPromptTemplate.from_template(...)</div>' +
+          '<div><span class="key">system</span>: <span class="str">"You are a helpful assistant. Answer using only the provided context."</span></div>' +
+          '<div><span class="key">human</span>: <span class="str">"Context: {context}\\n\\nQ: <span class="hl">' + safe + '</span>"</span></div>' +
+          '<div class="dim" style="margin-top:0.4rem"># prompt is now a ChatPromptValue, ready for the next stage</div>';
+      }
+
+      function renderRetriever(kb, query) {
+        const body = stages[1].querySelector('[data-body]');
+        body.innerHTML =
+          '<div class="dim"># vector_store.similarity_search(query, k=3) on topic: <span class="ck">' + escapeHtml(kb.summary) + '</span></div>' +
+          '<div class="dim" style="margin-bottom:0.5rem">query.embed() &rarr; 1536-d vector &rarr; cosine search</div>' +
+          kb.docs.map(d =>
+            '<div class="sim-doc">' +
+              '<div class="sim-doc-text">' + escapeHtml(d.text) + '<div class="dim" style="margin-top:0.25rem; font-size:0.65rem">' + escapeHtml(d.src) + '</div></div>' +
+              '<div class="sim-doc-meta">[score: ' + d.score.toFixed(2) + ']</div>' +
+            '</div>'
+          ).join('') +
+          '<div class="dim" style="margin-top:0.4rem"># &rarr; List[Document], len=3</div>';
+      }
+
+      function renderFormat(kb) {
+        const body = stages[2].querySelector('[data-body]');
+        const joined = kb.docs.map((d, i) => '[' + (i+1) + '] ' + d.text.slice(0, 90) + (d.text.length > 90 ? '…' : '')).join('\n');
+        body.innerHTML =
+          '<div class="dim"># RunnableLambda(lambda docs: "\\n".join(d.page_content for d in docs))</div>' +
+          '<div class="dim" style="margin: 0.3rem 0">context = """</div>' +
+          '<div class="hl" style="padding-left: 0.6rem; white-space: pre-wrap; word-break: break-word">' + escapeHtml(joined) + '</div>' +
+          '<div class="dim">"""</div>' +
+          '<div class="dim" style="margin-top:0.4rem"># &rarr; single str, ' + joined.length + ' chars · ready for prompt slot {context}</div>';
+      }
+
+      async function renderLLM(kb, runId) {
+        const body = stages[3].querySelector('[data-body]');
+        body.innerHTML =
+          '<div class="dim"># ChatOpenAI(model="gpt-4o-mini", streaming=True).astream(...)</div>' +
+          '<div class="dim" style="margin-bottom:0.5rem">awaiting first token<span class="dim">...</span></div>' +
+          '<div class="stream-out" data-stream></div>';
+        const streamEl = body.querySelector('[data-stream]');
+        // baseline 22ms per token at 1x, scaled by speed
+        const perToken = prefersReduced ? 0 : 22;
+        let acc = '';
+        for (let i = 0; i < kb.tokens.length; i++) {
+          if (activeRun !== runId) return;
+          acc += kb.tokens[i];
+          streamEl.textContent = acc;
+          if (perToken > 0) await wait(perToken);
+        }
+        body.querySelectorAll('.dim')[1].textContent = '# stream complete · ' + kb.tokens.length + ' tokens · ' + acc.length + ' chars';
+      }
+
+      function renderParser(kb) {
+        const body = stages[4].querySelector('[data-body]');
+        const json = kb.json;
+        const lines = [
+          '<span class="dim"># JsonOutputParser.parse(model_output)</span>',
+          '<span class="dim">{</span>',
+          '  <span class="key">"answer"</span>: <span class="str">"' + escapeHtml(json.answer) + '"</span>,',
+          '  <span class="key">"sources"</span>: [' + json.sources.map(s => '<span class="str">"' + escapeHtml(s) + '"</span>').join(', ') + '],',
+          '  <span class="key">"confidence"</span>: <span class="num">' + json.confidence + '</span>',
+          '<span class="dim">}</span>',
+          '<span class="dim" style="margin-top:0.4rem; display:block"># &rarr; Dict[str, Any] · type-safe, ready to return</span>',
+        ];
+        body.innerHTML = lines.join('<br>');
+      }
+
+      // ---------- run pipeline ----------
+      async function run(query) {
+        if (running) return;
+        running = true;
+        runBtn.disabled = true;
+        const runId = ++activeRun;
+        const kb = pickCorpus(query);
+
+        resetStages();
+        setStatus('running', 'running…');
+
+        if (prefersReduced) {
+          // Static final state — show everything immediately
+          renderPrompt(query);
+          renderRetriever(kb, query);
+          renderFormat(kb);
+          renderParser(kb);
+          // LLM as final text
+          const llmBody = stages[3].querySelector('[data-body]');
+          llmBody.innerHTML =
+            '<div class="dim"># ChatOpenAI streamed ' + kb.tokens.length + ' tokens</div>' +
+            '<div class="stream-out">' + escapeHtml(kb.tokens.join('')) + '</div>';
+          stages.forEach((s, i) => { s.classList.add('done'); setStageState(i, 'done'); });
+          flows.forEach(f => f.classList.add('active'));
+          setStatus('done', 'done');
+          running = false;
+          runBtn.disabled = false;
+          return;
+        }
+
+        // Stage 1: Prompt
+        activateStage(0);
+        await wait(220);
+        if (activeRun !== runId) { running = false; runBtn.disabled = false; return; }
+        renderPrompt(query);
+        await wait(180);
+        finishStage(0);
+
+        // Stage 2: Retriever
+        activateStage(1);
+        await wait(380);
+        if (activeRun !== runId) { running = false; runBtn.disabled = false; return; }
+        renderRetriever(kb, query);
+        await wait(220);
+        finishStage(1);
+
+        // Stage 3: Format
+        activateStage(2);
+        await wait(200);
+        if (activeRun !== runId) { running = false; runBtn.disabled = false; return; }
+        renderFormat(kb);
+        await wait(160);
+        finishStage(2);
+
+        // Stage 4: LLM (token streaming)
+        activateStage(3);
+        await wait(280);
+        if (activeRun !== runId) { running = false; runBtn.disabled = false; return; }
+        await renderLLM(kb, runId);
+        if (activeRun !== runId) { running = false; runBtn.disabled = false; return; }
+        await wait(120);
+        finishStage(3);
+
+        // Stage 5: Parser
+        activateStage(4);
+        await wait(260);
+        if (activeRun !== runId) { running = false; runBtn.disabled = false; return; }
+        renderParser(kb);
+        await wait(180);
+        finishStage(4);
+
+        setStatus('done', 'done · ' + kb.tokens.length + ' tokens');
+        running = false;
+        runBtn.disabled = false;
+      }
+
+      // ---------- wire UI ----------
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = input.value.trim() || 'What is RAG?';
+        run(q);
+      });
+
+      speedBtns.forEach(b => {
+        b.addEventListener('click', () => {
+          speedBtns.forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          speed = parseFloat(b.dataset.speed);
+        });
+      });
+
+      // auto-run once when scrolled into view
+      const simObs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            simObs.unobserve(e.target);
+            setTimeout(() => run(input.value.trim() || 'What is RAG?'), 600);
+          }
+        });
+      }, { threshold: 0.25 });
+      simObs.observe(document.getElementById('sim'));
+    })();
+
+    // ============ MODE TILE MINI-DEMOS ============
+    (function modeTileDemos() {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const tiles = [...document.querySelectorAll('.tile[data-tile]')];
+
+      tiles.forEach(tile => {
+        const mode = tile.dataset.tile;
+        let cancelled = false;
+        let running = false;
+
+        const reset = () => {
+          tile.querySelectorAll('.demo-slot').forEach(s => s.classList.remove('lit'));
+          const num = tile.querySelector('.demo-num');
+          if (num) { num.textContent = '0ms'; num.classList.remove('lit'); }
+          const stream = tile.querySelector('[data-stream]');
+          if (stream) { stream.textContent = ''; stream.classList.remove('live'); }
+          tile.querySelectorAll('.demo-async-row').forEach(r => r.classList.remove('lit'));
+        };
+
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+        async function play() {
+          if (running || prefersReduced) return;
+          running = true;
+          cancelled = false;
+          reset();
+
+          if (mode === 'invoke') {
+            // single slot fills slowly over ~2200ms — represents one synchronous call
+            const slot = tile.querySelector('.demo-slot');
+            const num = tile.querySelector('.demo-num');
+            slot.classList.add('lit');
+            const dur = 2200;
+            const t0 = performance.now();
+            num.classList.add('lit');
+            await new Promise(res => {
+              const tick = () => {
+                const t = Math.min((performance.now() - t0) / dur, 1);
+                num.textContent = Math.round(t * 2400) + 'ms';
+                if (t < 1 && !cancelled) requestAnimationFrame(tick);
+                else res();
+              };
+              requestAnimationFrame(tick);
+            });
+          } else if (mode === 'batch') {
+            // 4 slots fill nearly in parallel — ~1.1x of one
+            const slots = tile.querySelectorAll('.demo-slot');
+            const num = tile.querySelector('.demo-num');
+            num.classList.add('lit');
+            const delays = [0, 80, 40, 120]; // slight stagger to feel real, not lock-step
+            slots.forEach((s, i) => setTimeout(() => { if (!cancelled) s.classList.add('lit'); }, delays[i]));
+            const dur = 2400;
+            const t0 = performance.now();
+            await new Promise(res => {
+              const tick = () => {
+                const t = Math.min((performance.now() - t0) / dur, 1);
+                num.textContent = Math.round(t * 2600) + 'ms · 4×';
+                if (t < 1 && !cancelled) requestAnimationFrame(tick);
+                else res();
+              };
+              requestAnimationFrame(tick);
+            });
+          } else if (mode === 'stream') {
+            // token-by-token streaming
+            const stream = tile.querySelector('[data-stream]');
+            stream.classList.add('live');
+            const tokens = ['LangChain', ' streams', ' tokens', ' the', ' moment', ' the', ' model', ' produces', ' them', '—', ' so', ' your', ' UI', ' feels', ' alive', '.'];
+            let acc = '';
+            for (let i = 0; i < tokens.length; i++) {
+              if (cancelled) break;
+              acc += tokens[i];
+              stream.textContent = acc;
+              await sleep(85);
+            }
+          } else if (mode === 'ainvoke') {
+            // 4 async event-loop rows lighting in interleaved order
+            const rows = tile.querySelectorAll('.demo-async-row');
+            const seq = [0, 1, 2, 1, 2, 3];
+            for (const idx of seq) {
+              if (cancelled) break;
+              rows[idx].classList.add('lit');
+              await sleep(280);
+            }
+          }
+          running = false;
+        }
+
+        function stop() {
+          cancelled = true;
+        }
+
+        tile.addEventListener('mouseenter', play);
+        tile.addEventListener('focusin', play);
+        tile.addEventListener('mouseleave', () => { stop(); setTimeout(() => { if (!running) reset(); }, 120); });
+        tile.addEventListener('focusout', () => { stop(); setTimeout(() => { if (!running) reset(); }, 120); });
+        // also support tap on touch
+        tile.addEventListener('click', play);
+      });
     })();
   </script>
   <script src="../shared/nav.js" defer></script>

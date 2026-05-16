@@ -366,14 +366,431 @@
       height: 100px;
       flex-shrink: 0;
       position: relative;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
-    .knob svg { width: 100%; height: 100%; display: block; overflow: visible; }
+    .knob:active, .knob.dragging { cursor: grabbing; }
+    .knob:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 50%; }
+    .knob svg { width: 100%; height: 100%; display: block; overflow: visible; pointer-events: none; }
     .knob .knob-body {
       transform-origin: 50% 50%;
       transition: transform 1.6s cubic-bezier(0.34, 1.06, 0.64, 1);
       transform: rotate(-130deg);
     }
     .knob.live .knob-body { transform: rotate(var(--knob-angle, 30deg)); }
+    .knob.dragging .knob-body { transition: transform 60ms linear; }
+    /* knob value-readout chip */
+    .knob-readout {
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--gold);
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      background: rgba(0,0,0,0.4);
+      padding: 1px 6px;
+      border-radius: 2px;
+      border: 1px solid rgba(212,175,55,0.25);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .knob.dragging .knob-readout, .knob:hover .knob-readout, .knob:focus-visible .knob-readout { opacity: 1; }
+
+    /* ============ MIC BUTTON + WAVEFORM ============ */
+    .mic-stage { position: relative; }
+    .mic-btn {
+      width: 100px;
+      height: 100px;
+      flex-shrink: 0;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      position: relative;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 28%, #4A4540 0%, #2C2A26 50%, #161513 100%);
+      box-shadow:
+        inset 0 2px 3px rgba(255,255,255,0.1),
+        inset 0 -2px 3px rgba(0,0,0,0.7),
+        0 4px 10px rgba(0,0,0,0.6),
+        0 0 0 2px #1A1816,
+        0 0 0 3px rgba(212,175,55,0.5);
+      transition:
+        box-shadow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+      color: var(--gold);
+      font-family: var(--font-mono);
+    }
+    .mic-btn:hover {
+      box-shadow:
+        inset 0 2px 3px rgba(255,255,255,0.12),
+        inset 0 -2px 3px rgba(0,0,0,0.7),
+        0 4px 12px rgba(212,175,55,0.2),
+        0 0 0 2px #1A1816,
+        0 0 0 3px var(--gold);
+    }
+    .mic-btn:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 6px;
+    }
+    .mic-btn.active, .mic-btn:active {
+      transform: scale(0.96);
+      box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.8),
+        inset 0 -1px 1px rgba(255,255,255,0.04),
+        0 0 24px var(--red-glow),
+        0 0 48px var(--red-glow),
+        0 0 0 2px #1A1816,
+        0 0 0 3px var(--red);
+    }
+    .mic-btn svg { width: 56%; height: 56%; display: block; margin: 0 auto; }
+    .mic-btn .mic-glow {
+      transition: fill 0.25s ease;
+    }
+    .mic-btn.active .mic-glow { fill: #FF5544; }
+    .mic-btn-label {
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .mic-btn.active ~ .mic-btn-label { color: var(--red); }
+
+    /* waveform strip drawn into pre-amp section */
+    .waveform-strip {
+      margin: 0 0 1.25rem;
+      padding: 0.85rem 1rem 0.85rem;
+      background: var(--bg-panel-deep);
+      border-radius: 4px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.7), inset 0 -1px 0 rgba(255,255,255,0.03);
+      position: relative;
+      overflow: hidden;
+    }
+    .waveform-strip::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+      opacity: 0.4;
+    }
+    .wf-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 90px;
+      gap: 0.85rem;
+      align-items: center;
+      min-height: 56px;
+    }
+    .wf-row + .wf-row { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed rgba(212,175,55,0.12); }
+    .wf-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .wf-tag .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--text-muted);
+      transition: background 0.2s ease, box-shadow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .wf-row.active .wf-tag .dot {
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold-glow), 0 0 16px var(--gold-glow);
+    }
+    .wf-row.input.active .wf-tag .dot { background: var(--red); box-shadow: 0 0 8px var(--red-glow), 0 0 16px var(--red-glow); }
+    .wf-row.output.active .wf-tag .dot { background: var(--orange); box-shadow: 0 0 8px var(--orange-glow), 0 0 16px var(--orange-glow); }
+    .wf-spec {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--gold);
+      text-align: right;
+      letter-spacing: 0.04em;
+    }
+    .wf-spec .dim { color: var(--text-muted); }
+    .wf-canvas {
+      width: 100%;
+      height: 48px;
+      display: block;
+    }
+    .wf-canvas rect {
+      fill: var(--text-muted);
+      opacity: 0.5;
+      transition: fill 0.2s ease, opacity 0.2s ease;
+    }
+    .wf-row.input .wf-canvas rect { fill: var(--red); }
+    .wf-row.output .wf-canvas rect { fill: var(--orange); }
+    .wf-row.active .wf-canvas rect { opacity: 1; }
+    /* transcript / response lines */
+    .wf-text {
+      width: 100%;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      padding: 0 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      letter-spacing: 0.01em;
+      line-height: 1.35;
+    }
+    .wf-text .cursor {
+      display: inline-block;
+      width: 7px; height: 1em;
+      background: var(--gold);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: cursor-blink 1s steps(2) infinite;
+    }
+    .wf-text.dim { color: var(--text-muted); font-style: italic; }
+    .wf-text.thinking { font-style: italic; color: var(--text-secondary); }
+    @keyframes cursor-blink {
+      50% { opacity: 0; }
+    }
+
+    /* ============ LATENCY PIE CHART ============ */
+    .latency-pie-wrap {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) 1fr;
+      gap: 2rem;
+      margin: 1.5rem 0 1rem;
+      padding: 1.5rem;
+      background: var(--bg-panel-deep);
+      border-radius: 4px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+      align-items: center;
+    }
+    .latency-pie {
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 1;
+      margin: 0 auto;
+      position: relative;
+    }
+    .latency-pie svg { width: 100%; height: 100%; display: block; overflow: visible; }
+    .pie-slice {
+      cursor: pointer;
+      transform-origin: 50% 50%;
+      transition:
+        transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+        filter 0.25s ease;
+      transform: translate(0, 0);
+    }
+    .pie-slice:hover { filter: brightness(1.15); }
+    .pie-slice.expanded { transform: var(--pie-pop, translate(0,0)); filter: brightness(1.2); }
+    .pie-center-label {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+    .pie-center-label .total {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 500;
+      font-size: 2.2rem;
+      color: var(--gold);
+      line-height: 1;
+      display: block;
+      font-variant-numeric: tabular-nums;
+    }
+    .pie-center-label .total .unit { font-family: var(--font-mono); font-size: 0.55em; color: var(--orange); font-style: normal; margin-left: 0.15em; }
+    .pie-center-label .lbl {
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+      display: block;
+    }
+    .pie-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+    .pie-legend-row {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 0.75rem;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      padding: 0.35rem 0.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .pie-legend-row:hover, .pie-legend-row.expanded {
+      background: rgba(212, 175, 55, 0.06);
+    }
+    .pie-legend-row .swatch {
+      width: 14px; height: 14px;
+      border-radius: 2px;
+      box-shadow: 0 0 6px var(--swatch-glow, transparent);
+    }
+    .pie-legend-row .ms {
+      color: var(--gold);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .pie-detail {
+      grid-column: 1 / -1;
+      padding: 1rem 1.25rem;
+      margin-top: 0.75rem;
+      background: rgba(0,0,0,0.3);
+      border-left: 2px solid var(--gold);
+      border-radius: 2px;
+      display: none;
+      animation: detail-in 0.3s cubic-bezier(0.34, 1.06, 0.64, 1);
+    }
+    .pie-detail.open { display: block; }
+    @keyframes detail-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .pie-detail h6 {
+      margin: 0 0 0.5rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--text);
+    }
+    .pie-detail .pdr {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      padding: 0.3rem 0;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      border-bottom: 1px dashed rgba(212,175,55,0.08);
+    }
+    .pie-detail .pdr:last-child { border-bottom: none; }
+    .pie-detail .pdr b { color: var(--gold); font-weight: 500; }
+
+    /* platform spec-sheet expand */
+    .platform { cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease; }
+    .platform:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        inset 0 -1px 0 rgba(0,0,0,0.5),
+        0 6px 14px rgba(0,0,0,0.45);
+    }
+    .platform .toggle { transition: background 0.3s ease; }
+    .platform .toggle::after { transition: right 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease; }
+    .platform.on .toggle { background: #3A2F1A; box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 4px var(--gold-glow); }
+    .platform.on .toggle::after {
+      right: 11px;
+      background: radial-gradient(circle at 30% 30%, #FFE0A0 0%, #D4AF37 50%, #5C4118 100%);
+      box-shadow: 0 0 6px var(--gold-glow);
+    }
+    .platform .pspec-sheet {
+      grid-column: 1 / -1;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.34, 1.06, 0.64, 1), opacity 0.3s ease, margin-top 0.3s ease;
+      opacity: 0;
+      margin-top: 0;
+    }
+    .platform.on .pspec-sheet {
+      max-height: 260px;
+      opacity: 1;
+      margin-top: 0.75rem;
+    }
+    .pspec-sheet-inner {
+      padding: 0.85rem 1rem;
+      background: rgba(0,0,0,0.35);
+      border-radius: 3px;
+      border-left: 2px solid var(--gold);
+    }
+    .pspec-sheet-inner .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem;
+      padding: 0.28rem 0;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      border-bottom: 1px dashed rgba(212,175,55,0.1);
+    }
+    .pspec-sheet-inner .row:last-child { border-bottom: none; }
+    .pspec-sheet-inner .row .k {
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.62rem;
+    }
+    .pspec-sheet-inner .row .v {
+      color: var(--gold);
+      letter-spacing: 0.03em;
+    }
+
+    /* trace-through code highlight */
+    .scope-controls {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.7rem;
+      margin-top: 0.65rem;
+    }
+    .trace-btn {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(212,175,55,0.05);
+      border: 1px solid var(--gold-deep);
+      border-radius: 2px;
+      padding: 0.45rem 0.85rem;
+      cursor: pointer;
+      transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+    }
+    .trace-btn:hover { background: rgba(212,175,55,0.15); }
+    .trace-btn:active { transform: scale(0.97); }
+    .trace-btn.running { color: var(--orange); border-color: var(--orange); background: rgba(255,140,44,0.08); }
+    .scope pre .trace-line {
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      padding: 0 0.3rem;
+      margin: 0 -0.3rem;
+      border-radius: 2px;
+      display: inline-block;
+      width: calc(100% + 0.6rem);
+    }
+    .scope pre .trace-line.lit {
+      background: rgba(212,175,55,0.15);
+      box-shadow: inset 2px 0 0 var(--gold);
+    }
+
+    /* tape reel speed control */
+    .reel.fast .spinner { animation-duration: 1.2s; }
+
+    /* fast-mode active body wash */
+    body.mic-live {
+      background-image:
+        radial-gradient(ellipse 90% 60% at 50% -10%, rgba(204, 68, 34, 0.08), transparent 60%),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 2px),
+        radial-gradient(ellipse 70% 40% at 50% 110%, rgba(255, 140, 44, 0.06), transparent 60%);
+    }
 
     /* ============ SIGNAL CHAIN (Pre-Amp section) ============ */
     .signal-chain {
@@ -987,6 +1404,11 @@
       .platform-grid { grid-template-columns: 1fr; }
       .apps { grid-template-columns: repeat(2, 1fr); }
       .specs-panel { grid-template-columns: repeat(2, 1fr); }
+      .latency-pie-wrap { grid-template-columns: 1fr; gap: 1.25rem; }
+      .latency-pie { max-width: 240px; }
+      .wf-row { grid-template-columns: 70px 1fr 70px; gap: 0.5rem; }
+      .wf-tag, .wf-spec { font-size: 0.55rem; }
+      .wf-text { font-size: 0.74rem; }
       .fault { grid-template-columns: auto 1fr; }
       .fault .fix { grid-column: 2; text-align: left; max-width: none; padding-top: 0.4rem; border-top: 1px dashed var(--rule); margin-top: 0.4rem; }
       .warranty { grid-template-columns: 1fr; gap: 1rem; }
@@ -1015,6 +1437,8 @@
       .reel .spinner { animation: none !important; }
       .power-bulb { animation: none !important; }
       .unit-strip .led, .fault .fled { animation: none !important; opacity: 1 !important; }
+      .wf-text .cursor { animation: none !important; opacity: 1 !important; }
+      .pie-slice { transition: none !important; }
     }
   </style>
 </head>
@@ -1068,35 +1492,86 @@
     <p class="unit-sub smcp">Speech in &mdash; meaning out &mdash; speech back. Five stages, one socket.</p>
 
     <div class="signal-chain">
-      <div class="sig-stage">
-        <div class="knob" data-knob="40"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="url(#g1)" stroke="#1A1816" stroke-width="2"/><defs><radialGradient id="g1" cx="35%" cy="30%"><stop offset="0" stop-color="#5A554E"/><stop offset="0.6" stop-color="#2E2C29"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.6"/><g class="knob-body"><line x1="50" y1="20" x2="50" y2="34" stroke="#D4AF37" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="6" fill="#1A1816" stroke="#D4AF37" stroke-width="0.5"/></svg></div>
+      <div class="sig-stage mic-stage" data-stage="capture">
+        <button class="mic-btn" id="mic-btn" aria-label="Press and hold to capture voice" aria-pressed="false">
+          <svg viewBox="0 0 64 80" aria-hidden="true">
+            <!-- mic capsule -->
+            <rect class="mic-glow" x="22" y="6" width="20" height="36" rx="10" fill="#D4AF37"/>
+            <rect x="22" y="6" width="20" height="36" rx="10" fill="none" stroke="#1A1816" stroke-width="1"/>
+            <!-- grille lines -->
+            <g stroke="#1A1816" stroke-width="0.8" opacity="0.5">
+              <line x1="24" y1="14" x2="40" y2="14"/>
+              <line x1="24" y1="20" x2="40" y2="20"/>
+              <line x1="24" y1="26" x2="40" y2="26"/>
+              <line x1="24" y1="32" x2="40" y2="32"/>
+            </g>
+            <!-- cradle U -->
+            <path d="M 12 36 Q 12 56 32 56 Q 52 56 52 36" fill="none" stroke="#D4AF37" stroke-width="2.4" stroke-linecap="round"/>
+            <!-- stem -->
+            <line x1="32" y1="56" x2="32" y2="68" stroke="#D4AF37" stroke-width="2.4" stroke-linecap="round"/>
+            <!-- base -->
+            <line x1="20" y1="70" x2="44" y2="70" stroke="#D4AF37" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <span class="mic-btn-label smcp" id="mic-label">Press &amp; hold</span>
         <span class="sig-label smcp">Capture</span>
-        <span class="sig-name">User speaks</span>
+        <span class="sig-name">Microphone</span>
         <span class="sig-spec">VAD &middot; 50 ms</span>
       </div>
-      <div class="sig-stage">
-        <div class="knob" data-knob="-50"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="url(#g2)" stroke="#1A1816" stroke-width="2"/><defs><radialGradient id="g2" cx="35%" cy="30%"><stop offset="0" stop-color="#5A554E"/><stop offset="0.6" stop-color="#2E2C29"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.6"/><g class="knob-body"><line x1="50" y1="20" x2="50" y2="34" stroke="#D4AF37" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="6" fill="#1A1816" stroke="#D4AF37" stroke-width="0.5"/></svg></div>
+      <div class="sig-stage" data-stage="stt">
+        <div class="knob" data-knob="-50" data-param="stt-model" data-min="0" data-max="4" data-step="1" data-default="1" tabindex="0" role="slider" aria-label="STT model" aria-valuemin="0" aria-valuemax="4" aria-valuenow="1"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="url(#g2)" stroke="#1A1816" stroke-width="2"/><defs><radialGradient id="g2" cx="35%" cy="30%"><stop offset="0" stop-color="#5A554E"/><stop offset="0.6" stop-color="#2E2C29"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.6"/><g class="knob-body"><line x1="50" y1="20" x2="50" y2="34" stroke="#D4AF37" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="6" fill="#1A1816" stroke="#D4AF37" stroke-width="0.5"/></svg><span class="knob-readout" data-readout="stt-model">Whisper</span></div>
         <span class="sig-label smcp">Transcribe</span>
         <span class="sig-name">STT</span>
-        <span class="sig-spec">Whisper &middot; 150 ms</span>
+        <span class="sig-spec"><span data-spec="stt-name">Whisper</span> &middot; <span data-spec="stt-ms">150</span> ms</span>
       </div>
-      <div class="sig-stage">
-        <div class="knob" data-knob="80"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="url(#g3)" stroke="#1A1816" stroke-width="2"/><defs><radialGradient id="g3" cx="35%" cy="30%"><stop offset="0" stop-color="#5A554E"/><stop offset="0.6" stop-color="#2E2C29"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.6"/><g class="knob-body"><line x1="50" y1="20" x2="50" y2="34" stroke="#FF8C2C" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="6" fill="#1A1816" stroke="#FF8C2C" stroke-width="0.5"/></svg></div>
+      <div class="sig-stage" data-stage="llm">
+        <div class="knob" data-knob="80" data-param="temperature" data-min="0" data-max="2" data-step="0.05" data-default="0.7" tabindex="0" role="slider" aria-label="LLM temperature" aria-valuemin="0" aria-valuemax="2" aria-valuenow="0.7"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="url(#g3)" stroke="#1A1816" stroke-width="2"/><defs><radialGradient id="g3" cx="35%" cy="30%"><stop offset="0" stop-color="#5A554E"/><stop offset="0.6" stop-color="#2E2C29"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.6"/><g class="knob-body"><line x1="50" y1="20" x2="50" y2="34" stroke="#FF8C2C" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="6" fill="#1A1816" stroke="#FF8C2C" stroke-width="0.5"/></svg><span class="knob-readout" data-readout="temperature">T 0.70</span></div>
         <span class="sig-label smcp">Reason</span>
         <span class="sig-name">LLM</span>
-        <span class="sig-spec">GPT-4o &middot; 400 ms</span>
+        <span class="sig-spec">GPT-4o &middot; <span data-spec="temp">0.70</span> &middot; <span data-spec="llm-ms">400</span> ms</span>
       </div>
-      <div class="sig-stage">
-        <div class="knob" data-knob="20"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="url(#g4)" stroke="#1A1816" stroke-width="2"/><defs><radialGradient id="g4" cx="35%" cy="30%"><stop offset="0" stop-color="#5A554E"/><stop offset="0.6" stop-color="#2E2C29"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.6"/><g class="knob-body"><line x1="50" y1="20" x2="50" y2="34" stroke="#D4AF37" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="6" fill="#1A1816" stroke="#D4AF37" stroke-width="0.5"/></svg></div>
+      <div class="sig-stage" data-stage="tts">
+        <div class="knob" data-knob="20" data-param="tts-voice" data-min="0" data-max="3" data-step="1" data-default="0" tabindex="0" role="slider" aria-label="TTS voice" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="url(#g4)" stroke="#1A1816" stroke-width="2"/><defs><radialGradient id="g4" cx="35%" cy="30%"><stop offset="0" stop-color="#5A554E"/><stop offset="0.6" stop-color="#2E2C29"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.6"/><g class="knob-body"><line x1="50" y1="20" x2="50" y2="34" stroke="#D4AF37" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="6" fill="#1A1816" stroke="#D4AF37" stroke-width="0.5"/></svg><span class="knob-readout" data-readout="tts-voice">Verse</span></div>
         <span class="sig-label smcp">Synthesise</span>
         <span class="sig-name">TTS</span>
-        <span class="sig-spec">Eleven &middot; 75 ms</span>
+        <span class="sig-spec"><span data-spec="tts-name">Eleven</span> &middot; <span data-spec="tts-ms">75</span> ms</span>
       </div>
-      <div class="sig-stage">
-        <div class="knob" data-knob="60"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="url(#g5)" stroke="#1A1816" stroke-width="2"/><defs><radialGradient id="g5" cx="35%" cy="30%"><stop offset="0" stop-color="#5A554E"/><stop offset="0.6" stop-color="#2E2C29"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.6"/><g class="knob-body"><line x1="50" y1="20" x2="50" y2="34" stroke="#D4AF37" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="6" fill="#1A1816" stroke="#D4AF37" stroke-width="0.5"/></svg></div>
+      <div class="sig-stage" data-stage="playback">
+        <div class="knob" data-knob="60" data-param="max-tokens" data-min="32" data-max="512" data-step="16" data-default="128" tabindex="0" role="slider" aria-label="Max tokens" aria-valuemin="32" aria-valuemax="512" aria-valuenow="128"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="url(#g5)" stroke="#1A1816" stroke-width="2"/><defs><radialGradient id="g5" cx="35%" cy="30%"><stop offset="0" stop-color="#5A554E"/><stop offset="0.6" stop-color="#2E2C29"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="38" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.6"/><g class="knob-body"><line x1="50" y1="20" x2="50" y2="34" stroke="#D4AF37" stroke-width="3" stroke-linecap="round"/></g><circle cx="50" cy="50" r="6" fill="#1A1816" stroke="#D4AF37" stroke-width="0.5"/></svg><span class="knob-readout" data-readout="max-tokens">128 tok</span></div>
         <span class="sig-label smcp">Playback</span>
         <span class="sig-name">User hears</span>
-        <span class="sig-spec">Stream &middot; 50 ms</span>
+        <span class="sig-spec">Stream &middot; <span data-spec="loop-total">775</span> ms</span>
+      </div>
+    </div>
+
+    <!-- live signal monitor: input waveform → transcript → thinking → response waveform -->
+    <div class="waveform-strip" id="wf-strip" aria-live="polite">
+      <div class="wf-row input" data-wf="input">
+        <span class="wf-tag"><span class="dot"></span>MIC IN</span>
+        <svg class="wf-canvas" viewBox="0 0 600 48" preserveAspectRatio="none" data-bars="60">
+          <!-- 60 bars, generated by JS, fallback flat -->
+        </svg>
+        <span class="wf-spec"><span class="dim">PCM16</span> 24kHz</span>
+      </div>
+      <div class="wf-row" data-wf="stt">
+        <span class="wf-tag"><span class="dot"></span>STT</span>
+        <div class="wf-text dim" id="wf-transcript">&mdash; hold mic to speak &mdash;</div>
+        <span class="wf-spec"><span data-spec="stt-name-mon">Whisper</span></span>
+      </div>
+      <div class="wf-row" data-wf="llm">
+        <span class="wf-tag"><span class="dot"></span>LLM</span>
+        <div class="wf-text" id="wf-thinking">&nbsp;</div>
+        <span class="wf-spec">GPT-4o</span>
+      </div>
+      <div class="wf-row output" data-wf="output">
+        <span class="wf-tag"><span class="dot"></span>TTS OUT</span>
+        <svg class="wf-canvas" viewBox="0 0 600 48" preserveAspectRatio="none" data-bars="60"></svg>
+        <span class="wf-spec"><span data-spec="tts-name-mon">Eleven</span></span>
+      </div>
+      <div class="wf-row" data-wf="response">
+        <span class="wf-tag"><span class="dot"></span>SPK</span>
+        <div class="wf-text" id="wf-response">&nbsp;</div>
+        <span class="wf-spec"><span data-spec="loop-total-mon">775</span> ms</span>
       </div>
     </div>
 
@@ -1187,11 +1662,89 @@
     </div>
 
     <div class="budget-row">
-      <div class="budget-cell" style="--cell-color: #CC4422;"><div class="bv">50<span class="ms">ms</span></div><div class="bl smcp">Capture · VAD</div></div>
-      <div class="budget-cell" style="--cell-color: #6FB87A;"><div class="bv">150<span class="ms">ms</span></div><div class="bl smcp">STT first token</div></div>
-      <div class="budget-cell" style="--cell-color: #FF8C2C;"><div class="bv">400<span class="ms">ms</span></div><div class="bl smcp">LLM TTFT</div></div>
-      <div class="budget-cell" style="--cell-color: #D4AF37;"><div class="bv">150<span class="ms">ms</span></div><div class="bl smcp">TTS chunk</div></div>
-      <div class="budget-cell" style="--cell-color: #9C8B70;"><div class="bv">50<span class="ms">ms</span></div><div class="bl smcp">Network · jitter</div></div>
+      <div class="budget-cell" style="--cell-color: #CC4422;"><div class="bv"><span data-budget="capture">50</span><span class="ms">ms</span></div><div class="bl smcp">Capture · VAD</div></div>
+      <div class="budget-cell" style="--cell-color: #6FB87A;"><div class="bv"><span data-budget="stt">150</span><span class="ms">ms</span></div><div class="bl smcp">STT first token</div></div>
+      <div class="budget-cell" style="--cell-color: #FF8C2C;"><div class="bv"><span data-budget="llm">400</span><span class="ms">ms</span></div><div class="bl smcp">LLM TTFT</div></div>
+      <div class="budget-cell" style="--cell-color: #D4AF37;"><div class="bv"><span data-budget="tts">150</span><span class="ms">ms</span></div><div class="bl smcp">TTS chunk</div></div>
+      <div class="budget-cell" style="--cell-color: #9C8B70;"><div class="bv"><span data-budget="net">50</span><span class="ms">ms</span></div><div class="bl smcp">Network · jitter</div></div>
+    </div>
+
+    <!-- Interactive pie chart: click slices to expand sub-comparisons -->
+    <div class="latency-pie-wrap" role="region" aria-label="Latency budget breakdown — interactive">
+      <div class="latency-pie" id="lat-pie">
+        <svg viewBox="-110 -110 220 220" aria-hidden="true">
+          <!-- slices drawn by JS so they re-render on knob change -->
+          <g id="pie-slices"></g>
+          <circle cx="0" cy="0" r="40" fill="#1C1B1A" stroke="#D4AF37" stroke-width="0.8" opacity="0.5"/>
+        </svg>
+        <div class="pie-center-label">
+          <span class="total"><span id="pie-total-num">800</span><span class="unit">ms</span></span>
+          <span class="lbl smcp">Loop total</span>
+        </div>
+      </div>
+      <div class="pie-legend" id="pie-legend">
+        <div class="pie-legend-row" data-slice="capture" style="--swatch-glow: rgba(204,68,34,0.4);">
+          <span class="swatch" style="background:#CC4422"></span>
+          <span>Capture &middot; VAD</span>
+          <span class="ms"><span data-budget-legend="capture">50</span>ms</span>
+        </div>
+        <div class="pie-legend-row" data-slice="stt" style="--swatch-glow: rgba(111,184,122,0.4);">
+          <span class="swatch" style="background:#6FB87A"></span>
+          <span>STT &middot; first token</span>
+          <span class="ms"><span data-budget-legend="stt">150</span>ms</span>
+        </div>
+        <div class="pie-detail" data-detail="stt">
+          <h6>STT model comparison &mdash; first-token latency</h6>
+          <div class="pdr"><span>Cartesia Ink</span><b>90 ms</b></div>
+          <div class="pdr"><span>Deepgram Nova-3</span><b>150 ms</b></div>
+          <div class="pdr"><span>ElevenLabs Scribe v2</span><b>220 ms</b></div>
+          <div class="pdr"><span>Whisper Large V3</span><b>280 ms</b></div>
+          <div class="pdr"><span>AssemblyAI Universal-2</span><b>290 ms</b></div>
+        </div>
+        <div class="pie-legend-row" data-slice="llm" style="--swatch-glow: rgba(255,140,44,0.4);">
+          <span class="swatch" style="background:#FF8C2C"></span>
+          <span>LLM &middot; TTFT</span>
+          <span class="ms"><span data-budget-legend="llm">400</span>ms</span>
+        </div>
+        <div class="pie-detail" data-detail="llm">
+          <h6>LLM TTFT comparison (voice-tuned)</h6>
+          <div class="pdr"><span>Llama 3.3 70B (Groq)</span><b>130 ms</b></div>
+          <div class="pdr"><span>Gemini 3.1 Flash Live</span><b>180 ms</b></div>
+          <div class="pdr"><span>gpt-4o-realtime</span><b>200 ms</b></div>
+          <div class="pdr"><span>Claude Sonnet 4.7</span><b>340 ms</b></div>
+        </div>
+        <div class="pie-legend-row" data-slice="tts" style="--swatch-glow: rgba(212,175,55,0.4);">
+          <span class="swatch" style="background:#D4AF37"></span>
+          <span>TTS &middot; chunk</span>
+          <span class="ms"><span data-budget-legend="tts">150</span>ms</span>
+        </div>
+        <div class="pie-detail" data-detail="tts">
+          <h6>TTS first-byte latency</h6>
+          <div class="pdr"><span>Cartesia Sonic-2</span><b>40 ms</b></div>
+          <div class="pdr"><span>ElevenLabs Flash v3</span><b>75 ms</b></div>
+          <div class="pdr"><span>Resemble AI</span><b>120 ms</b></div>
+          <div class="pdr"><span>OpenAI Voice</span><b>180 ms</b></div>
+        </div>
+        <div class="pie-legend-row" data-slice="net" style="--swatch-glow: rgba(156,139,112,0.3);">
+          <span class="swatch" style="background:#9C8B70"></span>
+          <span>Network &middot; jitter</span>
+          <span class="ms"><span data-budget-legend="net">50</span>ms</span>
+        </div>
+        <div class="pie-detail" data-detail="capture">
+          <h6>VAD breakdown</h6>
+          <div class="pdr"><span>Silero VAD (default)</span><b>30 ms</b></div>
+          <div class="pdr"><span>WebRTC VAD</span><b>20 ms</b></div>
+          <div class="pdr"><span>Server VAD (OpenAI)</span><b>50 ms</b></div>
+          <div class="pdr"><span>End-of-utterance pad</span><b>+200 ms</b></div>
+        </div>
+        <div class="pie-detail" data-detail="net">
+          <h6>Network latency budget</h6>
+          <div class="pdr"><span>RTT (intra-region)</span><b>10 ms</b></div>
+          <div class="pdr"><span>RTT (cross-region)</span><b>80 ms</b></div>
+          <div class="pdr"><span>PSTN/SIP interconnect</span><b>~150 ms</b></div>
+          <div class="pdr"><span>WebRTC jitter buffer</span><b>50 ms</b></div>
+        </div>
+      </div>
     </div>
 
     <div class="prose">
@@ -1351,22 +1904,22 @@
 
     <div class="knob-bay">
       <div class="knob-cell">
-        <div class="knob" data-knob="-60"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="url(#k1)" stroke="#1A1816" stroke-width="2.5"/><defs><radialGradient id="k1" cx="35%" cy="30%"><stop offset="0" stop-color="#6A655B"/><stop offset="0.6" stop-color="#322F2B"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" stroke-width="1.6" opacity="0.7"/><g stroke="#D4AF37" stroke-width="1" opacity="0.5"><line x1="50" y1="6" x2="50" y2="14"/><line x1="84.6" y1="22.7" x2="79" y2="28.3"/><line x1="94" y1="50" x2="86" y2="50"/><line x1="50" y1="94" x2="50" y2="86"/><line x1="15.4" y1="77.3" x2="21" y2="71.7"/><line x1="6" y1="50" x2="14" y2="50"/><line x1="15.4" y1="22.7" x2="21" y2="28.3"/></g><g class="knob-body"><line x1="50" y1="16" x2="50" y2="32" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/></g><circle cx="50" cy="50" r="7" fill="#1A1816" stroke="#D4AF37" stroke-width="0.8"/></svg></div>
+        <div class="knob" data-knob="-60" data-param="tts-stability" data-default="65" tabindex="0" role="slider" aria-label="TTS stability" aria-valuemin="0" aria-valuemax="100" aria-valuenow="65"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="url(#k1)" stroke="#1A1816" stroke-width="2.5"/><defs><radialGradient id="k1" cx="35%" cy="30%"><stop offset="0" stop-color="#6A655B"/><stop offset="0.6" stop-color="#322F2B"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" stroke-width="1.6" opacity="0.7"/><g stroke="#D4AF37" stroke-width="1" opacity="0.5"><line x1="50" y1="6" x2="50" y2="14"/><line x1="84.6" y1="22.7" x2="79" y2="28.3"/><line x1="94" y1="50" x2="86" y2="50"/><line x1="50" y1="94" x2="50" y2="86"/><line x1="15.4" y1="77.3" x2="21" y2="71.7"/><line x1="6" y1="50" x2="14" y2="50"/><line x1="15.4" y1="22.7" x2="21" y2="28.3"/></g><g class="knob-body"><line x1="50" y1="16" x2="50" y2="32" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/></g><circle cx="50" cy="50" r="7" fill="#1A1816" stroke="#D4AF37" stroke-width="0.8"/></svg><span class="knob-readout" data-readout="tts-stability">STAB 65%</span></div>
         <div class="knob-cap">ElevenLabs Flash v3</div>
         <div class="knob-spec">MOS <b>4.6</b> &middot; <b>75 ms</b> TTFB<br/>380 voices &middot; 70+ langs</div>
       </div>
       <div class="knob-cell">
-        <div class="knob" data-knob="-110"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="url(#k2)" stroke="#1A1816" stroke-width="2.5"/><defs><radialGradient id="k2" cx="35%" cy="30%"><stop offset="0" stop-color="#6A655B"/><stop offset="0.6" stop-color="#322F2B"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" stroke-width="1.6" opacity="0.7"/><g stroke="#D4AF37" stroke-width="1" opacity="0.5"><line x1="50" y1="6" x2="50" y2="14"/><line x1="84.6" y1="22.7" x2="79" y2="28.3"/><line x1="94" y1="50" x2="86" y2="50"/><line x1="50" y1="94" x2="50" y2="86"/><line x1="15.4" y1="77.3" x2="21" y2="71.7"/><line x1="6" y1="50" x2="14" y2="50"/><line x1="15.4" y1="22.7" x2="21" y2="28.3"/></g><g class="knob-body"><line x1="50" y1="16" x2="50" y2="32" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/></g><circle cx="50" cy="50" r="7" fill="#1A1816" stroke="#D4AF37" stroke-width="0.8"/></svg></div>
+        <div class="knob" data-knob="-110" data-param="tts-similarity" data-default="80" tabindex="0" role="slider" aria-label="TTS similarity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="url(#k2)" stroke="#1A1816" stroke-width="2.5"/><defs><radialGradient id="k2" cx="35%" cy="30%"><stop offset="0" stop-color="#6A655B"/><stop offset="0.6" stop-color="#322F2B"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" stroke-width="1.6" opacity="0.7"/><g stroke="#D4AF37" stroke-width="1" opacity="0.5"><line x1="50" y1="6" x2="50" y2="14"/><line x1="84.6" y1="22.7" x2="79" y2="28.3"/><line x1="94" y1="50" x2="86" y2="50"/><line x1="50" y1="94" x2="50" y2="86"/><line x1="15.4" y1="77.3" x2="21" y2="71.7"/><line x1="6" y1="50" x2="14" y2="50"/><line x1="15.4" y1="22.7" x2="21" y2="28.3"/></g><g class="knob-body"><line x1="50" y1="16" x2="50" y2="32" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/></g><circle cx="50" cy="50" r="7" fill="#1A1816" stroke="#D4AF37" stroke-width="0.8"/></svg><span class="knob-readout" data-readout="tts-similarity">SIM 80%</span></div>
         <div class="knob-cap">Cartesia Sonic-2</div>
         <div class="knob-spec">MOS <b>4.4</b> &middot; <b>40 ms</b> TTFB<br/>SSM &middot; fastest in field</div>
       </div>
       <div class="knob-cell">
-        <div class="knob" data-knob="20"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="url(#k3)" stroke="#1A1816" stroke-width="2.5"/><defs><radialGradient id="k3" cx="35%" cy="30%"><stop offset="0" stop-color="#6A655B"/><stop offset="0.6" stop-color="#322F2B"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" stroke-width="1.6" opacity="0.7"/><g stroke="#D4AF37" stroke-width="1" opacity="0.5"><line x1="50" y1="6" x2="50" y2="14"/><line x1="84.6" y1="22.7" x2="79" y2="28.3"/><line x1="94" y1="50" x2="86" y2="50"/><line x1="50" y1="94" x2="50" y2="86"/><line x1="15.4" y1="77.3" x2="21" y2="71.7"/><line x1="6" y1="50" x2="14" y2="50"/><line x1="15.4" y1="22.7" x2="21" y2="28.3"/></g><g class="knob-body"><line x1="50" y1="16" x2="50" y2="32" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/></g><circle cx="50" cy="50" r="7" fill="#1A1816" stroke="#D4AF37" stroke-width="0.8"/></svg></div>
+        <div class="knob" data-knob="20" data-param="tts-style" data-default="55" tabindex="0" role="slider" aria-label="TTS style" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="url(#k3)" stroke="#1A1816" stroke-width="2.5"/><defs><radialGradient id="k3" cx="35%" cy="30%"><stop offset="0" stop-color="#6A655B"/><stop offset="0.6" stop-color="#322F2B"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" stroke-width="1.6" opacity="0.7"/><g stroke="#D4AF37" stroke-width="1" opacity="0.5"><line x1="50" y1="6" x2="50" y2="14"/><line x1="84.6" y1="22.7" x2="79" y2="28.3"/><line x1="94" y1="50" x2="86" y2="50"/><line x1="50" y1="94" x2="50" y2="86"/><line x1="15.4" y1="77.3" x2="21" y2="71.7"/><line x1="6" y1="50" x2="14" y2="50"/><line x1="15.4" y1="22.7" x2="21" y2="28.3"/></g><g class="knob-body"><line x1="50" y1="16" x2="50" y2="32" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/></g><circle cx="50" cy="50" r="7" fill="#1A1816" stroke="#D4AF37" stroke-width="0.8"/></svg><span class="knob-readout" data-readout="tts-style">STYLE 55%</span></div>
         <div class="knob-cap">OpenAI Voice</div>
         <div class="knob-spec">MOS <b>4.3</b> &middot; <b>180 ms</b> TTFB<br/>9 stock voices</div>
       </div>
       <div class="knob-cell">
-        <div class="knob" data-knob="80"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="url(#k4)" stroke="#1A1816" stroke-width="2.5"/><defs><radialGradient id="k4" cx="35%" cy="30%"><stop offset="0" stop-color="#6A655B"/><stop offset="0.6" stop-color="#322F2B"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" stroke-width="1.6" opacity="0.7"/><g stroke="#D4AF37" stroke-width="1" opacity="0.5"><line x1="50" y1="6" x2="50" y2="14"/><line x1="84.6" y1="22.7" x2="79" y2="28.3"/><line x1="94" y1="50" x2="86" y2="50"/><line x1="50" y1="94" x2="50" y2="86"/><line x1="15.4" y1="77.3" x2="21" y2="71.7"/><line x1="6" y1="50" x2="14" y2="50"/><line x1="15.4" y1="22.7" x2="21" y2="28.3"/></g><g class="knob-body"><line x1="50" y1="16" x2="50" y2="32" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/></g><circle cx="50" cy="50" r="7" fill="#1A1816" stroke="#D4AF37" stroke-width="0.8"/></svg></div>
+        <div class="knob" data-knob="80" data-param="tts-speed" data-default="1.05" tabindex="0" role="slider" aria-label="TTS speed" aria-valuemin="0.7" aria-valuemax="1.3" aria-valuenow="1.05"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="url(#k4)" stroke="#1A1816" stroke-width="2.5"/><defs><radialGradient id="k4" cx="35%" cy="30%"><stop offset="0" stop-color="#6A655B"/><stop offset="0.6" stop-color="#322F2B"/><stop offset="1" stop-color="#1A1816"/></radialGradient></defs><circle cx="50" cy="50" r="40" fill="none" stroke="#D4AF37" stroke-width="1.6" opacity="0.7"/><g stroke="#D4AF37" stroke-width="1" opacity="0.5"><line x1="50" y1="6" x2="50" y2="14"/><line x1="84.6" y1="22.7" x2="79" y2="28.3"/><line x1="94" y1="50" x2="86" y2="50"/><line x1="50" y1="94" x2="50" y2="86"/><line x1="15.4" y1="77.3" x2="21" y2="71.7"/><line x1="6" y1="50" x2="14" y2="50"/><line x1="15.4" y1="22.7" x2="21" y2="28.3"/></g><g class="knob-body"><line x1="50" y1="16" x2="50" y2="32" stroke="#D4AF37" stroke-width="4" stroke-linecap="round"/></g><circle cx="50" cy="50" r="7" fill="#1A1816" stroke="#D4AF37" stroke-width="0.8"/></svg><span class="knob-readout" data-readout="tts-speed">SPD 1.05×</span></div>
         <div class="knob-cap">Resemble AI</div>
         <div class="knob-spec">MOS <b>4.5</b> &middot; <b>120 ms</b> TTFB<br/>3-second cloning</div>
       </div>
@@ -1393,48 +1946,96 @@
     <h2 class="unit-h">The <span class="gold">master</span> bus.</h2>
     <p class="unit-sub smcp">Where VAD, barge-in, function-calling, and telephony all sum together.</p>
 
-    <div class="platform-grid">
-      <div class="platform">
+    <div class="platform-grid" id="platform-grid">
+      <div class="platform" role="button" tabindex="0" aria-expanded="false" aria-label="Vapi — tap to view spec sheet">
         <div class="toggle" aria-hidden="true"></div>
         <p class="pkind smcp">Hosted &middot; opinionated</p>
         <h4>Vapi</h4>
         <p>Hosted voice-agent platform &mdash; you bring the LLM prompt and the function tools, Vapi handles the audio plumbing. Sub-500 ms steady-state turn latency; native Twilio integration; routes through their own STT/TTS or yours.</p>
         <div class="pspec">Pricing: <b>$0.05/min</b> infra + provider passthrough &middot; 1M+ calls/day in production</div>
+        <div class="pspec-sheet" aria-hidden="true"><div class="pspec-sheet-inner">
+          <div class="row"><span class="k">Loop latency (p50)</span><span class="v">480 ms</span></div>
+          <div class="row"><span class="k">Telephony</span><span class="v">Twilio · SIP native</span></div>
+          <div class="row"><span class="k">STT options</span><span class="v">Deepgram · Whisper · Cartesia</span></div>
+          <div class="row"><span class="k">LLM</span><span class="v">OpenAI · Anthropic · Groq</span></div>
+          <div class="row"><span class="k">Function calling</span><span class="v">Mid-stream · webhook</span></div>
+          <div class="row"><span class="k">Self-host</span><span class="v">No</span></div>
+        </div></div>
       </div>
-      <div class="platform">
+      <div class="platform" role="button" tabindex="0" aria-expanded="false" aria-label="Retell AI — tap to view spec sheet">
         <div class="toggle" aria-hidden="true"></div>
         <p class="pkind smcp">Hosted &middot; low-code</p>
         <h4>Retell AI</h4>
         <p>Low-code competitor to Vapi. Pre-built flows for lead qualification, support triage, appointment booking, and follow-ups. Deploy a working agent in minutes; less control than Vapi at the wire level but faster to ship.</p>
         <div class="pspec">Pricing: <b>$0.07/min</b> flat &middot; ~600 ms turn latency &middot; voice-cloning included</div>
+        <div class="pspec-sheet" aria-hidden="true"><div class="pspec-sheet-inner">
+          <div class="row"><span class="k">Loop latency (p50)</span><span class="v">600 ms</span></div>
+          <div class="row"><span class="k">Telephony</span><span class="v">Twilio · Vonage · in-house</span></div>
+          <div class="row"><span class="k">Templates</span><span class="v">Lead-qual · triage · booking</span></div>
+          <div class="row"><span class="k">Voice cloning</span><span class="v">Included · 30s sample</span></div>
+          <div class="row"><span class="k">Custom code</span><span class="v">Webhook only</span></div>
+          <div class="row"><span class="k">Self-host</span><span class="v">No</span></div>
+        </div></div>
       </div>
-      <div class="platform">
+      <div class="platform" role="button" tabindex="0" aria-expanded="false" aria-label="Pipecat — tap to view spec sheet">
         <div class="toggle" aria-hidden="true"></div>
         <p class="pkind smcp">Open-source &middot; framework</p>
         <h4>Pipecat</h4>
         <p>Open-source Python framework from Daily. You wire pipelines explicitly &mdash; STT processor, LLM processor, TTS processor, output transport &mdash; with full control over barge-in, interruption, function-calling semantics. The right choice when you need to customise the loop.</p>
         <div class="pspec">Pricing: <b>self-host</b> &middot; brings-own-models &middot; production at Y Combinator scale</div>
+        <div class="pspec-sheet" aria-hidden="true"><div class="pspec-sheet-inner">
+          <div class="row"><span class="k">License</span><span class="v">BSD-2 · open source</span></div>
+          <div class="row"><span class="k">Language</span><span class="v">Python 3.10+</span></div>
+          <div class="row"><span class="k">Pipeline model</span><span class="v">Explicit processors</span></div>
+          <div class="row"><span class="k">Transports</span><span class="v">Daily · LiveKit · WebSocket · Twilio</span></div>
+          <div class="row"><span class="k">Barge-in</span><span class="v">First-class · configurable</span></div>
+          <div class="row"><span class="k">Self-host</span><span class="v">Yes · only option</span></div>
+        </div></div>
       </div>
-      <div class="platform">
+      <div class="platform" role="button" tabindex="0" aria-expanded="false" aria-label="LiveKit Agents — tap to view spec sheet">
         <div class="toggle" aria-hidden="true"></div>
         <p class="pkind smcp">Open-source &middot; infrastructure</p>
         <h4>LiveKit Agents</h4>
         <p>Real-time WebRTC infrastructure with a first-class agents SDK. Built for scale &mdash; the backend OpenAI uses for ChatGPT Voice. Strong on multi-participant rooms, screen-share, mobile SDKs. Bring your own STT / LLM / TTS.</p>
         <div class="pspec">Pricing: <b>$0.005/min</b> infra (Cloud) &middot; powers ChatGPT Voice at scale</div>
+        <div class="pspec-sheet" aria-hidden="true"><div class="pspec-sheet-inner">
+          <div class="row"><span class="k">License</span><span class="v">Apache 2.0</span></div>
+          <div class="row"><span class="k">Transport</span><span class="v">WebRTC (SFU)</span></div>
+          <div class="row"><span class="k">SDKs</span><span class="v">JS · Swift · Kotlin · Flutter · Python</span></div>
+          <div class="row"><span class="k">Multi-participant</span><span class="v">Yes · rooms</span></div>
+          <div class="row"><span class="k">Notable user</span><span class="v">OpenAI ChatGPT Voice backend</span></div>
+          <div class="row"><span class="k">Self-host</span><span class="v">Yes · or LiveKit Cloud</span></div>
+        </div></div>
       </div>
-      <div class="platform">
+      <div class="platform" role="button" tabindex="0" aria-expanded="false" aria-label="Bland AI — tap to view spec sheet">
         <div class="toggle" aria-hidden="true"></div>
         <p class="pkind smcp">Hosted &middot; outbound</p>
         <h4>Bland AI</h4>
         <p>Specialised in outbound phone calls at volume &mdash; sales outreach, appointment confirmations, surveys. Their custom-trained LLM is tuned specifically for phone conversation rhythms; less general-purpose than Vapi but better at the specific job.</p>
         <div class="pspec">Pricing: <b>$0.09/min</b> &middot; outbound-optimised &middot; 24/7 throughput</div>
+        <div class="pspec-sheet" aria-hidden="true"><div class="pspec-sheet-inner">
+          <div class="row"><span class="k">Focus</span><span class="v">Outbound &middot; high volume</span></div>
+          <div class="row"><span class="k">LLM</span><span class="v">Custom-trained on phone data</span></div>
+          <div class="row"><span class="k">Concurrency</span><span class="v">100K+ simultaneous calls</span></div>
+          <div class="row"><span class="k">Compliance</span><span class="v">TCPA · DNC · recording opt-in</span></div>
+          <div class="row"><span class="k">Loop latency (p50)</span><span class="v">520 ms</span></div>
+          <div class="row"><span class="k">Self-host</span><span class="v">No</span></div>
+        </div></div>
       </div>
-      <div class="platform">
+      <div class="platform" role="button" tabindex="0" aria-expanded="false" aria-label="OpenAI Realtime API — tap to view spec sheet">
         <div class="toggle" aria-hidden="true"></div>
         <p class="pkind smcp">First-party &middot; bundled</p>
         <h4>OpenAI Realtime API</h4>
         <p>No orchestrator. The Realtime API <em>is</em> the orchestrator &mdash; you open one WebSocket, send audio, receive audio. Tool-calling, interruption, function-calling all bundled in. The lowest-friction way to ship an agent; locks you to OpenAI for the full stack.</p>
         <div class="pspec">Pricing: <b>$0.06/min audio in</b> &middot; <b>$0.24/min audio out</b> &middot; 300&ndash;500 ms loop</div>
+        <div class="pspec-sheet" aria-hidden="true"><div class="pspec-sheet-inner">
+          <div class="row"><span class="k">Protocol</span><span class="v">WebSocket · WebRTC</span></div>
+          <div class="row"><span class="k">Modalities</span><span class="v">Audio + text duplex</span></div>
+          <div class="row"><span class="k">VAD</span><span class="v">Server-side · configurable</span></div>
+          <div class="row"><span class="k">Voices</span><span class="v">9 stock · no cloning</span></div>
+          <div class="row"><span class="k">Tool calling</span><span class="v">Mid-stream &middot; native</span></div>
+          <div class="row"><span class="k">Lock-in</span><span class="v">Full stack on OpenAI</span></div>
+        </div></div>
       </div>
     </div>
 
@@ -1458,32 +2059,35 @@
     <h2 class="unit-h">Twelve lines, <span class="gold">one phone call.</span></h2>
     <p class="unit-sub smcp">A working voice agent on the OpenAI Realtime API &mdash; from socket to speaker.</p>
 
-    <div class="scope">
+    <div class="scope" id="scope">
       <div class="scope-head">
         <span class="lbl smcp">voice-agent.ts</span>
         <span class="ch">TypeScript &middot; Node 20+</span>
       </div>
-<pre><span class="k">import</span> WebSocket <span class="k">from</span> <span class="s">"ws"</span>;
+<pre id="scope-pre"><span class="trace-line" data-step="import" data-explain="Pull in the WebSocket client for Node — the Realtime API is duplex sockets, not REST."><span class="k">import</span> WebSocket <span class="k">from</span> <span class="s">"ws"</span>;</span>
 
-<span class="k">const</span> <span class="f">ws</span> = <span class="k">new</span> <span class="f">WebSocket</span>(
+<span class="trace-line" data-step="open-socket" data-explain="Open a WebSocket to the Realtime endpoint with bearer-token auth. The model lives at the other end of this one socket."><span class="k">const</span> <span class="f">ws</span> = <span class="k">new</span> <span class="f">WebSocket</span>(
   <span class="s">"wss://api.openai.com/v1/realtime?model=gpt-4o-realtime"</span>,
   { <span class="p">headers</span>: { <span class="p">Authorization</span>: <span class="s">`Bearer ${process.env.OPENAI_API_KEY}`</span> } }
-);
+);</span>
 
-ws.<span class="f">on</span>(<span class="s">"open"</span>, () =&gt; ws.<span class="f">send</span>(<span class="f">JSON.stringify</span>({
-  <span class="p">type</span>: <span class="s">"session.update"</span>,
-  <span class="p">session</span>: {
-    <span class="p">voice</span>: <span class="s">"verse"</span>,
-    <span class="p">modalities</span>: [<span class="s">"audio"</span>, <span class="s">"text"</span>],
-    <span class="p">turn_detection</span>: { <span class="p">type</span>: <span class="s">"server_vad"</span>, <span class="p">threshold</span>: <span class="n">0.5</span> },
-    <span class="p">instructions</span>: <span class="s">"You are a terse, helpful phone assistant."</span>
+<span class="trace-line" data-step="session-update" data-explain="Once the socket opens, send a session.update event to configure the agent for this conversation.">ws.<span class="f">on</span>(<span class="s">"open"</span>, () =&gt; ws.<span class="f">send</span>(<span class="f">JSON.stringify</span>({
+  <span class="p">type</span>: <span class="s">"session.update"</span>,</span>
+<span class="trace-line" data-step="voice" data-explain="Pick the TTS voice — one of nine stock voices (verse, alloy, echo, fable, onyx, nova, sage, shimmer, coral).">  <span class="p">session</span>: {
+    <span class="p">voice</span>: <span class="s">"verse"</span>,</span>
+<span class="trace-line" data-step="modalities" data-explain="Ask for both audio chunks (to play) and a text transcript (to log or display) on the same socket.">    <span class="p">modalities</span>: [<span class="s">"audio"</span>, <span class="s">"text"</span>],</span>
+<span class="trace-line" data-step="vad" data-explain="Let the server-side VAD decide when the user has stopped talking. Threshold 0.5 is the silence-confidence cutoff.">    <span class="p">turn_detection</span>: { <span class="p">type</span>: <span class="s">"server_vad"</span>, <span class="p">threshold</span>: <span class="n">0.5</span> },</span>
+<span class="trace-line" data-step="instructions" data-explain="Your system prompt. Keep it terse — the model is about to *speak* whatever it generates.">    <span class="p">instructions</span>: <span class="s">"You are a terse, helpful phone assistant."</span>
   }
-})));
+})));</span>
 
-ws.<span class="f">on</span>(<span class="s">"message"</span>, (buf) =&gt; {
+<span class="trace-line" data-step="message-handler" data-explain="Every event from the model arrives on this handler. For audio.delta events, decode the base64 PCM and play it as it arrives.">ws.<span class="f">on</span>(<span class="s">"message"</span>, (buf) =&gt; {
   <span class="k">const</span> e = <span class="f">JSON.parse</span>(buf.<span class="f">toString</span>());
   <span class="k">if</span> (e.type === <span class="s">"response.audio.delta"</span>) <span class="f">play</span>(e.delta); <span class="c">// stream to speaker</span>
-});</pre>
+});</span></pre>
+      <div class="scope-controls">
+        <button class="trace-btn" id="trace-btn" type="button" aria-label="Walk through the code step by step">&#9655; Trace through</button>
+      </div>
       <p class="note"><b>What each parameter does:</b> <code style="font-family:var(--font-mono);color:var(--gold);">voice: "verse"</code> selects one of nine stock voices (verse, alloy, echo, fable, onyx, nova, sage, shimmer, coral). <code style="font-family:var(--font-mono);color:var(--gold);">modalities</code> tells the model to emit both audio chunks and a text transcript on the same socket. <code style="font-family:var(--font-mono);color:var(--gold);">turn_detection: server_vad</code> lets OpenAI's server-side voice-activity detector decide when the user has stopped talking; <code style="font-family:var(--font-mono);color:var(--gold);">threshold: 0.5</code> is the silence-confidence cutoff (lower = more eager to interrupt, higher = waits for clearer pauses). <code style="font-family:var(--font-mono);color:var(--gold);">instructions</code> is your system prompt &mdash; keep it terse, because the model is going to <em>speak</em> what it generates.</p>
     </div>
 
@@ -1625,7 +2229,7 @@ ws.<span class="f">on</span>(<span class="s">"message"</span>, (buf) =&gt; {
       </div>
     </div>
 
-    <div class="tape-reels" aria-hidden="true">
+    <div class="tape-reels" aria-hidden="true" id="tape-reels">
       <div class="reel"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#2A2825" stroke="#1A1816" stroke-width="2"/><g class="spinner"><circle cx="50" cy="50" r="38" fill="none" stroke="#3A3835" stroke-width="2"/><circle cx="50" cy="50" r="14" fill="#1A1816" stroke="#D4AF37" stroke-width="1"/><g stroke="#D4AF37" stroke-width="2" stroke-linecap="round"><line x1="50" y1="22" x2="50" y2="36"/><line x1="78" y1="50" x2="64" y2="50"/><line x1="50" y1="78" x2="50" y2="64"/><line x1="22" y1="50" x2="36" y2="50"/></g><circle cx="50" cy="50" r="3" fill="#D4AF37"/></g></svg></div>
       <div class="reel"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#2A2825" stroke="#1A1816" stroke-width="2"/><g class="spinner" style="animation-direction: reverse;"><circle cx="50" cy="50" r="38" fill="none" stroke="#3A3835" stroke-width="2"/><circle cx="50" cy="50" r="14" fill="#1A1816" stroke="#D4AF37" stroke-width="1"/><g stroke="#D4AF37" stroke-width="2" stroke-linecap="round"><line x1="50" y1="22" x2="50" y2="36"/><line x1="78" y1="50" x2="64" y2="50"/><line x1="50" y1="78" x2="50" y2="64"/><line x1="22" y1="50" x2="36" y2="50"/></g><circle cx="50" cy="50" r="3" fill="#D4AF37"/></g></svg></div>
     </div>
@@ -1643,51 +2247,662 @@ ws.<span class="f">on</span>(<span class="s">"message"</span>, (buf) =&gt; {
 </div>
 
 <script>
-  // Reduce-motion check (used for both knob & VU sweeps)
+(function(){
+  'use strict';
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // ============ KNOB SWEEP on rack-enter ============
-  // Each .knob[data-knob] has a target angle in degrees; rotate to it
-  // when its rack enters the viewport.
-  const knobIO = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      if (!e.isIntersecting) return;
-      // for every knob inside this rack, set the live angle
-      e.target.querySelectorAll('.knob').forEach((k) => {
-        const angle = parseFloat(k.dataset.knob || '0');
-        k.style.setProperty('--knob-angle', angle + 'deg');
-        if (!prefersReduced) k.classList.add('live');
-      });
-      // VU meters
-      e.target.querySelectorAll('.vu').forEach((v) => {
-        const reading = parseFloat(v.dataset.vu || '50'); // 0..100 → -55..+55
-        const angle = (reading / 100) * 110 - 55;
-        v.style.setProperty('--vu-angle', angle + 'deg');
-        if (!prefersReduced) v.classList.add('live');
-      });
-      knobIO.unobserve(e.target);
-    });
-  }, { threshold: 0.25 });
-  document.querySelectorAll('[data-rack]').forEach((r) => knobIO.observe(r));
+  // PARAM table — discrete + continuous values, formatting, ms-cost. Knob sweep -130→+130deg.
+  const PARAMS = {
+    'stt-model':     { type:'enum', values:['Whisper','Deepgram','AssemblyAI','Cartesia Ink','ElevenLabs'], msMap:[280,150,290,90,220] },
+    'temperature':   { type:'continuous', min:0, max:2, step:0.05, format:v=>'T '+v.toFixed(2), msFn:v=>Math.round(400+(v-0.7)*40) },
+    'tts-voice':     { type:'enum', values:['Verse','Sage','Nova','Onyx'], msMap:[75,75,75,75] },
+    'max-tokens':    { type:'continuous', min:32, max:512, step:16,    format:v=>Math.round(v)+' tok',          msFn:()=>0 },
+    'tts-stability': { type:'continuous', min:0,  max:100, step:1,     format:v=>'STAB '+Math.round(v)+'%',     msFn:()=>0 },
+    'tts-similarity':{ type:'continuous', min:0,  max:100, step:1,     format:v=>'SIM '+Math.round(v)+'%',      msFn:()=>0 },
+    'tts-style':     { type:'continuous', min:0,  max:100, step:1,     format:v=>'STYLE '+Math.round(v)+'%',    msFn:()=>0 },
+    'tts-speed':     { type:'continuous', min:0.7,max:1.3, step:0.01,  format:v=>'SPD '+v.toFixed(2)+'×',       msFn:()=>0 },
+  };
 
-  // Run immediately on hero-adjacent racks (in case they're above the fold)
-  // Force the power-unit's bulb pulse to start (CSS handles it; nothing to do).
+  const knobState = {};
+  const KNOB_MIN_DEG = -130;
+  const KNOB_MAX_DEG = 130;
 
-  // If user prefers reduced motion, set knob & VU positions immediately (CSS
-  // transition is zeroed by the reduce-motion media query, so this just locks them).
-  if (prefersReduced) {
-    document.querySelectorAll('.knob').forEach((k) => {
-      const angle = parseFloat(k.dataset.knob || '0');
-      k.style.setProperty('--knob-angle', angle + 'deg');
-      k.classList.add('live');
-    });
-    document.querySelectorAll('.vu').forEach((v) => {
-      const reading = parseFloat(v.dataset.vu || '50');
-      const angle = (reading / 100) * 110 - 55;
-      v.style.setProperty('--vu-angle', angle + 'deg');
-      v.classList.add('live');
+  function angleForKnob(k){
+    const p = PARAMS[k.dataset.param];
+    if (!p) return 0;
+    const v = knobState[k.dataset.param];
+    if (p.type === 'enum'){
+      const i = p.values.indexOf(v);
+      const t = p.values.length <= 1 ? 0 : i / (p.values.length - 1);
+      return KNOB_MIN_DEG + t * (KNOB_MAX_DEG - KNOB_MIN_DEG);
+    } else {
+      const t = (v - p.min) / (p.max - p.min);
+      return KNOB_MIN_DEG + t * (KNOB_MAX_DEG - KNOB_MIN_DEG);
+    }
+  }
+  function knobReadoutText(k){
+    const p = PARAMS[k.dataset.param];
+    if (!p) return '';
+    const v = knobState[k.dataset.param];
+    return p.type === 'enum' ? v : p.format(v);
+  }
+  function setKnobValue(k, v, animate){
+    const p = PARAMS[k.dataset.param];
+    if (!p) return;
+    if (p.type === 'enum'){
+      const idx = Math.max(0, Math.min(p.values.length - 1, Math.round(v)));
+      knobState[k.dataset.param] = p.values[idx];
+      k.setAttribute('aria-valuenow', String(idx));
+    } else {
+      let nv = Math.max(p.min, Math.min(p.max, v));
+      nv = Math.round(nv / p.step) * p.step;
+      knobState[k.dataset.param] = nv;
+      k.setAttribute('aria-valuenow', String(nv));
+    }
+    const angle = angleForKnob(k);
+    k.style.setProperty('--knob-angle', angle + 'deg');
+    const ro = k.querySelector('.knob-readout');
+    if (ro) ro.textContent = knobReadoutText(k);
+    if (!animate){
+      k.classList.add('dragging');
+      requestAnimationFrame(() => { k.classList.remove('dragging'); });
+    }
+    updateDerivedFromKnobs();
+  }
+
+  function initKnobs(){
+    document.querySelectorAll('.knob[data-param]').forEach(k => {
+      const p = PARAMS[k.dataset.param];
+      if (!p) return;
+      const def = k.dataset.default;
+      if (p.type === 'enum'){
+        knobState[k.dataset.param] = p.values[parseInt(def || '0', 10)] || p.values[0];
+      } else {
+        knobState[k.dataset.param] = parseFloat(def);
+      }
     });
   }
+
+  function currentLatencies(){
+    const sttModel = knobState['stt-model'];
+    const sttIdx = PARAMS['stt-model'].values.indexOf(sttModel);
+    const sttMs = PARAMS['stt-model'].msMap[sttIdx];
+    const temp = knobState['temperature'];
+    const llmMs = PARAMS['temperature'].msFn(temp);
+    const ttsVoice = knobState['tts-voice'];
+    const ttsIdx = PARAMS['tts-voice'].values.indexOf(ttsVoice);
+    const ttsMs = PARAMS['tts-voice'].msMap[ttsIdx];
+    return {
+      capture: 50,
+      stt: sttMs,
+      llm: llmMs,
+      tts: ttsMs,
+      net: 50,
+      get total(){ return this.capture + this.stt + this.llm + this.tts + this.net; },
+    };
+  }
+
+  function updateDerivedFromKnobs(){
+    const L = currentLatencies();
+    document.querySelectorAll('[data-spec="stt-name"]').forEach(el => el.textContent = knobState['stt-model']);
+    document.querySelectorAll('[data-spec="stt-name-mon"]').forEach(el => el.textContent = knobState['stt-model']);
+    document.querySelectorAll('[data-spec="stt-ms"]').forEach(el => el.textContent = L.stt);
+    document.querySelectorAll('[data-spec="temp"]').forEach(el => el.textContent = knobState['temperature'].toFixed(2));
+    document.querySelectorAll('[data-spec="llm-ms"]').forEach(el => el.textContent = L.llm);
+    document.querySelectorAll('[data-spec="tts-name"]').forEach(el => el.textContent = knobState['tts-voice']);
+    document.querySelectorAll('[data-spec="tts-name-mon"]').forEach(el => el.textContent = knobState['tts-voice']);
+    document.querySelectorAll('[data-spec="tts-ms"]').forEach(el => el.textContent = L.tts);
+    document.querySelectorAll('[data-spec="loop-total"]').forEach(el => el.textContent = L.total);
+    document.querySelectorAll('[data-spec="loop-total-mon"]').forEach(el => el.textContent = L.total);
+    document.querySelectorAll('[data-budget="capture"]').forEach(el => el.textContent = L.capture);
+    document.querySelectorAll('[data-budget="stt"]').forEach(el => el.textContent = L.stt);
+    document.querySelectorAll('[data-budget="llm"]').forEach(el => el.textContent = L.llm);
+    document.querySelectorAll('[data-budget="tts"]').forEach(el => el.textContent = L.tts);
+    document.querySelectorAll('[data-budget="net"]').forEach(el => el.textContent = L.net);
+    document.querySelectorAll('[data-budget-legend="capture"]').forEach(el => el.textContent = L.capture);
+    document.querySelectorAll('[data-budget-legend="stt"]').forEach(el => el.textContent = L.stt);
+    document.querySelectorAll('[data-budget-legend="llm"]').forEach(el => el.textContent = L.llm);
+    document.querySelectorAll('[data-budget-legend="tts"]').forEach(el => el.textContent = L.tts);
+    document.querySelectorAll('[data-budget-legend="net"]').forEach(el => el.textContent = L.net);
+    const pt = document.getElementById('pie-total-num');
+    if (pt) pt.textContent = L.total;
+    renderPie();
+  }
+
+  function knobDragInit(){
+    document.querySelectorAll('.knob[data-param]').forEach(k => {
+      let startAngle = 0, startValueNumeric = 0, dragging = false;
+      const p = PARAMS[k.dataset.param];
+
+      function getPointer(e){
+        if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        return { x: e.clientX, y: e.clientY };
+      }
+      function pointerAngle(e){
+        const r = k.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const pt = getPointer(e);
+        return Math.atan2(pt.y - cy, pt.x - cx) * 180 / Math.PI;
+      }
+
+      function onDown(e){
+        dragging = true;
+        k.classList.add('dragging');
+        startAngle = pointerAngle(e);
+        if (p.type === 'enum'){
+          startValueNumeric = p.values.indexOf(knobState[k.dataset.param]);
+        } else {
+          startValueNumeric = knobState[k.dataset.param];
+        }
+        e.preventDefault();
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onUp);
+      }
+      function onMove(e){
+        if (!dragging) return;
+        e.preventDefault();
+        const cur = pointerAngle(e);
+        let delta = cur - startAngle;
+        if (delta > 180) delta -= 360;
+        if (delta < -180) delta += 360;
+        const sweep = KNOB_MAX_DEG - KNOB_MIN_DEG;
+        const t = delta / sweep;
+        if (p.type === 'enum'){
+          const newIdx = startValueNumeric + t * (p.values.length - 1);
+          setKnobValue(k, newIdx, false);
+        } else {
+          const range = p.max - p.min;
+          setKnobValue(k, startValueNumeric + t * range, false);
+        }
+      }
+      function onUp(){
+        if (!dragging) return;
+        dragging = false;
+        k.classList.remove('dragging');
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+        window.removeEventListener('touchmove', onMove);
+        window.removeEventListener('touchend', onUp);
+      }
+
+      k.addEventListener('mousedown', onDown);
+      k.addEventListener('touchstart', onDown, { passive: false });
+
+      k.addEventListener('keydown', e => {
+        let handled = true;
+        if (p.type === 'enum'){
+          const idx = p.values.indexOf(knobState[k.dataset.param]);
+          if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setKnobValue(k, idx + 1, true);
+          else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setKnobValue(k, idx - 1, true);
+          else if (e.key === 'Home') setKnobValue(k, 0, true);
+          else if (e.key === 'End') setKnobValue(k, p.values.length - 1, true);
+          else handled = false;
+        } else {
+          const v = knobState[k.dataset.param];
+          const step = p.step * (e.shiftKey ? 4 : 1);
+          if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setKnobValue(k, v + step, true);
+          else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setKnobValue(k, v - step, true);
+          else if (e.key === 'Home') setKnobValue(k, p.min, true);
+          else if (e.key === 'End') setKnobValue(k, p.max, true);
+          else handled = false;
+        }
+        if (handled) e.preventDefault();
+      });
+    });
+  }
+
+  const PIE_COLORS = {
+    capture: '#CC4422', stt: '#6FB87A', llm: '#FF8C2C', tts: '#D4AF37', net: '#9C8B70',
+  };
+  const PIE_ORDER = ['capture', 'stt', 'llm', 'tts', 'net'];
+
+  function renderPie(){
+    const g = document.getElementById('pie-slices');
+    if (!g) return;
+    const L = currentLatencies();
+    const total = L.total;
+    let acc = 0;
+    g.innerHTML = '';
+    PIE_ORDER.forEach(key => {
+      const val = L[key];
+      const a0 = (acc / total) * Math.PI * 2 - Math.PI / 2;
+      const a1 = ((acc + val) / total) * Math.PI * 2 - Math.PI / 2;
+      acc += val;
+      const r = 100;
+      const x0 = Math.cos(a0) * r, y0 = Math.sin(a0) * r;
+      const x1 = Math.cos(a1) * r, y1 = Math.sin(a1) * r;
+      const large = (a1 - a0) > Math.PI ? 1 : 0;
+      const d = `M 0 0 L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`;
+      const mid = (a0 + a1) / 2;
+      const popX = Math.cos(mid) * 10, popY = Math.sin(mid) * 10;
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d);
+      path.setAttribute('fill', PIE_COLORS[key]);
+      path.setAttribute('stroke', '#1A1816');
+      path.setAttribute('stroke-width', '0.8');
+      path.classList.add('pie-slice');
+      path.dataset.slice = key;
+      path.style.setProperty('--pie-pop', `translate(${popX.toFixed(1)}px, ${popY.toFixed(1)}px)`);
+      path.setAttribute('tabindex', '0');
+      path.setAttribute('role', 'button');
+      path.setAttribute('aria-label', `${key} latency: ${val} ms — click to expand`);
+      path.addEventListener('click', () => togglePieDetail(key));
+      path.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePieDetail(key); }});
+      g.appendChild(path);
+    });
+    if (currentExpandedSlice){
+      const sl = g.querySelector(`[data-slice="${currentExpandedSlice}"]`);
+      if (sl) sl.classList.add('expanded');
+    }
+  }
+
+  let currentExpandedSlice = null;
+  function togglePieDetail(key){
+    const legend = document.getElementById('pie-legend');
+    if (!legend) return;
+    document.querySelectorAll('.pie-detail').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.pie-legend-row').forEach(r => r.classList.remove('expanded'));
+    document.querySelectorAll('.pie-slice').forEach(s => s.classList.remove('expanded'));
+    if (currentExpandedSlice === key){
+      currentExpandedSlice = null;
+      return;
+    }
+    currentExpandedSlice = key;
+    const detail = legend.querySelector(`.pie-detail[data-detail="${key}"]`);
+    const row    = legend.querySelector(`.pie-legend-row[data-slice="${key}"]`);
+    const slice  = document.querySelector(`.pie-slice[data-slice="${key}"]`);
+    if (detail){
+      if (row && detail.previousElementSibling !== row) row.after(detail);
+      detail.classList.add('open');
+    }
+    if (row) row.classList.add('expanded');
+    if (slice) slice.classList.add('expanded');
+  }
+
+  function pieLegendInit(){
+    document.querySelectorAll('.pie-legend-row[data-slice]').forEach(row => {
+      row.addEventListener('click', () => togglePieDetail(row.dataset.slice));
+      row.setAttribute('tabindex', '0');
+      row.setAttribute('role', 'button');
+      row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePieDetail(row.dataset.slice); }});
+    });
+  }
+
+  // States: idle → recording → transcribing → thinking → responding → idle
+  const MIC = {
+    state: 'idle',
+    rafId: null,
+    timers: [],
+    transcriptTimer: null,
+    responseTimer: null,
+    cleanup(){
+      this.timers.forEach(t => clearTimeout(t));
+      this.timers = [];
+      if (this.transcriptTimer) clearInterval(this.transcriptTimer);
+      if (this.responseTimer)   clearInterval(this.responseTimer);
+      if (this.rafId) cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    },
+  };
+
+  const TRANSCRIPT_TEXT = "what's on my calendar today?";
+  const RESPONSE_TEXT   = "you have a meeting at 3pm with the CETI team, and a dentist appointment at 5.";
+
+  function buildWaveformBars(){
+    document.querySelectorAll('.wf-canvas[data-bars]').forEach(svg => {
+      const n = parseInt(svg.dataset.bars, 10) || 60;
+      if (svg.dataset.built === '1') return;
+      const w = 600;
+      const bw = (w - n) / n; // 1px gap
+      for (let i = 0; i < n; i++){
+        const x = i * (bw + 1);
+        const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        r.setAttribute('x', x.toFixed(2));
+        r.setAttribute('y', '22');
+        r.setAttribute('width', bw.toFixed(2));
+        r.setAttribute('height', '4');
+        r.setAttribute('rx', '1');
+        svg.appendChild(r);
+      }
+      svg.dataset.built = '1';
+    });
+  }
+
+  function setWaveformHeight(svg, intensity){
+    svg.querySelectorAll('rect').forEach(r => {
+      if (intensity <= 0.01){
+        r.setAttribute('y', '22');
+        r.setAttribute('height', '4');
+      } else {
+        const h = Math.max(4, Math.random() * 44 * intensity);
+        r.setAttribute('y', String(24 - h/2));
+        r.setAttribute('height', String(h));
+      }
+    });
+  }
+
+  function startInputWaveformLoop(){
+    if (prefersReduced) return;
+    const inputSvg = document.querySelector('.wf-row.input .wf-canvas');
+    const outputSvg = document.querySelector('.wf-row.output .wf-canvas');
+    let lastT = 0;
+    let inputIntensity = 0;
+    let outputIntensity = 0;
+    function step(t){
+      if (!lastT) lastT = t;
+      if (t - lastT > 60){
+        const tgtIn = (MIC.state === 'recording' || MIC.state === 'transcribing') ? 0.85 : 0;
+        const tgtOut = (MIC.state === 'responding') ? 0.9 : 0;
+        inputIntensity  += (tgtIn  - inputIntensity)  * 0.25;
+        outputIntensity += (tgtOut - outputIntensity) * 0.25;
+        if (inputSvg)  setWaveformHeight(inputSvg, inputIntensity);
+        if (outputSvg) setWaveformHeight(outputSvg, outputIntensity);
+        lastT = t;
+      }
+      MIC.rafId = requestAnimationFrame(step);
+    }
+    MIC.rafId = requestAnimationFrame(step);
+  }
+
+  function setActiveRows(rows){
+    document.querySelectorAll('.wf-row').forEach(r => r.classList.remove('active'));
+    rows.forEach(name => {
+      const el = document.querySelector(`.wf-row[data-wf="${name}"]`);
+      if (el) el.classList.add('active');
+    });
+  }
+
+  function typewriter(el, text, speedMs, onDone){
+    el.classList.remove('dim');
+    el.innerHTML = '<span class="cursor"></span>';
+    let i = 0;
+    const t = setInterval(() => {
+      i++;
+      const txt = text.slice(0, i);
+      el.innerHTML = txt + '<span class="cursor"></span>';
+      if (i >= text.length){
+        clearInterval(t);
+        if (onDone) onDone();
+      }
+    }, speedMs);
+    return t;
+  }
+
+  function setVuActive(active){
+    document.querySelectorAll('.vu').forEach(v => {
+      if (active){
+        const baseReading = parseFloat(v.dataset.vu || '50');
+        const liveReading = Math.min(95, baseReading + 25 + Math.random() * 15);
+        v.style.setProperty('--vu-angle', ((liveReading / 100) * 110 - 55) + 'deg');
+      } else {
+        const reading = parseFloat(v.dataset.vu || '50');
+        v.style.setProperty('--vu-angle', ((reading / 100) * 110 - 55) + 'deg');
+      }
+    });
+  }
+
+  function setMicState(next){
+    MIC.state = next;
+    const wf = document.getElementById('wf-strip');
+    const transcriptEl = document.getElementById('wf-transcript');
+    const thinkingEl   = document.getElementById('wf-thinking');
+    const responseEl   = document.getElementById('wf-response');
+    const reels = document.querySelectorAll('.reel');
+    const body  = document.body;
+    const micBtn = document.getElementById('mic-btn');
+    const micLabel = document.getElementById('mic-label');
+
+    if (next === 'idle'){
+      MIC.cleanup();
+      setActiveRows([]);
+      setVuActive(false);
+      reels.forEach(r => r.classList.remove('fast'));
+      body.classList.remove('mic-live');
+      micBtn.classList.remove('active');
+      micBtn.setAttribute('aria-pressed', 'false');
+      micLabel.textContent = 'Press & hold';
+      transcriptEl.classList.add('dim');
+      transcriptEl.innerHTML = '&mdash; hold mic to speak &mdash;';
+      thinkingEl.innerHTML = '&nbsp;';
+      responseEl.innerHTML = '&nbsp;';
+      return;
+    }
+    if (next === 'recording'){
+      MIC.cleanup();
+      setActiveRows(['input', 'stt']);
+      setVuActive(true);
+      reels.forEach(r => r.classList.add('fast'));
+      body.classList.add('mic-live');
+      micBtn.classList.add('active');
+      micBtn.setAttribute('aria-pressed', 'true');
+      micLabel.textContent = 'Listening…';
+      transcriptEl.classList.add('dim');
+      transcriptEl.innerHTML = '…<span class="cursor"></span>';
+      thinkingEl.innerHTML = '&nbsp;';
+      responseEl.innerHTML = '&nbsp;';
+      startInputWaveformLoop();
+      MIC.timers.push(setTimeout(() => {
+        if (MIC.state !== 'recording') return;
+        setMicState('transcribing');
+      }, 350));
+      return;
+    }
+    if (next === 'transcribing'){
+      setActiveRows(['input', 'stt']);
+      const L = currentLatencies();
+      MIC.transcriptTimer = typewriter(transcriptEl, TRANSCRIPT_TEXT, Math.max(28, Math.min(60, L.stt / 6)), () => {
+        if (MIC.state !== 'transcribing') return;
+        setMicState('thinking');
+      });
+      return;
+    }
+    if (next === 'thinking'){
+      setActiveRows(['stt', 'llm']);
+      let dots = 0;
+      thinkingEl.classList.remove('dim');
+      thinkingEl.classList.add('thinking');
+      thinkingEl.innerHTML = 'reasoning';
+      MIC.responseTimer = setInterval(() => {
+        dots = (dots + 1) % 4;
+        thinkingEl.innerHTML = 'reasoning' + '.'.repeat(dots);
+      }, 180);
+      const L = currentLatencies();
+      MIC.timers.push(setTimeout(() => {
+        clearInterval(MIC.responseTimer);
+        if (MIC.state !== 'thinking') return;
+        thinkingEl.classList.remove('thinking');
+        thinkingEl.innerHTML = '<span style="color:var(--gold)">[response generated]</span>';
+        setMicState('responding');
+      }, Math.max(550, L.llm)));
+      return;
+    }
+    if (next === 'responding'){
+      setActiveRows(['llm', 'output', 'response']);
+      const L = currentLatencies();
+      MIC.responseTimer = typewriter(responseEl, RESPONSE_TEXT, Math.max(22, Math.min(45, 22 + L.tts / 8)), () => {
+        if (MIC.state !== 'responding') return;
+        MIC.timers.push(setTimeout(() => setMicState('idle'), 1200));
+      });
+      return;
+    }
+  }
+
+  function micInit(){
+    const btn = document.getElementById('mic-btn');
+    if (!btn) return;
+    buildWaveformBars();
+    if (prefersReduced){
+      btn.addEventListener('click', () => {
+        if (MIC.state === 'idle'){
+          // jump straight through with minimal animation
+          const t = document.getElementById('wf-transcript');
+          const thk = document.getElementById('wf-thinking');
+          const r = document.getElementById('wf-response');
+          t.classList.remove('dim');
+          t.textContent = TRANSCRIPT_TEXT;
+          thk.textContent = '[response generated]';
+          r.textContent = RESPONSE_TEXT;
+          btn.classList.add('active');
+          document.getElementById('mic-label').textContent = 'Sample shown';
+          MIC.state = 'demo';
+        } else {
+          setMicState('idle');
+        }
+      });
+      return;
+    }
+    const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    if (isTouch){
+      btn.addEventListener('click', () => {
+        if (MIC.state === 'idle'){
+          setMicState('recording');
+        } else {
+          setMicState('idle');
+        }
+      });
+    } else {
+      const press = e => { e.preventDefault(); if (MIC.state === 'idle') setMicState('recording'); };
+      const release = () => { if (MIC.state === 'recording') setMicState('transcribing'); };
+      btn.addEventListener('mousedown', press);
+      btn.addEventListener('mouseup', release);
+      btn.addEventListener('mouseleave', () => { if (MIC.state === 'recording') release(); });
+      btn.addEventListener('keydown', e => {
+        if ((e.key === ' ' || e.key === 'Enter') && MIC.state === 'idle'){
+          e.preventDefault();
+          setMicState('recording');
+          MIC.timers.push(setTimeout(() => { if (MIC.state === 'recording') setMicState('transcribing'); }, 700));
+        }
+      });
+      btn.addEventListener('touchstart', e => { e.preventDefault(); if (MIC.state === 'idle') setMicState('recording'); }, { passive: false });
+      btn.addEventListener('touchend',   e => { e.preventDefault(); release(); });
+    }
+  }
+
+  function platformInit(){
+    document.querySelectorAll('#platform-grid .platform').forEach(p => {
+      const toggle = () => {
+        const open = p.classList.toggle('on');
+        p.setAttribute('aria-expanded', open ? 'true' : 'false');
+        const sh = p.querySelector('.pspec-sheet');
+        if (sh) sh.setAttribute('aria-hidden', open ? 'false' : 'true');
+      };
+      p.addEventListener('click', toggle);
+      p.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
+      });
+    });
+  }
+
+  function traceInit(){
+    const btn = document.getElementById('trace-btn');
+    const pre = document.getElementById('scope-pre');
+    if (!btn || !pre) return;
+    const lines = Array.from(pre.querySelectorAll('.trace-line'));
+    let running = false;
+    let timers = [];
+    function clearAll(){
+      lines.forEach(l => l.classList.remove('lit'));
+      timers.forEach(t => clearTimeout(t));
+      timers = [];
+    }
+    btn.addEventListener('click', () => {
+      if (running){
+        running = false;
+        clearAll();
+        btn.classList.remove('running');
+        btn.innerHTML = '&#9655; Trace through';
+        return;
+      }
+      running = true;
+      btn.classList.add('running');
+      btn.innerHTML = '&#9633; Stop trace';
+      clearAll();
+      const step = prefersReduced ? 100 : 850;
+      lines.forEach((line, i) => {
+        timers.push(setTimeout(() => {
+          if (!running) return;
+          lines.forEach(l => l.classList.remove('lit'));
+          line.classList.add('lit');
+          line.scrollIntoView({ block: 'nearest', behavior: prefersReduced ? 'auto' : 'smooth' });
+        }, i * step));
+      });
+      timers.push(setTimeout(() => {
+        if (!running) return;
+        running = false;
+        btn.classList.remove('running');
+        btn.innerHTML = '&#9655; Trace through';
+        setTimeout(() => clearAll(), 1500);
+      }, lines.length * step + 800));
+    });
+  }
+
+  function viewportSweepInit(){
+    const knobIO = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.querySelectorAll('.knob').forEach((k) => {
+          if (k.dataset.param){
+            k.style.setProperty('--knob-angle', angleForKnob(k) + 'deg');
+          } else {
+            const angle = parseFloat(k.dataset.knob || '0');
+            k.style.setProperty('--knob-angle', angle + 'deg');
+          }
+          if (!prefersReduced) k.classList.add('live');
+        });
+        e.target.querySelectorAll('.vu').forEach((v) => {
+          const reading = parseFloat(v.dataset.vu || '50');
+          const angle = (reading / 100) * 110 - 55;
+          v.style.setProperty('--vu-angle', angle + 'deg');
+          if (!prefersReduced) v.classList.add('live');
+        });
+        knobIO.unobserve(e.target);
+      });
+    }, { threshold: 0.25 });
+    document.querySelectorAll('[data-rack]').forEach((r) => knobIO.observe(r));
+
+    if (prefersReduced){
+      document.querySelectorAll('.knob').forEach((k) => {
+        if (k.dataset.param){
+          k.style.setProperty('--knob-angle', angleForKnob(k) + 'deg');
+        } else {
+          const angle = parseFloat(k.dataset.knob || '0');
+          k.style.setProperty('--knob-angle', angle + 'deg');
+        }
+        k.classList.add('live');
+      });
+      document.querySelectorAll('.vu').forEach((v) => {
+        const reading = parseFloat(v.dataset.vu || '50');
+        const angle = (reading / 100) * 110 - 55;
+        v.style.setProperty('--vu-angle', angle + 'deg');
+        v.classList.add('live');
+      });
+    }
+  }
+
+  function boot(){
+    initKnobs();
+    knobDragInit();
+    document.querySelectorAll('.knob[data-param]').forEach(k => {
+      const ro = k.querySelector('.knob-readout');
+      if (ro) ro.textContent = knobReadoutText(k);
+    });
+    updateDerivedFromKnobs();
+    pieLegendInit();
+    micInit();
+    platformInit();
+    traceInit();
+    viewportSweepInit();
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
 </script>
 <script src="../shared/nav.js" defer></script>
 </body>

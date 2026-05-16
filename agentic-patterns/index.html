@@ -1243,6 +1243,121 @@
     }
     .watermark .dot{ color: var(--red); font-weight:700;}
 
+    /* ============ INTERACTIVE: RUN CONTROLS ============ */
+    .pat{ scroll-margin-top: 90px;}
+    .pat-stage{ flex-direction:column; gap:.75rem; align-items:stretch; justify-content:flex-start;}
+    .pat-stage svg{ max-height:200px; width:100%; flex-shrink:0;}
+    .run-bar{ display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; margin-top:.85rem; padding-top:.85rem; border-top:1.5px solid var(--black);}
+    .run-btn{
+      font-family:'Inter',sans-serif; font-weight:800; font-size:.78rem;
+      letter-spacing:.14em; text-transform:uppercase; padding:.55rem .85rem;
+      border:1.5px solid var(--black); background:var(--black); color:var(--white);
+      cursor:pointer; line-height:1; display:inline-flex; align-items:center; gap:.45rem;
+      transition: transform 180ms var(--ease), background 160ms, color 160ms;
+    }
+    .run-btn:hover{ transform:translate(2px,-2px); background:var(--yellow); color:var(--black);}
+    .run-btn:focus-visible{ outline:3px solid var(--yellow); outline-offset:2px;}
+    .run-btn[disabled]{ opacity:.35; cursor:not-allowed; transform:none;}
+    .run-btn.reset{ background:var(--white); color:var(--black);}
+    .run-btn.reset:hover{ background:var(--red); color:var(--white); border-color:var(--red);}
+    .run-btn .glyph{ font-weight:900; font-size:.9em; line-height:1;}
+    .pat-1 .run-btn:not(.reset):hover{ background:var(--blue); color:var(--white); border-color:var(--blue);}
+    .pat-2 .run-btn:not(.reset):hover{ background:var(--red); color:var(--white); border-color:var(--red);}
+    .pat-3 .run-btn:not(.reset):hover{ background:var(--yellow); color:var(--black);}
+    .pat-4 .run-btn:not(.reset):hover{ background:var(--black); color:var(--yellow);}
+    .run-status{
+      font-family:'JetBrains Mono',monospace; font-size:.68rem; letter-spacing:.14em;
+      text-transform:uppercase; font-weight:700; padding:.35rem .6rem;
+      border:1.5px solid var(--black); background:var(--white); color:var(--black);
+      flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      transition: background 200ms, color 200ms;
+    }
+    .run-status.is-run{ background:var(--yellow);}
+    .run-status.is-done{ background:var(--black); color:var(--yellow);}
+
+    .runnable{ transition: transform 400ms var(--ease), opacity 300ms var(--ease), fill 250ms linear;}
+    .ray-draw{ stroke-dasharray:200; stroke-dashoffset:200; transition: stroke-dashoffset 400ms var(--ease), opacity 200ms linear;}
+    .ray-draw.on{ stroke-dashoffset:0;}
+
+    /* Pattern 01 — Chaining */
+    #chain-token{ opacity:0;} #chain-token.go{ opacity:1;}
+    .chain-step{ transition: fill 250ms linear;}
+    .chain-step.active{ fill:var(--yellow); stroke:var(--black); stroke-width:2;}
+    .chain-step.done{ fill:var(--black);}
+    #chain-out{ opacity:0; transition: opacity 240ms linear;}
+    #chain-out.on{ opacity:1;}
+
+    /* Pattern 02 — Routing */
+    .route-target{ transition: opacity 250ms linear;}
+    .route-target.dim{ opacity:.25;}
+    .route-target.hit circle{ stroke:var(--black); stroke-width:3;}
+    #route-token{ opacity:0;} #route-token.go{ opacity:1;}
+    #router-tri{ transition: transform 200ms var(--ease), fill 200ms linear;}
+    #router-tri.pulse{ transform:scale(1.15); transform-origin:55px 100px;}
+
+    /* Pattern 03 — Parallelization */
+    .par-worker{ transition: opacity 220ms linear, transform 400ms var(--ease);}
+    .par-worker.dim{ opacity:.25;}
+    .par-worker.on{ opacity:1; transform:scale(1.08); transform-origin:center;}
+    .par-worker.done{ opacity:1; transform:scale(1);}
+    #par-merge{ opacity:0; transition: opacity 240ms linear;}
+    #par-merge.on{ opacity:1;}
+
+    /* Pattern 04 — Orchestrator-Workers */
+    .orch-worker{ opacity:0; transform:translateY(-20px); transition: opacity 220ms linear, transform 400ms var(--ease), fill 250ms linear;}
+    .orch-worker.spawn{ opacity:1; transform:translateY(0);}
+    #orch-output-bar{ transform:scaleX(0); transform-origin:left center; transition: transform 500ms var(--ease);}
+    #orch-output-bar.on{ transform:scaleX(1);}
+    #orch-box{ transition: fill 250ms linear;}
+
+    /* Pattern tile highlight */
+    .pat.is-highlight{
+      box-shadow: inset 0 0 0 4px var(--yellow), 4px 4px 0 var(--black);
+      transform: translate(-2px,-2px);
+      transition: box-shadow 220ms var(--ease), transform 220ms var(--ease);
+    }
+    .pat.is-running{ box-shadow: inset 0 0 0 3px var(--black);}
+
+    /* Decision table — clickable rows */
+    .trow.clickable{ cursor:pointer; transition: background 200ms, transform 200ms var(--ease);}
+    .trow.clickable:hover{ background:var(--yellow) !important; transform:translateX(4px);}
+    .trow.clickable:focus-visible{ outline:3px solid var(--red); outline-offset:-3px;}
+    .trow.clickable.is-armed{ background:var(--black) !important; color:var(--white);}
+    .trow.clickable.is-armed .ti, .trow.clickable.is-armed .why-col{ color:var(--white);}
+    .trow.clickable.is-armed .use{ color:var(--yellow);}
+
+    /* Vignette TRACE FLOW */
+    .vign-flow{ transition: background 200ms, color 200ms;}
+    .vign-cta{
+      margin-top:.85rem; display:inline-flex; align-items:center; gap:.5rem;
+      font-family:'Inter',sans-serif; font-weight:800; font-size:.72rem;
+      letter-spacing:.14em; text-transform:uppercase; padding:.5rem .8rem;
+      border:1.5px solid var(--black); background:var(--white); color:var(--black);
+      cursor:pointer; line-height:1;
+      transition: transform 180ms var(--ease), background 160ms, color 160ms;
+    }
+    .vign-cta:hover{ background:var(--black); color:var(--yellow); transform:translate(2px,-2px);}
+    .vign-cta[disabled]{ opacity:.4; cursor:wait;}
+    .vign-cta .glyph{ font-weight:900;}
+    .vign-flow.tracing{ background:var(--yellow); color:var(--black);}
+    .vign-flow.tracing .arr{ color:var(--red);}
+    .vignette.tracing{ background: rgba(247,208,0,.12);}
+
+    @media (max-width:540px){
+      .run-bar{ gap:.5rem;}
+      .run-status{ font-size:.62rem; padding:.3rem .45rem;}
+      .run-btn{ font-size:.7rem; padding:.45rem .7rem;}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .run-btn:not(.reset){ display:none;}
+      .runnable, .ray-draw, .route-target, .par-worker, .orch-worker, #chain-out, #par-merge, #orch-output-bar, #chain-token, #route-token{
+        opacity:1 !important; transform:none !important; stroke-dashoffset:0 !important;
+      }
+      #orch-output-bar{ transform:scaleX(1) !important;}
+      .vign-cta{ display:none;}
+    }
+
     /* ============ RESPONSIVE ============ */
     @media (max-width: 980px){
       .hero-title{ grid-column: 1 / span 12;}
@@ -1438,24 +1553,42 @@
       <div class="pat-grid" style="grid-column: 1 / span 12;">
 
         <!-- 1. CHAINING -->
-        <article class="pat pat-1">
+        <article class="pat pat-1" id="pat-1" data-pattern="chaining">
           <div class="pat-head">
             <span class="pat-num">01</span>
             <span class="pat-tag">PROMPT<br>CHAINING</span>
           </div>
           <h3 class="pat-title">A Step-By-Step Assembly Line</h3>
 
-          <div class="pat-stage" aria-hidden="true">
-            <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMid meet">
+          <div class="pat-stage">
+            <svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
               <line x1="20" y1="65" x2="300" y2="65" stroke="#000" stroke-width="2"/>
-              <rect class="seq-block s1" x="20"  y="35" width="60" height="60" fill="#0066CC"/>
-              <rect class="seq-block s2" x="90"  y="45" width="40" height="40" fill="#000000"/>
-              <rect class="seq-block s3" x="145" y="35" width="60" height="60" fill="#0066CC"/>
-              <circle class="seq-block s4" cx="262" cy="65" r="32" fill="#F7D000"/>
-              <polygon points="84,60 90,65 84,70" fill="#000"/>
-              <polygon points="134,60 140,65 134,70" fill="#000"/>
-              <polygon points="210,60 216,65 210,70" fill="#000"/>
+              <!-- 4 step boxes -->
+              <rect id="chain-s1" class="chain-step runnable" x="20"  y="35" width="50" height="50" fill="#0066CC"/>
+              <rect id="chain-s2" class="chain-step runnable" x="85"  y="35" width="50" height="50" fill="#0066CC"/>
+              <rect id="chain-s3" class="chain-step runnable" x="150" y="35" width="50" height="50" fill="#0066CC"/>
+              <rect id="chain-s4" class="chain-step runnable" x="215" y="35" width="50" height="50" fill="#0066CC"/>
+              <!-- arrows between -->
+              <polygon points="74,60 84,65 74,70" fill="#000"/>
+              <polygon points="139,60 149,65 139,70" fill="#000"/>
+              <polygon points="204,60 214,65 204,70" fill="#000"/>
+              <polygon points="269,60 279,65 269,70" fill="#000"/>
+              <!-- moving yellow token -->
+              <circle id="chain-token" cx="45" cy="65" r="9" fill="#F7D000" stroke="#000" stroke-width="2"/>
+              <!-- final output -->
+              <circle id="chain-out" cx="295" cy="65" r="14" fill="#F7D000" stroke="#000" stroke-width="2"/>
+              <!-- step labels -->
+              <text x="45"  y="108" font-family="JetBrains Mono" font-size="9" fill="#000" text-anchor="middle" font-weight="700">01</text>
+              <text x="110" y="108" font-family="JetBrains Mono" font-size="9" fill="#000" text-anchor="middle" font-weight="700">02</text>
+              <text x="175" y="108" font-family="JetBrains Mono" font-size="9" fill="#000" text-anchor="middle" font-weight="700">03</text>
+              <text x="240" y="108" font-family="JetBrains Mono" font-size="9" fill="#000" text-anchor="middle" font-weight="700">04</text>
+              <text x="295" y="108" font-family="JetBrains Mono" font-size="9" fill="#000" text-anchor="middle" font-weight="700">OUT</text>
             </svg>
+            <div class="run-bar">
+              <button class="run-btn" data-run="chaining" aria-label="Run chaining pattern"><span class="glyph">&#9654;</span> RUN</button>
+              <button class="run-btn reset" data-reset="chaining" aria-label="Reset chaining pattern"><span class="glyph">&#9633;</span> RESET</button>
+              <span class="run-status" id="status-chaining">IDLE · 4 STEPS QUEUED</span>
+            </div>
           </div>
 
           <p class="pat-blurb">Each AI step hands its output to the next, like cooks at a station.</p>
@@ -1463,26 +1596,47 @@
         </article>
 
         <!-- 2. ROUTING -->
-        <article class="pat pat-2">
+        <article class="pat pat-2" id="pat-2" data-pattern="routing">
           <div class="pat-head">
             <span class="pat-num">02</span>
             <span class="pat-tag">ROUTING</span>
           </div>
           <h3 class="pat-title">A Receptionist With The Right Specialist</h3>
 
-          <div class="pat-stage" aria-hidden="true">
-            <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid meet">
-              <polygon points="20,60 20,140 90,100" fill="#000"/>
-              <circle cx="245" cy="40"  r="28" fill="#DD2226"/>
-              <circle cx="265" cy="100" r="32" fill="#F7D000"/>
-              <circle cx="245" cy="160" r="28" fill="#0066CC"/>
-              <g transform="translate(90,100)">
-                <line class="route-ray" x1="0" y1="0" x2="160" y2="0" stroke="#000" stroke-width="2.5"/>
+          <div class="pat-stage">
+            <svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <!-- yellow query token (incoming) -->
+              <rect id="route-token" x="0" y="90" width="22" height="22" fill="#F7D000" stroke="#000" stroke-width="2"/>
+              <!-- entry line to router -->
+              <line x1="22" y1="100" x2="55" y2="100" stroke="#000" stroke-width="2"/>
+              <!-- router (black triangle) -->
+              <polygon id="router-tri" points="40,70 40,130 95,100" fill="#000"/>
+              <!-- routing lines (dim) -->
+              <line id="route-line-0" class="ray-draw" x1="95" y1="100" x2="217" y2="40"  stroke="#DD2226" stroke-width="3" opacity=".25"/>
+              <line id="route-line-1" class="ray-draw" x1="95" y1="100" x2="225" y2="105" stroke="#F7D000" stroke-width="3" opacity=".25"/>
+              <line id="route-line-2" class="ray-draw" x1="95" y1="100" x2="217" y2="170" stroke="#0066CC" stroke-width="3" opacity=".25"/>
+              <!-- 3 target boxes -->
+              <g id="route-t0" class="route-target">
+                <circle cx="245" cy="40"  r="28" fill="#DD2226"/>
+                <text x="245" y="45" font-family="Inter" font-size="14" font-weight="900" fill="#FFF" text-anchor="middle">A</text>
               </g>
-              <line x1="90" y1="100" x2="217" y2="40"  stroke="#000" stroke-width="1" opacity=".3"/>
-              <line x1="90" y1="100" x2="233" y2="100" stroke="#000" stroke-width="1" opacity=".3"/>
-              <line x1="90" y1="100" x2="217" y2="160" stroke="#000" stroke-width="1" opacity=".3"/>
+              <g id="route-t1" class="route-target">
+                <circle cx="253" cy="105" r="30" fill="#F7D000"/>
+                <text x="253" y="110" font-family="Inter" font-size="14" font-weight="900" fill="#000" text-anchor="middle">B</text>
+              </g>
+              <g id="route-t2" class="route-target">
+                <circle cx="245" cy="170" r="28" fill="#0066CC"/>
+                <text x="245" y="175" font-family="Inter" font-size="14" font-weight="900" fill="#FFF" text-anchor="middle">C</text>
+              </g>
+              <!-- labels -->
+              <text x="11"  y="135" font-family="JetBrains Mono" font-size="8" fill="#000" text-anchor="middle" font-weight="700">QUERY</text>
+              <text x="67"  y="148" font-family="JetBrains Mono" font-size="8" fill="#000" text-anchor="middle" font-weight="700">ROUTER</text>
             </svg>
+            <div class="run-bar">
+              <button class="run-btn" data-run="routing" aria-label="Run routing pattern"><span class="glyph">&#9654;</span> RUN</button>
+              <button class="run-btn reset" data-reset="routing" aria-label="Reset routing pattern"><span class="glyph">&#9633;</span> RESET</button>
+              <span class="run-status" id="status-routing">IDLE · 3 ROUTES READY</span>
+            </div>
           </div>
 
           <p class="pat-blurb">Classify the question first, then send it to the expert who handles that kind.</p>
@@ -1490,25 +1644,50 @@
         </article>
 
         <!-- 3. PARALLELIZATION -->
-        <article class="pat pat-3" style="background: #FFFFFF;">
+        <article class="pat pat-3" id="pat-3" data-pattern="parallel" style="background: #FFFFFF;">
           <div class="pat-head">
             <span class="pat-num">03</span>
             <span class="pat-tag">PARALLEL<br>IZATION</span>
           </div>
           <h3 class="pat-title">Three Reviewers Reading At Once</h3>
 
-          <div class="pat-stage" aria-hidden="true">
-            <svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid meet">
-              <rect x="135" y="15" width="50" height="50" fill="#F7D000"/>
-              <g>
-                <line x1="160" y1="65" x2="60"  y2="150" stroke="#000" stroke-width="1.5"/>
-                <line x1="160" y1="65" x2="160" y2="150" stroke="#000" stroke-width="1.5"/>
-                <line x1="160" y1="65" x2="260" y2="150" stroke="#000" stroke-width="1.5"/>
+          <div class="pat-stage">
+            <svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <!-- yellow query top -->
+              <rect x="135" y="10" width="50" height="44" fill="#F7D000" stroke="#000" stroke-width="2"/>
+              <text x="160" y="38" font-family="Inter" font-size="13" font-weight="900" fill="#000" text-anchor="middle">QUERY</text>
+              <!-- three blue beams (drawn) -->
+              <line id="par-beam-0" class="ray-draw" x1="160" y1="55" x2="60"  y2="120" stroke="#0066CC" stroke-width="3" opacity=".25"/>
+              <line id="par-beam-1" class="ray-draw" x1="160" y1="55" x2="160" y2="120" stroke="#0066CC" stroke-width="3" opacity=".25"/>
+              <line id="par-beam-2" class="ray-draw" x1="160" y1="55" x2="260" y2="120" stroke="#0066CC" stroke-width="3" opacity=".25"/>
+              <!-- 3 worker boxes (initially dim, light blue) -->
+              <g id="par-w0" class="par-worker dim">
+                <rect x="40" y="115" width="40" height="40" fill="#0066CC"/>
+                <text x="60" y="140" font-family="Inter" font-size="12" font-weight="900" fill="#FFF" text-anchor="middle">W1</text>
               </g>
-              <circle class="par-circ p1" cx="60"  cy="150" r="22" fill="#DD2226"/>
-              <circle class="par-circ p2" cx="160" cy="150" r="22" fill="#DD2226"/>
-              <circle class="par-circ p3" cx="260" cy="150" r="22" fill="#DD2226"/>
+              <g id="par-w1" class="par-worker dim">
+                <rect x="140" y="115" width="40" height="40" fill="#0066CC"/>
+                <text x="160" y="140" font-family="Inter" font-size="12" font-weight="900" fill="#FFF" text-anchor="middle">W2</text>
+              </g>
+              <g id="par-w2" class="par-worker dim">
+                <rect x="240" y="115" width="40" height="40" fill="#0066CC"/>
+                <text x="260" y="140" font-family="Inter" font-size="12" font-weight="900" fill="#FFF" text-anchor="middle">W3</text>
+              </g>
+              <!-- merge lines -->
+              <line id="par-merge-l0" class="ray-draw" x1="60"  y1="155" x2="160" y2="185" stroke="#000" stroke-width="2" opacity=".25"/>
+              <line id="par-merge-l1" class="ray-draw" x1="160" y1="155" x2="160" y2="185" stroke="#000" stroke-width="2" opacity=".25"/>
+              <line id="par-merge-l2" class="ray-draw" x1="260" y1="155" x2="160" y2="185" stroke="#000" stroke-width="2" opacity=".25"/>
+              <!-- merged result -->
+              <g id="par-merge">
+                <rect x="135" y="180" width="50" height="16" fill="#F7D000" stroke="#000" stroke-width="2"/>
+                <text x="160" y="192" font-family="Inter" font-size="10" font-weight="900" fill="#000" text-anchor="middle">MERGED</text>
+              </g>
             </svg>
+            <div class="run-bar">
+              <button class="run-btn" data-run="parallel" aria-label="Run parallelization pattern"><span class="glyph">&#9654;</span> RUN</button>
+              <button class="run-btn reset" data-reset="parallel" aria-label="Reset parallelization pattern"><span class="glyph">&#9633;</span> RESET</button>
+              <span class="run-status" id="status-parallel">IDLE · 3 WORKERS STANDBY</span>
+            </div>
           </div>
 
           <p class="pat-blurb">Fan the task out, work simultaneously, and combine the answers at the end.</p>
@@ -1516,26 +1695,42 @@
         </article>
 
         <!-- 4. ORCHESTRATOR -->
-        <article class="pat pat-4">
+        <article class="pat pat-4" id="pat-4" data-pattern="orchestrator">
           <div class="pat-head">
             <span class="pat-num">04</span>
             <span class="pat-tag">ORCHESTRATOR<br>WORKERS</span>
           </div>
           <h3 class="pat-title">A Foreman Hiring Crew On The Fly</h3>
 
-          <div class="pat-stage" aria-hidden="true">
-            <svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid meet">
-              <rect x="120" y="15" width="80" height="60" fill="#000"/>
-              <line x1="160" y1="75" x2="50"  y2="130" stroke="#000" stroke-width="1.5"/>
-              <line x1="160" y1="75" x2="120" y2="130" stroke="#000" stroke-width="1.5"/>
-              <line x1="160" y1="75" x2="200" y2="130" stroke="#000" stroke-width="1.5"/>
-              <line x1="160" y1="75" x2="270" y2="130" stroke="#000" stroke-width="1.5"/>
-              <rect class="orch-w w1" x="30"  y="125" width="40" height="40" fill="#0066CC"/>
-              <rect class="orch-w w2" x="100" y="125" width="40" height="40" fill="#0066CC"/>
-              <rect class="orch-w w3" x="180" y="125" width="40" height="40" fill="#0066CC"/>
-              <rect class="orch-w w4" x="250" y="125" width="40" height="40" fill="#0066CC"/>
-              <rect x="50" y="180" width="220" height="8" fill="#F7D000"/>
+          <div class="pat-stage">
+            <svg viewBox="0 0 320 210" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <!-- orchestrator (black box) -->
+              <rect id="orch-box" x="115" y="15" width="90" height="55" fill="#000"/>
+              <text x="160" y="42" font-family="Inter" font-size="13" font-weight="900" fill="#FFF" text-anchor="middle">ORCH</text>
+              <text x="160" y="58" font-family="JetBrains Mono" font-size="9" font-weight="700" fill="#F7D000" text-anchor="middle">.LEAD</text>
+              <!-- spawn lines (draw on demand) -->
+              <line id="orch-line-0" class="ray-draw" x1="160" y1="70" x2="40"  y2="120" stroke="#000" stroke-width="2" opacity=".25"/>
+              <line id="orch-line-1" class="ray-draw" x1="160" y1="70" x2="113" y2="120" stroke="#000" stroke-width="2" opacity=".25"/>
+              <line id="orch-line-2" class="ray-draw" x1="160" y1="70" x2="187" y2="120" stroke="#000" stroke-width="2" opacity=".25"/>
+              <line id="orch-line-3" class="ray-draw" x1="160" y1="70" x2="265" y2="120" stroke="#000" stroke-width="2" opacity=".25"/>
+              <!-- workers (initially hidden) -->
+              <rect id="orch-w0" class="orch-worker" x="20"  y="120" width="40" height="40" fill="#0066CC"/>
+              <rect id="orch-w1" class="orch-worker" x="93"  y="120" width="40" height="40" fill="#0066CC"/>
+              <rect id="orch-w2" class="orch-worker" x="166" y="120" width="40" height="40" fill="#0066CC"/>
+              <rect id="orch-w3" class="orch-worker" x="244" y="120" width="40" height="40" fill="#0066CC"/>
+              <!-- return-up lines -->
+              <line id="orch-ret-0" class="ray-draw" x1="40"  y1="160" x2="160" y2="180" stroke="#000" stroke-width="1.5" opacity=".25"/>
+              <line id="orch-ret-1" class="ray-draw" x1="113" y1="160" x2="160" y2="180" stroke="#000" stroke-width="1.5" opacity=".25"/>
+              <line id="orch-ret-2" class="ray-draw" x1="187" y1="160" x2="160" y2="180" stroke="#000" stroke-width="1.5" opacity=".25"/>
+              <line id="orch-ret-3" class="ray-draw" x1="265" y1="160" x2="160" y2="180" stroke="#000" stroke-width="1.5" opacity=".25"/>
+              <!-- synthesized output -->
+              <rect id="orch-output-bar" x="40" y="185" width="240" height="12" fill="#F7D000" stroke="#000" stroke-width="1.5"/>
             </svg>
+            <div class="run-bar">
+              <button class="run-btn" data-run="orchestrator" aria-label="Run orchestrator pattern"><span class="glyph">&#9654;</span> RUN</button>
+              <button class="run-btn reset" data-reset="orchestrator" aria-label="Reset orchestrator pattern"><span class="glyph">&#9633;</span> RESET</button>
+              <span class="run-status" id="status-orchestrator">IDLE · LEAD ON STANDBY</span>
+            </div>
           </div>
 
           <p class="pat-blurb">A lead AI inspects the job, decides how many helpers to spin up — and what each does.</p>
@@ -2026,37 +2221,37 @@ flags = [r.is_violation <span class="kw">for</span> r <span class="kw">in</span>
           <div>Use</div>
           <div>Because</div>
         </div>
-        <div class="trow r-1">
+        <div class="trow r-1 clickable" data-target="pat-1" tabindex="0" role="button" aria-label="Highlight Prompt Chaining pattern tile">
           <div class="ti">01</div>
           <div class="if">A clean sequence of fixed steps (outline → draft → polish)</div>
           <div class="use">Prompt Chaining</div>
           <div class="why-col">Each step gets a smaller, sharper prompt — and you can inspect every handoff.</div>
         </div>
-        <div class="trow r-2">
+        <div class="trow r-2 clickable" data-target="pat-2" tabindex="0" role="button" aria-label="Highlight Routing pattern tile">
           <div class="ti">02</div>
           <div class="if">Many distinct kinds of input that need different handling</div>
           <div class="use">Routing</div>
           <div class="why-col">A classifier up front means each specialist only has to be good at one thing.</div>
         </div>
-        <div class="trow r-3">
+        <div class="trow r-3 clickable" data-target="pat-3" tabindex="0" role="button" aria-label="Highlight Parallelization pattern tile">
           <div class="ti">03</div>
           <div class="if">Several independent sub-questions, latency-bound</div>
           <div class="use">Parallel · Sectioning</div>
           <div class="why-col">Concurrent execution slashes wall-clock time when subtasks don't depend on each other.</div>
         </div>
-        <div class="trow r-7">
+        <div class="trow r-7 clickable" data-target="pat-3" tabindex="0" role="button" aria-label="Highlight Parallelization pattern tile">
           <div class="ti">04</div>
           <div class="if">Correctness is critical; you can afford 3-5&times; the cost</div>
           <div class="use">Parallel · Voting</div>
           <div class="why-col">Multiple opinions catch the edge cases one model misses; majority vote stabilises.</div>
         </div>
-        <div class="trow r-4">
+        <div class="trow r-4 clickable" data-target="pat-4" tabindex="0" role="button" aria-label="Highlight Orchestrator-Workers pattern tile">
           <div class="ti">05</div>
           <div class="if">A complex job where you can't predict the sub-tasks ahead of time</div>
           <div class="use">Orchestrator-Workers</div>
           <div class="why-col">A lead AI decomposes the problem at runtime — flexible, but needs guardrails.</div>
         </div>
-        <div class="trow r-8">
+        <div class="trow r-8 clickable" data-target="pat-4" tabindex="0" role="button" aria-label="Highlight related pattern tile">
           <div class="ti">06</div>
           <div class="if">You have clear acceptance criteria and quality matters more than speed</div>
           <div class="use">Evaluator-Optimizer</div>
@@ -2108,7 +2303,8 @@ flags = [r.is_violation <span class="kw">for</span> r <span class="kw">in</span>
             <p>
               The orchestrator decides which of those tool-calls to make based on the symptoms. The final answer runs through an <b>evaluator</b> that checks whether the response actually addresses the user's question and includes a next-action — if not, it bounces back for one revision before being sent.
             </p>
-            <div class="vign-flow">router<span class="arr">→</span>orchestrator<span class="arr">→</span>tools<span class="arr">→</span>evaluator<span class="arr">→</span>reply</div>
+            <div class="vign-flow" id="vign-flow-1">router<span class="arr">→</span>orchestrator<span class="arr">→</span>tools<span class="arr">→</span>evaluator<span class="arr">→</span>reply</div>
+            <button class="vign-cta" data-trace="1" data-trace-targets="pat-2,pat-4"><span class="glyph">&#9654;</span> TRACE FLOW</button>
           </div>
           <aside class="vign-side">
             <div class="vs-stat r">
@@ -2140,7 +2336,8 @@ flags = [r.is_violation <span class="kw">for</span> r <span class="kw">in</span>
             <p>
               Stage three is an <b>evaluator</b>: a senior-reviewer prompt checks that the per-clause findings stitch into a coherent risk profile — and flags contradictions for human review rather than papering over them. Output: an executive brief with citations to specific clauses.
             </p>
-            <div class="vign-flow">chain<span class="arr">→</span>parallel · sectioning<span class="arr">→</span>parallel · voting<span class="arr">→</span>evaluator</div>
+            <div class="vign-flow" id="vign-flow-2">chain<span class="arr">→</span>parallel · sectioning<span class="arr">→</span>parallel · voting<span class="arr">→</span>evaluator</div>
+            <button class="vign-cta" data-trace="2" data-trace-targets="pat-1,pat-3"><span class="glyph">&#9654;</span> TRACE FLOW</button>
           </div>
           <aside class="vign-side">
             <div class="vs-stat b">
@@ -2172,7 +2369,8 @@ flags = [r.is_violation <span class="kw">for</span> r <span class="kw">in</span>
             <p>
               The workers report back with structured findings plus citation URLs. A <b>parallelizer-voter</b> checks the highest-stakes numbers (purchase price, tax credit) against multiple sources before they enter the brief. Finally, an <b>evaluator</b> reads the synthesised brief and refuses to ship if any claim lacks a resolvable citation. The output is a memo, not a vibe.
             </p>
-            <div class="vign-flow">orchestrator<span class="arr">→</span>workers<span class="arr">→</span>parallel-voting<span class="arr">→</span>evaluator</div>
+            <div class="vign-flow" id="vign-flow-3">orchestrator<span class="arr">→</span>workers<span class="arr">→</span>parallel-voting<span class="arr">→</span>evaluator</div>
+            <button class="vign-cta" data-trace="3" data-trace-targets="pat-4,pat-3"><span class="glyph">&#9654;</span> TRACE FLOW</button>
           </div>
           <aside class="vign-side">
             <div class="vs-stat r">
@@ -2388,6 +2586,265 @@ flags = [r.is_violation <span class="kw">for</span> r <span class="kw">in</span>
   <div class="watermark" aria-hidden="true">
     05 / 18 <span class="dot">·</span> CETI.LOOKBOOK
   </div>
+
+  <!-- INTERACTIVE PATTERN SIMULATORS -->
+  <script>
+  (function(){
+    'use strict';
+    const PR = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const wait = (ms) => new Promise(r => setTimeout(r, ms));
+    const $  = (s, el = document) => el.querySelector(s);
+    const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+    const running = {};
+    const TN = { chaining:1, routing:2, parallel:3, orchestrator:4 };
+
+    function setStatus(id, text, mode){
+      const el = $('#status-' + id); if (!el) return;
+      el.textContent = text;
+      el.classList.remove('is-run','is-done');
+      if (mode === 'run')  el.classList.add('is-run');
+      if (mode === 'done') el.classList.add('is-done');
+    }
+    function lockTile(id, locked){
+      const tile = $('#pat-' + TN[id]); if (!tile) return;
+      tile.classList.toggle('is-running', locked);
+      $$('button[data-run="'+id+'"],button[data-reset="'+id+'"]', tile).forEach(b => b.disabled = locked);
+    }
+
+    // ===== Pattern 01: Chaining =====
+    function resetChain(){
+      const t = $('#chain-token'); if (!t) return;
+      t.classList.remove('go'); t.setAttribute('cx', 45);
+      ['#chain-s1','#chain-s2','#chain-s3','#chain-s4'].forEach(s => {
+        const e = $(s); e.classList.remove('active','done'); e.setAttribute('fill','#0066CC');
+      });
+      $('#chain-out').classList.remove('on');
+      setStatus('chaining','IDLE · 4 STEPS QUEUED', null);
+    }
+    async function runChain(){
+      if (running.chaining) return;
+      running.chaining = true; lockTile('chaining', true); resetChain();
+      const t = $('#chain-token');
+      const st = ['#chain-s1','#chain-s2','#chain-s3','#chain-s4'].map(s => $(s));
+      const cxs = [45, 110, 175, 240];
+      t.classList.add('go'); await wait(80);
+      for (let i = 0; i < 4; i++){
+        setStatus('chaining', 'STEP 0' + (i+1) + ' · PROCESSING…', 'run');
+        t.setAttribute('cx', cxs[i]);
+        st[i].classList.add('active');
+        await wait(400);
+        st[i].classList.remove('active'); st[i].classList.add('done');
+        await wait(160);
+      }
+      t.setAttribute('cx', 295); await wait(280);
+      $('#chain-out').classList.add('on');
+      setStatus('chaining', 'DONE · OUTPUT EMITTED', 'done');
+      running.chaining = false; lockTile('chaining', false);
+    }
+
+    // ===== Pattern 02: Routing =====
+    let routeIdx = 0;
+    function resetRoute(){
+      const tok = $('#route-token'), tri = $('#router-tri');
+      if (!tok) return;
+      tok.classList.remove('go'); tok.setAttribute('x', 0);
+      tri.classList.remove('pulse'); tri.setAttribute('fill','#000');
+      ['#route-t0','#route-t1','#route-t2'].forEach(s => $(s).classList.remove('hit','dim'));
+      ['#route-line-0','#route-line-1','#route-line-2'].forEach(s => {
+        const e = $(s); e.classList.remove('on'); e.setAttribute('opacity','.25');
+      });
+      setStatus('routing','IDLE · 3 ROUTES READY', null);
+    }
+    async function runRoute(){
+      if (running.routing) return;
+      running.routing = true; lockTile('routing', true); resetRoute();
+      const tok = $('#route-token'), tri = $('#router-tri');
+      const labels = ['CLASS A · URGENT','CLASS B · STANDARD','CLASS C · SUPPORT'];
+      const pick = routeIdx % 3; routeIdx = (routeIdx + 1) % 3;
+      setStatus('routing','QUERY IN · CLASSIFYING…','run');
+      tok.classList.add('go'); await wait(80);
+      tok.setAttribute('x', 30); await wait(380);
+      tri.classList.add('pulse'); tri.setAttribute('fill','#DD2226');
+      await wait(280);
+      tri.classList.remove('pulse'); tri.setAttribute('fill','#000');
+      setStatus('routing','→ ROUTED · ' + labels[pick], 'run');
+      ['#route-t0','#route-t1','#route-t2'].forEach((s,i) => $(s).classList.add(i === pick ? 'hit' : 'dim'));
+      ['#route-line-0','#route-line-1','#route-line-2'].forEach((s,i) => {
+        const e = $(s);
+        if (i === pick){ e.classList.add('on'); e.setAttribute('opacity','1'); }
+        else e.setAttribute('opacity','.12');
+      });
+      tok.setAttribute('x', 70); await wait(420);
+      tok.classList.remove('go');
+      setStatus('routing','DONE · ' + labels[pick], 'done');
+      running.routing = false; lockTile('routing', false);
+    }
+
+    // ===== Pattern 03: Parallelization =====
+    function resetPar(){
+      ['#par-w0','#par-w1','#par-w2'].forEach(s => {
+        const e = $(s); if (!e) return;
+        e.classList.remove('on','done'); e.classList.add('dim');
+      });
+      ['#par-beam-0','#par-beam-1','#par-beam-2','#par-merge-l0','#par-merge-l1','#par-merge-l2'].forEach(s => {
+        const e = $(s); if (!e) return;
+        e.classList.remove('on'); e.setAttribute('opacity','.25');
+      });
+      $('#par-merge')?.classList.remove('on');
+      setStatus('parallel','IDLE · 3 WORKERS STANDBY', null);
+    }
+    async function runPar(){
+      if (running.parallel) return;
+      running.parallel = true; lockTile('parallel', true); resetPar();
+      const beams = ['#par-beam-0','#par-beam-1','#par-beam-2'].map(s => $(s));
+      const workers = ['#par-w0','#par-w1','#par-w2'].map(s => $(s));
+      const ml = ['#par-merge-l0','#par-merge-l1','#par-merge-l2'].map(s => $(s));
+      setStatus('parallel','FAN-OUT · 3 WORKERS','run');
+      beams.forEach(b => { b.classList.add('on'); b.setAttribute('opacity','1'); });
+      await wait(80);
+      workers.forEach(w => { w.classList.remove('dim'); w.classList.add('on'); });
+      await wait(400);
+      setStatus('parallel','PROCESSING IN PARALLEL…','run');
+      await wait(380);
+      workers.forEach(w => { w.classList.remove('on'); w.classList.add('done'); });
+      await wait(160);
+      setStatus('parallel','MERGE · COMBINING OUTPUTS','run');
+      ml.forEach(l => { l.classList.add('on'); l.setAttribute('opacity','1'); });
+      await wait(420);
+      $('#par-merge').classList.add('on');
+      setStatus('parallel','DONE · MERGED RESULT','done');
+      running.parallel = false; lockTile('parallel', false);
+    }
+
+    // ===== Pattern 04: Orchestrator-Workers =====
+    function resetOrch(){
+      const box = $('#orch-box');
+      if (box){ box.classList.remove('thinking'); box.setAttribute('fill','#000'); }
+      for (let i = 0; i < 4; i++){
+        const w = $('#orch-w'+i), l = $('#orch-line-'+i), r = $('#orch-ret-'+i);
+        if (w){ w.classList.remove('spawn','done'); w.setAttribute('fill','#0066CC'); }
+        if (l){ l.classList.remove('on'); l.setAttribute('opacity','.25'); }
+        if (r){ r.classList.remove('on'); r.setAttribute('opacity','.25'); }
+      }
+      $('#orch-output-bar')?.classList.remove('on');
+      setStatus('orchestrator','IDLE · LEAD ON STANDBY', null);
+    }
+    async function runOrch(){
+      if (running.orchestrator) return;
+      running.orchestrator = true; lockTile('orchestrator', true); resetOrch();
+      const box = $('#orch-box');
+      setStatus('orchestrator','LEAD · INSPECTING TASK','run');
+      box.classList.add('thinking'); box.setAttribute('fill','#DD2226');
+      await wait(420);
+      const n = 2 + Math.floor(Math.random() * 3); // 2..4
+      box.classList.remove('thinking'); box.setAttribute('fill','#000');
+      setStatus('orchestrator','→ DECOMPOSED · ' + n + ' WORKERS','run');
+      await wait(220);
+      for (let i = 0; i < n; i++){
+        const l = $('#orch-line-'+i), w = $('#orch-w'+i);
+        l.classList.add('on'); l.setAttribute('opacity','1');
+        await wait(120);
+        w.classList.add('spawn');
+      }
+      await wait(280);
+      setStatus('orchestrator','WORKERS PROCESSING…','run');
+      await wait(420);
+      for (let i = 0; i < n; i++){
+        const w = $('#orch-w'+i);
+        w.classList.add('done'); w.setAttribute('fill','#F7D000');
+      }
+      await wait(180);
+      setStatus('orchestrator','SYNTHESIZING…','run');
+      for (let i = 0; i < n; i++){
+        const r = $('#orch-ret-'+i);
+        r.classList.add('on'); r.setAttribute('opacity','1');
+      }
+      await wait(360);
+      $('#orch-output-bar').classList.add('on');
+      setStatus('orchestrator','DONE · ' + n + ' WORKERS SYNTHESIZED','done');
+      running.orchestrator = false; lockTile('orchestrator', false);
+    }
+
+    const runners   = { chaining: runChain, routing: runRoute, parallel: runPar, orchestrator: runOrch };
+    const resetters = { chaining: resetChain, routing: resetRoute, parallel: resetPar, orchestrator: resetOrch };
+
+    if (PR){
+      // static terminal preview, no buttons
+      ['#chain-s1','#chain-s2','#chain-s3','#chain-s4'].forEach(s => $(s)?.setAttribute('fill','#000'));
+      $('#chain-out')?.classList.add('on');
+      $('#route-t1')?.classList.add('hit');
+      $('#route-t0')?.classList.add('dim'); $('#route-t2')?.classList.add('dim');
+      $('#route-line-1')?.setAttribute('opacity','1');
+      ['#par-w0','#par-w1','#par-w2'].forEach(s => { const e = $(s); if (e){ e.classList.remove('dim'); e.classList.add('done'); } });
+      ['#par-beam-0','#par-beam-1','#par-beam-2','#par-merge-l0','#par-merge-l1','#par-merge-l2'].forEach(s => $(s)?.setAttribute('opacity','1'));
+      $('#par-merge')?.classList.add('on');
+      [0,1,2].forEach(i => {
+        $('#orch-line-'+i)?.setAttribute('opacity','1');
+        $('#orch-ret-'+i)?.setAttribute('opacity','1');
+        const w = $('#orch-w'+i);
+        if (w){ w.classList.add('spawn','done'); w.setAttribute('fill','#F7D000'); }
+      });
+      $('#orch-output-bar')?.classList.add('on');
+      ['chaining','routing','parallel','orchestrator'].forEach(p => setStatus(p,'STATIC PREVIEW','done'));
+    } else {
+      $$('.run-btn').forEach(btn => {
+        const r = btn.dataset.run, x = btn.dataset.reset;
+        if (r && runners[r])   btn.addEventListener('click', () => runners[r]());
+        if (x && resetters[x]) btn.addEventListener('click', () => resetters[x]());
+      });
+    }
+
+    // ===== Decision table → highlight pattern tile =====
+    let flashT;
+    function flashTile(id){
+      const tile = document.getElementById(id); if (!tile) return;
+      tile.scrollIntoView({ behavior: PR ? 'auto' : 'smooth', block: 'center' });
+      $$('.pat.is-highlight').forEach(t => t.classList.remove('is-highlight'));
+      tile.classList.add('is-highlight');
+      clearTimeout(flashT);
+      flashT = setTimeout(() => tile.classList.remove('is-highlight'), 2200);
+    }
+    $$('.trow.clickable').forEach(row => {
+      const target = row.dataset.target; if (!target) return;
+      const arm = () => {
+        $$('.trow.clickable.is-armed').forEach(r => r.classList.remove('is-armed'));
+        row.classList.add('is-armed');
+        setTimeout(() => row.classList.remove('is-armed'), 2200);
+      };
+      row.addEventListener('click', () => { arm(); flashTile(target); });
+      row.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); arm(); flashTile(target); }
+      });
+    });
+
+    // ===== Vignette TRACE FLOW =====
+    async function traceFlow(btn){
+      if (btn.disabled) return;
+      btn.disabled = true;
+      const targets = (btn.dataset.traceTargets || '').split(',').map(s => s.trim()).filter(Boolean);
+      const vignette = btn.closest('.vignette');
+      const flow = vignette?.querySelector('.vign-flow');
+      vignette?.classList.add('tracing');
+      flow?.classList.add('tracing');
+      $$('.pat.is-highlight').forEach(t => t.classList.remove('is-highlight'));
+      for (let i = 0; i < targets.length; i++){
+        const tile = document.getElementById(targets[i]);
+        if (!tile) continue;
+        if (i === 0) tile.scrollIntoView({ behavior: PR ? 'auto' : 'smooth', block: 'center' });
+        tile.classList.add('is-highlight');
+        await wait(900);
+        tile.classList.remove('is-highlight');
+        await wait(200);
+      }
+      vignette?.scrollIntoView({ behavior: PR ? 'auto' : 'smooth', block: 'center' });
+      await wait(400);
+      flow?.classList.remove('tracing');
+      vignette?.classList.remove('tracing');
+      btn.disabled = false;
+    }
+    $$('.vign-cta').forEach(btn => btn.addEventListener('click', () => traceFlow(btn)));
+  })();
+  </script>
 
   <script src="../shared/nav.js" defer></script>
 </body>

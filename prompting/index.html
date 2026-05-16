@@ -686,6 +686,423 @@
       }
     }
 
+    /* ============== EXERCISE / PLAYGROUND ============== */
+    .exercise {
+      margin: 1.8rem 0;
+      border: 1px solid var(--paper-rule);
+      border-left: 4px solid var(--maroon);
+      background: var(--paper-deep);
+      padding: 1rem 1.1rem 1.1rem;
+      break-inside: avoid;
+      max-width: 100%;
+      position: relative;
+    }
+    .exercise-cap {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      margin: 0 0 0.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.6rem;
+      border-bottom: 1px solid var(--paper-rule);
+      padding-bottom: 0.35rem;
+    }
+    .exercise-cap .ex-num { color: var(--maroon); }
+    .exercise-cap .ex-tag {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--ink-muted);
+      letter-spacing: 0.1em;
+      font-weight: 500;
+    }
+    .exercise-title {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1.02rem;
+      color: var(--ink);
+      margin: 0 0 0.55rem;
+      letter-spacing: -0.005em;
+    }
+    .ex-instructions {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 0.93rem;
+      color: var(--ink-secondary);
+      line-height: 1.45;
+      margin: 0 0 0.85rem;
+    }
+
+    /* Control row — buttons / selects */
+    .ex-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.8rem;
+      align-items: center;
+      margin: 0 0 0.85rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px dotted var(--paper-rule);
+    }
+    .ex-controls label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: var(--ink-secondary);
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .ex-controls select,
+    .ex-controls input[type="text"] {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: var(--paper);
+      border: 1px solid var(--paper-rule);
+      color: var(--ink);
+      padding: 0.25rem 0.45rem;
+      border-radius: 0;
+    }
+    .ex-controls select:focus,
+    .ex-controls input[type="text"]:focus,
+    .ex-controls textarea:focus {
+      outline: 1.5px solid var(--maroon);
+      outline-offset: 1px;
+    }
+    .ex-btn {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      background: var(--paper);
+      color: var(--maroon);
+      border: 1px solid var(--maroon);
+      padding: 0.32rem 0.7rem;
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease;
+      text-transform: none;
+    }
+    .ex-btn::before { content: "▷ "; font-size: 0.78em; }
+    .ex-btn:hover:not(:disabled) { background: var(--maroon); color: var(--paper); }
+    .ex-btn:active:not(:disabled) { background: var(--maroon-deep); }
+    .ex-btn:disabled { opacity: 0.5; cursor: wait; }
+    .ex-btn.ghost { color: var(--ink-muted); border-color: var(--paper-rule); }
+    .ex-btn.ghost::before { content: "↻ "; }
+    .ex-btn.ghost:hover:not(:disabled) {
+      background: var(--paper);
+      color: var(--maroon);
+      border-color: var(--maroon);
+    }
+
+    /* Two-up panel layout (for §11.1 comparison) */
+    .ex-twoup {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+    .ex-panel {
+      background: var(--paper);
+      border: 1px solid var(--paper-rule);
+      padding: 0.7rem 0.8rem;
+      min-height: 9rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .ex-panel-head {
+      font-family: var(--font-sans);
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin: 0 0 0.5rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--paper-rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .ex-panel.active .ex-panel-head { color: var(--maroon); }
+    .ex-panel-body {
+      font-family: var(--font-body);
+      font-size: 0.96rem;
+      line-height: 1.5;
+      color: var(--ink);
+      flex: 1;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      min-height: 5.4rem;
+    }
+    .ex-panel-body .step {
+      color: var(--ink-secondary);
+      font-style: italic;
+      display: block;
+      margin: 0.15rem 0;
+      font-size: 0.93rem;
+    }
+    .ex-panel-body .final {
+      display: block;
+      margin-top: 0.5rem;
+      padding-top: 0.45rem;
+      border-top: 1px solid var(--paper-rule);
+      font-family: var(--font-sans);
+      font-weight: 600;
+      color: var(--maroon);
+      font-style: normal;
+      font-size: 1rem;
+    }
+    .ex-panel-body .final.wrong { color: var(--ink); text-decoration: line-through; text-decoration-color: var(--maroon); }
+    .caret {
+      display: inline-block;
+      width: 0.5ch;
+      background: var(--maroon);
+      color: var(--maroon);
+      animation: blink 900ms steps(2) infinite;
+      margin-left: 1px;
+    }
+    .caret.idle { animation: none; opacity: 0; }
+    @keyframes blink { 50% { opacity: 0.2; } }
+
+    /* JSON streaming panel */
+    .ex-json {
+      background: var(--paper);
+      border: 1px solid var(--paper-rule);
+      border-left: 3px solid var(--maroon);
+      padding: 0.75rem 0.9rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      color: var(--ink);
+      min-height: 9rem;
+      overflow-x: auto;
+    }
+    .ex-json .k { color: var(--maroon); }
+    .ex-json .s { color: #5C3A14; }
+    .ex-json .n { color: #4A6B3A; }
+    .ex-json .b { color: #3A4A6B; }
+
+    /* Few-shot editable */
+    .ex-fewshot textarea {
+      width: 100%;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      background: var(--paper);
+      border: 1px solid var(--paper-rule);
+      border-left: 3px solid var(--paper-rule);
+      color: var(--ink);
+      padding: 0.6rem 0.7rem;
+      resize: vertical;
+      min-height: 7.5rem;
+      transition: border-color 160ms ease;
+    }
+    .ex-fewshot textarea:focus { border-left-color: var(--maroon); }
+    .ex-fewshot-out {
+      margin-top: 0.7rem;
+      background: var(--paper);
+      border: 1px solid var(--paper-rule);
+      padding: 0.6rem 0.75rem;
+      font-family: var(--font-body);
+      font-size: 0.96rem;
+      line-height: 1.5;
+      min-height: 2.4rem;
+      color: var(--ink-secondary);
+      font-style: italic;
+    }
+    .ex-fewshot-out.ready { color: var(--ink); font-style: normal; }
+    .ex-fewshot-out .lbl {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 0.66rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      font-style: normal;
+      margin-right: 0.4rem;
+    }
+
+    /* Self-consistency triple panel */
+    .ex-triple {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.6rem;
+      margin-bottom: 0.7rem;
+    }
+    .ex-trace {
+      background: var(--paper);
+      border: 1px solid var(--paper-rule);
+      padding: 0.55rem 0.65rem;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      line-height: 1.45;
+      min-height: 7.5rem;
+      transition: border-color 200ms ease;
+    }
+    .ex-trace.agrees { border-color: var(--maroon); border-left: 3px solid var(--maroon); }
+    .ex-trace .trace-head {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.1em;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      margin: 0 0 0.4rem;
+      border-bottom: 1px solid var(--paper-rule);
+      padding-bottom: 0.25rem;
+    }
+    .ex-trace .trace-body { color: var(--ink); font-style: italic; }
+    .ex-trace .trace-ans {
+      display: block;
+      margin-top: 0.4rem;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      color: var(--maroon);
+      font-size: 0.95rem;
+      font-style: normal;
+    }
+    .ex-consensus {
+      background: var(--paper);
+      border-top: 2px solid var(--maroon);
+      border-bottom: 2px solid var(--maroon);
+      padding: 0.55rem 0.7rem;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      color: var(--ink);
+      margin-top: 0.4rem;
+      min-height: 2.2rem;
+    }
+    .ex-consensus .lbl {
+      font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      margin-right: 0.5rem;
+    }
+    .ex-consensus .winner { font-weight: 700; color: var(--maroon); }
+
+    /* ReAct steps */
+    .ex-react {
+      background: var(--paper);
+      border: 1px solid var(--paper-rule);
+      border-left: 3px solid var(--paper-rule);
+      padding: 0.7rem 0.9rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      min-height: 12rem;
+      transition: border-left-color 200ms ease;
+    }
+    .ex-react.running { border-left-color: var(--maroon); }
+    .ex-react .react-line {
+      display: block;
+      margin: 0.15rem 0;
+      opacity: 0;
+      transform: translateY(2px);
+      transition: opacity 240ms ease, transform 240ms ease;
+    }
+    .ex-react .react-line.in { opacity: 1; transform: translateY(0); }
+    .ex-react .react-line .tag {
+      display: inline-block;
+      min-width: 8.2ch;
+      font-weight: 700;
+      color: var(--maroon);
+      letter-spacing: 0.04em;
+    }
+    .ex-react .react-line.obs .tag { color: var(--ink-muted); }
+    .ex-react .react-line.ans {
+      margin-top: 0.5rem;
+      padding-top: 0.4rem;
+      border-top: 1px solid var(--paper-rule);
+      font-family: var(--font-body);
+      font-size: 0.96rem;
+      font-style: italic;
+    }
+    .ex-react .react-line.ans .tag {
+      color: var(--maroon);
+      font-family: var(--font-mono);
+      font-style: normal;
+    }
+
+    /* Role playground answer panel */
+    .ex-role-out {
+      background: var(--paper);
+      border: 1px solid var(--paper-rule);
+      border-left: 3px solid var(--paper-rule);
+      padding: 0.75rem 0.9rem;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.55;
+      min-height: 7rem;
+      color: var(--ink);
+      transition: border-left-color 200ms ease;
+    }
+    .ex-role-out.streaming { border-left-color: var(--maroon); }
+    .ex-role-meta {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      margin: 0 0 0.45rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--paper-rule);
+    }
+    .ex-role-meta b { color: var(--maroon); }
+
+    /* Table row highlight via JS */
+    .ctable tr.pulse {
+      background: var(--maroon-tint) !important;
+      transition: background 280ms ease;
+    }
+
+    /* Walkthrough trace button */
+    .walk-trace {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      background: transparent;
+      border: 1px solid var(--paper-rule);
+      color: var(--maroon);
+      padding: 0.2rem 0.55rem;
+      cursor: pointer;
+      margin-top: 0.25rem;
+      letter-spacing: 0.04em;
+      transition: background 160ms ease, color 160ms ease;
+    }
+    .walk-trace::before { content: "▷"; font-size: 0.72em; }
+    .walk-trace:hover { background: var(--maroon); color: var(--paper); border-color: var(--maroon); }
+    .walkthrough-step.tracing { border-left-color: var(--maroon); background: rgba(139,26,26,0.025); }
+    .walkthrough-step .trace-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--paper-rule);
+      margin-right: 0.5rem;
+      transition: background 200ms ease, transform 200ms ease;
+    }
+    .walkthrough-step.tracing .trace-dot { background: var(--maroon); transform: scale(1.4); }
+
+    /* Exercise responsive */
+    @media (max-width: 820px) {
+      .ex-twoup { grid-template-columns: 1fr; }
+      .ex-triple { grid-template-columns: 1fr; }
+      .exercise { margin-left: 0; margin-right: 0; }
+    }
+
+    /* Honor reduced motion: playgrounds render final state w/o typing */
+    @media (prefers-reduced-motion: reduce) {
+      .caret { display: none; }
+      .ex-react .react-line { opacity: 1; transform: none; }
+    }
+
     /* Print-friendly fidelity (paper, after all) */
     @media print {
       body { background: white; }
@@ -827,6 +1244,115 @@ final = match.group(<span class="num">1</span>).strip() <span class="kw">if</spa
           The reasoning a model emits is not always the reasoning it used. Chain-of-Thought traces are post-hoc rationalisations the model is willing to commit to &mdash; they are an audit trail of the answer, not a window into the network. Treat them as you would a deposition: useful, persuasive, sometimes wrong. For the underlying empirical worry, see Turpin et al. (2023) on biased reasoning in CoT.
         </div>
       </div>
+
+      <!-- LIVE PLAYGROUND § 11.1 -->
+      <div class="exercise" id="ex-11-1">
+        <p class="exercise-cap"><span><span class="ex-num">Exercise 11.1</span> &middot; Try it &mdash; Chain-of-Thought side-by-side</span><span class="ex-tag">live · vanilla js</span></p>
+        <p class="exercise-title">Same problem. Two prompts. Watch what tokens-as-computation buys you.</p>
+        <p class="ex-instructions">The left panel shows the model answering without reasoning; the right shows the same model with &ldquo;Let&rsquo;s think step by step&rdquo; appended. Click <i>run again</i> to cycle through four problems &mdash; the no-CoT panel will, on at least one of them, confidently emit the wrong answer.</p>
+        <div class="ex-controls">
+          <button class="ex-btn" data-action="run">run trace</button>
+          <button class="ex-btn ghost" data-action="cycle">run again</button>
+          <label>problem <span id="cot-qlabel" style="color:var(--maroon);font-weight:600;margin-left:0.2rem;">1 / 4</span></label>
+        </div>
+        <p class="ex-instructions" style="font-style:normal;font-family:var(--font-mono);font-size:0.78rem;color:var(--ink);margin-bottom:0.6rem;" id="cot-question">Q: If 3 apples cost $1.50, how much do 7 apples cost?</p>
+        <div class="ex-twoup">
+          <div class="ex-panel" id="cot-left">
+            <p class="ex-panel-head"><span>Without CoT</span><span>instant</span></p>
+            <p class="ex-panel-body"><span class="placeholder" style="color:var(--ink-muted);font-style:italic;">click "run trace" to begin →</span></p>
+          </div>
+          <div class="ex-panel" id="cot-right">
+            <p class="ex-panel-head"><span>With CoT</span><span>step by step</span></p>
+            <p class="ex-panel-body"><span class="placeholder" style="color:var(--ink-muted);font-style:italic;">reasoning will appear here →</span></p>
+          </div>
+        </div>
+      </div>
+      <script>
+      (function(){
+        const problems = [
+          { q: "Q: If 3 apples cost $1.50, how much do 7 apples cost?",
+            wrong: "$5.00",
+            steps: ["3 apples cost $1.50.","One apple costs $1.50 / 3 = $0.50.","Seven apples cost 7 × $0.50 = $3.50."],
+            ans: "$3.50" },
+          { q: "Q: A train leaves at 09:15 and travels 4h 50min. When does it arrive?",
+            wrong: "13:05",
+            steps: ["Start time: 09:15.","Add 4 hours → 13:15.","Add 50 minutes → 13:15 + 0:50 = 14:05."],
+            ans: "14:05" },
+          { q: "Q: A shirt is $40, marked 25% off, then 10% off the sale price. Final price?",
+            wrong: "$26.00",
+            steps: ["25% off $40 = $40 × 0.75 = $30.","Then 10% off the new price = $30 × 0.90.","$30 × 0.90 = $27.00."],
+            ans: "$27.00" },
+          { q: "Q: I roll two fair six-sided dice. What's the probability the sum is 7?",
+            wrong: "1/12",
+            steps: ["There are 6 × 6 = 36 equally likely outcomes.","Sums of 7: (1,6)(2,5)(3,4)(4,3)(5,2)(6,1) → 6 ways.","Probability = 6 / 36 = 1/6."],
+            ans: "1/6" },
+        ];
+        let idx = 0;
+        const ex = document.getElementById('ex-11-1');
+        const qLabel = document.getElementById('cot-qlabel');
+        const qLine = document.getElementById('cot-question');
+        const left = document.getElementById('cot-left');
+        const right = document.getElementById('cot-right');
+        const lb = left.querySelector('.ex-panel-body');
+        const rb = right.querySelector('.ex-panel-body');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let timers = [];
+        function clearAll(){ timers.forEach(t=>clearTimeout(t)); timers=[]; }
+        function typeInto(node, text, speed, doneCb){
+          if (reduced){ node.textContent = text; doneCb&&doneCb(); return; }
+          let i = 0; node.textContent = '';
+          const caret = document.createElement('span');
+          caret.className = 'caret'; caret.textContent = '|';
+          node.appendChild(caret);
+          function tick(){
+            if (i < text.length){
+              caret.insertAdjacentText('beforebegin', text[i]);
+              i++;
+              timers.push(setTimeout(tick, speed + Math.random()*20));
+            } else { caret.remove(); doneCb&&doneCb(); }
+          }
+          tick();
+        }
+        function render(){
+          clearAll();
+          const p = problems[idx];
+          qLine.textContent = p.q;
+          qLabel.textContent = (idx+1) + ' / ' + problems.length;
+          left.classList.add('active'); right.classList.remove('active');
+          lb.innerHTML = '';
+          rb.innerHTML = '';
+          // Left: instantly emit a confidently-wrong (or curt) answer
+          const wrongIsWrong = (idx === 0 || idx === 1 || idx === 2 || idx === 3); // show line-through on all to dramatize
+          const finalEl = document.createElement('span');
+          finalEl.className = 'final ' + (wrongIsWrong ? 'wrong' : '');
+          finalEl.textContent = 'Answer: ' + p.wrong;
+          timers.push(setTimeout(()=>{ lb.appendChild(finalEl); }, reduced?0:380));
+          // Right: type reasoning steps then final
+          timers.push(setTimeout(()=>{
+            right.classList.add('active');
+            left.classList.remove('active');
+            const steps = p.steps;
+            let s = 0;
+            function nextStep(){
+              if (s >= steps.length){
+                const fin = document.createElement('span');
+                fin.className = 'final';
+                fin.textContent = 'Answer: ' + p.ans;
+                rb.appendChild(fin);
+                return;
+              }
+              const line = document.createElement('span');
+              line.className = 'step';
+              rb.appendChild(line);
+              typeInto(line, steps[s], 18, ()=>{ s++; timers.push(setTimeout(nextStep, 180)); });
+            }
+            nextStep();
+          }, reduced?0:520));
+        }
+        ex.querySelector('[data-action="run"]').addEventListener('click', ()=>{ render(); });
+        ex.querySelector('[data-action="cycle"]').addEventListener('click', ()=>{ idx = (idx+1) % problems.length; render(); });
+      })();
+      </script>
     </section>
 
     <!-- ============ §11.2 FEW SHOT ============ -->
@@ -905,6 +1431,124 @@ final = match.group(<span class="num">1</span>).strip() <span class="kw">if</spa
           The order of your examples matters more than newcomers expect. Lu et al. (2022) showed that simply re-ordering four demonstrations could swing accuracy by more than ten percentage points on the same task and the same model. The safe default: place the example whose format and edge-case handling most resembles the typical user input <em class="term">last</em>. The model weighs recency.
         </div>
       </div>
+
+      <!-- LIVE PLAYGROUND § 11.2 -->
+      <div class="exercise ex-fewshot" id="ex-11-2">
+        <p class="exercise-cap"><span><span class="ex-num">Exercise 11.2</span> &middot; Try it &mdash; Few-Shot pattern induction</span><span class="ex-tag">editable</span></p>
+        <p class="exercise-title">Edit the examples. Re-run. The format follows the demonstration.</p>
+        <p class="ex-instructions">Three input&ndash;output pairs are pre-filled below. The model has never seen the fourth query &mdash; click <i>predict next</i> and watch it complete the pattern. Try changing the format (UPPERCASE the labels, add emoji, swap the separator) and re-run: the prediction&rsquo;s shape will follow whatever you demonstrate.</p>
+        <div class="ex-controls">
+          <button class="ex-btn" data-action="predict">predict next</button>
+          <button class="ex-btn ghost" data-action="reset">reset examples</button>
+          <label>preset
+            <select id="fs-preset">
+              <option value="country">country → capital</option>
+              <option value="sentiment">review → sentiment</option>
+              <option value="animal">animal → sound</option>
+            </select>
+          </label>
+        </div>
+        <textarea id="fs-shots" spellcheck="false"></textarea>
+        <p style="font-family:var(--font-mono);font-size:0.74rem;color:var(--ink-muted);margin:0.55rem 0 0.35rem;letter-spacing:0.06em;">QUERY (the model will predict the answer):</p>
+        <p style="font-family:var(--font-mono);font-size:0.82rem;margin:0 0 0.6rem;color:var(--ink);" id="fs-query">Input: Australia → Output:</p>
+        <div class="ex-fewshot-out" id="fs-out">awaiting prediction…</div>
+      </div>
+      <script>
+      (function(){
+        const presets = {
+          country: {
+            shots: "Input: France → Output: Paris\nInput: Japan → Output: Tokyo\nInput: Kenya → Output: Nairobi",
+            queries: [
+              { q: "Australia", a: "Canberra" },
+              { q: "Brazil",    a: "Brasília" },
+              { q: "Egypt",     a: "Cairo" },
+            ],
+          },
+          sentiment: {
+            shots: "Input: \"Best purchase of the year.\" → Output: POSITIVE\nInput: \"Stopped working after two days.\" → Output: NEGATIVE\nInput: \"Comfortable but the colour faded.\" → Output: MIXED",
+            queries: [
+              { q: "\"Fast delivery, but the box arrived crushed.\"", a: "MIXED" },
+              { q: "\"Exactly what I wanted, will buy again.\"",       a: "POSITIVE" },
+              { q: "\"Worst customer service of my life.\"",           a: "NEGATIVE" },
+            ],
+          },
+          animal: {
+            shots: "Input: cow → Output: moo\nInput: cat → Output: meow\nInput: bee → Output: buzz",
+            queries: [
+              { q: "duck", a: "quack" },
+              { q: "owl",  a: "hoot" },
+              { q: "frog", a: "ribbit" },
+            ],
+          },
+        };
+        const ex = document.getElementById('ex-11-2');
+        const ta = document.getElementById('fs-shots');
+        const sel = document.getElementById('fs-preset');
+        const qLine = document.getElementById('fs-query');
+        const out = document.getElementById('fs-out');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let currentPreset = 'country';
+        let qIdx = 0;
+        function loadPreset(name){
+          currentPreset = name; qIdx = 0;
+          ta.value = presets[name].shots;
+          renderQuery();
+          out.classList.remove('ready');
+          out.innerHTML = 'awaiting prediction…';
+        }
+        function renderQuery(){
+          const q = presets[currentPreset].queries[qIdx].q;
+          qLine.textContent = "Input: " + q + " → Output:";
+        }
+        function detectStyle(text){
+          // Inspect the textarea to mimic the format the user has demonstrated.
+          // Find the right-hand side (after the last " → Output: ") of the last line that has one.
+          const lines = text.split(/\n/).map(l=>l.trim()).filter(Boolean);
+          for (let i = lines.length - 1; i >= 0; i--){
+            const m = lines[i].match(/[Oo]utput\s*:\s*(.+)$/);
+            if (m){
+              const sample = m[1];
+              return {
+                upper: sample === sample.toUpperCase() && /[A-Z]/.test(sample),
+                quoted: /^[".]/.test(sample),
+                arrow: lines[i].includes('→') ? '→' : (lines[i].includes('->') ? '->' : '→'),
+              };
+            }
+          }
+          return { upper:false, quoted:false, arrow:'→' };
+        }
+        function predict(){
+          const style = detectStyle(ta.value);
+          const item = presets[currentPreset].queries[qIdx];
+          let answer = item.a;
+          if (style.upper) answer = answer.toUpperCase();
+          out.classList.add('ready');
+          out.innerHTML = '<span class="lbl">Predicted</span>';
+          const span = document.createElement('span');
+          out.appendChild(span);
+          if (reduced){ span.textContent = answer; return; }
+          let i = 0;
+          const caret = document.createElement('span');
+          caret.className = 'caret'; caret.textContent = '|';
+          out.appendChild(caret);
+          function tick(){
+            if (i < answer.length){
+              span.textContent += answer[i++];
+              setTimeout(tick, 45 + Math.random()*30);
+            } else { caret.remove(); }
+          }
+          setTimeout(tick, 280);
+        }
+        sel.addEventListener('change', e => loadPreset(e.target.value));
+        ex.querySelector('[data-action="predict"]').addEventListener('click', ()=>{
+          predict();
+          qIdx = (qIdx + 1) % presets[currentPreset].queries.length;
+          setTimeout(renderQuery, 1100);
+        });
+        ex.querySelector('[data-action="reset"]').addEventListener('click', ()=> loadPreset(currentPreset));
+        loadPreset('country');
+      })();
+      </script>
     </section>
 
     <!-- ============ §11.3 ROLE ============ -->
@@ -965,6 +1609,81 @@ final = match.group(<span class="num">1</span>).strip() <span class="kw">if</spa
           A role prefix shifts vocabulary and stance, but it does not unlock capabilities the model lacks. Telling Claude it is a competitive ICPC programmer will not give it ICPC-grade abilities; the role merely surfaces what the model already plausibly contains. If the role implies a capability the model does not have, the output will read fluent and be wrong &mdash; arguably the worst possible failure mode.
         </div>
       </div>
+
+      <!-- LIVE PLAYGROUND § 11.3 -->
+      <div class="exercise" id="ex-11-3">
+        <p class="exercise-cap"><span><span class="ex-num">Exercise 11.3</span> &middot; Try it &mdash; Role Prompting and register shift</span><span class="ex-tag">persona switcher</span></p>
+        <p class="exercise-title">Same question, four roles. Watch the register transform.</p>
+        <p class="ex-instructions">Pick a role from the dropdown and click <i>explain quantum</i>. The question is identical every time: <i>&ldquo;What is quantum entanglement?&rdquo;</i> &mdash; only the system message changes. Note how vocabulary, sentence length, and analogies adapt to the persona.</p>
+        <div class="ex-controls">
+          <label>role
+            <select id="role-pick">
+              <option value="physicist">senior physicist</option>
+              <option value="teacher">kindergarten teacher</option>
+              <option value="comedian">standup comedian</option>
+              <option value="lawyer">tax lawyer</option>
+            </select>
+          </label>
+          <button class="ex-btn" data-action="run">explain quantum</button>
+        </div>
+        <p class="ex-role-meta">SYSTEM: <b id="role-sys">You are a senior physicist explaining to a colleague.</b></p>
+        <p style="font-family:var(--font-mono);font-size:0.76rem;color:var(--ink);margin:0 0 0.5rem;">USER: What is quantum entanglement?</p>
+        <div class="ex-role-out" id="role-out"><span style="color:var(--ink-muted);font-style:italic;">awaiting response…</span></div>
+      </div>
+      <script>
+      (function(){
+        const roles = {
+          physicist: {
+            sys: "You are a senior physicist explaining to a colleague.",
+            text: "Two particles, prepared together, share a joint quantum state that no description of either one alone can capture. Measure one observable on particle A and you instantaneously fix the conjugate observable on particle B — the correlations exceed any local-hidden-variable bound (Bell, 1964). Entanglement is a resource, not a force; it does not transmit information, but it does let you do things classical correlations cannot."
+          },
+          teacher: {
+            sys: "You are a kindergarten teacher explaining to a five-year-old.",
+            text: "Imagine you have two magic socks that always come out as a pair. If one is red, the other one is always blue. Now you put each sock in a separate box and send one box to the moon. When you open your box and see a red sock, you know — right away! — that the sock on the moon is blue. That's a little bit like entanglement. The socks are 'linked' even when they're far apart."
+          },
+          comedian: {
+            sys: "You are a standup comedian who has just had three coffees.",
+            text: "Entanglement is when two particles meet, fall stupidly in love, and then refuse to be apart even when you put one on Earth and the other on Mars. You measure one and the other one is like 'OH YEAH? Well I am the OPPOSITE.' Einstein called this 'spooky action at a distance' which is, honestly, the most relatable thing a physicist has ever said about being in a relationship."
+          },
+          lawyer: {
+            sys: "You are a tax lawyer who has been told to explain physics.",
+            text: "Pursuant to the joint preparation of two quanta, said particles enter into a state which I shall, for our purposes, characterise as analogous to a joint-and-several obligation: any measurement performed on the first party shall, by operation of the underlying quantum statute, give rise to a determinate condition in the second party. This does not, I must stress, constitute a transmission for the purposes of any locality clause. — I am not your physicist."
+          },
+        };
+        const sel = document.getElementById('role-pick');
+        const sysOut = document.getElementById('role-sys');
+        const out = document.getElementById('role-out');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let timer = null;
+        function updateSys(){ sysOut.textContent = roles[sel.value].sys; }
+        sel.addEventListener('change', updateSys);
+        document.getElementById('ex-11-3').querySelector('[data-action="run"]').addEventListener('click', ()=>{
+          clearTimeout(timer);
+          const txt = roles[sel.value].text;
+          out.classList.add('streaming');
+          out.textContent = '';
+          if (reduced){ out.textContent = txt; out.classList.remove('streaming'); return; }
+          const caret = document.createElement('span'); caret.className='caret'; caret.textContent='|';
+          out.appendChild(caret);
+          let i = 0;
+          function tick(){
+            if (i < txt.length){
+              // type a small chunk per tick for prose feel
+              const chunkSize = txt[i] === ' ' ? 1 : 1;
+              caret.insertAdjacentText('beforebegin', txt.substr(i, chunkSize));
+              i += chunkSize;
+              const ch = txt[i-1];
+              const delay = (ch === '.' || ch === '?' || ch === '!') ? 130
+                          : (ch === ',' || ch === ';' || ch === '—') ? 70
+                          : 12 + Math.random()*14;
+              timer = setTimeout(tick, delay);
+            } else { caret.remove(); out.classList.remove('streaming'); }
+          }
+          tick();
+        });
+        updateSys();
+      })();
+      </script>
     </section>
 
     <!-- ============ §11.4 STRUCTURED OUTPUT ============ -->
@@ -1052,6 +1771,119 @@ inv = client.messages.create(
           Schema-constrained decoding guarantees the output parses; it does <em class="term">not</em> guarantee the output is correct. The model can still hallucinate a vendor name that does not appear in the invoice. Always treat structured output as &ldquo;guaranteed-parseable, still-needs-validation&rdquo; &mdash; pair it with downstream sanity checks (e.g. the extracted amount falls within a plausible range, the vendor appears as a substring of the source).
         </div>
       </div>
+
+      <!-- LIVE PLAYGROUND § 11.4 -->
+      <div class="exercise" id="ex-11-4">
+        <p class="exercise-cap"><span><span class="ex-num">Exercise 11.4</span> &middot; Try it &mdash; Schema-constrained JSON streaming</span><span class="ex-tag">grammar-bound</span></p>
+        <p class="exercise-title">Pick a schema. Generate. Watch valid JSON build itself token by token.</p>
+        <p class="ex-instructions">Each schema selects a different grammar; constrained decoding makes it impossible for the model to emit a token that would break the JSON parse. The reasoning field is intentionally placed <em>before</em> the answer fields &mdash; CoT smuggled inside the schema (see §11.9, mistake #2).</p>
+        <div class="ex-controls">
+          <label>schema
+            <select id="js-schema">
+              <option value="person">person</option>
+              <option value="recipe">recipe</option>
+              <option value="bug">bug-report</option>
+            </select>
+          </label>
+          <button class="ex-btn" data-action="gen">generate</button>
+          <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--ink-muted);letter-spacing:0.06em;">tool_choice = forced</span>
+        </div>
+        <div class="ex-json" id="js-out"><span style="color:var(--ink-muted);font-style:italic;font-family:var(--font-body);">{ awaiting tool call… }</span></div>
+      </div>
+      <script>
+      (function(){
+        const schemas = {
+          person: {
+            tokens: [
+              { t: '{\n  ', c: null },
+              { t: '"reasoning"', c: 'k' }, { t: ': ', c: null },
+              { t: '"Source text mentions Lagos, age 34, software engineer; assembling fields."', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"name"', c: 'k' }, { t: ': ', c: null }, { t: '"Adaeze Okafor"', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"age"', c: 'k' }, { t: ': ', c: null }, { t: '34', c: 'n' }, { t: ',\n  ', c: null },
+              { t: '"city"', c: 'k' }, { t: ': ', c: null }, { t: '"Lagos"', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"occupation"', c: 'k' }, { t: ': ', c: null }, { t: '"software engineer"', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"languages"', c: 'k' }, { t: ': ', c: null }, { t: '[', c: null },
+              { t: '"English"', c: 's' }, { t: ', ', c: null }, { t: '"Igbo"', c: 's' }, { t: ', ', c: null }, { t: '"Yoruba"', c: 's' }, { t: ']', c: null },
+              { t: '\n}', c: null }
+            ]
+          },
+          recipe: {
+            tokens: [
+              { t: '{\n  ', c: null },
+              { t: '"reasoning"', c: 'k' }, { t: ': ', c: null },
+              { t: '"Classic Italian; 4 servings; canonical pantry ingredients only."', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"name"', c: 'k' }, { t: ': ', c: null }, { t: '"Pasta alla Carbonara"', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"servings"', c: 'k' }, { t: ': ', c: null }, { t: '4', c: 'n' }, { t: ',\n  ', c: null },
+              { t: '"prep_minutes"', c: 'k' }, { t: ': ', c: null }, { t: '20', c: 'n' }, { t: ',\n  ', c: null },
+              { t: '"ingredients"', c: 'k' }, { t: ': ', c: null }, { t: '[\n    ', c: null },
+              { t: '"400g spaghetti"', c: 's' }, { t: ',\n    ', c: null },
+              { t: '"150g guanciale"', c: 's' }, { t: ',\n    ', c: null },
+              { t: '"4 egg yolks"', c: 's' }, { t: ',\n    ', c: null },
+              { t: '"60g pecorino romano"', c: 's' }, { t: ',\n    ', c: null },
+              { t: '"black pepper"', c: 's' }, { t: '\n  ]', c: null },
+              { t: ',\n  ', c: null },
+              { t: '"vegetarian"', c: 'k' }, { t: ': ', c: null }, { t: 'false', c: 'b' },
+              { t: '\n}', c: null }
+            ]
+          },
+          bug: {
+            tokens: [
+              { t: '{\n  ', c: null },
+              { t: '"reasoning"', c: 'k' }, { t: ': ', c: null },
+              { t: '"Stack trace in chunk_uploader.py; repro is deterministic on >2GB files."', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"title"', c: 'k' }, { t: ': ', c: null }, { t: '"OOM crash during large file upload"', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"severity"', c: 'k' }, { t: ': ', c: null }, { t: '"high"', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"component"', c: 'k' }, { t: ': ', c: null }, { t: '"upload-service"', c: 's' }, { t: ',\n  ', c: null },
+              { t: '"reproducible"', c: 'k' }, { t: ': ', c: null }, { t: 'true', c: 'b' }, { t: ',\n  ', c: null },
+              { t: '"affected_versions"', c: 'k' }, { t: ': ', c: null }, { t: '[', c: null },
+              { t: '"2.4.1"', c: 's' }, { t: ', ', c: null }, { t: '"2.4.2"', c: 's' }, { t: ']', c: null },
+              { t: ',\n  ', c: null },
+              { t: '"assignee"', c: 'k' }, { t: ': ', c: null }, { t: 'null', c: 'b' },
+              { t: '\n}', c: null }
+            ]
+          }
+        };
+        const sel = document.getElementById('js-schema');
+        const out = document.getElementById('js-out');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let stopFlag = false;
+        function generate(){
+          stopFlag = true; // cancel any running stream
+          setTimeout(()=>{
+            stopFlag = false;
+            const schema = schemas[sel.value];
+            out.innerHTML = '';
+            if (reduced){
+              schema.tokens.forEach(tk => {
+                const sp = document.createElement('span');
+                if (tk.c) sp.className = tk.c;
+                sp.textContent = tk.t;
+                out.appendChild(sp);
+              });
+              return;
+            }
+            let i = 0;
+            const caret = document.createElement('span'); caret.className='caret'; caret.textContent='█';
+            out.appendChild(caret);
+            function tick(){
+              if (stopFlag) return;
+              if (i < schema.tokens.length){
+                const tk = schema.tokens[i++];
+                const sp = document.createElement('span');
+                if (tk.c) sp.className = tk.c;
+                sp.textContent = tk.t;
+                out.insertBefore(sp, caret);
+                // variable token cadence so it feels like streaming
+                const delay = tk.t.length > 20 ? 130 : (tk.t.length > 8 ? 80 : 45);
+                setTimeout(tick, delay + Math.random()*20);
+              } else { caret.remove(); }
+            }
+            tick();
+          }, 20);
+        }
+        document.getElementById('ex-11-4').querySelector('[data-action="gen"]').addEventListener('click', generate);
+      })();
+      </script>
     </section>
 
     <!-- ============ §11.5 SELF-CONSISTENCY ============ -->
@@ -1124,6 +1956,87 @@ confidence = count / <span class="fn">len</span>(samples)</pre>
           The plurality is not the same thing as the right answer. On hard questions where the model is systematically biased, Self-Consistency will return the systematic-bias answer with high confidence &mdash; an answer that is wrong in the same way every time. Calibrate by spot-checking high-confidence wins against ground truth periodically; if the model is hallucinating, more samples will not save you.
         </div>
       </div>
+
+      <!-- LIVE PLAYGROUND § 11.5 -->
+      <div class="exercise" id="ex-11-5">
+        <p class="exercise-cap"><span><span class="ex-num">Exercise 11.5</span> &middot; Try it &mdash; Self-Consistency by majority vote</span><span class="ex-tag">k=3 · plurality</span></p>
+        <p class="exercise-title">Three reasoning paths. Two agree. That&rsquo;s the answer.</p>
+        <p class="ex-instructions">The same question is sampled three times at temperature 0.7. Each trace reasons independently and arrives at a candidate answer. The plurality wins &mdash; and the size of the plurality is itself a calibration estimate. Run it: two paths will converge, one will drift.</p>
+        <div class="ex-controls">
+          <button class="ex-btn" data-action="run">run · k=3</button>
+          <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--ink-muted);letter-spacing:0.06em;">Q: A farmer has 17 sheep; all but 9 run away. How many remain?</span>
+        </div>
+        <div class="ex-triple" id="sc-triple">
+          <div class="ex-trace" data-trace="0"><p class="trace-head">Sample 1 · T=0.7</p><div class="trace-body"><span style="color:var(--ink-muted);">awaiting…</span></div></div>
+          <div class="ex-trace" data-trace="1"><p class="trace-head">Sample 2 · T=0.7</p><div class="trace-body"><span style="color:var(--ink-muted);">awaiting…</span></div></div>
+          <div class="ex-trace" data-trace="2"><p class="trace-head">Sample 3 · T=0.7</p><div class="trace-body"><span style="color:var(--ink-muted);">awaiting…</span></div></div>
+        </div>
+        <div class="ex-consensus" id="sc-consensus"><span class="lbl">Consensus</span><span style="color:var(--ink-muted);font-style:italic;">awaiting…</span></div>
+      </div>
+      <script>
+      (function(){
+        // The classic "but" misread. Path that misreads → "8". Two paths that read correctly → "9".
+        const samples = [
+          { steps: ["Start: 17 sheep.","\"All but 9 run away\" means 9 stay.","Remaining: 9."], ans: "9" },
+          { steps: ["17 sheep, then 9 leave.","17 − 9 = 8.","So 8 remain."], ans: "8" }, // misreads
+          { steps: ["\"All but 9 ran away\" = 9 did NOT run away.","Therefore 9 are still in the field."], ans: "9" },
+        ];
+        const traces = document.querySelectorAll('#sc-triple .ex-trace');
+        const consensus = document.getElementById('sc-consensus');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let timers = [];
+        function clearAll(){ timers.forEach(t=>clearTimeout(t)); timers=[]; }
+        function runOne(traceEl, sample, baseDelay){
+          const body = traceEl.querySelector('.trace-body');
+          body.innerHTML = '';
+          traceEl.classList.remove('agrees');
+          let si = 0;
+          function nextStep(){
+            if (si >= sample.steps.length){
+              const a = document.createElement('span');
+              a.className = 'trace-ans';
+              a.textContent = 'Answer: ' + sample.ans;
+              body.appendChild(a);
+              return;
+            }
+            const ln = document.createElement('span');
+            ln.style.display = 'block';
+            body.appendChild(ln);
+            if (reduced){ ln.textContent = sample.steps[si]; si++; nextStep(); return; }
+            const text = sample.steps[si];
+            let i = 0;
+            const caret = document.createElement('span'); caret.className='caret'; caret.textContent='|';
+            ln.appendChild(caret);
+            function typ(){
+              if (i < text.length){
+                caret.insertAdjacentText('beforebegin', text[i++]);
+                timers.push(setTimeout(typ, 14 + Math.random()*16));
+              } else { caret.remove(); si++; timers.push(setTimeout(nextStep, 120)); }
+            }
+            typ();
+          }
+          timers.push(setTimeout(nextStep, baseDelay));
+        }
+        function run(){
+          clearAll();
+          consensus.innerHTML = '<span class="lbl">Consensus</span><span style="color:var(--ink-muted);font-style:italic;">computing…</span>';
+          traces.forEach((tr,i) => runOne(tr, samples[i], reduced ? 0 : i * 220));
+          // tally after all complete
+          const totalDelay = reduced ? 100 : 2800;
+          timers.push(setTimeout(()=>{
+            const counts = {};
+            samples.forEach(s => counts[s.ans] = (counts[s.ans]||0) + 1);
+            const winner = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+            samples.forEach((s,i)=>{ if (s.ans === winner[0]) traces[i].classList.add('agrees'); });
+            consensus.innerHTML = '<span class="lbl">Consensus</span>'
+              + winner[1] + ' of ' + samples.length + ' samples agree → '
+              + '<span class="winner">' + winner[0] + '</span>'
+              + ' &nbsp;<span style="font-family:var(--font-mono);font-size:0.74rem;color:var(--ink-muted);">confidence ' + Math.round(winner[1]/samples.length*100) + '%</span>';
+          }, totalDelay));
+        }
+        document.getElementById('ex-11-5').querySelector('[data-action="run"]').addEventListener('click', run);
+      })();
+      </script>
     </section>
 
     <!-- ============ §11.6 REACT ============ -->
@@ -1207,6 +2120,89 @@ messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <
           ReAct&rsquo;s reasoning trace is also a side channel: anything the model writes in a Thought can be exfiltrated to a logging system or, in adversarial settings, to a malicious tool. Treat the Thought stream as untrusted output the same way you treat the final answer, especially in multi-tenant deployments. See <span class="xref">Ch. 9 §9.4</span> on prompt-injection defence.
         </div>
       </div>
+
+      <!-- LIVE PLAYGROUND § 11.6 -->
+      <div class="exercise" id="ex-11-6">
+        <p class="exercise-cap"><span><span class="ex-num">Exercise 11.6</span> &middot; Try it &mdash; ReAct trace, step by step</span><span class="ex-tag">Thought · Action · Observation · Answer</span></p>
+        <p class="exercise-title">Watch the model plan, act on the world, observe, and loop.</p>
+        <p class="ex-instructions">A single question requires two tool calls and one calculation. Click <i>trace</i> to step through the canonical ReAct loop &mdash; each Thought informs the next Action, each Observation feeds back into the next Thought, and the loop terminates when the model has enough evidence to finish.</p>
+        <div class="ex-controls">
+          <button class="ex-btn" data-action="trace">trace</button>
+          <button class="ex-btn ghost" data-action="reset">reset</button>
+          <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--ink-muted);letter-spacing:0.06em;">tools: search() · calc() · finish()</span>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:0.78rem;margin:0 0 0.55rem;color:var(--ink);">Q: What is the population of the capital of Australia?</p>
+        <div class="ex-react" id="react-out">
+          <span style="color:var(--ink-muted);font-style:italic;font-family:var(--font-body);">awaiting trace…</span>
+        </div>
+      </div>
+      <script>
+      (function(){
+        const steps = [
+          { kind: 'thought', tag: 'Thought 1', text: "I need the capital of Australia first, then its population." },
+          { kind: 'action',  tag: 'Action 1',  text: "search(\"capital of Australia\")" },
+          { kind: 'obs',     tag: 'Observ. 1', text: "→ Canberra" },
+          { kind: 'thought', tag: 'Thought 2', text: "Good. Now look up the population of Canberra." },
+          { kind: 'action',  tag: 'Action 2',  text: "search(\"Canberra population 2025\")" },
+          { kind: 'obs',     tag: 'Observ. 2', text: "→ approximately 466,800" },
+          { kind: 'thought', tag: 'Thought 3', text: "I have everything. No further tool calls needed." },
+          { kind: 'action',  tag: 'Action 3',  text: "finish(\"~466,800 (Canberra, 2025 est.)\")" },
+          { kind: 'ans',     tag: 'Answer:',   text: "The capital of Australia is Canberra; its population is approximately 466,800 (2025 estimate)." },
+        ];
+        const box = document.getElementById('react-out');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let timers = [];
+        function clearAll(){ timers.forEach(t=>clearTimeout(t)); timers=[]; }
+        function reset(){ clearAll(); box.classList.remove('running'); box.innerHTML = '<span style="color:var(--ink-muted);font-style:italic;font-family:var(--font-body);">awaiting trace…</span>'; }
+        function trace(){
+          clearAll();
+          box.classList.add('running');
+          box.innerHTML = '';
+          if (reduced){
+            steps.forEach(s=>{
+              const ln = document.createElement('span');
+              ln.className = 'react-line in ' + s.kind;
+              ln.innerHTML = '<span class="tag">' + s.tag + '</span>' + s.text;
+              box.appendChild(ln);
+            });
+            return;
+          }
+          let i = 0;
+          function nextLine(){
+            if (i >= steps.length){ return; }
+            const s = steps[i++];
+            const ln = document.createElement('span');
+            ln.className = 'react-line ' + s.kind;
+            ln.innerHTML = '<span class="tag">' + s.tag + '</span>';
+            box.appendChild(ln);
+            const txtNode = document.createTextNode('');
+            ln.appendChild(txtNode);
+            // animate in
+            requestAnimationFrame(()=> ln.classList.add('in'));
+            let j = 0;
+            const text = s.text;
+            const speed = s.kind === 'obs' ? 24 : (s.kind === 'action' ? 22 : 14);
+            const caret = document.createElement('span'); caret.className='caret'; caret.textContent='|';
+            ln.appendChild(caret);
+            function typ(){
+              if (j < text.length){
+                txtNode.appendData(text[j++]);
+                timers.push(setTimeout(typ, speed + Math.random()*14));
+              } else {
+                caret.remove();
+                const pause = s.kind === 'obs' ? 380 : (s.kind === 'action' ? 260 : 220);
+                timers.push(setTimeout(nextLine, pause));
+              }
+            }
+            typ();
+          }
+          nextLine();
+        }
+        const ex = document.getElementById('ex-11-6');
+        ex.querySelector('[data-action="trace"]').addEventListener('click', trace);
+        ex.querySelector('[data-action="reset"]').addEventListener('click', reset);
+      })();
+      </script>
     </section>
 
     <!-- ============ §11.7 COMPARISON TABLE ============ -->
@@ -1231,8 +2227,8 @@ messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <
               <th>Citation</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
+          <tbody id="compare-tbody">
+            <tr data-target="cot">
               <th class="row-h"><span class="pn">11.1</span>Chain-of-Thought</th>
               <td>1.2&ndash;2&times;</td>
               <td>+30&ndash;40 pts on GSM8K</td>
@@ -1241,7 +2237,7 @@ messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <
               <td><em>Shallow retrieval; small models</em></td>
               <td>Wei et al. 2022</td>
             </tr>
-            <tr>
+            <tr data-target="fewshot">
               <th class="row-h"><span class="pn">11.2</span>Few-Shot</th>
               <td>1.1&ndash;1.5&times;</td>
               <td>+10&ndash;25 pts on novel classification</td>
@@ -1250,7 +2246,7 @@ messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <
               <td><em>Too many or too-narrow examples</em></td>
               <td>Brown et al. 2020</td>
             </tr>
-            <tr>
+            <tr data-target="role">
               <th class="row-h"><span class="pn">11.3</span>Role Prompting</th>
               <td>~1&times;</td>
               <td>Variable, register-dependent</td>
@@ -1259,7 +2255,7 @@ messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <
               <td><em>Credentialed personas implying authority</em></td>
               <td>White et al. 2023</td>
             </tr>
-            <tr>
+            <tr data-target="structured">
               <th class="row-h"><span class="pn">11.4</span>Structured Output</th>
               <td>~1&times;</td>
               <td>100% schema conformance</td>
@@ -1268,7 +2264,7 @@ messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <
               <td><em>Open-ended prose; over-rigid enums</em></td>
               <td>OpenAI 2024 (strict mode)</td>
             </tr>
-            <tr>
+            <tr data-target="consistency">
               <th class="row-h"><span class="pn">11.5</span>Self-Consistency</th>
               <td>3&ndash;10&times;</td>
               <td>+15&ndash;20 pts on hard reasoning</td>
@@ -1277,7 +2273,7 @@ messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <
               <td><em>Open-ended generation; interactive UI</em></td>
               <td>Wang et al. 2022</td>
             </tr>
-            <tr>
+            <tr data-target="react">
               <th class="row-h"><span class="pn">11.6</span>ReAct</th>
               <td>3&ndash;8&times; (per loop step)</td>
               <td>Unlocks tasks needing fresh data</td>
@@ -1289,6 +2285,41 @@ messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <
           </tbody>
         </table>
       </div>
+      <script>
+      (function(){
+        // Hover-link the table rows to their pattern sections.
+        const rows = document.querySelectorAll('#compare-tbody tr[data-target]');
+        let active = null;
+        rows.forEach(tr=>{
+          tr.style.cursor = 'pointer';
+          tr.addEventListener('mouseenter', ()=>{
+            const id = tr.getAttribute('data-target');
+            const sec = document.getElementById(id);
+            if (!sec) return;
+            if (active) active.classList.remove('pulse-section');
+            sec.classList.add('pulse-section');
+            active = sec;
+          });
+          tr.addEventListener('mouseleave', ()=>{
+            if (active){ setTimeout(()=>{ active && active.classList.remove('pulse-section'); active = null; }, 380); }
+          });
+          tr.addEventListener('click', ()=>{
+            const id = tr.getAttribute('data-target');
+            const sec = document.getElementById(id);
+            if (sec) sec.scrollIntoView({behavior:'smooth', block:'start'});
+          });
+        });
+      })();
+      </script>
+      <style>
+        .pattern-entry.pulse-section .pattern-head {
+          background: var(--maroon-tint);
+          transition: background 280ms ease;
+        }
+        .pattern-entry.pulse-section .pattern-num-big,
+        .pattern-entry.pulse-section .section-mark { color: var(--maroon-deep); }
+        .pattern-entry .pattern-head { transition: background 280ms ease; padding: 0.35rem 0.5rem; margin-left: -0.5rem; margin-right: -0.5rem; }
+      </style>
     </section>
 
     <!-- ============ §11.8 COMPOSING WALKTHROUGH ============ -->
@@ -1300,29 +2331,99 @@ messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <
         Production prompts rarely use one pattern in isolation; in CETI client work the median production system prompt composes three to five patterns at once. The example below is a slightly-simplified version of a real prompt that powers an inbound-email triage system for a B2B SaaS company. It composes Role Prompting (<span class="xref">§11.3</span>), Few-Shot (<span class="xref">§11.2</span>), and Structured Output (<span class="xref">§11.4</span>), with Chain-of-Thought (<span class="xref">§11.1</span>) tucked inside the schema. Read the four steps in order.
       </p>
 
-      <div class="walkthrough-step">
-        <span class="step-num">Step 1 &middot; Pin the role</span>
+      <div class="walkthrough-step" id="walk-1">
+        <span class="step-num"><span class="trace-dot"></span>Step 1 &middot; Pin the role</span>
         <h4>Set the register and refusal policy first</h4>
         <p>The system prompt opens with a one-paragraph role: <code class="kw">"You are the triage layer of a customer-support inbox at Acme. Your job is to read inbound email and produce a routing decision."</code> This single sentence collapses dozens of micro-instructions the rest of the prompt would otherwise have to spell out: tone is neutral, the audience is internal, the answer is a decision rather than a reply to the customer. We pair the role with one explicit refusal rule (<em>&ldquo;If the email contains a request for medical or legal advice, route it directly to a human and emit no other output&rdquo;</em>) because role prompts alone do not reliably enforce hard constraints.</p>
+        <button class="walk-trace" data-walk="1">trace this step</button>
+        <div class="walk-output" id="walk-1-out" hidden style="margin-top:0.6rem;padding:0.55rem 0.7rem;background:var(--paper);border-left:3px solid var(--maroon);font-family:var(--font-mono);font-size:0.74rem;line-height:1.55;color:var(--ink);"></div>
       </div>
 
-      <div class="walkthrough-step">
-        <span class="step-num">Step 2 &middot; Demonstrate the shape</span>
+      <div class="walkthrough-step" id="walk-2">
+        <span class="step-num"><span class="trace-dot"></span>Step 2 &middot; Demonstrate the shape</span>
         <h4>Three Few-Shot examples covering edge cases</h4>
         <p>We supply three examples wrapped in XML tags. The examples are chosen to span the routing space rather than to look representative: one billing question (the largest category, but the easiest), one bug report with an attached screenshot reference (tests image-aware routing), and one ambiguous &ldquo;urgent please help&rdquo; email with no clear intent (tests the &ldquo;other&rdquo; escape hatch). The variety here is doing more work than the quantity; following <span class="xref">§11.2</span>&rsquo;s gotcha about recency, the most-representative example is placed last.</p>
+        <button class="walk-trace" data-walk="2">trace this step</button>
+        <div class="walk-output" id="walk-2-out" hidden style="margin-top:0.6rem;padding:0.55rem 0.7rem;background:var(--paper);border-left:3px solid var(--maroon);font-family:var(--font-mono);font-size:0.74rem;line-height:1.55;color:var(--ink);"></div>
       </div>
 
-      <div class="walkthrough-step">
-        <span class="step-num">Step 3 &middot; Fix the output shape</span>
+      <div class="walkthrough-step" id="walk-3">
+        <span class="step-num"><span class="trace-dot"></span>Step 3 &middot; Fix the output shape</span>
         <h4>A schema with reasoning before the answer</h4>
         <p>The schema is supplied to the Messages API as a tool definition (Listing 11.7&rsquo;s pattern). Crucially, the <code class="kw">"reasoning"</code> field is declared <em class="term">first</em> in the schema, before <code class="kw">"category"</code>, <code class="kw">"urgency"</code>, and <code class="kw">"route_to"</code>. JSON is filled top-to-bottom by the model, so this ordering forces a CoT trace to be written before the final routing decision is committed &mdash; Chain-of-Thought emerges as a free side-effect of careful schema design.</p>
+        <button class="walk-trace" data-walk="3">trace this step</button>
+        <div class="walk-output" id="walk-3-out" hidden style="margin-top:0.6rem;padding:0.55rem 0.7rem;background:var(--paper);border-left:3px solid var(--maroon);font-family:var(--font-mono);font-size:0.74rem;line-height:1.55;color:var(--ink);"></div>
       </div>
 
-      <div class="walkthrough-step">
-        <span class="step-num">Step 4 &middot; Wire the loop</span>
+      <div class="walkthrough-step" id="walk-4">
+        <span class="step-num"><span class="trace-dot"></span>Step 4 &middot; Wire the loop</span>
         <h4>Optional ReAct fallback for ambiguous cases</h4>
         <p>For the ninety percent of emails that match the examples, a single API call returns a parseable routing decision in under two seconds. For the long tail where the model emits <code class="kw">"category": "other"</code> with low confidence, the application escalates to a small ReAct loop (<span class="xref">§11.6</span>) with two tools: <code class="kw">lookup_customer(email)</code> and <code class="kw">search_kb(query)</code>. The loop has a 4-step cap. This two-tier design keeps median latency low while still handling the cases that benefit from extra reasoning &mdash; a pattern we recommend for almost every production agent.</p>
+        <button class="walk-trace" data-walk="4">trace this step</button>
+        <div class="walk-output" id="walk-4-out" hidden style="margin-top:0.6rem;padding:0.55rem 0.7rem;background:var(--paper);border-left:3px solid var(--maroon);font-family:var(--font-mono);font-size:0.74rem;line-height:1.55;color:var(--ink);"></div>
       </div>
+      <script>
+      (function(){
+        const traces = {
+          1: [
+            { lbl: 'SYSTEM',  v: 'You are the triage layer of a customer-support inbox at Acme.' },
+            { lbl: 'POLICY',  v: 'Refuse medical/legal advice → route directly to a human.' },
+            { lbl: 'TONE',    v: 'Neutral. Internal audience. Decisions, not replies.' },
+          ],
+          2: [
+            { lbl: 'EX 1',    v: '<input>Cannot find my invoice for March</input> → billing' },
+            { lbl: 'EX 2',    v: '<input>App crashes on save [see screenshot]</input> → bug' },
+            { lbl: 'EX 3',    v: '<input>URGENT please help asap !!</input> → other (ambiguous)' },
+            { lbl: 'NOTE',    v: 'Most-representative example placed last (§11.2 gotcha).' },
+          ],
+          3: [
+            { lbl: 'SCHEMA',  v: '{ "reasoning": str, "category": enum, "urgency": int, "route_to": str }' },
+            { lbl: 'KEY',     v: '"reasoning" comes FIRST → CoT happens inside the JSON.' },
+            { lbl: 'TOOL',    v: 'tool_choice = { type:"tool", name:"triage_email" }' },
+          ],
+          4: [
+            { lbl: 'IF',      v: 'category == "other" AND confidence < 0.7' },
+            { lbl: 'LOOP',    v: 'ReAct with tools: lookup_customer, search_kb' },
+            { lbl: 'CAP',     v: 'max_steps = 4 · page on cap hit · log every trace' },
+            { lbl: 'RESULT',  v: '91% auto-actioned · 2.7% misroute · $0.004 / email' },
+          ],
+        };
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        document.querySelectorAll('.walk-trace').forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            const n = btn.getAttribute('data-walk');
+            const step = document.getElementById('walk-' + n);
+            const out = document.getElementById('walk-' + n + '-out');
+            document.querySelectorAll('.walkthrough-step').forEach(s=>s.classList.remove('tracing'));
+            step.classList.add('tracing');
+            out.hidden = false;
+            out.innerHTML = '';
+            const lines = traces[n];
+            if (reduced){
+              lines.forEach(l=>{
+                const r = document.createElement('div');
+                r.innerHTML = '<span style="color:var(--maroon);font-weight:700;letter-spacing:0.08em;margin-right:0.5rem;">' + l.lbl + '</span>' + l.v;
+                out.appendChild(r);
+              });
+              return;
+            }
+            let i = 0;
+            function tick(){
+              if (i >= lines.length) return;
+              const l = lines[i++];
+              const r = document.createElement('div');
+              r.style.opacity = '0';
+              r.style.transition = 'opacity 220ms ease';
+              r.innerHTML = '<span style="color:var(--maroon);font-weight:700;letter-spacing:0.08em;margin-right:0.5rem;">' + l.lbl + '</span>' + l.v;
+              out.appendChild(r);
+              requestAnimationFrame(()=> r.style.opacity = '1');
+              setTimeout(tick, 240);
+            }
+            tick();
+          });
+        });
+      })();
+      </script>
 
       <div class="callout note">
         <span class="label">Outcome</span>

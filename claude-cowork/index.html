@@ -1209,6 +1209,318 @@
       .colophon-right .next { margin-left: 0; }
     }
 
+    /* ============ TICKING CLOCKS (Tuesday spread) ============ */
+    .vs-clock {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 1.85rem;
+      line-height: 1;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      font-variant-numeric: tabular-nums;
+      margin: 0 0 0.35rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.45rem;
+    }
+    .vs-col.after .vs-clock { color: var(--sage-deep); }
+    .vs-clock .ampm {
+      font-family: var(--sans);
+      font-style: normal;
+      font-weight: 400;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+    }
+    .vs-clock .pulse {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      margin-left: 0.35rem;
+      transform: translateY(-0.32em);
+      opacity: 0;
+      transition: opacity 220ms ease;
+    }
+    .vs-col.after .vs-clock .pulse { background: var(--sage-deep); }
+    .vs-clock.live .pulse { animation: clock-pulse 1.1s ease-in-out infinite; }
+    @keyframes clock-pulse {
+      0%, 100% { opacity: 0.15; }
+      50% { opacity: 1; }
+    }
+    .vs-col li {
+      transition: opacity 700ms ease, color 700ms ease;
+      opacity: 0.28;
+    }
+    .vs-col li.done {
+      opacity: 1;
+    }
+    .vs-col li.done::after {
+      content: '';
+      position: absolute;
+      left: 1.6rem;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.32;
+      transform-origin: left center;
+      animation: strike 600ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes strike {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    .vs-col.after li.done {
+      color: var(--sage-deep);
+    }
+    .vs-tally {
+      transition: opacity 700ms ease;
+      opacity: 0.32;
+    }
+    .vs-tally.shown { opacity: 1; }
+    .vs-col.after .complete-callout {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--sage-deep);
+      margin: 0.5rem 0 0;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--sage);
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 700ms ease, transform 700ms ease;
+      pointer-events: none;
+    }
+    .vs-col.after .complete-callout.shown {
+      opacity: 1;
+      transform: none;
+    }
+    .vs-controls {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--rule);
+    }
+    .vs-controls .vs-label {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      margin-right: 0.25rem;
+    }
+    .vs-controls button {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--ink);
+      padding: 0.3rem 0.1rem;
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      cursor: pointer;
+      transition: color 300ms ease, border-color 300ms ease;
+    }
+    .vs-controls button:hover { color: var(--terracotta); border-color: var(--terracotta); }
+    .vs-controls button:disabled { opacity: 0.35; cursor: default; }
+    .vs-controls button:disabled:hover { color: var(--ink); border-color: var(--ink); }
+    .vs-final-callout {
+      max-width: 32ch;
+      margin: 2.5rem auto 0;
+      text-align: center;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+      line-height: 1.3;
+      color: var(--ink);
+      padding-top: 2rem;
+      border-top: 1px solid var(--rule);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 900ms ease, transform 900ms ease;
+    }
+    .vs-final-callout.shown { opacity: 1; transform: none; }
+    .vs-final-callout em { color: var(--terracotta); font-weight: 700; }
+
+    /* ============ FLIP TILES (Six kinds of work) ============ */
+    .use-essay {
+      perspective: 1400px;
+    }
+    .flip-tile {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+      min-height: 100%;
+    }
+    .flip-tile .face {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .flip-tile .face.back {
+      position: absolute;
+      inset: 0;
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      padding: 1.5rem 1.4rem;
+      background: var(--paper-deep);
+      border: 1px solid var(--rule);
+      border-left: 3px solid var(--terracotta);
+    }
+    .use-essay:nth-child(2n) .flip-tile .face.back { border-left-color: var(--sage); }
+    .use-essay:nth-child(3n) .flip-tile .face.back { border-left-color: var(--terra-deep); }
+    .flip-hint {
+      font-family: var(--sans);
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      margin-top: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .flip-hint::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border: 1px solid var(--terracotta);
+      transform: rotate(45deg);
+      display: inline-block;
+    }
+    .use-essay:nth-child(2n) .flip-hint::before { border-color: var(--sage-deep); }
+    .use-essay:nth-child(3n) .flip-hint::before { border-color: var(--terra-deep); }
+    .use-essay:hover .flip-tile,
+    .use-essay:focus-within .flip-tile,
+    .use-essay.flipped .flip-tile {
+      transform: rotateY(180deg);
+    }
+    .flip-back-kicker {
+      font-family: var(--sans);
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+    }
+    .use-essay:nth-child(2n) .flip-back-kicker { color: var(--sage-deep); }
+    .use-essay:nth-child(3n) .flip-back-kicker { color: var(--terra-deep); }
+    .flip-back-title {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+      margin: 0;
+      color: var(--ink);
+    }
+    .flip-prompt {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: var(--ink);
+      margin: 0;
+      max-width: 38ch;
+    }
+    .flip-prompt::before {
+      content: '\201C';
+      color: var(--terracotta);
+      font-style: normal;
+      margin-right: 0.05em;
+    }
+    .flip-prompt::after {
+      content: '\201D';
+      color: var(--terracotta);
+      font-style: normal;
+      margin-left: 0.05em;
+    }
+    .use-essay:nth-child(2n) .flip-prompt::before,
+    .use-essay:nth-child(2n) .flip-prompt::after { color: var(--sage-deep); }
+    .use-essay:nth-child(3n) .flip-prompt::before,
+    .use-essay:nth-child(3n) .flip-prompt::after { color: var(--terra-deep); }
+    .flip-prompt-cite {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      margin: 0.25rem 0 0;
+    }
+    .flip-back-note {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      color: var(--ink);
+      margin: 0;
+      max-width: 38ch;
+    }
+
+    /* ============ PULL QUOTE PARALLAX ============ */
+    .pullquote blockquote {
+      transform: translate3d(0, calc(var(--pq-drift, 0) * -1px), 0);
+      transition: transform 80ms linear;
+      will-change: transform;
+    }
+    .pullquote cite {
+      transform: translate3d(0, calc(var(--pq-drift, 0) * -0.4px), 0);
+      transition: transform 80ms linear;
+    }
+
+    /* ============ READ-STORY LINKS + SAGE HIGHLIGHT FADE ============ */
+    .read-story {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.65rem;
+      padding-top: 0.65rem;
+      border-top: 1px dotted var(--rule);
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      text-decoration: none;
+      transition: color 300ms ease;
+      cursor: pointer;
+      background: none;
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      align-self: flex-start;
+    }
+    .read-story::before {
+      content: '\25B7';
+      color: var(--terracotta);
+      font-style: normal;
+      transition: transform 400ms ease;
+    }
+    .vignette:nth-child(2) .read-story::before { color: var(--sage-deep); }
+    .vignette:nth-child(3) .read-story::before { color: var(--terra-deep); }
+    .read-story:hover { color: var(--ink); }
+    .read-story:hover::before { transform: translateX(2px); }
+    .sage-highlight {
+      background: rgba(123, 146, 112, 0.32);
+      box-shadow: 0 0 0 2px rgba(123, 146, 112, 0.32);
+      transition: background 1400ms ease, box-shadow 1400ms ease;
+    }
+    .sage-highlight.fading {
+      background: rgba(123, 146, 112, 0);
+      box-shadow: 0 0 0 2px rgba(123, 146, 112, 0);
+    }
+
     /* ============ REDUCED MOTION ============ */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -1216,6 +1528,13 @@
         transition-duration: 0.01ms !important;
       }
       .cover-block, .block, .plate { transform: none !important; }
+      .vs-col li { opacity: 1 !important; }
+      .vs-col li.done::after { animation: none !important; transform: scaleX(1) !important; }
+      .vs-tally { opacity: 1 !important; }
+      .vs-clock .pulse { animation: none !important; opacity: 0 !important; }
+      .vs-final-callout, .complete-callout { opacity: 1 !important; transform: none !important; }
+      .flip-tile { transform: rotateY(180deg) !important; }
+      .pullquote blockquote, .pullquote cite { transform: none !important; }
     }
 
     /* ============ FADE-IN ON SCROLL ============ */
@@ -1318,35 +1637,46 @@
         <p class="body-text"><span class="dropcap">T</span>he first method is how most of us still work. Tabs upon tabs, copy-paste, building tables by hand, losing the thread, watching the clock. The second is what already exists if you simply have Claude open in one of those tabs instead.</p>
         <p class="body-text">What follows is the same brief, narrated twice. Read it as a small <strong>before-and-after photograph</strong> of an ordinary morning.</p>
 
-        <div class="vs">
+        <div class="vs" id="tuesday-vs" data-clock-state="idle">
           <div class="vs-col before">
             <h4>Before</h4>
             <p class="title">The browser-tab method</p>
-            <ol>
-              <li>Search for the competitor's name plus &ldquo;pricing.&rdquo;</li>
-              <li>Open twelve tabs. Skim. Lose your place. Open three more.</li>
-              <li>Read five articles. Forget what was in the first one.</li>
-              <li>Open Notion. Make a blank page. Stare.</li>
-              <li>Copy-paste quotes. Lose formatting.</li>
-              <li>Build a comparison table by hand. Miss a column.</li>
-              <li>Bring half-finished notes to the meeting.</li>
+            <p class="vs-clock" id="clock-before" aria-live="polite"><span class="time">9:14</span><span class="ampm">a.m.</span><span class="pulse" aria-hidden="true"></span></p>
+            <ol id="list-before">
+              <li data-at="6">Search for the competitor's name plus &ldquo;pricing.&rdquo;</li>
+              <li data-at="22">Open twelve tabs. Skim. Lose your place. Open three more.</li>
+              <li data-at="44">Read five articles. Forget what was in the first one.</li>
+              <li data-at="62">Open Notion. Make a blank page. Stare.</li>
+              <li data-at="78">Copy-paste quotes. Lose formatting.</li>
+              <li data-at="100">Build a comparison table by hand. Miss a column.</li>
+              <li data-at="123">Bring half-finished notes to the meeting.</li>
             </ol>
-            <div class="vs-tally"><span class="lbl">Time spent</span>2h 03m</div>
+            <div class="vs-tally" id="tally-before"><span class="lbl">Time spent</span><span class="val">2h 03m</span></div>
           </div>
 
           <div class="vs-col after">
             <h4>With Claude</h4>
             <p class="title">The cowork method</p>
-            <ol>
-              <li>Open Claude. Type one sentence describing what you need.</li>
-              <li>Claude pulls from your Drive, Notion, and the open web.</li>
-              <li>A clean comparison table appears as an Artifact.</li>
-              <li>You ask: &ldquo;What about their enterprise tier?&rdquo;</li>
-              <li>Table updates. Sources cited. You save to Notion.</li>
+            <p class="vs-clock" id="clock-after" aria-live="polite"><span class="time">9:14</span><span class="ampm">a.m.</span><span class="pulse" aria-hidden="true"></span></p>
+            <ol id="list-after">
+              <li data-at="0.6">Open Claude. Type one sentence describing what you need.</li>
+              <li data-at="1.4">Claude pulls from your Drive, Notion, and the open web.</li>
+              <li data-at="2.2">A clean comparison table appears as an Artifact.</li>
+              <li data-at="3">You ask: &ldquo;What about their enterprise tier?&rdquo;</li>
+              <li data-at="4">Table updates. Sources cited. You save to Notion.</li>
             </ol>
-            <div class="vs-tally"><span class="lbl">Time spent</span>4 minutes</div>
+            <div class="vs-tally" id="tally-after"><span class="lbl">Time spent</span><span class="val">4 minutes</span></div>
+            <p class="complete-callout" id="callout-after">Complete &middot; 9:18 a.m.</p>
+          </div>
+
+          <div class="vs-controls">
+            <span class="vs-label">Play the morning</span>
+            <button type="button" id="vs-play" aria-label="Play story">&#9654; Play story</button>
+            <button type="button" id="vs-replay" aria-label="Replay" disabled>&#8635; Replay</button>
+            <button type="button" id="vs-skip" aria-label="Skip to end">Skip to end</button>
           </div>
         </div>
+        <p class="vs-final-callout" id="vs-final-callout">She was done <em>before her coffee got cold.</em></p>
       </article>
     </div>
   </section>
@@ -1428,52 +1758,124 @@
     </div>
 
     <div class="use-essays-grid">
-      <article class="use-essay">
-        <div class="use-num">01</div>
-        <p class="cat">The researcher</p>
-        <h3>Mapping a market before the meeting begins.</h3>
-        <p>Priya runs corporate development for a forty-person services firm. On a Tuesday morning she is asked, with no warning, to brief her CEO on the competitive landscape for a category they are considering entering. The category did not exist three years ago. She has ninety minutes.</p>
-        <p>She opens Claude. She asks for the eight companies operating in the space, their funding history, their stated positioning, and the three reviews she should read first for each one. Within four minutes she has a structured map with citations. She spends the rest of the ninety minutes doing what she is actually paid for: <em>deciding which of those eight matter</em>, and why. The map is not the brief. The map is what frees her to write the brief.</p>
+      <article class="use-essay" tabindex="0">
+        <div class="flip-tile">
+          <div class="face front">
+            <div class="use-num">01</div>
+            <p class="cat">The researcher</p>
+            <h3>Mapping a market before the meeting begins.</h3>
+            <p>Priya runs corporate development for a forty-person services firm. On a Tuesday morning she is asked, with no warning, to brief her CEO on the competitive landscape for a category they are considering entering. The category did not exist three years ago. She has ninety minutes.</p>
+            <p>She opens Claude. She asks for the eight companies operating in the space, their funding history, their stated positioning, and the three reviews she should read first for each one. Within four minutes she has a structured map with citations. She spends the rest of the ninety minutes doing what she is actually paid for: <em>deciding which of those eight matter</em>, and why. The map is not the brief. The map is what frees her to write the brief.</p>
+            <span class="flip-hint">Hover for the prompt</span>
+          </div>
+          <div class="face back" aria-label="Research prompt">
+            <span class="flip-back-kicker">Prompt &middot; Research</span>
+            <p class="flip-back-title">A landscape, mapped in four minutes.</p>
+            <p class="flip-prompt">Map the eight companies operating in the autonomous-claims category. For each: founding year, total funding, last round, stated positioning in one sentence, and the three customer reviews I should read first. Cite each source with a working link.</p>
+            <p class="flip-back-note">Add the discovery notes from our last board meeting as context. Format the output as a table so I can paste it into Notion before eleven.</p>
+            <p class="flip-prompt-cite">&mdash; Priya, Corp. dev. lead</p>
+          </div>
+        </div>
       </article>
 
-      <article class="use-essay">
-        <div class="use-num">02</div>
-        <p class="cat">The writer</p>
-        <h3>A first draft that already sounds like the firm.</h3>
-        <p>Marcus is a partner at a boutique strategy consultancy. He has a proposal due to a healthcare client tomorrow. He gives Claude two past winning proposals, the discovery notes from the client conversations, and a one-paragraph brief on what he wants the engagement to look like. Twelve minutes later he has a draft.</p>
-        <p>The draft is not finished. It is a first draft. But it is a first draft <em>in his voice</em>, with his structure, with his firm's vocabulary. He spends the next two hours rewriting the parts that need his judgment, sharpening the close, deleting the paragraphs that were too generic. The proposal goes out at six. He is home in time for dinner. This used to be a Saturday.</p>
+      <article class="use-essay" tabindex="0">
+        <div class="flip-tile">
+          <div class="face front">
+            <div class="use-num">02</div>
+            <p class="cat">The writer</p>
+            <h3>A first draft that already sounds like the firm.</h3>
+            <p>Marcus is a partner at a boutique strategy consultancy. He has a proposal due to a healthcare client tomorrow. He gives Claude two past winning proposals, the discovery notes from the client conversations, and a one-paragraph brief on what he wants the engagement to look like. Twelve minutes later he has a draft.</p>
+            <p>The draft is not finished. It is a first draft. But it is a first draft <em>in his voice</em>, with his structure, with his firm's vocabulary. He spends the next two hours rewriting the parts that need his judgment, sharpening the close, deleting the paragraphs that were too generic. The proposal goes out at six. He is home in time for dinner. This used to be a Saturday.</p>
+            <span class="flip-hint">Hover for the prompt</span>
+          </div>
+          <div class="face back" aria-label="Writing prompt">
+            <span class="flip-back-kicker">Prompt &middot; Writing</span>
+            <p class="flip-back-title">A first draft in the firm's voice.</p>
+            <p class="flip-prompt">Draft a proposal for the healthcare client whose discovery notes I just uploaded. Match the structure of the two winning proposals in this Project. Use our firm's cadence in the executive summary &mdash; numbered phases, plain verbs, no consultant-ese.</p>
+            <p class="flip-back-note">Leave the pricing section as a placeholder. Flag any claim that needs my judgment with [VERIFY]. I'll rewrite the close.</p>
+            <p class="flip-prompt-cite">&mdash; Marcus, Partner, strategy</p>
+          </div>
+        </div>
       </article>
 
-      <article class="use-essay">
-        <div class="use-num">03</div>
-        <p class="cat">The analyst</p>
-        <h3>A messy spreadsheet, made legible.</h3>
-        <p>Aisha is a finance manager at a direct-to-consumer brand. The expense report she just received from her ops team is the same expense report she has been receiving for three years: nine tabs, inconsistent categories, three different formats for dates. She has historically spent half a Tuesday reconciling it before she can even begin to analyze it.</p>
-        <p>She drops the file into Claude with the message: <em>"Reconcile this against the chart of accounts I uploaded last quarter. Flag anything that looks like a category change. Show me a clean monthly trend by department."</em> The reconciled file appears as an Artifact. The flagged items are footnoted. The trend chart is rendered. Aisha now begins her real work, which is asking why marketing spend in February was twice what was forecast.</p>
+      <article class="use-essay" tabindex="0">
+        <div class="flip-tile">
+          <div class="face front">
+            <div class="use-num">03</div>
+            <p class="cat">The analyst</p>
+            <h3>A messy spreadsheet, made legible.</h3>
+            <p>Aisha is a finance manager at a direct-to-consumer brand. The expense report she just received from her ops team is the same expense report she has been receiving for three years: nine tabs, inconsistent categories, three different formats for dates. She has historically spent half a Tuesday reconciling it before she can even begin to analyze it.</p>
+            <p>She drops the file into Claude with the message: <em>"Reconcile this against the chart of accounts I uploaded last quarter. Flag anything that looks like a category change. Show me a clean monthly trend by department."</em> The reconciled file appears as an Artifact. The flagged items are footnoted. The trend chart is rendered. Aisha now begins her real work, which is asking why marketing spend in February was twice what was forecast.</p>
+            <span class="flip-hint">Hover for the prompt</span>
+          </div>
+          <div class="face back" aria-label="Analysis prompt">
+            <span class="flip-back-kicker">Prompt &middot; Analysis</span>
+            <p class="flip-back-title">A spreadsheet, made legible.</p>
+            <p class="flip-prompt">Reconcile this nine-tab expense report against the chart of accounts I uploaded last quarter. Flag anything that looks like a category change. Show me a clean monthly trend by department, with department-over-department deltas highlighted in the chart.</p>
+            <p class="flip-back-note">Surface anything that is more than twenty per cent off the trailing six-month average. I want to know what to ask my ops lead before our 2 p.m. review.</p>
+            <p class="flip-prompt-cite">&mdash; Aisha, Finance manager, DTC</p>
+          </div>
+        </div>
       </article>
 
-      <article class="use-essay">
-        <div class="use-num">04</div>
-        <p class="cat">The organizer</p>
-        <h3>A folder, turned into a system.</h3>
-        <p>Diego is the chief of staff at an early-stage company. There is a folder in the shared Drive labelled <em>Vendor Quotes &mdash; 2026</em> that contains forty-three PDFs from twelve vendors across three categories. Nobody, including Diego, has ever sat down and read all of them. The folder has the gravitational pull of a project that will never start.</p>
-        <p>He gives Claude permission to read the folder. He asks for a single comparison table across all vendors, with columns for price, contract length, included support, and the three most important fine-print clauses. He asks for a one-paragraph summary of each vendor's overall pitch. The table is built. The folder, for the first time in eighteen months, becomes a tool instead of a backlog.</p>
+      <article class="use-essay" tabindex="0">
+        <div class="flip-tile">
+          <div class="face front">
+            <div class="use-num">04</div>
+            <p class="cat">The organizer</p>
+            <h3>A folder, turned into a system.</h3>
+            <p>Diego is the chief of staff at an early-stage company. There is a folder in the shared Drive labelled <em>Vendor Quotes &mdash; 2026</em> that contains forty-three PDFs from twelve vendors across three categories. Nobody, including Diego, has ever sat down and read all of them. The folder has the gravitational pull of a project that will never start.</p>
+            <p>He gives Claude permission to read the folder. He asks for a single comparison table across all vendors, with columns for price, contract length, included support, and the three most important fine-print clauses. He asks for a one-paragraph summary of each vendor's overall pitch. The table is built. The folder, for the first time in eighteen months, becomes a tool instead of a backlog.</p>
+            <span class="flip-hint">Hover for the prompt</span>
+          </div>
+          <div class="face back" aria-label="Organize prompt">
+            <span class="flip-back-kicker">Prompt &middot; Organize</span>
+            <p class="flip-back-title">Forty-three PDFs, one table.</p>
+            <p class="flip-prompt">Read every PDF in the Drive folder &ldquo;Vendor Quotes &mdash; 2026.&rdquo; Build one comparison table with columns for price, contract length, included support, and the three most important fine-print clauses per vendor. Group by category.</p>
+            <p class="flip-back-note">Write a one-paragraph summary of each vendor's pitch in plain English. Flag the two vendors that look most similar &mdash; I suspect we are negotiating with the same parent company twice.</p>
+            <p class="flip-prompt-cite">&mdash; Diego, Chief of staff</p>
+          </div>
+        </div>
       </article>
 
-      <article class="use-essay">
-        <div class="use-num">05</div>
-        <p class="cat">The decision-maker</p>
-        <h3>A structured second opinion, before the call.</h3>
-        <p>Yuki is the founder of a sixty-person product company. She has a hard call to make: whether to extend an offer to a senior hire who interviewed brilliantly but whose references were uneven. She has the candidate's resume, her own notes, the panel feedback, and the reference summaries. She has, also, the discomfort of a decision she does not yet trust.</p>
-        <p>She gives Claude the documents and asks for the three strongest arguments in favour, the three strongest arguments against, and the questions she has not yet asked herself. The reply is not a recommendation. It is a <em>structured second opinion</em> &mdash; the kind a good advisor would give in a coffee, if she had one available on a Tuesday morning. She makes the call. She knows why.</p>
+      <article class="use-essay" tabindex="0">
+        <div class="flip-tile">
+          <div class="face front">
+            <div class="use-num">05</div>
+            <p class="cat">The decision-maker</p>
+            <h3>A structured second opinion, before the call.</h3>
+            <p>Yuki is the founder of a sixty-person product company. She has a hard call to make: whether to extend an offer to a senior hire who interviewed brilliantly but whose references were uneven. She has the candidate's resume, her own notes, the panel feedback, and the reference summaries. She has, also, the discomfort of a decision she does not yet trust.</p>
+            <p>She gives Claude the documents and asks for the three strongest arguments in favour, the three strongest arguments against, and the questions she has not yet asked herself. The reply is not a recommendation. It is a <em>structured second opinion</em> &mdash; the kind a good advisor would give in a coffee, if she had one available on a Tuesday morning. She makes the call. She knows why.</p>
+            <span class="flip-hint">Hover for the prompt</span>
+          </div>
+          <div class="face back" aria-label="Decide prompt">
+            <span class="flip-back-kicker">Prompt &middot; Decide</span>
+            <p class="flip-back-title">A structured second opinion.</p>
+            <p class="flip-prompt">Read the resume, the panel feedback, my notes, and the three reference summaries I have shared. Give me the three strongest arguments in favour of an offer, the three strongest arguments against, and the five questions I have not yet asked myself.</p>
+            <p class="flip-back-note">Do not recommend. I want the second opinion a good advisor would give over coffee &mdash; specific, hedged where it should be, and honest about what is missing.</p>
+            <p class="flip-prompt-cite">&mdash; Yuki, Founder &amp; CEO</p>
+          </div>
+        </div>
       </article>
 
-      <article class="use-essay">
-        <div class="use-num">06</div>
-        <p class="cat">The builder</p>
-        <h3>A tiny tool, ready in twenty minutes.</h3>
-        <p>Esme runs operations for a fourteen-person agency. Her team has been guessing at project pricing using a spreadsheet that is technically a calculator but practically a museum piece. She does not have a developer. She does not want one.</p>
-        <p>She describes the calculator she wishes she had &mdash; inputs for scope, team size, project length, complexity multiplier; outputs for floor, target, and ceiling price. Claude builds it as an Artifact. She tests it against five recent projects. She tweaks two of the multipliers. She shares the link with her team. Twenty minutes. It is not a product. It is a <em>tiny tool</em>. The category is new, and it is one of the most useful things her team will use this year.</p>
+      <article class="use-essay" tabindex="0">
+        <div class="flip-tile">
+          <div class="face front">
+            <div class="use-num">06</div>
+            <p class="cat">The builder</p>
+            <h3>A tiny tool, ready in twenty minutes.</h3>
+            <p>Esme runs operations for a fourteen-person agency. Her team has been guessing at project pricing using a spreadsheet that is technically a calculator but practically a museum piece. She does not have a developer. She does not want one.</p>
+            <p>She describes the calculator she wishes she had &mdash; inputs for scope, team size, project length, complexity multiplier; outputs for floor, target, and ceiling price. Claude builds it as an Artifact. She tests it against five recent projects. She tweaks two of the multipliers. She shares the link with her team. Twenty minutes. It is not a product. It is a <em>tiny tool</em>. The category is new, and it is one of the most useful things her team will use this year.</p>
+            <span class="flip-hint">Hover for the prompt</span>
+          </div>
+          <div class="face back" aria-label="Build prompt">
+            <span class="flip-back-kicker">Prompt &middot; Build</span>
+            <p class="flip-back-title">A calculator, as an Artifact.</p>
+            <p class="flip-prompt">Build me a project-pricing calculator as an Artifact. Inputs: scope (S/M/L), team size (1&ndash;8), project length in weeks, complexity multiplier (1.0&ndash;2.5). Outputs: floor price, target price, ceiling price, and a one-line rationale per output.</p>
+            <p class="flip-back-note">Use our agency rate card from the doc I shared. Style it like a simple form &mdash; warm cream background, italic serif headings. I'll share the link with my team in ten minutes.</p>
+            <p class="flip-prompt-cite">&mdash; Esme, Ops lead, agency</p>
+          </div>
+        </div>
       </article>
     </div>
   </section>
@@ -1610,28 +2012,31 @@
     </div>
 
     <div class="vignettes reveal">
-      <article class="vignette">
+      <article class="vignette" id="vignette-maya">
         <p class="role">Marketing lead &middot; Agency, twelve people</p>
         <h3>Proposals that used to take a day take an hour.</h3>
-        <p>Maya kept a folder of past winning proposals the way some people keep a recipe box. Forty-eight documents, dating back four years, each one a slightly different shape of "yes." Before Claude, the folder was a reference she would dip into when she needed to remember how a clause was phrased. It was useful, but it was passive.</p>
-        <p>For the last nine months, the folder has been active. When a new RFP comes in, Maya gives Claude the brief and points it at the folder. She gets back a draft that already sounds like her firm &mdash; the cadence of the sections, the way her firm talks about pricing, the small turns of phrase her team is known for. She edits. She does not author from scratch. The proposal that used to take her a full Wednesday now takes ninety minutes. She is using that recovered time, mostly, to take on the kind of work she could not previously fit in.</p>
-        <p class="quote">&ldquo;I'm not faster at writing. I am much, much faster at <em>starting</em>. That turns out to be most of it.&rdquo;</p>
+        <p id="maya-para-1">Maya kept a folder of past winning proposals the way some people keep a recipe box. Forty-eight documents, dating back four years, each one a slightly different shape of "yes." Before Claude, the folder was a reference she would dip into when she needed to remember how a clause was phrased. It was useful, but it was passive.</p>
+        <p id="maya-para-2">For the last nine months, the folder has been active. When a new RFP comes in, Maya gives Claude the brief and points it at the folder. She gets back a draft that already sounds like her firm &mdash; the cadence of the sections, the way her firm talks about pricing, the small turns of phrase her team is known for. She edits. She does not author from scratch. The proposal that used to take her a full Wednesday now takes ninety minutes. She is using that recovered time, mostly, to take on the kind of work she could not previously fit in.</p>
+        <p class="quote" id="maya-quote">&ldquo;I'm not faster at writing. I am much, much faster at <em>starting</em>. That turns out to be most of it.&rdquo;</p>
+        <button type="button" class="read-story" data-target="maya-para-2">Read story</button>
       </article>
 
-      <article class="vignette">
+      <article class="vignette" id="vignette-diego">
         <p class="role">Operations &middot; DTC brand, $18M revenue</p>
         <h3>Vendor data, finally clean.</h3>
-        <p>Diego inherited a supplier list that lived across six spreadsheets in six formats. Two of the suppliers were the same supplier under two different names. One had a quarterly price drift that nobody had caught. The list had been "on the list to clean up" for two and a half years &mdash; a project that was always one priority away.</p>
-        <p>In the first month of using Claude, Diego dropped all six spreadsheets into a Project. He asked for one reconciled view with cost trends by category, a flag on anything that looked like a duplicate, and a chart of price movement per supplier per quarter. The Artifact he got back was, in his words, "the version of this work I would have done if I had had three uninterrupted weeks." He now runs the same reconciliation as a monthly ritual. Last quarter, Claude caught a fourteen-per-cent price drift on a packaging supplier two weeks before it would have hit the P&amp;L. That single catch paid for the year.</p>
-        <p class="quote">&ldquo;The headache became a Monday-morning habit. That is the whole story.&rdquo;</p>
+        <p id="diego-para-1">Diego inherited a supplier list that lived across six spreadsheets in six formats. Two of the suppliers were the same supplier under two different names. One had a quarterly price drift that nobody had caught. The list had been "on the list to clean up" for two and a half years &mdash; a project that was always one priority away.</p>
+        <p id="diego-para-2">In the first month of using Claude, Diego dropped all six spreadsheets into a Project. He asked for one reconciled view with cost trends by category, a flag on anything that looked like a duplicate, and a chart of price movement per supplier per quarter. The Artifact he got back was, in his words, "the version of this work I would have done if I had had three uninterrupted weeks." He now runs the same reconciliation as a monthly ritual. Last quarter, Claude caught a fourteen-per-cent price drift on a packaging supplier two weeks before it would have hit the P&amp;L. That single catch paid for the year.</p>
+        <p class="quote" id="diego-quote">&ldquo;The headache became a Monday-morning habit. That is the whole story.&rdquo;</p>
+        <button type="button" class="read-story" data-target="diego-para-2">Read story</button>
       </article>
 
-      <article class="vignette">
+      <article class="vignette" id="vignette-priya">
         <p class="role">CEO &middot; Services firm, forty people</p>
         <h3>Board updates that don't eat the weekend.</h3>
-        <p>Priya used to spend Sunday mornings writing her monthly board update. Coffee, the kitchen table, the dread of starting. She would assemble the numbers, the wins, the misses, the "asks of the board." It took, on average, four hours. It took longer when the month had been hard.</p>
-        <p>The board update now starts on Friday afternoon, in Claude. Priya gives it the month's metrics, the team's weekly check-ins, and three talking points she wants to make. She gets back a draft already structured in the way her board likes to read &mdash; numbers first, then narrative, then asks. She rewrites the parts that need her voice, which is mostly the narrative and almost all of the asks. The draft is on her chairman's desk by Friday at six. Her Sunday mornings are her own again. The board, she reports, has not noticed a thing &mdash; except that the updates have become more consistent.</p>
-        <p class="quote">&ldquo;It is not writing for me. It is getting me to the page. Once I am there, I am still me.&rdquo;</p>
+        <p id="priya-para-1">Priya used to spend Sunday mornings writing her monthly board update. Coffee, the kitchen table, the dread of starting. She would assemble the numbers, the wins, the misses, the "asks of the board." It took, on average, four hours. It took longer when the month had been hard.</p>
+        <p id="priya-para-2">The board update now starts on Friday afternoon, in Claude. Priya gives it the month's metrics, the team's weekly check-ins, and three talking points she wants to make. She gets back a draft already structured in the way her board likes to read &mdash; numbers first, then narrative, then asks. She rewrites the parts that need her voice, which is mostly the narrative and almost all of the asks. The draft is on her chairman's desk by Friday at six. Her Sunday mornings are her own again. The board, she reports, has not noticed a thing &mdash; except that the updates have become more consistent.</p>
+        <p class="quote" id="priya-quote">&ldquo;It is not writing for me. It is getting me to the page. Once I am there, I am still me.&rdquo;</p>
+        <button type="button" class="read-story" data-target="priya-para-2">Read story</button>
       </article>
     </div>
   </section>
@@ -1732,8 +2137,256 @@
   </footer>
 
   <script>
-    // Letter-spacing tighten on cover headline entry
+    // ============ REDUCED-MOTION GATE ============
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ============ TICKING CLOCKS — Tuesday morning ============
+    // Real-time playback: 60 simulated seconds per real second.
+    // LEFT: 9:14 a.m. -> 11:17 a.m. (123 sim-min => 123s real). 7 tasks at data-at minute marks.
+    // RIGHT: 9:14 a.m. -> 9:18 a.m. (4 sim-min => 4s real). 5 tasks. Then stops at 9:18.
+    // After right finishes + a beat, the italic callout appears.
+    (function setupTuesdayClocks() {
+      const root = document.getElementById('tuesday-vs');
+      if (!root) return;
+
+      const clockBeforeEl = document.getElementById('clock-before');
+      const clockAfterEl  = document.getElementById('clock-after');
+      const listBefore = document.getElementById('list-before');
+      const listAfter  = document.getElementById('list-after');
+      const tallyBefore = document.getElementById('tally-before');
+      const tallyAfter  = document.getElementById('tally-after');
+      const calloutAfter = document.getElementById('callout-after');
+      const finalCallout = document.getElementById('vs-final-callout');
+      const playBtn   = document.getElementById('vs-play');
+      const replayBtn = document.getElementById('vs-replay');
+      const skipBtn   = document.getElementById('vs-skip');
+
+      const START_HOUR = 9;
+      const START_MIN  = 14;
+      const END_BEFORE_MIN = 123; // 2h 03m
+      const END_AFTER_MIN  = 4;   // 4m
+      const SIM_PER_SECOND = 60;  // simulated-minutes per real-second is 60 (1 sim-min per ~1s real... wait)
+
+      // We want LEFT to take 123 real seconds to play 123 sim-minutes.
+      // That means 1 sim-minute per 1 real second  =>  speed = 1 sim-min / 1000 ms.
+      // We want RIGHT to play 4 sim-minutes in 4 real seconds at the same speed (same clock).
+      // So both clocks share the same speed: 1 sim-min per 1000 ms.
+
+      const PLAY_MS = 1000; // ms per simulated minute
+
+      function fmt(min) {
+        const total = START_HOUR * 60 + START_MIN + Math.floor(min);
+        let hr = Math.floor(total / 60);
+        const m = total % 60;
+        const ampm = hr >= 12 ? 'p.m.' : 'a.m.';
+        if (hr === 0) hr = 12;
+        if (hr > 12) hr -= 12;
+        return { time: hr + ':' + String(m).padStart(2, '0'), ampm: ampm };
+      }
+      function setClock(el, min) {
+        const { time, ampm } = fmt(min);
+        el.querySelector('.time').textContent = time;
+        el.querySelector('.ampm').textContent = ampm;
+      }
+
+      // Initial state
+      function resetState() {
+        listBefore.querySelectorAll('li').forEach(li => li.classList.remove('done'));
+        listAfter.querySelectorAll('li').forEach(li => li.classList.remove('done'));
+        tallyBefore.classList.remove('shown');
+        tallyAfter.classList.remove('shown');
+        calloutAfter.classList.remove('shown');
+        finalCallout.classList.remove('shown');
+        clockBeforeEl.classList.remove('live');
+        clockAfterEl.classList.remove('live');
+        setClock(clockBeforeEl, 0);
+        setClock(clockAfterEl, 0);
+      }
+
+      function showFinalState() {
+        listBefore.querySelectorAll('li').forEach(li => li.classList.add('done'));
+        listAfter.querySelectorAll('li').forEach(li => li.classList.add('done'));
+        tallyBefore.classList.add('shown');
+        tallyAfter.classList.add('shown');
+        calloutAfter.classList.add('shown');
+        finalCallout.classList.add('shown');
+        clockBeforeEl.classList.remove('live');
+        clockAfterEl.classList.remove('live');
+        setClock(clockBeforeEl, END_BEFORE_MIN);
+        setClock(clockAfterEl, END_AFTER_MIN);
+      }
+
+      // If reduced motion, show final state immediately and skip the play machine
+      if (reduced) {
+        showFinalState();
+        playBtn.disabled = true;
+        replayBtn.disabled = true;
+        skipBtn.disabled = true;
+        return;
+      }
+
+      let rafId = null;
+      let startTs = null;
+      let playing = false;
+      let finished = false;
+
+      function stop() {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        rafId = null;
+        playing = false;
+        clockBeforeEl.classList.remove('live');
+        clockAfterEl.classList.remove('live');
+      }
+
+      function tick(ts) {
+        if (startTs === null) startTs = ts;
+        const elapsedMs = ts - startTs;
+        const simMinBefore = Math.min(END_BEFORE_MIN, elapsedMs / PLAY_MS);
+        const simMinAfter  = Math.min(END_AFTER_MIN, elapsedMs / PLAY_MS);
+        setClock(clockBeforeEl, simMinBefore);
+        setClock(clockAfterEl, simMinAfter);
+
+        // Mark tasks done as we cross each task's data-at minute
+        listBefore.querySelectorAll('li').forEach(li => {
+          const at = parseFloat(li.dataset.at);
+          if (simMinBefore >= at && !li.classList.contains('done')) li.classList.add('done');
+        });
+        listAfter.querySelectorAll('li').forEach(li => {
+          const at = parseFloat(li.dataset.at);
+          if (simMinAfter >= at && !li.classList.contains('done')) li.classList.add('done');
+        });
+
+        // After 4 sim-minutes: stop the RIGHT clock, show its tally + callout
+        if (simMinAfter >= END_AFTER_MIN && !tallyAfter.classList.contains('shown')) {
+          tallyAfter.classList.add('shown');
+          clockAfterEl.classList.remove('live');
+          setTimeout(() => calloutAfter.classList.add('shown'), 240);
+        }
+
+        if (simMinBefore < END_BEFORE_MIN) {
+          rafId = requestAnimationFrame(tick);
+        } else {
+          // Done — LEFT clock catches up to 11:17
+          setClock(clockBeforeEl, END_BEFORE_MIN);
+          tallyBefore.classList.add('shown');
+          stop();
+          finished = true;
+          replayBtn.disabled = false;
+          playBtn.disabled = false;
+          playBtn.innerHTML = '&#9654; Play again';
+          setTimeout(() => finalCallout.classList.add('shown'), 220);
+        }
+      }
+
+      function play() {
+        if (playing) return;
+        if (finished) resetState();
+        finished = false;
+        playing = true;
+        startTs = null;
+        playBtn.disabled = true;
+        replayBtn.disabled = true;
+        clockBeforeEl.classList.add('live');
+        clockAfterEl.classList.add('live');
+        rafId = requestAnimationFrame(tick);
+      }
+      function replay() {
+        stop();
+        resetState();
+        finished = false;
+        setTimeout(play, 60);
+      }
+      function skip() {
+        stop();
+        showFinalState();
+        finished = true;
+        playBtn.disabled = false;
+        replayBtn.disabled = false;
+        playBtn.innerHTML = '&#9654; Play again';
+      }
+
+      playBtn.addEventListener('click', play);
+      replayBtn.addEventListener('click', replay);
+      skipBtn.addEventListener('click', skip);
+
+      // Auto-play once when the spread enters view
+      const auto = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !playing && !finished) {
+            play();
+            auto.disconnect();
+          }
+        });
+      }, { threshold: 0.45 });
+      auto.observe(root);
+    })();
+
+    // ============ FLIP TILES (touch / tap support) ============
+    (function setupFlipTiles() {
+      if (reduced) return;
+      document.querySelectorAll('.use-essay').forEach((tile) => {
+        tile.addEventListener('click', (e) => {
+          // Only toggle on touch / tap (hover already handles desktop)
+          if (window.matchMedia('(hover: hover)').matches) return;
+          tile.classList.toggle('flipped');
+        });
+        tile.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            tile.classList.toggle('flipped');
+          }
+        });
+      });
+    })();
+
+    // ============ PULL-QUOTE PARALLAX ============
+    (function setupPullQuoteParallax() {
+      if (reduced) return;
+      const pq = document.querySelector('.pullquote');
+      if (!pq) return;
+      let pqTicking = false;
+      function update() {
+        const vh = window.innerHeight;
+        const rect = pq.getBoundingClientRect();
+        // progress: 0 when entering bottom, 1 when leaving top
+        const center = rect.top + rect.height / 2;
+        const offset = (center - vh / 2) * 0.06;
+        pq.style.setProperty('--pq-drift', offset.toFixed(2));
+        pqTicking = false;
+      }
+      window.addEventListener('scroll', () => {
+        if (!pqTicking) {
+          requestAnimationFrame(update);
+          pqTicking = true;
+        }
+      }, { passive: true });
+      update();
+    })();
+
+    // ============ READ-STORY VIGNETTE LINKS ============
+    (function setupReadStoryLinks() {
+      document.querySelectorAll('.read-story').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.target;
+          const target = document.getElementById(targetId);
+          if (!target) return;
+          const top = window.scrollY + target.getBoundingClientRect().top - 120;
+          window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+          // Sage highlight fade
+          target.classList.remove('fading');
+          target.classList.add('sage-highlight');
+          // Force reflow before adding fading so transition triggers
+          void target.offsetWidth;
+          setTimeout(() => target.classList.add('fading'), 850);
+          setTimeout(() => {
+            target.classList.remove('sage-highlight');
+            target.classList.remove('fading');
+          }, 2400);
+        });
+      });
+    })();
+
+    // ============ ORIGINAL MOTION: HEADLINE TIGHTEN + PARALLAX + REVEAL ============
     if (!reduced) {
       requestAnimationFrame(() => {
         const h = document.getElementById('cover-headline');

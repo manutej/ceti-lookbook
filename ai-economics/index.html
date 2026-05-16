@@ -579,6 +579,510 @@
       100% { background: transparent; }
     }
 
+    /* ============== CYAN FLASH · ON CALC UPDATE ============== */
+    .cyan-flash {
+      animation: cyan-flash 320ms ease-out;
+    }
+    @keyframes cyan-flash {
+      0%   { background: var(--cyan); color: #000; }
+      60%  { background: rgba(0, 204, 255, 0.35); color: var(--fg); }
+      100% { background: transparent; color: inherit; }
+    }
+
+    /* ============== COST CALCULATOR PANEL ============== */
+    .calc {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--border-bright);
+    }
+    @media (max-width: 760px) {
+      .calc { grid-template-columns: 1fr; }
+    }
+    .calc-side {
+      padding: 14px 16px;
+      background: var(--bg-cell);
+      border-right: 1px solid var(--border-bright);
+    }
+    .calc-side:last-child { border-right: none; }
+    @media (max-width: 760px) {
+      .calc-side { border-right: none; border-bottom: 1px solid var(--border-bright); }
+      .calc-side:last-child { border-bottom: none; }
+    }
+    .calc-side h4 {
+      margin: 0 0 12px;
+      color: var(--amber);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .calc-side h4 .badge {
+      background: var(--amber);
+      color: #000;
+      padding: 1px 6px;
+      font-size: 10px;
+      letter-spacing: 0.10em;
+    }
+    .calc-field {
+      display: grid;
+      grid-template-columns: 130px 1fr 60px;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px dotted var(--border);
+    }
+    .calc-field:last-child { border-bottom: none; }
+    .calc-field label {
+      color: var(--fg-dim);
+      font-size: 11px;
+      letter-spacing: 0.10em;
+    }
+    .calc-field input[type=number],
+    .calc-field select {
+      background: #000;
+      color: var(--cyan);
+      border: 1px solid var(--border-bright);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      padding: 4px 8px;
+      width: 100%;
+      letter-spacing: 0.04em;
+    }
+    .calc-field select {
+      text-transform: uppercase;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, var(--amber) 50%),
+                        linear-gradient(135deg, var(--amber) 50%, transparent 50%);
+      background-position: calc(100% - 14px) 50%, calc(100% - 10px) 50%;
+      background-size: 4px 4px, 4px 4px;
+      background-repeat: no-repeat;
+      padding-right: 22px;
+    }
+    .calc-field input[type=number]:focus,
+    .calc-field select:focus {
+      outline: 1px solid var(--cyan);
+      outline-offset: 0;
+      border-color: var(--cyan);
+    }
+    .calc-field input[type=number]::-webkit-inner-spin-button,
+    .calc-field input[type=number]::-webkit-outer-spin-button {
+      opacity: 1;
+      filter: invert(0.7) hue-rotate(180deg);
+    }
+    .calc-field .unit {
+      font-size: 10px;
+      color: var(--fg-mute);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: right;
+    }
+    .calc-slider-row {
+      display: grid;
+      grid-template-columns: 130px 1fr 60px;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px dotted var(--border);
+    }
+    .calc-slider-row label { color: var(--fg-dim); font-size: 11px; letter-spacing: 0.10em; }
+    .calc-slider-row .sval {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 600;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .calc-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 18px;
+      background: transparent;
+      cursor: ew-resize;
+    }
+    .calc-slider::-webkit-slider-runnable-track {
+      height: 4px;
+      background: linear-gradient(90deg, var(--cyan) 0%, var(--cyan) var(--fill, 80%), var(--border-bright) var(--fill, 80%), var(--border-bright) 100%);
+      border: 1px solid var(--border);
+    }
+    .calc-slider::-moz-range-track {
+      height: 4px;
+      background: var(--border-bright);
+      border: 1px solid var(--border);
+    }
+    .calc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 10px;
+      height: 16px;
+      background: var(--amber);
+      border: 1px solid #000;
+      margin-top: -7px;
+      cursor: ew-resize;
+    }
+    .calc-slider::-moz-range-thumb {
+      width: 10px;
+      height: 16px;
+      background: var(--amber);
+      border: 1px solid #000;
+      border-radius: 0;
+      cursor: ew-resize;
+    }
+    .calc-out {
+      display: grid;
+      grid-template-columns: 90px 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 8px 10px;
+      border-bottom: 1px dotted var(--border);
+      align-items: baseline;
+      font-variant-numeric: tabular-nums;
+    }
+    .calc-out:last-child { border-bottom: none; }
+    .calc-out .col-l {
+      color: var(--fg-dim);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+    }
+    .calc-out .col-un {
+      color: var(--red);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: right;
+    }
+    .calc-out .col-delta {
+      color: var(--green);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-align: center;
+    }
+    .calc-out .col-c {
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: right;
+    }
+    .calc-out.head {
+      border-bottom: 1px solid var(--amber);
+    }
+    .calc-out.head .col-l { color: var(--amber); }
+    .calc-out.head .col-un, .calc-out.head .col-c, .calc-out.head .col-delta {
+      color: var(--amber);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+    }
+    .calc-formula {
+      margin-top: 12px;
+      padding: 8px 10px;
+      background: #000;
+      border: 1px dashed var(--border-bright);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--fg-mute);
+      line-height: 1.7;
+    }
+    .calc-formula b { color: var(--cyan); font-weight: 500; }
+    .calc-formula em { color: var(--amber); font-style: normal; }
+
+    /* ============== COST CURVE SCRUBBER ============== */
+    .curve-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--bg-cell);
+      border: 1px solid var(--border);
+      border-top: none;
+      flex-wrap: wrap;
+    }
+    .curve-controls .btn-play {
+      background: var(--amber);
+      color: #000;
+      border: none;
+      padding: 4px 12px;
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      cursor: pointer;
+      transition: background 80ms linear;
+    }
+    .curve-controls .btn-play:hover { background: var(--amber-bright); }
+    .curve-controls .btn-play.playing { background: var(--cyan); }
+    .curve-controls .scrub-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 220px;
+    }
+    .curve-controls input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 16px;
+      background: transparent;
+    }
+    .curve-controls input[type=range]::-webkit-slider-runnable-track {
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan) 0%, var(--cyan) var(--fill, 0%), var(--border-bright) var(--fill, 0%), var(--border-bright) 100%);
+      border: 1px solid var(--border);
+    }
+    .curve-controls input[type=range]::-moz-range-track {
+      height: 3px;
+      background: var(--border-bright);
+      border: 1px solid var(--border);
+    }
+    .curve-controls input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 8px;
+      height: 14px;
+      background: var(--amber);
+      border: 1px solid #000;
+      margin-top: -6px;
+      cursor: ew-resize;
+    }
+    .curve-controls input[type=range]::-moz-range-thumb {
+      width: 8px;
+      height: 14px;
+      background: var(--amber);
+      border: 1px solid #000;
+      border-radius: 0;
+      cursor: ew-resize;
+    }
+    .curve-controls .scrub-read {
+      font-size: 11px;
+      letter-spacing: 0.10em;
+      color: var(--fg-dim);
+      min-width: 240px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .curve-controls .scrub-read b { color: var(--cyan); font-weight: 500; }
+    .curve-controls .scrub-read .g { color: var(--green); }
+    .curve-controls .scrub-read .r { color: var(--red); }
+
+    /* SVG scrubber elements */
+    svg.curve .scrub-line { stroke: var(--amber); stroke-width: 1; stroke-dasharray: 2, 3; opacity: 0.85; }
+    svg.curve .scrub-dot-c { fill: var(--green); stroke: var(--amber); stroke-width: 1.5; }
+    svg.curve .scrub-dot-u { fill: var(--red); stroke: var(--amber); stroke-width: 1.5; }
+    svg.curve .scrub-tag {
+      fill: var(--amber);
+      font-family: var(--font);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+    svg.curve .hit-pulse {
+      animation: hit-pulse 0.6s ease-out;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    @keyframes hit-pulse {
+      0%   { transform: scale(1); fill: var(--cyan); }
+      60%  { transform: scale(3); fill: var(--cyan); }
+      100% { transform: scale(1); fill: var(--green); }
+    }
+
+    /* ============== F-KEY BUTTONS (now clickable) ============== */
+    .fkey {
+      cursor: pointer;
+      user-select: none;
+      transition: background 60ms linear, color 60ms linear;
+    }
+    .fkey:hover { background: rgba(255, 149, 0, 0.10); color: var(--amber-bright); }
+    .fkey:active { background: var(--amber); color: #000; }
+    .fkey:focus-visible {
+      outline: 1px dashed var(--cyan);
+      outline-offset: -2px;
+    }
+
+    /* ============== TOAST · F7 EXPORT ============== */
+    .toast-wrap {
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      z-index: 95;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 320px;
+    }
+    .toast {
+      background: #000;
+      border: 1px solid var(--amber);
+      color: var(--fg);
+      padding: 10px 14px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      box-shadow: 0 0 0 1px #000, 0 2px 12px rgba(255, 149, 0, 0.25);
+      animation: toast-in 220ms ease-out;
+    }
+    .toast.cyan { border-color: var(--cyan); }
+    .toast.green { border-color: var(--green); }
+    .toast .t-l {
+      color: var(--amber);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      font-size: 10px;
+      margin-right: 8px;
+    }
+    .toast.cyan .t-l { color: var(--cyan); }
+    .toast.green .t-l { color: var(--green); }
+    @keyframes toast-in {
+      0%   { transform: translateY(8px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    .toast.out { animation: toast-out 220ms ease-in forwards; }
+    @keyframes toast-out {
+      0%   { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(8px); opacity: 0; }
+    }
+
+    /* ============== HELP OVERLAY · F1 ============== */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.86);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .overlay.open { display: flex; }
+    .overlay-box {
+      background: #000;
+      border: 1px solid var(--amber);
+      max-width: 580px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .overlay-bar {
+      padding: 6px 12px;
+      background: var(--amber);
+      color: #000;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .overlay-bar .x {
+      cursor: pointer;
+      background: #000;
+      color: var(--amber);
+      padding: 1px 8px;
+      font-weight: 700;
+    }
+    .overlay-body {
+      padding: 16px 18px;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--fg);
+    }
+    .overlay-body .kk {
+      background: var(--bg-cell);
+      color: var(--amber);
+      padding: 1px 6px;
+      border: 1px solid var(--border-bright);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-right: 8px;
+    }
+    .overlay-body p { margin: 6px 0; }
+
+    /* ============== LEDGER MATH TOOLTIPS ============== */
+    table.ledger tbody tr[data-math] {
+      cursor: help;
+      position: relative;
+    }
+    table.ledger tbody tr[data-math]:hover {
+      background: rgba(0, 204, 255, 0.06);
+    }
+    table.ledger tbody tr[data-math]:hover td:first-child {
+      color: var(--amber);
+    }
+    .math-tip {
+      position: fixed;
+      z-index: 105;
+      background: #000;
+      border: 1px solid var(--cyan);
+      color: var(--fg);
+      padding: 8px 12px;
+      font-family: var(--font);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      line-height: 1.7;
+      max-width: 360px;
+      pointer-events: none;
+      box-shadow: 0 0 0 1px #000, 0 4px 16px rgba(0, 204, 255, 0.25);
+      display: none;
+    }
+    .math-tip.open { display: block; }
+    .math-tip b { color: var(--cyan); font-weight: 500; }
+    .math-tip em { color: var(--amber); font-style: normal; }
+    .math-tip .g { color: var(--green); }
+    .math-tip .r { color: var(--red); }
+
+    /* ============== APPLY BUTTONS ON CHECKLIST ============== */
+    .check-row .ci .apply-btn {
+      display: inline-block;
+      background: transparent;
+      color: var(--cyan);
+      border: 1px solid var(--cyan-dim);
+      font-family: var(--font);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      margin-top: 4px;
+      cursor: pointer;
+      transition: background 80ms linear, color 80ms linear;
+    }
+    .check-row .ci .apply-btn:hover {
+      background: var(--cyan);
+      color: #000;
+      border-color: var(--cyan);
+    }
+    .check-row .ci .apply-btn.applied {
+      background: var(--green-dim);
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    /* ============== MODEL ROW ACTIVE STATE ============== */
+    table.matrix tbody tr.active-model {
+      background: rgba(0, 204, 255, 0.10);
+    }
+    table.matrix tbody tr.active-model td:first-child {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+    table.matrix tbody tr.active-model td:first-child::before {
+      content: '▸ ';
+      color: var(--amber);
+    }
+    table.matrix tbody tr {
+      cursor: pointer;
+    }
+
+    /* Make calculator outputs flash subtly */
+    .calc-out .flashable {
+      display: inline-block;
+      padding: 1px 4px;
+      transition: background 60ms linear;
+    }
+
     /* ============== MINI-CHART (sparkline) ============== */
     .spark {
       display: inline-block;
@@ -614,6 +1118,10 @@
       .cmd-line .caret { animation: none !important; background: var(--amber); }
       .flash, .nflash.up, .nflash.dn { animation: none !important; }
       table.matrix .flash { background: transparent !important; color: var(--fg) !important; }
+      .cyan-flash { animation: none !important; }
+      svg.curve .hit-pulse { animation: none !important; }
+      .toast { animation: none !important; }
+      .toast.out { animation: none !important; opacity: 0; }
     }
 
     /* ============== ACCESSIBILITY · FOCUS RINGS ============== */
@@ -843,7 +1351,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr data-model="opus" tabindex="0" aria-label="Select OPUS 4.7 in calculator">
               <td>OPUS 4.7<span class="ven">ANTHROPIC</span></td>
               <td class="high" data-row="opus" data-col="input">5.00</td>
               <td class="high" data-row="opus" data-col="output">25.00</td>
@@ -853,7 +1361,7 @@
               <td class="high">0.88s</td>
               <td class="high">58</td>
             </tr>
-            <tr>
+            <tr data-model="sonnet" tabindex="0" aria-label="Select SONNET 4.6 in calculator">
               <td>SONNET 4.6<span class="ven">ANTHROPIC</span></td>
               <td class="mid" data-row="sonnet" data-col="input">3.00</td>
               <td class="mid" data-row="sonnet" data-col="output">15.00</td>
@@ -863,7 +1371,7 @@
               <td class="mid">0.50s</td>
               <td class="mid">95</td>
             </tr>
-            <tr>
+            <tr data-model="haiku" tabindex="0" aria-label="Select HAIKU 4.5 in calculator">
               <td>HAIKU 4.5<span class="ven">ANTHROPIC</span></td>
               <td class="low" data-row="haiku" data-col="input">1.00</td>
               <td class="low" data-row="haiku" data-col="output">5.00</td>
@@ -873,7 +1381,7 @@
               <td class="low">0.20s</td>
               <td class="low">185</td>
             </tr>
-            <tr>
+            <tr data-model="gpt52" tabindex="0" aria-label="Select GPT-5.2 in calculator">
               <td>GPT-5.2<span class="ven">OPENAI</span></td>
               <td class="mid" data-row="gpt52" data-col="input">1.75</td>
               <td class="mid" data-row="gpt52" data-col="output">14.00</td>
@@ -883,7 +1391,7 @@
               <td class="mid">0.42s</td>
               <td class="mid">112</td>
             </tr>
-            <tr>
+            <tr data-model="o3" tabindex="0" aria-label="Select O3 in calculator">
               <td>O3 (REASONING)<span class="ven">OPENAI</span></td>
               <td class="mid">2.00</td>
               <td class="mid">8.00</td>
@@ -893,7 +1401,7 @@
               <td class="high">1.20s</td>
               <td class="high">48</td>
             </tr>
-            <tr>
+            <tr data-model="gemini31" tabindex="0" aria-label="Select GEMINI 3.1 PRO in calculator">
               <td>GEMINI 3.1 PRO<span class="ven">GOOGLE</span></td>
               <td class="mid">2.00</td>
               <td class="mid">12.00</td>
@@ -903,7 +1411,7 @@
               <td class="mid">0.65s</td>
               <td class="mid">72</td>
             </tr>
-            <tr>
+            <tr data-model="gemini25f" tabindex="0" aria-label="Select GEMINI 2.5 FLASH in calculator">
               <td>GEMINI 2.5 FLASH<span class="ven">GOOGLE</span></td>
               <td class="low">0.30</td>
               <td class="low">2.50</td>
@@ -1004,7 +1512,23 @@
             <text x="795" y="234" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#00FF00" text-anchor="end">$24.00 CACHED ▼</text>
             <!-- Delta annotation -->
             <text x="795" y="252" font-family="IBM Plex Mono, monospace" font-size="9" fill="#A09684" text-anchor="end">−87.88% Δ</text>
+            <!-- Scrubber overlay (driven by JS) -->
+            <g id="curveScrubGroup" style="display: none;">
+              <line id="curveScrubLine" class="scrub-line" x1="50" y1="20" x2="50" y2="300"/>
+              <circle id="curveScrubDotU" class="scrub-dot-u" cx="50" cy="300" r="4"/>
+              <circle id="curveScrubDotC" class="scrub-dot-c" cx="50" cy="300" r="4"/>
+              <text id="curveScrubTag" class="scrub-tag" x="50" y="14" text-anchor="middle">00:00</text>
+            </g>
           </svg>
+        </div>
+        <div class="curve-controls" role="group" aria-label="Cost curve scrubber">
+          <button class="btn-play" id="curvePlayBtn" type="button" aria-label="Play 24-hour cost simulation">▶ PLAY 24H</button>
+          <div class="scrub-wrap">
+            <input id="curveScrub" type="range" min="0" max="1440" step="1" value="0" aria-label="Hour scrubber (0-24h)" style="--fill: 0%;">
+          </div>
+          <div class="scrub-read" id="curveScrubRead">
+            HOUR <b>00:00</b> · UNCACHED <span class="r">$0.00</span> · CACHED <span class="g">$0.00</span> · Δ <b>0%</b>
+          </div>
         </div>
         <div class="curve-legend">
           <span><span class="swatch cyan"></span>UNCACHED · SYNC</span>
@@ -1019,6 +1543,109 @@
           <p>Lever two: <strong>prompt caching</strong>. Anthropic charges 1.25× base on the first request that writes a cache entry and 0.10× base on every request that reads it within the TTL — five minutes on the default tier, one hour on the extended tier. Mathematically: at <span class="pos">k</span> cache reads per write, average input cost per request is <code>(1.25 + 0.10·k) / (k+1)</code> times base. At <span class="pos">k=5</span>, that is <span class="pos">0.29×</span> — a seventy-one-percent input discount. At <span class="pos">k=20</span>, it is <span class="pos">0.15×</span>. The math says: cache anything stable that is read more than five times within the TTL window.</p>
           <p>Lever three: <strong>batch API</strong>. A flat fifty-percent discount in exchange for up to twenty-four hours of latency. Stacks with caching, stacks with model selection. For overnight evals on a Haiku-class model with a cached system prompt and batch submission, you are paying five percent of the synchronous Opus rate. That is the ninety-five-percent corner — the cheapest one-million tokens in the matrix is a batched cached Haiku read at approximately <span class="pos">$0.05</span> per million.</p>
           <p>Lever four: <strong>output token discipline</strong>. Output tokens cost five times input on every Anthropic frontier model and roughly the same multiplier elsewhere. The default <code>max_tokens</code> on most SDKs is high — four thousand or eight thousand — and most production prompts ship with the default. They should not. The right discipline is: pick the smallest output budget that still produces complete answers, prefer structured output schemas (JSON mode forces the model to be concise), and prune system instructions that ask the model to "explain its reasoning" or "be thorough" unless you actually want to pay five-times-input for that explanation.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 04 · LIVE COST CALCULATOR =============== -->
+    <section class="panel" id="calcPanel">
+      <div class="panel-bar">
+        <span class="panel-id">04</span>COST CALCULATOR // LIVE · CACHED-VS-UNCACHED
+        <span class="panel-meta">F4 GRAPH · <b>EDIT ANY FIELD</b></span>
+      </div>
+      <div class="panel-body" style="padding: 0;">
+        <div class="calc">
+          <div class="calc-side">
+            <h4><span class="badge">IN</span>INPUTS · USAGE SHAPE</h4>
+            <div class="calc-field">
+              <label for="ci-in">INPUT TOKENS</label>
+              <input id="ci-in" type="number" min="0" max="2000000" step="500" value="10000" aria-label="Input tokens per call">
+              <span class="unit">/ CALL</span>
+            </div>
+            <div class="calc-field">
+              <label for="ci-out">OUTPUT TOKENS</label>
+              <input id="ci-out" type="number" min="0" max="32000" step="50" value="1500" aria-label="Output tokens per call">
+              <span class="unit">/ CALL</span>
+            </div>
+            <div class="calc-field">
+              <label for="ci-calls">CALLS / DAY</label>
+              <input id="ci-calls" type="number" min="0" max="10000000" step="100" value="1000" aria-label="Calls per day">
+              <span class="unit">QUERIES</span>
+            </div>
+            <div class="calc-field">
+              <label for="ci-model">MODEL</label>
+              <select id="ci-model" aria-label="Model selection">
+                <option value="opus">OPUS 4.7 · ANTHROPIC</option>
+                <option value="sonnet" selected>SONNET 4.6 · ANTHROPIC</option>
+                <option value="haiku">HAIKU 4.5 · ANTHROPIC</option>
+                <option value="gpt52">GPT-5.2 · OPENAI</option>
+                <option value="o3">O3 · OPENAI</option>
+                <option value="gemini31">GEMINI 3.1 PRO · GOOGLE</option>
+                <option value="gemini25f">GEMINI 2.5 FLASH · GOOGLE</option>
+              </select>
+              <span class="unit">VENDOR</span>
+            </div>
+            <div class="calc-slider-row">
+              <label for="ci-cache">CACHE HIT RATE</label>
+              <input id="ci-cache" class="calc-slider" type="range" min="0" max="100" step="1" value="80" aria-label="Cache hit rate (percent)" style="--fill: 80%;">
+              <span class="sval" id="ci-cache-val">80%</span>
+            </div>
+            <div class="calc-slider-row">
+              <label for="ci-batch">BATCH SHARE</label>
+              <input id="ci-batch" class="calc-slider" type="range" min="0" max="100" step="1" value="0" aria-label="Batch API share (percent)" style="--fill: 0%;">
+              <span class="sval" id="ci-batch-val">0%</span>
+            </div>
+            <div class="calc-formula">
+              <em>FORMULA</em> · per request<br>
+              <b>IN-COST</b> = (1−H)·in·P<sub>in</sub> + H·in·P<sub>cached</sub><br>
+              <b>OUT-COST</b> = out · P<sub>out</sub><br>
+              <b>BATCH</b> applies <em>−50%</em> over <em>B%</em> of calls
+            </div>
+          </div>
+
+          <div class="calc-side" id="calcOutSide">
+            <h4><span class="badge">$</span>OUTPUT · USD COST</h4>
+            <div class="calc-out head">
+              <span class="col-l">PERIOD</span>
+              <span class="col-un">UNCACHED</span>
+              <span class="col-delta">Δ</span>
+              <span class="col-c">YOURS</span>
+            </div>
+            <div class="calc-out">
+              <span class="col-l">PER-CALL</span>
+              <span class="col-un"><span class="flashable" id="o-call-u">$0.0000</span></span>
+              <span class="col-delta" id="o-call-d">▼ 0%</span>
+              <span class="col-c"><span class="flashable" id="o-call-y">$0.0000</span></span>
+            </div>
+            <div class="calc-out">
+              <span class="col-l">PER-1K CALLS</span>
+              <span class="col-un"><span class="flashable" id="o-k-u">$0.00</span></span>
+              <span class="col-delta" id="o-k-d">▼ 0%</span>
+              <span class="col-c"><span class="flashable" id="o-k-y">$0.00</span></span>
+            </div>
+            <div class="calc-out">
+              <span class="col-l">DAILY</span>
+              <span class="col-un"><span class="flashable" id="o-d-u">$0.00</span></span>
+              <span class="col-delta" id="o-d-d">▼ 0%</span>
+              <span class="col-c"><span class="flashable" id="o-d-y">$0.00</span></span>
+            </div>
+            <div class="calc-out">
+              <span class="col-l">MONTHLY</span>
+              <span class="col-un"><span class="flashable" id="o-m-u">$0.00</span></span>
+              <span class="col-delta" id="o-m-d">▼ 0%</span>
+              <span class="col-c"><span class="flashable" id="o-m-y">$0.00</span></span>
+            </div>
+            <div class="calc-out">
+              <span class="col-l">ANNUAL</span>
+              <span class="col-un"><span class="flashable" id="o-y-u">$0.00</span></span>
+              <span class="col-delta" id="o-y-d">▼ 0%</span>
+              <span class="col-c"><span class="flashable" id="o-y-y">$0.00</span></span>
+            </div>
+            <div class="calc-formula" id="calcRates">
+              <em>RATES</em> · <b id="r-model">SONNET 4.6</b><br>
+              IN <b id="r-in">$3.00</b>/MTOK · CACHED <b id="r-cached">$0.30</b>/MTOK · OUT <b id="r-out">$15.00</b>/MTOK · BATCH <b id="r-batch">−50%</b>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1240,33 +1867,33 @@ chosen <span class="op">=</span> classifier.<span class="fn">classify</span>(use
           <p>A production retrieval-augmented-generation system serving roughly six thousand daily user queries against an internal documentation corpus. The team had built it on Opus 4.7 because Opus was the model that worked during the demo, and they had never re-evaluated. Daily spend was <span class="neg">$42.18</span>. Here is the line-item engineering:</p>
         </div>
 
-        <div class="sec-head"><span class="num">B</span>BEFORE · OPUS 4.7 · UNCACHED · SYNC</div>
-        <table class="ledger">
+        <div class="sec-head"><span class="num">B</span>BEFORE · OPUS 4.7 · UNCACHED · SYNC <span style="color: var(--fg-mute); font-weight: 400; letter-spacing: 0.08em; margin-left: 10px;">· HOVER ANY ROW FOR THE MATH</span></div>
+        <table class="ledger" id="ledgerBefore">
           <thead>
             <tr><th>LINE</th><th>QUERIES/DAY</th><th>IN-TOK/REQ</th><th>OUT-TOK/REQ</th><th>IN-COST</th><th>OUT-COST</th><th>DAILY</th></tr>
           </thead>
           <tbody>
-            <tr><td>USER QUERIES</td><td>6,000</td><td>10,400</td><td>650</td><td class="add">$5.20</td><td class="add">$3.90</td><td class="add">$32.50</td></tr>
-            <tr><td>RAG RE-RANK CALLS</td><td>6,000</td><td>2,100</td><td>180</td><td class="add">$1.05</td><td class="add">$0.27</td><td class="add">$7.93</td></tr>
-            <tr><td>OVERNIGHT EVAL</td><td>500</td><td>10,400</td><td>650</td><td class="add">$0.43</td><td class="add">$0.33</td><td class="add">$1.50</td></tr>
-            <tr><td>OBS / LOGGING</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="add">$0.25</td></tr>
+            <tr data-math="6000 calls · 10,400 IN @ $5/MTOK = $5.20/call-pool · 650 OUT @ $25/MTOK = $0.0163 · per-call $0.0683 · ×6,000 ÷ 1000 · IN/OUT cost columns are aggregates · daily total <span class='r'>$32.50</span>"><td>USER QUERIES</td><td>6,000</td><td>10,400</td><td>650</td><td class="add">$5.20</td><td class="add">$3.90</td><td class="add">$32.50</td></tr>
+            <tr data-math="6,000 re-rank calls · 2,100 IN @ $5/MTOK = $0.0105/call · 180 OUT @ $25/MTOK = $0.0045 · per-call $0.0150 · daily <span class='r'>$7.93</span> (Opus uncached input dominates)"><td>RAG RE-RANK CALLS</td><td>6,000</td><td>2,100</td><td>180</td><td class="add">$1.05</td><td class="add">$0.27</td><td class="add">$7.93</td></tr>
+            <tr data-math="500 eval runs · 10,400 IN + 650 OUT · Opus uncached · per-run $0.0683 · daily <span class='r'>$1.50</span> · runs against full prompt set every night"><td>OVERNIGHT EVAL</td><td>500</td><td>10,400</td><td>650</td><td class="add">$0.43</td><td class="add">$0.33</td><td class="add">$1.50</td></tr>
+            <tr data-math="DataDog APM + LangSmith traces · 100% sampling · 6K traces/day @ ~5KB each · ~$0.25/day at this tier · <em>often higher than the model bill at scale</em>"><td>OBS / LOGGING</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="add">$0.25</td></tr>
             <tr class="total"><td>TOTAL · DAY</td><td></td><td></td><td></td><td></td><td></td><td>$42.18</td></tr>
           </tbody>
         </table>
 
-        <div class="sec-head"><span class="num">A</span>AFTER · ROUTED · CACHED · BATCHED · TRIMMED</div>
-        <table class="ledger">
+        <div class="sec-head"><span class="num">A</span>AFTER · ROUTED · CACHED · BATCHED · TRIMMED <span style="color: var(--fg-mute); font-weight: 400; letter-spacing: 0.08em; margin-left: 10px;">· HOVER ANY ROW FOR THE MATH</span></div>
+        <table class="ledger" id="ledgerAfter">
           <thead>
             <tr><th>LINE</th><th>QUERIES/DAY</th><th>MODEL</th><th>STRATEGY</th><th>IN-COST</th><th>OUT-COST</th><th>DAILY</th></tr>
           </thead>
           <tbody>
-            <tr><td>ROUTING CLASSIFIER</td><td>6,000</td><td>HAIKU 4.5</td><td>CACHED</td><td>$0.0008</td><td>$0.0003</td><td>$0.07</td></tr>
-            <tr><td>EASY QUERIES (70%)</td><td>4,200</td><td>HAIKU 4.5</td><td>CACHED-5M</td><td class="cut">$0.55</td><td class="cut">$1.36</td><td class="cut">$1.91</td></tr>
-            <tr><td>MEDIUM QUERIES (25%)</td><td>1,500</td><td>SONNET 4.6</td><td>CACHED-5M</td><td class="cut">$0.59</td><td class="cut">$1.46</td><td class="cut">$2.05</td></tr>
-            <tr><td>HARD QUERIES (5%)</td><td>300</td><td>SONNET 4.6</td><td>CACHED · MAX_TOK=400</td><td class="cut">$0.12</td><td class="cut">$0.18</td><td class="cut">$0.30</td></tr>
-            <tr><td>RAG RE-RANK</td><td>6,000</td><td>HAIKU 4.5</td><td>CACHED-1H · MAX_TOK=64</td><td>$0.013</td><td>$0.005</td><td>$0.02</td></tr>
-            <tr><td>OVERNIGHT EVAL</td><td>500</td><td>HAIKU 4.5</td><td>BATCH + CACHE</td><td>$0.003</td><td>$0.003</td><td>$0.01</td></tr>
-            <tr><td>OBS · 1% SAMPLED</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>$0.15</td></tr>
+            <tr data-math="<b>Haiku classifier</b> · ~200 IN @ $1/MTOK cached → $0.0000018/call · <em>routing overhead is rounding error</em> · 6K calls/day = <span class='g'>$0.07</span>"><td>ROUTING CLASSIFIER</td><td>6,000</td><td>HAIKU 4.5</td><td>CACHED</td><td>$0.0008</td><td>$0.0003</td><td>$0.07</td></tr>
+            <tr data-math="<b>70% of traffic</b> · Haiku 4.5 cached · cache-hit 88% · effective IN $0.16/MTOK · 10,400·$0.00016 = $0.00133/call IN + $0.000325/call OUT (650 @ $5/MTOK) · 4,200 calls = <span class='g'>$1.91</span>"><td>EASY QUERIES (70%)</td><td>4,200</td><td>HAIKU 4.5</td><td>CACHED-5M</td><td class="cut">$0.55</td><td class="cut">$1.36</td><td class="cut">$1.91</td></tr>
+            <tr data-math="<b>25% of traffic</b> · Sonnet 4.6 cached · cache-hit 88% · effective IN $0.48/MTOK · 10,400·$0.00048 = $0.005/call IN + $0.0098 OUT (650 @ $15/MTOK) · 1,500 calls = <span class='g'>$2.05</span>"><td>MEDIUM QUERIES (25%)</td><td>1,500</td><td>SONNET 4.6</td><td>CACHED-5M</td><td class="cut">$0.59</td><td class="cut">$1.46</td><td class="cut">$2.05</td></tr>
+            <tr data-math="<b>5% hard queries</b> · Sonnet cached + <em>max_tok 400</em> (down from 4096) · 300 calls · $0.005 IN + $0.006 OUT = $0.011/call · daily <span class='g'>$0.30</span>"><td>HARD QUERIES (5%)</td><td>300</td><td>SONNET 4.6</td><td>CACHED · MAX_TOK=400</td><td class="cut">$0.12</td><td class="cut">$0.18</td><td class="cut">$0.30</td></tr>
+            <tr data-math="<b>Re-rank moved to Haiku 1H cache</b> + max_tok=64 · effective IN $0.016/MTOK · 2,100·$0.000016 = $0.0000336 IN · 64 @ $5/MTOK = $0.00032 OUT · 6K calls = <span class='g'>$0.02</span>"><td>RAG RE-RANK</td><td>6,000</td><td>HAIKU 4.5</td><td>CACHED-1H · MAX_TOK=64</td><td>$0.013</td><td>$0.005</td><td>$0.02</td></tr>
+            <tr data-math="<b>Eval moved to BATCH + CACHE</b> · Haiku batch-50 + cache = <em>5% of base sync</em> · effective per-call $0.00012 · 500 runs = <span class='g'>$0.01</span> (was $1.50)"><td>OVERNIGHT EVAL</td><td>500</td><td>HAIKU 4.5</td><td>BATCH + CACHE</td><td>$0.003</td><td>$0.003</td><td>$0.01</td></tr>
+            <tr data-math="<b>1% sampled traces</b> on success path · 100% on error path · cuts DataDog bill ~90% · debuggability preserved · <span class='g'>$0.15</span>"><td>OBS · 1% SAMPLED</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>$0.15</td></tr>
             <tr class="total"><td>TOTAL · DAY</td><td></td><td></td><td></td><td></td><td></td><td>$4.51</td></tr>
             <tr class="delta"><td colspan="6">REDUCTION</td><td>−89.3%</td></tr>
           </tbody>
@@ -1290,42 +1917,42 @@ chosen <span class="op">=</span> classifier.<span class="fn">classify</span>(use
           <div class="check-row">
             <div class="cn">01</div>
             <div class="ct"><b>CACHE THE SYSTEM PROMPT.</b><div class="d">Anything &gt;1024 tokens stable across requests: system instructions, tool defs, few-shot examples, long document prefixes. Mark with <code>cache_control</code>.</div></div>
-            <div class="ci">−60 TO −90%</div>
+            <div class="ci">−60 TO −90%<br><button class="apply-btn" type="button" data-apply="cache80">▷ APPLY 80%</button></div>
           </div>
           <div class="check-row">
             <div class="cn">02</div>
             <div class="ct"><b>ROUTE BY COMPLEXITY.</b><div class="d">Haiku-class classifier in front of Sonnet/Opus. Routes 70% of traffic to the cheap tier; routing overhead is rounding error.</div></div>
-            <div class="ci">−40 TO −70%</div>
+            <div class="ci">−40 TO −70%<br><button class="apply-btn" type="button" data-apply="haiku">▷ ROUTE → HAIKU</button></div>
           </div>
           <div class="check-row">
             <div class="cn">03</div>
             <div class="ct"><b>CAP <code>max_tokens</code> AGGRESSIVELY.</b><div class="d">Output is 5× input. Pick the smallest budget that still produces complete answers. Default 4096 → measured 400-800 is typical.</div></div>
-            <div class="ci">−20 TO −40%</div>
+            <div class="ci">−20 TO −40%<br><button class="apply-btn" type="button" data-apply="cap600">▷ CAP OUT=600</button></div>
           </div>
           <div class="check-row">
             <div class="cn">04</div>
             <div class="ct"><b>MOVE ASYNC WORK TO BATCH API.</b><div class="d">Overnight evals, embedding backfills, summarization sweeps, scheduled reports. 50% flat off, stacks with caching.</div></div>
-            <div class="ci">−50% FLAT</div>
+            <div class="ci">−50% FLAT<br><button class="apply-btn" type="button" data-apply="batch30">▷ BATCH 30%</button></div>
           </div>
           <div class="check-row">
             <div class="cn">05</div>
             <div class="ct"><b>STRUCTURED OUTPUT BY DEFAULT.</b><div class="d">Prefer <code>response_format: json_schema</code> over freeform prose. Schemas force concise answers; typical output drops 60-75% for extraction tasks.</div></div>
-            <div class="ci">−15 TO −30%</div>
+            <div class="ci">−15 TO −30%<br><button class="apply-btn" type="button" data-apply="json">▷ JSON SCHEMA</button></div>
           </div>
           <div class="check-row">
             <div class="cn">06</div>
             <div class="ct"><b>STRIP TIMESTAMPS FROM CACHED PREFIXES.</b><div class="d">A "current time" line in the system prompt invalidates the cache every request. Inject date once per day server-side outside the cached block.</div></div>
-            <div class="ci a">CACHE-FIX</div>
+            <div class="ci a">CACHE-FIX<br><button class="apply-btn" type="button" data-apply="stripTs">▷ STRIP TS</button></div>
           </div>
           <div class="check-row">
             <div class="cn">07</div>
             <div class="ct"><b>SAMPLE OBSERVABILITY LOGS.</b><div class="d">Log 1-5% of successful traces in production with full sampling on the error path. Cuts logging bill 90% without losing debuggability.</div></div>
-            <div class="ci">−10 TO −20%</div>
+            <div class="ci">−10 TO −20%<br><button class="apply-btn" type="button" data-apply="sample">▷ SAMPLE 1%</button></div>
           </div>
           <div class="check-row">
             <div class="cn">08</div>
             <div class="ct"><b>INSTRUMENT COST PER REQUEST.</b><div class="d">Tag every call with feature, model, cache-hit ratio, in/out token counts. The aggregate bill tells you nothing about where to optimize next; the histogram tells you everything.</div></div>
-            <div class="ci a">VISIBILITY</div>
+            <div class="ci a">VISIBILITY<br><button class="apply-btn" type="button" data-apply="instrument">▷ INSTRUMENT</button></div>
           </div>
         </div>
       </div>
@@ -1456,17 +2083,46 @@ SYSTEM_PROMPT <span class="op">=</span> <span class="s">"""..."""</span>   <span
 
   </div>
 
+  <!-- =============== TOAST · MATH-TIP · OVERLAY =============== -->
+  <div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
+  <div class="math-tip" id="mathTip" role="tooltip" aria-hidden="true"></div>
+
+  <div class="overlay" id="helpOverlay" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="overlay-box">
+      <div class="overlay-bar">
+        <span id="helpTitle">F1 · HELP · KEYBOARD &amp; INTERACTIONS</span>
+        <span class="x" id="helpClose" role="button" tabindex="0" aria-label="Close help">✕ CLOSE</span>
+      </div>
+      <div class="overlay-body">
+        <p><span class="kk">F1</span>OPEN THIS HELP OVERLAY (TOGGLE)</p>
+        <p><span class="kk">F2</span>EXIT · CLOSE OVERLAYS · CLEAR TOASTS</p>
+        <p><span class="kk">F3</span>SEARCH · USE BROWSER FIND (CTRL/CMD-F)</p>
+        <p><span class="kk">F4</span>GRAPH · JUMP TO COST CURVE + CALCULATOR</p>
+        <p><span class="kk">F5</span>REFRESH · RE-TICK ALL METRICS &amp; CALCULATOR</p>
+        <p><span class="kk">F6</span>EXPORT · DOWNLOAD CALCULATOR CSV</p>
+        <p><span class="kk">F7</span>ALERT · TOGGLE TICKER FLASH-MODE</p>
+        <p><span class="kk">F8</span>NEWS · ROTATE COMMAND-LINE STRING</p>
+        <p style="margin-top: 12px; color: var(--fg-dim); font-size: 11px;">
+          ▸ CLICK ANY <b style="color: var(--cyan);">MODEL ROW</b> IN THE PRICING MATRIX TO SWAP IT INTO THE CALCULATOR.<br>
+          ▸ HOVER ANY <b style="color: var(--cyan);">CASE-STUDY LEDGER ROW</b> TO SEE THE MATH.<br>
+          ▸ DRAG THE <b style="color: var(--amber);">SCRUBBER</b> ON THE COST CURVE — OR PRESS ▶ PLAY 24H.<br>
+          ▸ CLICK <b style="color: var(--cyan);">▷ APPLY</b> ON ANY CHECKLIST ITEM TO PUSH IT INTO THE CALC.
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- =============== FUNCTION KEY BAR + COMMAND LINE =============== -->
   <div class="fkey-bar" role="navigation" aria-label="Terminal function keys">
     <div class="fkey-row">
-      <div class="fkey"><b>F1</b>HELP</div>
-      <div class="fkey"><b>F2</b>EXIT</div>
-      <div class="fkey"><b>F3</b>SEARCH</div>
-      <div class="fkey"><b>F4</b>GRAPH</div>
-      <div class="fkey"><b>F5</b>REFRESH</div>
-      <div class="fkey"><b>F6</b>EXPORT</div>
-      <div class="fkey"><b>F7</b>ALERT</div>
-      <div class="fkey"><b>F8</b>NEWS</div>
+      <div class="fkey" data-fkey="F1" role="button" tabindex="0" aria-label="F1 Help"><b>F1</b>HELP</div>
+      <div class="fkey" data-fkey="F2" role="button" tabindex="0" aria-label="F2 Exit"><b>F2</b>EXIT</div>
+      <div class="fkey" data-fkey="F3" role="button" tabindex="0" aria-label="F3 Search"><b>F3</b>SEARCH</div>
+      <div class="fkey" data-fkey="F4" role="button" tabindex="0" aria-label="F4 Graph"><b>F4</b>GRAPH</div>
+      <div class="fkey" data-fkey="F5" role="button" tabindex="0" aria-label="F5 Refresh"><b>F5</b>REFRESH</div>
+      <div class="fkey" data-fkey="F6" role="button" tabindex="0" aria-label="F6 Export"><b>F6</b>EXPORT</div>
+      <div class="fkey" data-fkey="F7" role="button" tabindex="0" aria-label="F7 Alert"><b>F7</b>ALERT</div>
+      <div class="fkey" data-fkey="F8" role="button" tabindex="0" aria-label="F8 News"><b>F8</b>NEWS</div>
     </div>
     <div class="cmd-line">
       <span class="prompt">AI/ECON&gt;</span>
@@ -1476,31 +2132,578 @@ SYSTEM_PROMPT <span class="op">=</span> <span class="s">"""..."""</span>   <span
   </div>
 
   <script>
+    'use strict';
+    const PRM = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+    // ============ PRICING TABLE · USD per MTOK (May 2026) ============
+    const PRICING = {
+      opus:      { label: 'OPUS 4.7',        vendor: 'ANTHROPIC',          inUsd: 5.00,  outUsd: 25.00, cachedUsd: 0.50,   batchPct: 0.5 },
+      sonnet:    { label: 'SONNET 4.6',      vendor: 'ANTHROPIC',          inUsd: 3.00,  outUsd: 15.00, cachedUsd: 0.30,   batchPct: 0.5 },
+      haiku:     { label: 'HAIKU 4.5',       vendor: 'ANTHROPIC',          inUsd: 1.00,  outUsd: 5.00,  cachedUsd: 0.10,   batchPct: 0.5 },
+      gpt52:     { label: 'GPT-5.2',         vendor: 'OPENAI',             inUsd: 1.75,  outUsd: 14.00, cachedUsd: 0.44,   batchPct: 0.5 },
+      o3:        { label: 'O3',              vendor: 'OPENAI',             inUsd: 2.00,  outUsd: 8.00,  cachedUsd: 0.50,   batchPct: 0.5 },
+      gemini31:  { label: 'GEMINI 3.1 PRO',  vendor: 'GOOGLE',             inUsd: 2.00,  outUsd: 12.00, cachedUsd: 0.50,   batchPct: 0.5 },
+      gemini25f: { label: 'GEMINI 2.5 FLASH',vendor: 'GOOGLE',             inUsd: 0.30,  outUsd: 2.50,  cachedUsd: 0.075,  batchPct: 0.5 },
+    };
+
+    // ============ FORMAT HELPERS ============
+    function fmtUSD(n, decimals) {
+      if (!isFinite(n)) return '$0.00';
+      const d = decimals == null
+        ? (Math.abs(n) < 0.01 ? 4 : (Math.abs(n) < 1 ? 4 : 2))
+        : decimals;
+      const abs = Math.abs(n).toFixed(d);
+      return (n < 0 ? '-$' : '$') + abs;
+    }
+    function fmtPct(n, dec) {
+      if (!isFinite(n)) return '0%';
+      const d = dec == null ? 0 : dec;
+      return (n >= 0 ? '+' : '−') + Math.abs(n).toFixed(d) + '%';
+    }
+    function flashCyan(el) {
+      if (!el || PRM) { return; }
+      el.classList.remove('cyan-flash');
+      void el.offsetWidth;
+      el.classList.add('cyan-flash');
+    }
+    function setText(id, txt) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.textContent !== txt) {
+        el.textContent = txt;
+        flashCyan(el);
+      }
+    }
+
+    // ============ TOAST SYSTEM ============
+    const Toast = (function () {
+      const wrap = document.getElementById('toastWrap');
+      function show(msg, kind, ttl) {
+        if (!wrap) return;
+        const el = document.createElement('div');
+        el.className = 'toast' + (kind ? ' ' + kind : '');
+        el.innerHTML = '<span class="t-l">' + (kind ? kind.toUpperCase() : 'INFO') + '</span>' + msg;
+        wrap.appendChild(el);
+        const dur = ttl || 3200;
+        setTimeout(() => {
+          el.classList.add('out');
+          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 260);
+        }, dur);
+      }
+      function clear() {
+        while (wrap && wrap.firstChild) wrap.removeChild(wrap.firstChild);
+      }
+      return { show, clear };
+    })();
+
+    // ============ CALCULATOR ============
+    const Calc = (function () {
+      const els = {
+        inTok:    document.getElementById('ci-in'),
+        outTok:   document.getElementById('ci-out'),
+        calls:    document.getElementById('ci-calls'),
+        model:    document.getElementById('ci-model'),
+        cache:    document.getElementById('ci-cache'),
+        cacheVal: document.getElementById('ci-cache-val'),
+        batch:    document.getElementById('ci-batch'),
+        batchVal: document.getElementById('ci-batch-val'),
+        rModel:   document.getElementById('r-model'),
+        rIn:      document.getElementById('r-in'),
+        rCached:  document.getElementById('r-cached'),
+        rOut:     document.getElementById('r-out'),
+        rBatch:   document.getElementById('r-batch'),
+      };
+
+      function readState() {
+        return {
+          inTok:  Math.max(0, parseFloat(els.inTok.value)  || 0),
+          outTok: Math.max(0, parseFloat(els.outTok.value) || 0),
+          calls:  Math.max(0, parseFloat(els.calls.value)  || 0),
+          model:  els.model.value,
+          cache:  Math.min(1, Math.max(0, (parseFloat(els.cache.value) || 0) / 100)),
+          batch:  Math.min(1, Math.max(0, (parseFloat(els.batch.value) || 0) / 100)),
+        };
+      }
+
+      function compute(s) {
+        const p = PRICING[s.model] || PRICING.sonnet;
+        // Per-MTOK
+        const inP = p.inUsd, outP = p.outUsd, cachedP = p.cachedUsd;
+        // UNCACHED reference: full input rate, no batch, no cache.
+        const uncachedPerCall = (s.inTok * inP + s.outTok * outP) / 1e6;
+        // YOURS: blend cache hit (read price) and miss (full input price), then apply batch discount over batch share.
+        const inEff = (1 - s.cache) * inP + s.cache * cachedP;     // $/MTOK effective
+        const inCostSync  = s.inTok  * inEff / 1e6;
+        const outCostSync = s.outTok * outP  / 1e6;
+        const yourSyncPerCall   = inCostSync + outCostSync;
+        const yourBatchPerCall  = yourSyncPerCall * (1 - 0.5);     // batch is flat -50% (stackable with cache)
+        const yourPerCall = (1 - s.batch) * yourSyncPerCall + s.batch * yourBatchPerCall;
+
+        return { p, inP, outP, cachedP, inEff, uncachedPerCall, yourPerCall };
+      }
+
+      function paintRates(p) {
+        if (els.rModel)  els.rModel.textContent  = p.label;
+        if (els.rIn)     els.rIn.textContent     = fmtUSD(p.inUsd, 2);
+        if (els.rCached) els.rCached.textContent = fmtUSD(p.cachedUsd, p.cachedUsd < 1 ? 2 : 2);
+        if (els.rOut)    els.rOut.textContent    = fmtUSD(p.outUsd, 2);
+        if (els.rBatch)  els.rBatch.textContent  = '−50%';
+      }
+
+      function delta(unc, you) {
+        if (unc <= 0) return 0;
+        return -((unc - you) / unc) * 100;  // negative pct means cheaper
+      }
+      function fmtDelta(d) {
+        if (!isFinite(d) || Math.abs(d) < 0.05) return '— 0%';
+        return (d < 0 ? '▼ ' : '▲ ') + Math.abs(d).toFixed(d < -99 || Math.abs(d) >= 10 ? 0 : 1) + '%';
+      }
+
+      function paint() {
+        const s = readState();
+        const r = compute(s);
+        paintRates(r.p);
+
+        // Sliders fill
+        if (els.cache) els.cache.style.setProperty('--fill', s.cache * 100 + '%');
+        if (els.batch) els.batch.style.setProperty('--fill', s.batch * 100 + '%');
+        if (els.cacheVal) els.cacheVal.textContent = (s.cache * 100).toFixed(0) + '%';
+        if (els.batchVal) els.batchVal.textContent = (s.batch * 100).toFixed(0) + '%';
+
+        const callsPerDay = s.calls;
+        const callsPerMo  = callsPerDay * 30.4;
+        const callsPerYr  = callsPerDay * 365;
+
+        const unc = r.uncachedPerCall;
+        const you = r.yourPerCall;
+        const d   = delta(unc, you);
+
+        // Per-call
+        setText('o-call-u', fmtUSD(unc, unc < 0.01 ? 4 : 4));
+        setText('o-call-y', fmtUSD(you, you < 0.01 ? 4 : 4));
+        setText('o-call-d', fmtDelta(d));
+
+        // Per-1K calls
+        setText('o-k-u', fmtUSD(unc * 1000, 2));
+        setText('o-k-y', fmtUSD(you * 1000, 2));
+        setText('o-k-d', fmtDelta(d));
+
+        // Daily
+        setText('o-d-u', fmtUSD(unc * callsPerDay, 2));
+        setText('o-d-y', fmtUSD(you * callsPerDay, 2));
+        setText('o-d-d', fmtDelta(d));
+
+        // Monthly (30.4)
+        setText('o-m-u', fmtUSD(unc * callsPerMo, 2));
+        setText('o-m-y', fmtUSD(you * callsPerMo, 2));
+        setText('o-m-d', fmtDelta(d));
+
+        // Annual
+        setText('o-y-u', fmtUSD(unc * callsPerYr, 2));
+        setText('o-y-y', fmtUSD(you * callsPerYr, 2));
+        setText('o-y-d', fmtDelta(d));
+
+        // Highlight active model in matrix
+        document.querySelectorAll('#pxMatrix tr[data-model]').forEach(tr => {
+          tr.classList.toggle('active-model', tr.dataset.model === s.model);
+        });
+      }
+
+      function set(opts) {
+        if (opts.model && els.model) {
+          const has = !!PRICING[opts.model];
+          if (has) els.model.value = opts.model;
+        }
+        if (opts.cache != null && els.cache) {
+          els.cache.value = Math.max(0, Math.min(100, opts.cache));
+        }
+        if (opts.batch != null && els.batch) {
+          els.batch.value = Math.max(0, Math.min(100, opts.batch));
+        }
+        if (opts.inTok != null && els.inTok) els.inTok.value = opts.inTok;
+        if (opts.outTok != null && els.outTok) els.outTok.value = opts.outTok;
+        if (opts.calls != null && els.calls) els.calls.value = opts.calls;
+        paint();
+      }
+
+      // Wire events
+      ['inTok','outTok','calls','model','cache','batch'].forEach(k => {
+        const el = els[k];
+        if (!el) return;
+        el.addEventListener('input', paint);
+        el.addEventListener('change', paint);
+      });
+
+      // Initial paint
+      paint();
+
+      return { paint, set, readState };
+    })();
+
+    // ============ MODEL ROW CLICKS → SWAP CALC MODEL ============
+    (function () {
+      const rows = document.querySelectorAll('#pxMatrix tr[data-model]');
+      rows.forEach(tr => {
+        tr.addEventListener('click', () => {
+          const m = tr.dataset.model;
+          Calc.set({ model: m });
+          Toast.show('MODEL → <b>' + (PRICING[m] ? PRICING[m].label : m.toUpperCase()) + '</b> · CALCULATOR UPDATED', 'cyan', 2200);
+        });
+        tr.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            tr.click();
+          }
+        });
+      });
+    })();
+
+    // ============ CHECKLIST · APPLY BUTTONS ============
+    (function () {
+      const btns = document.querySelectorAll('.apply-btn[data-apply]');
+      btns.forEach(b => {
+        b.addEventListener('click', () => {
+          const k = b.dataset.apply;
+          switch (k) {
+            case 'cache80':
+              Calc.set({ cache: 80 });
+              Toast.show('APPLIED · CACHE HIT RATE <b>→ 80%</b>', 'green');
+              break;
+            case 'haiku':
+              Calc.set({ model: 'haiku' });
+              Toast.show('ROUTED · MODEL <b>→ HAIKU 4.5</b> (~70% of traffic eligible)', 'green');
+              break;
+            case 'cap600':
+              Calc.set({ outTok: 600 });
+              Toast.show('CAPPED · OUTPUT TOKENS <b>→ 600</b> (down from default)', 'green');
+              break;
+            case 'batch30':
+              Calc.set({ batch: 30 });
+              Toast.show('BATCH SHARE <b>→ 30%</b> · −50% on async-eligible calls', 'green');
+              break;
+            case 'json':
+              {
+                const s = Calc.readState();
+                const newOut = Math.max(50, Math.round(s.outTok * 0.35));
+                Calc.set({ outTok: newOut });
+                Toast.show('JSON SCHEMA · OUTPUT <b>−65%</b> (' + s.outTok + ' → ' + newOut + ')', 'green');
+              }
+              break;
+            case 'stripTs':
+              {
+                const s = Calc.readState();
+                const target = Math.max(s.cache * 100, 85);
+                Calc.set({ cache: target });
+                Toast.show('CACHE-FIX · TIMESTAMP STRIPPED · HIT-RATE <b>→ ' + target + '%</b>', 'green');
+              }
+              break;
+            case 'sample':
+              Toast.show('OBS SAMPLED 1% · LOGGING BILL <b>−90%</b> (not in per-token math)', 'cyan');
+              break;
+            case 'instrument':
+              Toast.show('INSTRUMENT · TAGGING <em>feature/model/cache/in/out</em> · histogram → audit', 'cyan');
+              break;
+          }
+          b.classList.add('applied');
+          b.textContent = '✓ APPLIED';
+          setTimeout(() => {
+            b.classList.remove('applied');
+            // restore original label
+            const orig = {
+              cache80:'▷ APPLY 80%', haiku:'▷ ROUTE → HAIKU', cap600:'▷ CAP OUT=600',
+              batch30:'▷ BATCH 30%', json:'▷ JSON SCHEMA', stripTs:'▷ STRIP TS',
+              sample:'▷ SAMPLE 1%', instrument:'▷ INSTRUMENT'
+            };
+            b.textContent = orig[k] || b.textContent;
+          }, 1800);
+        });
+      });
+    })();
+
+    // ============ COST CURVE SCRUBBER · PLAY 24H ============
+    (function () {
+      const scrub  = document.getElementById('curveScrub');
+      const read   = document.getElementById('curveScrubRead');
+      const btn    = document.getElementById('curvePlayBtn');
+      const group  = document.getElementById('curveScrubGroup');
+      const line   = document.getElementById('curveScrubLine');
+      const dotU   = document.getElementById('curveScrubDotU');
+      const dotC   = document.getElementById('curveScrubDotC');
+      const tag    = document.getElementById('curveScrubTag');
+      if (!scrub) return;
+
+      // SVG mapping: viewBox 0 0 820 340 · X 50→800 over 0→1440 minutes (24h)
+      // Y axis: 300 = $0, 20 = $200 (top), so y = 300 - (cost/200)*280.
+      // We'll precompute uncached + cached curves from the same polyline data used in the SVG.
+      const X0 = 50, X1 = 800, Y0 = 300, YMAX = 200;
+      const yFromCost = (c) => Y0 - Math.max(0, Math.min(YMAX, c)) / YMAX * (Y0 - 20);
+      const xFromMin = (m) => X0 + (m / 1440) * (X1 - X0);
+
+      // Uncached endpoints from the SVG path: 0h $0, 6h $40, 12h $80, 18h $120, 24h $198.
+      function unc(m) {
+        const t = m / 60; // hours
+        // piecewise linear segments matching the SVG cyan polyline:
+        // 0→6h: 0→$40; 6→12h: 40→80; 12→18h: 80→120; 18→24h: 120→198
+        if (t <= 6)  return (t / 6) * 40;
+        if (t <= 12) return 40 + ((t - 6) / 6) * 40;
+        if (t <= 18) return 80 + ((t - 12) / 6) * 40;
+        return 120 + ((t - 18) / 6) * 78;
+      }
+      // Cached: roughly $24 over 24h, near-linear with shallow jagged growth ($0→$24).
+      function cached(m) {
+        const t = m / 60;
+        return (t / 24) * 24;
+      }
+
+      // Cache-hit marker x positions in minutes (matching SVG rects)
+      const HIT_MARKERS = [
+        { xv: 120, m: (120 - 50) / (800 - 50) * 1440 },
+        { xv: 238, m: (238 - 50) / (800 - 50) * 1440 },
+        { xv: 358, m: (358 - 50) / (800 - 50) * 1440 },
+        { xv: 478, m: (478 - 50) / (800 - 50) * 1440 },
+        { xv: 598, m: (598 - 50) / (800 - 50) * 1440 },
+        { xv: 718, m: (718 - 50) / (800 - 50) * 1440 },
+      ];
+
+      function fmtClock(min) {
+        const h = Math.floor(min / 60);
+        const m = Math.floor(min % 60);
+        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      }
+
+      let lastFiredIdx = -1;
+      let prevMin = 0;
+
+      function fireMarker(idx) {
+        // Find the corresponding rect in the SVG
+        const rects = document.querySelectorAll('svg.curve g rect');
+        if (rects.length > idx && rects[idx]) {
+          const r = rects[idx];
+          if (!PRM) {
+            r.classList.remove('hit-pulse');
+            void r.getBoundingClientRect();
+            r.classList.add('hit-pulse');
+            setTimeout(() => r.classList.remove('hit-pulse'), 700);
+          }
+          Toast.show('CACHE HIT · <b>' + fmtClock(HIT_MARKERS[idx].m) + '</b> · cached read · −90%', 'green', 1400);
+        }
+      }
+
+      function paintScrub(min, opts) {
+        const x = xFromMin(min);
+        const u = unc(min);
+        const c = cached(min);
+        const dY = yFromCost(u);
+        const cY = yFromCost(c);
+        if (group) group.style.display = '';
+        if (line) {
+          line.setAttribute('x1', x.toFixed(1));
+          line.setAttribute('x2', x.toFixed(1));
+        }
+        if (dotU) { dotU.setAttribute('cx', x.toFixed(1)); dotU.setAttribute('cy', dY.toFixed(1)); }
+        if (dotC) { dotC.setAttribute('cx', x.toFixed(1)); dotC.setAttribute('cy', cY.toFixed(1)); }
+        if (tag)  { tag.setAttribute('x', x.toFixed(1)); tag.textContent = fmtClock(min); }
+        if (read) {
+          const dpct = u > 0 ? ((u - c) / u) * 100 : 0;
+          read.innerHTML = 'HOUR <b>' + fmtClock(min) + '</b> · UNCACHED <span class="r">' +
+            fmtUSD(u, 2) + '</span> · CACHED <span class="g">' + fmtUSD(c, 2) + '</span> · Δ <b>−' +
+            dpct.toFixed(0) + '%</b>';
+        }
+        // Fill bar
+        scrub.style.setProperty('--fill', (min / 1440 * 100).toFixed(1) + '%');
+
+        // Cache-hit firing: check if we crossed a marker
+        if (!opts || !opts.skipMarkers) {
+          for (let i = 0; i < HIT_MARKERS.length; i++) {
+            const mm = HIT_MARKERS[i].m;
+            if (prevMin < mm && min >= mm) {
+              if (i !== lastFiredIdx) {
+                lastFiredIdx = i;
+                fireMarker(i);
+              }
+            }
+          }
+        }
+        prevMin = min;
+      }
+
+      function onScrub() {
+        const v = parseFloat(scrub.value) || 0;
+        paintScrub(v);
+      }
+      scrub.addEventListener('input', onScrub);
+      scrub.addEventListener('change', onScrub);
+
+      // Initial paint (idle at 0)
+      paintScrub(0, { skipMarkers: true });
+
+      // Play button
+      let playing = false;
+      let rafId = null;
+      let startTime = 0;
+      let startMin = 0;
+      const PLAY_DURATION_MS = 8000;  // 24h compressed into 8s
+
+      function stop() {
+        playing = false;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+        btn.classList.remove('playing');
+        btn.textContent = '▶ PLAY 24H';
+      }
+      function tick(now) {
+        if (!playing) return;
+        const elapsed = now - startTime;
+        const frac = Math.min(1, elapsed / PLAY_DURATION_MS);
+        const min = startMin + frac * (1440 - startMin);
+        scrub.value = String(min);
+        paintScrub(min);
+        if (frac >= 1) {
+          stop();
+          Toast.show('24H COMPLETE · UNCACHED <span style="color: var(--red);">$198</span> · CACHED <span style="color: var(--green);">$24</span> · Δ <b>−87.9%</b>', 'amber', 3000);
+          return;
+        }
+        rafId = requestAnimationFrame(tick);
+      }
+      btn.addEventListener('click', () => {
+        if (playing) { stop(); return; }
+        // If at end, restart from 0
+        if (parseFloat(scrub.value) >= 1440 - 1) {
+          scrub.value = '0';
+          lastFiredIdx = -1;
+          prevMin = 0;
+          paintScrub(0, { skipMarkers: true });
+        }
+        if (PRM) {
+          // Instant jump to end in reduced-motion mode
+          scrub.value = '1440';
+          paintScrub(1440, { skipMarkers: true });
+          Toast.show('24H · UNCACHED $198 · CACHED $24 · Δ −87.9%', 'amber', 3000);
+          return;
+        }
+        playing = true;
+        startTime = performance.now();
+        startMin = parseFloat(scrub.value) || 0;
+        lastFiredIdx = -1;
+        prevMin = startMin;
+        btn.classList.add('playing');
+        btn.textContent = '■ STOP';
+        rafId = requestAnimationFrame(tick);
+      });
+    })();
+
+    // ============ LEDGER MATH TOOLTIPS ============
+    (function () {
+      const tip = document.getElementById('mathTip');
+      if (!tip) return;
+      const rows = document.querySelectorAll('table.ledger tr[data-math]');
+
+      function show(e, row) {
+        tip.innerHTML = row.dataset.math;
+        tip.classList.add('open');
+        tip.setAttribute('aria-hidden', 'false');
+        position(e);
+      }
+      function hide() {
+        tip.classList.remove('open');
+        tip.setAttribute('aria-hidden', 'true');
+      }
+      function position(e) {
+        const rect = tip.getBoundingClientRect();
+        const pad = 14;
+        let x = e.clientX + pad;
+        let y = e.clientY + pad;
+        const w = rect.width || 320;
+        const h = rect.height || 80;
+        if (x + w + 8 > window.innerWidth) x = e.clientX - w - pad;
+        if (y + h + 8 > window.innerHeight) y = e.clientY - h - pad;
+        tip.style.left = x + 'px';
+        tip.style.top  = y + 'px';
+      }
+      rows.forEach(row => {
+        row.addEventListener('mouseenter', (e) => show(e, row));
+        row.addEventListener('mousemove', position);
+        row.addEventListener('mouseleave', hide);
+        row.addEventListener('focus', (e) => {
+          const r = row.getBoundingClientRect();
+          show({ clientX: r.right, clientY: r.top }, row);
+        });
+        row.addEventListener('blur', hide);
+        row.tabIndex = 0;
+      });
+    })();
+
+    // ============ TICKER · LIVE PRICE FLASHES ============
+    (function () {
+      const rail = document.getElementById('tickerRail');
+      if (!rail) return;
+      // Find ticker items (b is the ticker symbol, then the price chunk, then the bull/bear span)
+      const items = rail.querySelectorAll('.t-item');
+      if (!items.length) return;
+
+      // Detect prefers-reduced-motion: skip scroll already handled in CSS; skip flash too
+      if (PRM) return;
+
+      let i = 0;
+      function flashOne() {
+        const item = items[i % items.length];
+        i++;
+        if (!item) return;
+        // toggle the inner arrow span between bull/bear cosmetic state
+        const arrowSpan = item.querySelector('span.bull, span.bear');
+        if (arrowSpan) {
+          const isBull = arrowSpan.classList.contains('bull');
+          // Coin-flip 60% retain, 40% flip
+          if (Math.random() < 0.4) {
+            arrowSpan.classList.toggle('bull');
+            arrowSpan.classList.toggle('bear');
+            const txt = arrowSpan.textContent;
+            if (txt.indexOf('▲') > -1) arrowSpan.textContent = txt.replace('▲', '▼');
+            else if (txt.indexOf('▼') > -1) arrowSpan.textContent = txt.replace('▼', '▲');
+          }
+          // Tiny jitter on the percent number
+          const m = arrowSpan.textContent.match(/([\d.]+)/);
+          if (m) {
+            const v = parseFloat(m[1]);
+            const dv = (Math.random() * 0.6).toFixed(2);
+            arrowSpan.textContent = arrowSpan.textContent.replace(m[1], dv);
+          }
+        }
+        // Cyan flash on the whole item
+        item.classList.remove('cyan-flash');
+        void item.offsetWidth;
+        item.classList.add('cyan-flash');
+      }
+      setInterval(flashOne, 4900);
+      // Also occasionally flash a second one for activity
+      setInterval(() => {
+        const idx = Math.floor(Math.random() * items.length);
+        const it = items[idx];
+        if (!it) return;
+        it.classList.remove('cyan-flash');
+        void it.offsetWidth;
+        it.classList.add('cyan-flash');
+      }, 2700);
+    })();
+
     // ============ NUMBER-FLASH ON UPDATE (price matrix) ============
     (function () {
-      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
+      if (PRM) return;
       const cells = document.querySelectorAll('#pxMatrix td[data-row]');
       if (!cells.length) return;
-
       function flashRandom() {
         const idx = Math.floor(Math.random() * cells.length);
         const cell = cells[idx];
         cell.classList.remove('flash');
-        // force reflow
         void cell.offsetWidth;
         cell.classList.add('flash');
       }
-
-      // Flash a cell every 3.4s
       setInterval(flashRandom, 3400);
     })();
 
     // ============ COMMAND-LINE ROTATING TEXT ============
-    (function () {
-      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const CmdLine = (function () {
       const el = document.getElementById('cmdText');
-      if (!el) return;
       const cmds = [
         'SHOW PX MATRIX ',
         'CACHE STAT 5M ',
@@ -1509,27 +2712,202 @@ SYSTEM_PROMPT <span class="op">=</span> <span class="s">"""..."""</span>   <span
         'CURVE 24H SONNET ',
         'OBS SAMPLE 1% ',
         'EXPORT LEDGER ',
+        'CALC RECOMPUTE ',
       ];
-      let i = 0;
-      setInterval(() => {
+      let i = 0, t = null;
+      function start() {
+        if (PRM || !el) return;
+        stop();
+        t = setInterval(() => {
+          i = (i + 1) % cmds.length;
+          el.textContent = cmds[i];
+        }, 4600);
+      }
+      function stop() { if (t) { clearInterval(t); t = null; } }
+      function rotate() {
+        if (!el) return;
         i = (i + 1) % cmds.length;
         el.textContent = cmds[i];
-      }, 4600);
+      }
+      start();
+      return { rotate, start, stop };
     })();
 
     // ============ HEADER METRIC IDLE-FLASH ============
-    (function () {
-      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const Metric = (function () {
       const targets = ['m1', 'm2', 'm3', 'm4'].map(id => document.getElementById(id));
-      let j = 0;
-      setInterval(() => {
-        const t = targets[j % targets.length];
-        if (!t) return;
-        t.classList.remove('nflash', 'up', 'dn');
-        void t.offsetWidth;
-        t.classList.add('nflash', Math.random() > 0.5 ? 'up' : 'dn');
-        j++;
-      }, 5200);
+      let j = 0, t = null;
+      function start() {
+        if (PRM) return;
+        if (t) clearInterval(t);
+        t = setInterval(() => {
+          const tg = targets[j % targets.length];
+          if (!tg) return;
+          tg.classList.remove('nflash', 'up', 'dn');
+          void tg.offsetWidth;
+          tg.classList.add('nflash', Math.random() > 0.5 ? 'up' : 'dn');
+          j++;
+        }, 5200);
+      }
+      function pulse() {
+        targets.forEach(tg => {
+          if (!tg) return;
+          tg.classList.remove('nflash', 'up', 'dn');
+          void tg.offsetWidth;
+          tg.classList.add('nflash', 'up');
+        });
+      }
+      start();
+      return { pulse, start };
+    })();
+
+    // ============ F-KEY HANDLERS ============
+    (function () {
+      const overlay = document.getElementById('helpOverlay');
+      const helpClose = document.getElementById('helpClose');
+      function openHelp() {
+        if (!overlay) return;
+        overlay.classList.add('open');
+        overlay.querySelector('.x').focus();
+      }
+      function closeHelp() {
+        if (!overlay) return;
+        overlay.classList.remove('open');
+      }
+      if (helpClose) {
+        helpClose.addEventListener('click', closeHelp);
+        helpClose.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeHelp(); }
+        });
+      }
+      if (overlay) {
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) closeHelp();
+        });
+      }
+
+      let tickerAlertOn = false;
+      const tickerEl = document.querySelector('.ticker');
+
+      function refreshAll() {
+        // Re-paint calculator (forces cyan flashes), re-flash matrix, pulse metrics
+        Calc.paint();
+        Metric.pulse();
+        const cells = document.querySelectorAll('#pxMatrix td[data-row]');
+        cells.forEach(cell => {
+          if (PRM) return;
+          cell.classList.remove('flash');
+          void cell.offsetWidth;
+          cell.classList.add('flash');
+        });
+        Toast.show('REFRESH · all metrics re-ticked · calculator recomputed', 'cyan', 1800);
+      }
+
+      function exportCSV() {
+        const s = Calc.readState();
+        const p = PRICING[s.model];
+        const callsPerDay = s.calls;
+        const inEff = (1 - s.cache) * p.inUsd + s.cache * p.cachedUsd;
+        const uncCall = (s.inTok * p.inUsd + s.outTok * p.outUsd) / 1e6;
+        const ourCall = ((s.inTok * inEff + s.outTok * p.outUsd) / 1e6) * ((1 - s.batch) + s.batch * 0.5);
+        const rows = [
+          ['period','uncached_usd','yours_usd','delta_pct'],
+          ['per_call', uncCall.toFixed(6), ourCall.toFixed(6), ((ourCall - uncCall)/uncCall*100).toFixed(2)],
+          ['daily', (uncCall * callsPerDay).toFixed(2), (ourCall * callsPerDay).toFixed(2), ((ourCall - uncCall)/uncCall*100).toFixed(2)],
+          ['monthly', (uncCall * callsPerDay * 30.4).toFixed(2), (ourCall * callsPerDay * 30.4).toFixed(2), ((ourCall - uncCall)/uncCall*100).toFixed(2)],
+          ['annual', (uncCall * callsPerDay * 365).toFixed(2), (ourCall * callsPerDay * 365).toFixed(2), ((ourCall - uncCall)/uncCall*100).toFixed(2)],
+        ];
+        const csv = '# CETI AI/ECON · CALCULATOR EXPORT\n' +
+                    '# MODEL=' + p.label + ' · IN_TOK=' + s.inTok + ' · OUT_TOK=' + s.outTok +
+                    ' · CALLS=' + s.calls + ' · CACHE=' + (s.cache*100).toFixed(0) +
+                    '% · BATCH=' + (s.batch*100).toFixed(0) + '%\n' +
+                    rows.map(r => r.join(',')).join('\n') + '\n';
+        try {
+          const blob = new Blob([csv], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'ai-econ-calc-' + p.label.toLowerCase().replace(/[^a-z0-9]+/g,'-') + '.csv';
+          document.body.appendChild(a); a.click();
+          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+          Toast.show('EXPORT · CSV downloaded · <b>' + p.label + '</b> · ' + s.calls + ' calls/day', 'green', 3000);
+        } catch (err) {
+          Toast.show('EXPORT · CSV ready (clipboard unavailable in this context)', 'amber', 2500);
+        }
+      }
+
+      function toggleAlert() {
+        tickerAlertOn = !tickerAlertOn;
+        if (tickerEl) {
+          tickerEl.style.borderTopColor = tickerAlertOn ? 'var(--red)' : 'var(--amber)';
+          tickerEl.style.borderBottomColor = tickerAlertOn ? 'var(--red)' : 'var(--amber)';
+        }
+        Toast.show('ALERT MODE · <b>' + (tickerAlertOn ? 'ON' : 'OFF') + '</b>', tickerAlertOn ? 'amber' : 'cyan', 1800);
+      }
+
+      function handleFkey(code) {
+        switch (code) {
+          case 'F1': {
+            if (overlay && overlay.classList.contains('open')) closeHelp(); else openHelp();
+            break;
+          }
+          case 'F2': {
+            closeHelp();
+            Toast.clear();
+            break;
+          }
+          case 'F3': {
+            Toast.show('SEARCH · use browser find (<b>CTRL/CMD+F</b>) to search the page', 'cyan', 2400);
+            break;
+          }
+          case 'F4': {
+            const target = document.getElementById('calcPanel');
+            if (target) target.scrollIntoView({ behavior: PRM ? 'auto' : 'smooth', block: 'start' });
+            Toast.show('GRAPH · scrolled to cost calculator', 'cyan', 1600);
+            break;
+          }
+          case 'F5': {
+            refreshAll();
+            break;
+          }
+          case 'F6': {
+            exportCSV();
+            break;
+          }
+          case 'F7': {
+            toggleAlert();
+            break;
+          }
+          case 'F8': {
+            CmdLine.rotate();
+            Toast.show('NEWS · command-line rotated', 'cyan', 1400);
+            break;
+          }
+        }
+      }
+
+      // Click handlers on the function-key bar
+      document.querySelectorAll('.fkey[data-fkey]').forEach(el => {
+        el.addEventListener('click', () => handleFkey(el.dataset.fkey));
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleFkey(el.dataset.fkey);
+          }
+        });
+      });
+
+      // Real keyboard F1-F8
+      window.addEventListener('keydown', (e) => {
+        if (e.key && /^F[1-8]$/.test(e.key)) {
+          e.preventDefault();
+          handleFkey(e.key);
+        } else if (e.key === 'Escape') {
+          if (overlay && overlay.classList.contains('open')) {
+            closeHelp();
+          }
+        }
+      });
     })();
   </script>
 

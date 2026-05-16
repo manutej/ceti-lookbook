@@ -265,148 +265,7 @@
       margin: 0;
     }
 
-    /* ============ LOOP DIAGRAM ============ */
-    .loop-wrap {
-      margin-top: 56px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-      gap: 48px;
-      align-items: stretch;
-    }
-
-    .loop-frame {
-      border: 2px solid var(--fg);
-      padding: 28px;
-      background:
-        repeating-linear-gradient(
-          0deg,
-          transparent 0,
-          transparent 23px,
-          rgba(255,255,255,0.02) 23px,
-          rgba(255,255,255,0.02) 24px
-        );
-      position: relative;
-    }
-    .loop-frame::before {
-      content: '┌─[ AGENT.LOOP ]─';
-      position: absolute;
-      top: -10px; left: 16px;
-      background: var(--bg);
-      padding: 0 8px;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--lime);
-      letter-spacing: 0.08em;
-    }
-    .loop-frame::after {
-      content: '─[ TICK=6s ]─┐';
-      position: absolute;
-      top: -10px; right: 16px;
-      background: var(--bg);
-      padding: 0 8px;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--fg-mute);
-      letter-spacing: 0.08em;
-    }
-
-    .loop-viz {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      max-width: 460px;
-      margin: 0 auto;
-      display: block;
-    }
-
-    .loop-viz .edge {
-      stroke: var(--lime);
-      stroke-width: 1.5;
-      fill: none;
-      stroke-dasharray: 4 3;
-    }
-    .loop-viz .edge-exit {
-      stroke: var(--fg-mute);
-      stroke-width: 1.5;
-      fill: none;
-      stroke-dasharray: 2 4;
-    }
-
-    .node-rect {
-      fill: var(--bg);
-      stroke: var(--fg);
-      stroke-width: 2;
-    }
-    .node-group.active .node-rect {
-      stroke: var(--magenta);
-      fill: rgba(255,0,255,0.08);
-    }
-    .node-label {
-      font-family: var(--mono);
-      font-weight: 700;
-      font-size: 13px;
-      fill: var(--fg);
-      text-anchor: middle;
-      dominant-baseline: middle;
-      letter-spacing: 0.04em;
-    }
-    .node-sublabel {
-      font-family: var(--mono);
-      font-weight: 400;
-      font-size: 9px;
-      fill: var(--fg-dim);
-      text-anchor: middle;
-      dominant-baseline: middle;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-    .node-num {
-      font-family: var(--mono);
-      font-weight: 500;
-      font-size: 9px;
-      fill: var(--lime);
-      text-anchor: middle;
-      dominant-baseline: middle;
-      letter-spacing: 0.08em;
-    }
-    .node-group.active .node-label { fill: var(--magenta); }
-    .node-group.active .node-num { fill: var(--magenta); }
-    .node-group.active .node-sublabel { fill: var(--cyan); }
-
-    .exit-label {
-      font-family: var(--mono);
-      font-size: 9px;
-      fill: var(--fg-mute);
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    /* State readout */
-    .state-readout {
-      margin-top: 24px;
-      padding: 14px 16px;
-      border: 1px solid var(--line);
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--fg-dim);
-      background: rgba(255,255,255,0.02);
-    }
-    .state-readout .row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 3px 0;
-    }
-    .state-readout .key { color: var(--fg-mute); }
-    .state-readout .val { color: var(--lime); font-weight: 500; }
-    .state-readout .val.cyan { color: var(--cyan); }
-    .state-readout .row.head {
-      padding-bottom: 8px;
-      margin-bottom: 6px;
-      border-bottom: 1px dashed var(--line-soft);
-      color: var(--fg);
-    }
-
-    /* Loop copy */
+    /* ============ LOOP COPY ============ */
     .loop-copy h3 {
       font-family: var(--mono);
       font-weight: 700;
@@ -760,7 +619,6 @@
 
     /* ============ RESPONSIVE ============ */
     @media (max-width: 880px) {
-      .loop-wrap { grid-template-columns: 1fr; gap: 36px; }
       .bento { grid-template-columns: 1fr; }
       .cases { grid-template-columns: 1fr; }
       .stats { grid-template-columns: 1fr; }
@@ -773,8 +631,6 @@
       .final-frame { padding: 32px 22px; }
       .watermark { font-size: 9px; top: 8px; right: 8px; }
       .code-block pre { padding: 16px 14px; font-size: 11px; }
-      .loop-frame { padding: 22px 18px; }
-      .loop-frame::before, .loop-frame::after { font-size: 9px; }
     }
     @media (max-width: 380px) {
       .hero-title { font-size: 1.9rem; }
@@ -900,19 +756,7 @@
       .pattern { grid-template-columns: 1fr; gap: 18px; }
     }
 
-    /* ============ COMPARISON TABLE ============ */
-    .ascii-table-wrap {
-      margin-top: 24px; overflow-x: auto;
-      border: 2px solid var(--fg); padding: 18px; background: var(--bg);
-    }
-    .ascii-table {
-      font-family: var(--mono); font-size: 12px; line-height: 1.5;
-      color: var(--fg); white-space: pre; margin: 0;
-    }
-    .ascii-table .head { color: var(--lime); }
-    .ascii-table .row-c { color: var(--cyan); }
-    .ascii-table .row-m { color: var(--magenta); }
-
+    /* ============ COMPARISON CAPTION ============ */
     .comp-caption {
       margin-top: 14px; font-family: var(--mono); font-size: 12px;
       color: var(--fg-mute); letter-spacing: 0.02em;
@@ -1028,6 +872,133 @@
       color: var(--fg-dim); font-size: 14px; line-height: 1.65;
       margin: 0 0 22px; max-width: 72ch;
     }
+
+    /* ============ INTERACTIVE SIMULATOR ============ */
+    .sim-wrap { margin-top: 56px; display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 32px; align-items: stretch; }
+    .sim-graph-frame, .sim-state-frame { padding: 20px 22px 22px; position: relative; display: flex; flex-direction: column; }
+    .sim-graph-frame { border: 2px solid var(--fg); background: repeating-linear-gradient(0deg, transparent 0, transparent 23px, rgba(255,255,255,.02) 23px, rgba(255,255,255,.02) 24px); }
+    .sim-graph-frame::before, .sim-graph-frame::after, .sim-state-frame::before, .sim-state-frame::after { position: absolute; top: -10px; background: var(--bg); padding: 0 8px; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; }
+    .sim-graph-frame::before { content: '┌─[ AGENT.SIMULATOR ]─'; left: 16px; color: var(--lime); }
+    .sim-graph-frame::after  { content: '─[ LIVE ]─┐'; right: 16px; color: var(--magenta); }
+    .sim-graph-frame.idle::after { content: '─[ IDLE ]─┐'; color: var(--fg-mute); }
+    .sim-graph-frame.running::after { content: '─[ RUNNING ]─┐'; color: var(--lime); }
+    .sim-graph-frame.finished::after { content: '─[ FINISH ]─┐'; color: var(--cyan); }
+    .sim-svg { width: 100%; aspect-ratio: 1/.78; display: block; margin: 0 auto; }
+    .sim-svg .edge-base { stroke: var(--fg-mute); stroke-width: 1.5; fill: none; stroke-dasharray: 4 3; }
+    .sim-svg .edge-base.exit { stroke-dasharray: 2 4; opacity: .6; }
+    .sim-svg .edge-trail { stroke: var(--lime); stroke-width: 2; fill: none; stroke-dasharray: 0 1000; filter: drop-shadow(0 0 4px rgba(57,255,20,.6)); opacity: 0; }
+    .sim-svg .edge-trail.firing { opacity: 1; animation: edge-fill 700ms steps(14, end) forwards; }
+    .sim-svg .edge-trail.firing.exit-trail { stroke: var(--cyan); filter: drop-shadow(0 0 4px rgba(0,255,255,.6)); }
+    @keyframes edge-fill { from { stroke-dasharray: 0 1000; } to { stroke-dasharray: 1000 0; } }
+    .sim-svg .sim-node-rect { fill: var(--bg); stroke: var(--fg); stroke-width: 2; }
+    .sim-svg .sim-node.start .sim-node-rect { stroke: var(--fg-mute); }
+    .sim-svg .sim-node.finish .sim-node-rect { stroke: var(--cyan); }
+    .sim-svg .sim-node.pulse .sim-node-rect { stroke: var(--lime); fill: rgba(57,255,20,.1); animation: np 700ms steps(8, end); }
+    .sim-svg .sim-node.pulse-act .sim-node-rect { stroke: var(--magenta); fill: rgba(255,0,255,.1); animation: nm 700ms steps(8, end); }
+    .sim-svg .sim-node.pulse-obs .sim-node-rect { stroke: var(--cyan); fill: rgba(0,255,255,.1); animation: nc 700ms steps(8, end); }
+    .sim-svg .sim-node.finish.active .sim-node-rect { stroke: var(--cyan); fill: rgba(0,255,255,.14); }
+    @keyframes np { 0%,100%{fill:rgba(57,255,20,.1)} 50%{fill:rgba(57,255,20,.3)} }
+    @keyframes nm { 0%,100%{fill:rgba(255,0,255,.1)} 50%{fill:rgba(255,0,255,.3)} }
+    @keyframes nc { 0%,100%{fill:rgba(0,255,255,.1)} 50%{fill:rgba(0,255,255,.3)} }
+    .sim-svg text { font-family: var(--mono); text-anchor: middle; dominant-baseline: middle; }
+    .sim-svg .sim-node-label { font-weight: 700; font-size: 13px; fill: var(--fg); letter-spacing: .04em; }
+    .sim-svg .sim-node-num   { font-weight: 500; font-size: 9px; fill: var(--lime); letter-spacing: .08em; }
+    .sim-svg .sim-node-sub   { font-weight: 400; font-size: 9px; fill: var(--fg-dim); letter-spacing: .12em; text-transform: uppercase; }
+    .sim-svg .sim-node.start .sim-node-label, .sim-svg .sim-node.start .sim-node-num { fill: var(--fg-mute); }
+    .sim-svg .sim-node.finish .sim-node-label, .sim-svg .sim-node.finish .sim-node-num { fill: var(--cyan); }
+    .sim-svg .sim-node.pulse .sim-node-label { fill: var(--lime); }
+    .sim-svg .sim-node.pulse-act .sim-node-label { fill: var(--magenta); }
+    .sim-svg .sim-node.pulse-obs .sim-node-label { fill: var(--cyan); }
+    .sim-svg .edge-label { font-size: 9px; fill: var(--fg-mute); letter-spacing: .12em; text-transform: uppercase; text-anchor: start; }
+    .sim-svg .edge-label.cyan { fill: var(--cyan); }
+    .sim-svg .tool-dots circle { fill: var(--cyan); opacity: 0; }
+    .sim-svg .tool-dots.active circle:nth-child(1) { animation: db 600ms steps(2, end) 0ms infinite; }
+    .sim-svg .tool-dots.active circle:nth-child(2) { animation: db 600ms steps(2, end) 150ms infinite; }
+    .sim-svg .tool-dots.active circle:nth-child(3) { animation: db 600ms steps(2, end) 300ms infinite; }
+    @keyframes db { 0%,49%{opacity:0} 50%,100%{opacity:1} }
+
+    .sim-controls { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding-top: 16px; border-top: 1px dashed var(--line-soft); }
+    .sim-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; font-weight: 500; font-size: 12px; letter-spacing: .04em; text-transform: lowercase; background: var(--bg); color: var(--lime); border: 2px solid var(--lime); cursor: pointer; transition: background 60ms var(--step), color 60ms var(--step), border-color 60ms var(--step); }
+    .sim-btn:hover { background: var(--lime); color: var(--bg); }
+    .sim-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+    .sim-btn.cyan { color: var(--cyan); border-color: var(--cyan); }
+    .sim-btn.cyan:hover { background: var(--cyan); color: var(--bg); }
+    .sim-btn.muted { color: var(--fg-dim); border-color: var(--fg-mute); }
+    .sim-btn.muted:hover { background: var(--fg-dim); color: var(--bg); border-color: var(--fg-dim); }
+    .sim-btn:disabled { opacity: .35; cursor: not-allowed; background: var(--bg) !important; color: var(--fg-mute) !important; border-color: var(--fg-mute) !important; }
+    .sim-speed { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--fg-dim); letter-spacing: .06em; margin-left: auto; }
+    .sim-speed-btn { padding: 4px 8px; font-size: 11px; color: var(--fg-dim); background: var(--bg); border: 1px solid var(--fg-mute); cursor: pointer; }
+    .sim-speed-btn:hover { color: var(--lime); border-color: var(--lime); }
+    .sim-speed-btn.active { color: var(--bg); background: var(--lime); border-color: var(--lime); }
+
+    .sim-state-frame { border: 2px solid var(--cyan); background: rgba(0,255,255,.02); min-height: 100%; }
+    .sim-state-frame::before { content: '┌─[ STATE.JSON ]─'; left: 16px; color: var(--cyan); }
+    .sim-state-frame::after  { content: '─[ MUTABLE ]─┐'; right: 16px; color: var(--fg-mute); }
+    .sim-state-head { font-size: 11px; color: var(--fg-mute); letter-spacing: .06em; margin-bottom: 10px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .sim-state-head .pill { color: var(--lime); border: 1px solid var(--lime); padding: 2px 6px; letter-spacing: .08em; }
+    .sim-state-head .pill.cyan { color: var(--cyan); border-color: var(--cyan); }
+    .sim-state-head .pill.magenta { color: var(--magenta); border-color: var(--magenta); }
+    .sim-state-head .pill.mute { color: var(--fg-mute); border-color: var(--fg-mute); }
+    .sim-state-json { font-size: 11.5px; line-height: 1.55; color: var(--fg); white-space: pre-wrap; word-break: break-word; flex: 1; min-height: 280px; max-height: 480px; overflow-y: auto; padding: 12px; border: 1px solid var(--line); background: var(--bg); margin: 0; }
+    .sim-state-json .k { color: var(--lime); }
+    .sim-state-json .s { color: var(--amber); }
+    .sim-state-json .n { color: var(--cyan); }
+    .sim-state-json .o { color: var(--magenta); }
+    .sim-state-json .c { color: var(--fg-mute); font-style: italic; }
+    .sim-state-json .br { color: var(--fg-mute); }
+    .sim-state-json .new { background: rgba(57,255,20,.18); animation: hl 700ms steps(1, end); }
+    @keyframes hl { 0%, 80% { background: rgba(57,255,20,.18); } 100% { background: transparent; } }
+    .sim-history { margin-top: 12px; max-height: 110px; overflow-y: auto; border-top: 1px dashed var(--line-soft); padding-top: 10px; }
+    .sim-hist-row { font-size: 11px; color: var(--fg-dim); padding: 3px 0; letter-spacing: .02em; border-bottom: 1px solid var(--line-soft); display: flex; gap: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sim-hist-row .t { color: var(--fg-mute); flex-shrink: 0; }
+    .sim-hist-row .n { color: var(--lime); flex-shrink: 0; min-width: 8ch; }
+    .sim-hist-row .n.act { color: var(--magenta); }
+    .sim-hist-row .n.observe, .sim-hist-row .n.finish { color: var(--cyan); }
+    .sim-hist-row .d { overflow: hidden; text-overflow: ellipsis; }
+
+    .code-expand { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; margin-left: 12px; font-weight: 500; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: var(--bg); color: var(--lime); border: 1px solid var(--lime); cursor: pointer; transition: background 60ms var(--step), color 60ms var(--step); }
+    .code-expand:hover, .code-expand[aria-expanded="true"] { background: var(--lime); color: var(--bg); }
+    .code-annotation { margin: 14px 0 0; padding: 16px 18px; border-left: 2px solid var(--lime); background: rgba(57,255,20,.04); font-size: 13px; line-height: 1.7; color: var(--fg); display: none; }
+    .code-annotation.open { display: block; }
+    .code-annotation h5 { font-weight: 700; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--lime); margin: 0 0 8px; }
+    .code-annotation p { margin: 0 0 8px; color: var(--fg-dim); font-size: 12.5px; line-height: 1.65; }
+    .code-annotation code { color: var(--cyan); background: rgba(0,255,255,.06); padding: 1px 5px; border: 1px solid rgba(0,255,255,.18); font-size: .92em; }
+    .code-annotation .hl { color: var(--lime); }  .code-annotation .hl2 { color: var(--cyan); }  .code-annotation .warn { color: var(--magenta); }
+
+    .comp-table-wrap { margin-top: 24px; overflow-x: auto; border: 2px solid var(--fg); background: var(--bg); }
+    .comp-table { width: 100%; border-collapse: collapse; font-size: 12.5px; color: var(--fg); }
+    .comp-table th, .comp-table td { border-right: 1px solid var(--line); }
+    .comp-table th:last-child, .comp-table td:last-child { border-right: none; }
+    .comp-table thead th { padding: 12px 14px; text-align: left; font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--lime); border-bottom: 2px solid var(--fg); background: rgba(57,255,20,.04); cursor: pointer; user-select: none; white-space: nowrap; transition: background 60ms var(--step), color 60ms var(--step); }
+    .comp-table thead th:first-child { color: var(--fg-mute); }
+    .comp-table thead th:hover { background: var(--lime); color: var(--bg); }
+    .comp-table thead th.sort-asc::after { content: ' ▲'; color: var(--magenta); font-size: 10px; }
+    .comp-table thead th.sort-desc::after { content: ' ▼'; color: var(--magenta); font-size: 10px; }
+    .comp-table tbody td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--fg-dim); line-height: 1.5; font-size: 12px; }
+    .comp-table tbody td:first-child { color: var(--fg); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: .02em; }
+    .comp-table tbody tr { transition: outline 60ms var(--step), background 60ms var(--step); outline: 2px solid transparent; outline-offset: -2px; }
+    .comp-table tbody tr:hover { background: rgba(57,255,20,.04); outline: 2px solid var(--lime); }
+    .comp-table tbody tr:hover td:first-child { color: var(--lime); }
+    .comp-table tbody tr:last-child td { border-bottom: none; }
+    .comp-table .c { color: var(--cyan); }  .comp-table .m { color: var(--magenta); }  .comp-table .l { color: var(--lime); }
+
+    @media (max-width: 880px) {
+      .sim-wrap { grid-template-columns: 1fr; gap: 24px; }
+      .sim-state-frame { min-height: auto; }
+      .sim-state-json { min-height: 220px; max-height: 320px; }
+      .sim-controls { gap: 8px; }
+      .sim-speed { margin-left: 0; width: 100%; padding-top: 8px; }
+      .comp-table { font-size: 11px; }
+      .comp-table tbody td, .comp-table thead th { padding: 10px 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sim-svg .edge-trail.firing { animation: none !important; opacity: 0 !important; }
+      .sim-svg .sim-node.pulse .sim-node-rect,
+      .sim-svg .sim-node.pulse-act .sim-node-rect,
+      .sim-svg .sim-node.pulse-obs .sim-node-rect { animation: none !important; }
+      .sim-svg .tool-dots.active circle { animation: none !important; opacity: 1 !important; }
+      .sim-state-json .new { animation: none !important; background: transparent !important; }
+    }
   </style>
 </head>
 <body>
@@ -1113,86 +1084,104 @@
       State threads through all of it &mdash; so the agent doesn't restart its brain on every step.
     </p>
 
-    <div class="loop-wrap">
-      <div class="loop-frame">
-        <svg class="loop-viz" viewBox="0 0 400 400" role="img" aria-label="Three nodes — Reason, Act, Observe — connected in a clockwise cycle. The active node is highlighted in magenta as the agent loops through the ReAct cycle.">
-          <defs>
-            <path id="cycle"
-                  d="M 200 80
-                     L 320 240
-                     L 80 240 Z" />
-          </defs>
-
-          <!-- Cycle edges (square corners, hard lines) -->
-          <line class="edge" x1="200" y1="80" x2="320" y2="240" />
-          <line class="edge" x1="320" y1="240" x2="80" y2="240" />
-          <line class="edge" x1="80" y1="240" x2="200" y2="80" />
-
-          <!-- Direction arrows on edges -->
-          <g fill="var(--lime)">
-            <polygon points="0,-5 9,0 0,5" transform="translate(265, 165) rotate(53)" />
-            <polygon points="0,-5 9,0 0,5" transform="translate(200, 240) rotate(180)" />
-            <polygon points="0,-5 9,0 0,5" transform="translate(135, 165) rotate(-53)" />
+    <!-- INTERACTIVE SIMULATOR -->
+    <div class="sim-wrap" id="sim">
+      <div class="sim-graph-frame idle" id="sim-frame">
+        <svg class="sim-svg" viewBox="0 0 520 410" role="img" aria-label="Interactive agent loop simulator. Four nodes — Start, Reason, Act, Observe — with a conditional exit edge to Finish. Pulses indicate the currently executing node; trails show state flowing along edges.">
+          <line class="edge-base" x1="60" y1="70" x2="200" y2="70" />
+          <polygon points="0,-4 7,0 0,4" transform="translate(200, 70)" fill="var(--fg-mute)" />
+          <line class="edge-base" x1="260" y1="100" x2="420" y2="180" />
+          <polygon points="0,-4 7,0 0,4" transform="translate(420, 180) rotate(27)" fill="var(--fg-mute)" />
+          <text class="edge-label" x="340" y="130">if tool_call</text>
+          <line class="edge-base" x1="420" y1="240" x2="100" y2="310" />
+          <polygon points="0,-4 7,0 0,4" transform="translate(100, 310) rotate(192)" fill="var(--fg-mute)" />
+          <text class="edge-label" x="220" y="290">tool_result</text>
+          <line class="edge-base" x1="100" y1="280" x2="220" y2="105" />
+          <polygon points="0,-4 7,0 0,4" transform="translate(220, 105) rotate(-55)" fill="var(--fg-mute)" />
+          <text class="edge-label" x="115" y="200">loop</text>
+          <line class="edge-base exit" x1="260" y1="60" x2="420" y2="60" />
+          <polygon points="0,-4 7,0 0,4" transform="translate(420, 60)" fill="var(--cyan)" opacity="0.7" />
+          <text class="edge-label cyan" x="290" y="48">if done</text>
+          <line class="edge-trail" id="trail-start-reason" x1="60" y1="70" x2="200" y2="70" />
+          <line class="edge-trail" id="trail-reason-act" x1="260" y1="100" x2="420" y2="180" />
+          <line class="edge-trail" id="trail-act-observe" x1="420" y1="240" x2="100" y2="310" />
+          <line class="edge-trail" id="trail-observe-reason" x1="100" y1="280" x2="220" y2="105" />
+          <line class="edge-trail exit-trail" id="trail-reason-finish" x1="260" y1="60" x2="420" y2="60" />
+          <g class="tool-dots" id="tool-dots">
+            <circle cx="248" cy="278" r="4"/><circle cx="262" cy="278" r="4"/><circle cx="276" cy="278" r="4"/>
           </g>
-
-          <!-- Exit edge: Reason → END -->
-          <line class="edge-exit" x1="200" y1="80" x2="200" y2="32" />
-          <polygon points="0,-4 7,0 0,4" transform="translate(200, 32) rotate(-90)" fill="var(--fg-mute)" />
-          <text x="210" y="40" class="exit-label">END</text>
-
-          <!-- Node 1: REASON -->
-          <g class="node-group" id="node-reason" transform="translate(200, 80)">
-            <rect class="node-rect" x="-58" y="-32" width="116" height="64" />
-            <text class="node-num" y="-14">[01]</text>
-            <text class="node-label" y="3">REASON</text>
-            <text class="node-sublabel" y="20">think</text>
+          <g class="sim-node start" id="sim-node-start" transform="translate(30, 70)">
+            <rect class="sim-node-rect" x="-26" y="-22" width="52" height="44" />
+            <text class="sim-node-label" y="2">START</text>
           </g>
-
-          <!-- Node 2: ACT -->
-          <g class="node-group" id="node-act" transform="translate(320, 240)">
-            <rect class="node-rect" x="-58" y="-32" width="116" height="64" />
-            <text class="node-num" y="-14">[02]</text>
-            <text class="node-label" y="3">ACT</text>
-            <text class="node-sublabel" y="20">tool_call</text>
+          <g class="sim-node" id="sim-node-reason" transform="translate(230, 70)">
+            <rect class="sim-node-rect" x="-58" y="-30" width="116" height="60" />
+            <text class="sim-node-num" y="-12">[01]</text>
+            <text class="sim-node-label" y="4">REASON</text>
+            <text class="sim-node-sub" y="20">llm</text>
           </g>
-
-          <!-- Node 3: OBSERVE -->
-          <g class="node-group" id="node-observe" transform="translate(80, 240)">
-            <rect class="node-rect" x="-58" y="-32" width="116" height="64" />
-            <text class="node-num" y="-14">[03]</text>
-            <text class="node-label" y="3">OBSERVE</text>
-            <text class="node-sublabel" y="20">result</text>
+          <g class="sim-node" id="sim-node-act" transform="translate(450, 210)">
+            <rect class="sim-node-rect" x="-58" y="-30" width="116" height="60" />
+            <text class="sim-node-num" y="-12">[02]</text>
+            <text class="sim-node-label" y="4">ACT</text>
+            <text class="sim-node-sub" y="20">tool_call</text>
+          </g>
+          <g class="sim-node" id="sim-node-observe" transform="translate(70, 310)">
+            <rect class="sim-node-rect" x="-58" y="-30" width="116" height="60" />
+            <text class="sim-node-num" y="-12">[03]</text>
+            <text class="sim-node-label" y="4">OBSERVE</text>
+            <text class="sim-node-sub" y="20">result</text>
+          </g>
+          <g class="sim-node finish" id="sim-node-finish" transform="translate(460, 60)">
+            <rect class="sim-node-rect" x="-30" y="-22" width="60" height="44" />
+            <text class="sim-node-label" y="2">FINISH</text>
           </g>
         </svg>
 
-        <!-- STATE READOUT -->
-        <div class="state-readout" aria-live="polite">
-          <div class="row head"><span class="key">// state[t]</span><span class="val cyan" id="state-tick">t=000</span></div>
-          <div class="row"><span class="key">step</span><span class="val" id="state-step">reason</span></div>
-          <div class="row"><span class="key">messages</span><span class="val cyan" id="state-messages">2</span></div>
-          <div class="row"><span class="key">observations</span><span class="val cyan" id="state-obs">1</span></div>
+        <div class="sim-controls" role="toolbar" aria-label="Simulator controls">
+          <button class="sim-btn" id="sim-run" type="button" aria-pressed="false"><span aria-hidden="true">&gt;</span> run</button>
+          <button class="sim-btn cyan" id="sim-step" type="button"><span aria-hidden="true">&gt;</span> step</button>
+          <button class="sim-btn muted" id="sim-reset" type="button"><span aria-hidden="true">&gt;</span> reset</button>
+          <div class="sim-speed" aria-label="Playback speed">
+            <span>speed:</span>
+            <button class="sim-speed-btn" data-speed="0.5" type="button">0.5x</button>
+            <button class="sim-speed-btn active" data-speed="1" type="button">1x</button>
+            <button class="sim-speed-btn" data-speed="2" type="button">2x</button>
+          </div>
         </div>
       </div>
 
-      <div class="loop-copy">
-        <h3><span class="ck">&gt;</span> ReAct loop, drawn as a graph.</h3>
-        <p>Each node receives the full state, returns an update, and hands control to the next node.
-          One tick = one LLM call, one tool invocation, one observation.</p>
-        <ol>
-          <li>
-            <strong>REASON</strong>
-            <span>The LLM reads conversation, decides next step &mdash; or whether it's done.</span>
-          </li>
-          <li>
-            <strong>ACT</strong>
-            <span>Agent invokes a tool: search, db query, Python function, external API.</span>
-          </li>
-          <li>
-            <strong>OBSERVE</strong>
-            <span>Tool output is appended to state. Loop continues, or routes to <code>END</code>.</span>
-          </li>
-        </ol>
+      <div class="sim-state-frame">
+        <div class="sim-state-head">
+          <span class="pill" id="sim-pill-status">idle</span>
+          <span class="pill cyan">tick <span id="sim-tick">000</span></span>
+          <span class="pill magenta">node <span id="sim-cur">—</span></span>
+          <span class="pill mute">budget 10</span>
+        </div>
+        <pre class="sim-state-json" id="sim-state" aria-live="polite" aria-atomic="false"></pre>
+        <div class="sim-history" id="sim-history" aria-label="Execution history"></div>
       </div>
+    </div>
+
+    <div class="loop-copy" style="margin-top: 40px;">
+      <h3><span class="ck">&gt;</span> ReAct loop, drawn as a graph.</h3>
+      <p>Each node receives the full state, returns an update, and hands control to the next node.
+        One tick = one LLM call, one tool invocation, one observation. The conditional edge after
+        <strong>REASON</strong> decides: loop again, or exit. State above mutates live as you step.</p>
+      <ol>
+        <li>
+          <strong>REASON</strong>
+          <span>The LLM reads conversation, decides next step &mdash; or whether it's done.</span>
+        </li>
+        <li>
+          <strong>ACT</strong>
+          <span>Agent invokes a tool: search, db query, Python function, external API.</span>
+        </li>
+        <li>
+          <strong>OBSERVE</strong>
+          <span>Tool output is appended to state. Loop continues, or routes to <code>END</code>.</span>
+        </li>
+      </ol>
     </div>
   </section>
 
@@ -1357,7 +1346,9 @@ Final Answer: <span class="ph2">{the_answer}</span></div>
       <div class="code-block">
         <div class="titlebar">
           <span class="name">$ schema.py</span>
-          <span class="meta">LISTING 1 · 12L · STATE DEFINITION</span>
+          <span class="meta">LISTING 1 · 12L · STATE DEFINITION
+            <button class="code-expand" type="button" aria-expanded="false" data-target="ann-schema">&gt; expand</button>
+          </span>
         </div>
 <pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">typing</span> <span class="k">import</span> Annotated, TypedDict
 <span class="ln"> 2</span><span class="k">from</span> <span class="m">langgraph.graph.message</span> <span class="k">import</span> add_messages
@@ -1371,6 +1362,12 @@ Final Answer: <span class="ph2">{the_answer}</span></div>
 <span class="ln">10</span>    <span class="c"># scalar: last-write-wins (no reducer)</span>
 <span class="ln">11</span>    iterations<span class="o">:</span> <span class="k">int</span>
 <span class="ln">12</span>    next_step<span class="o">:</span> <span class="k">str</span></pre>
+      </div>
+      <div class="code-annotation" id="ann-schema" aria-hidden="true">
+        <h5>&gt; reducers, line-by-line</h5>
+        <p><strong>L7</strong> &mdash; <code>add_messages</code> is <span class="hl">not</span> concat. Dedups by <code>message.id</code>, coerces <code>(role, text)</code> tuples, respects <code>RemoveMessage</code> &mdash; checkpoint replays don&apos;t double-append.</p>
+        <p><strong>L9</strong> &mdash; <code>operator.add</code> is order-commutative, required for <span class="hl2">fan-out</span> writing the same key. Three retrievers in parallel &rarr; one merged list, any finish order.</p>
+        <p><strong>L11-12</strong> &mdash; no annotation = last-write-wins. Concurrent scalar writes raise <code>InvalidUpdateError</code> &mdash; intentional, to surface races. For counters wrap with <code>Annotated[int, lambda a,b: a+b]</code>.</p>
       </div>
 
       <p>
@@ -1391,7 +1388,9 @@ Final Answer: <span class="ph2">{the_answer}</span></div>
       <div class="code-block">
         <div class="titlebar">
           <span class="name">$ reducer.py</span>
-          <span class="meta">LISTING 2 · 11L · ADD_MESSAGES BEHAVIOR</span>
+          <span class="meta">LISTING 2 · 11L · ADD_MESSAGES BEHAVIOR
+            <button class="code-expand" type="button" aria-expanded="false" data-target="ann-reducer">&gt; expand</button>
+          </span>
         </div>
 <pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">langchain_core.messages</span> <span class="k">import</span> AIMessage, RemoveMessage
 <span class="ln"> 2</span><span class="k">from</span> <span class="m">langgraph.graph.message</span> <span class="k">import</span> add_messages
@@ -1404,6 +1403,13 @@ Final Answer: <span class="ph2">{the_answer}</span></div>
 <span class="ln"> 9</span><span class="c"># Delete a message by emitting a RemoveMessage with its id</span>
 <span class="ln">10</span><span class="f">add_messages</span>(existing, [RemoveMessage(id<span class="o">=</span><span class="s">"a1"</span>)])
 <span class="ln">11</span><span class="c"># =&gt; []</span></pre>
+      </div>
+      <div class="code-annotation" id="ann-reducer" aria-hidden="true">
+        <h5>&gt; why id-based dedup matters</h5>
+        <p>Crash after emitting an <code>AIMessage</code> but before checkpointing &rarr; restart replays the same message. <span class="hl">Without dedup it doubles up</span>; with id-based dedup, replays are idempotent.</p>
+        <p><strong>L5-7</strong> &mdash; reusing an id on incoming <span class="hl2">edits the prior turn</span>. Streaming relies on this: partial and final share an id, reducer keeps the final.</p>
+        <p><strong>L10-11</strong> &mdash; emit a <code>RemoveMessage</code> sentinel to delete. Keeps reducers pure. Essential for <span class="warn">window trimming</span> on long agents.</p>
+        <p><strong>Production:</strong> custom reducers must be <span class="hl">commutative</span> (<code>f(a,b)==f(b,a)</code>) and <span class="hl">empty-idempotent</span> (<code>f(a,[])==a</code>). LangGraph assumes both when parallelizing.</p>
       </div>
 
       <h3><span class="arrow">&gt;</span> CONDITIONAL EDGES = DECISIONS AS DATA</h3>
@@ -1418,7 +1424,9 @@ Final Answer: <span class="ph2">{the_answer}</span></div>
       <div class="code-block">
         <div class="titlebar">
           <span class="name">$ router.py</span>
-          <span class="meta">LISTING 3 · 14L · CONDITIONAL EDGE</span>
+          <span class="meta">LISTING 3 · 14L · CONDITIONAL EDGE
+            <button class="code-expand" type="button" aria-expanded="false" data-target="ann-router">&gt; expand</button>
+          </span>
         </div>
 <pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">langgraph.graph</span> <span class="k">import</span> StateGraph, START, END
 <span class="ln"> 2</span>
@@ -1439,6 +1447,14 @@ Final Answer: <span class="ph2">{the_answer}</span></div>
 <span class="ln">17</span>graph.<span class="f">add_edge</span>(<span class="s">"act"</span>, <span class="s">"reason"</span>)
 <span class="ln">18</span>graph.<span class="f">add_edge</span>(<span class="s">"summarize"</span>, END)</pre>
       </div>
+      <div class="code-annotation" id="ann-router" aria-hidden="true">
+        <h5>&gt; the router is a pure function</h5>
+        <p><code>route_after_reason</code> takes <code>state</code>, returns a string. <span class="hl">No side effects, no LLM calls.</span> Trivially unit-testable: inject state, assert the name.</p>
+        <p><strong>L5-6</strong> &mdash; canonical tool-agent shape: <code>tool_calls</code> non-empty &rArr; dispatch to act; empty &rArr; model is done. <span class="hl2">The LLM never names a node</span> &mdash; the router derives it from the structured tool_call shape.</p>
+        <p><strong>L7-8</strong> &mdash; <code>iterations &gt;= 10</code> is the line between &ldquo;agent that finishes&rdquo; and &ldquo;agent that bills you $400 in tokens.&rdquo; Route to <code>summarize</code> for graceful <span class="warn">degradation</span>.</p>
+        <p><strong>L11-18</strong> &mdash; missing destinations from the router raise at <code>graph.compile()</code> &mdash; not at midnight in production.</p>
+        <p><strong>Pro-tip:</strong> return <code>Command(update={...}, goto=&quot;act&quot;)</code> from a node body to update state and route in one shot. Less boilerplate for supervisor-style nodes.</p>
+      </div>
 
       <p>
         Three primitives, infinite topology. The compiled graph is a Pregel-style executor: at each
@@ -1457,7 +1473,9 @@ Final Answer: <span class="ph2">{the_answer}</span></div>
     <div class="code-block" role="region" aria-label="Minimal LangGraph example in Python">
       <div class="titlebar">
         <span class="name">$ agent.py</span>
-        <span class="meta">PYTHON · 15L · UTF-8</span>
+        <span class="meta">PYTHON · 15L · UTF-8
+          <button class="code-expand" type="button" aria-expanded="false" data-target="ann-agent">&gt; expand</button>
+        </span>
       </div>
 <pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">langgraph.graph</span> <span class="k">import</span> StateGraph, MessagesState, START, END
 <span class="ln"> 2</span>
@@ -1480,6 +1498,13 @@ Final Answer: <span class="ph2">{the_answer}</span></div>
     </div>
 
     <p class="code-caption">That's the entire structure of a ReAct agent. The conditional edge is what makes it a graph instead of a chain.</p>
+    <div class="code-annotation" id="ann-agent" aria-hidden="true">
+      <h5>&gt; the ten lines, decoded</h5>
+      <p><strong>L3-5 (reason)</strong> &mdash; a node takes state, returns an update dict. <code>MessagesState</code> is the built-in TypedDict with <code>messages</code> wired to <code>add_messages</code>.</p>
+      <p><strong>L7-9 (act)</strong> &mdash; <code>tool_node</code> is a prebuilt: reads last AIMessage&apos;s <code>tool_calls</code>, dispatches in parallel, returns <code>ToolMessage</code>s. <span class="hl2">You never write tool-dispatch loops by hand</span>.</p>
+      <p><strong>L15-16</strong> &mdash; the conditional edge separates graph from chain. The <code>act &rarr; reason</code> edge turns the topology into a <span class="warn">cycle</span>: after every tool call, the LLM sees the result and picks next.</p>
+      <p><strong>L18 (compile)</strong> &mdash; with a <code>checkpointer</code>, every transition writes a full state snapshot. Restart with same <code>thread_id</code> &mdash; resume from last good checkpoint. <span class="hl">The difference between a demo and a production agent.</span></p>
+    </div>
   </section>
 
   <!-- ============ RUNTIME PRIMITIVES ============ -->
@@ -1829,26 +1854,26 @@ Final Answer: <span class="ph2">{the_answer}</span></div>
       CrewAI, and AutoGen. Different trade-offs &mdash; rendered the only acceptable way: ASCII.
     </p>
 
-    <div class="ascii-table-wrap">
-<pre class="ascii-table"><span class="head">┌──────────────────┬──────────────────┬──────────────────┬──────────────────┬──────────────────┐
-│ ATTRIBUTE        │ LANGGRAPH        │ LC AGENTEXECUTOR │ CREWAI           │ AUTOGEN          │
-├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤</span>
-│ state            │ typed, reducers  │ implicit dict    │ implicit         │ implicit (msgs)  │
-│                  │ <span class="row-c">+ checkpoints</span>    │ + scratchpad     │ + crew memory    │ + agent memory   │
-├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
-│ debugging        │ <span class="row-c">studio + replay</span>  │ verbose=True     │ verbose=2        │ console logs +   │
-│                  │ <span class="row-c">+ time-travel</span>    │ + LangSmith      │ + step printout  │ <span class="row-c">studio (preview)</span> │
-├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
-│ streaming        │ <span class="row-c">values, updates,</span> │ tokens only      │ none built-in    │ async events     │
-│                  │ <span class="row-c">messages, custom</span> │                  │ (callbacks)      │ (v0.4+)          │
-├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
-│ deployment       │ <span class="row-c">Cloud + self-host</span> │ self-host        │ self-host        │ self-host        │
-│                  │ (FastAPI, k8s)   │                  │ (+ CrewAI Plus)  │                  │
-├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
-│ learning curve   │ <span class="row-m">medium-high</span>      │ low              │ low              │ medium           │
-├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
-│ license          │ <span class="row-c">MIT</span>              │ <span class="row-c">MIT</span>              │ <span class="row-c">MIT</span>              │ <span class="row-c">CC-BY-4.0 / MIT</span>  │
-<span class="head">└──────────────────┴──────────────────┴──────────────────┴──────────────────┴──────────────────┘</span></pre>
+    <div class="comp-table-wrap">
+      <table class="comp-table" id="comp-table" aria-label="Comparison of LangGraph and alternatives. Click a column header to sort.">
+        <thead>
+          <tr>
+            <th scope="col" data-key="attr" data-rank="0">// attribute</th>
+            <th scope="col" data-key="lg" data-rank="1">langgraph</th>
+            <th scope="col" data-key="lc" data-rank="2">lc agent_exec</th>
+            <th scope="col" data-key="crew" data-rank="3">crewai</th>
+            <th scope="col" data-key="auto" data-rank="4">autogen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>state</td><td><span class="c">typed, reducers + checkpoints</span></td><td>implicit dict + scratchpad</td><td>implicit + crew memory</td><td>implicit (msgs) + agent memory</td></tr>
+          <tr><td>debugging</td><td><span class="c">studio + replay + time-travel</span></td><td>verbose=True + LangSmith</td><td>verbose=2 + step printout</td><td>console logs + <span class="c">studio (preview)</span></td></tr>
+          <tr><td>streaming</td><td><span class="c">values · updates · messages · custom</span></td><td>tokens only</td><td>none built-in (callbacks)</td><td>async events (v0.4+)</td></tr>
+          <tr><td>deployment</td><td><span class="c">Cloud + self-host</span> (FastAPI, k8s)</td><td>self-host</td><td>self-host (+ CrewAI Plus)</td><td>self-host</td></tr>
+          <tr><td>learning curve</td><td><span class="m">medium-high</span></td><td>low</td><td>low</td><td>medium</td></tr>
+          <tr><td>license</td><td><span class="l">MIT</span></td><td><span class="l">MIT</span></td><td><span class="l">MIT</span></td><td><span class="l">CC-BY-4.0 / MIT</span></td></tr>
+        </tbody>
+      </table>
     </div>
 
     <p class="comp-caption">
@@ -2210,53 +2235,308 @@ payload <span class="o">=</span> {<span class="s">"messages"</span><span class="
     }, { threshold: 0.5 });
     document.querySelectorAll('.num-bar').forEach((el) => barObs.observe(el));
 
-    // ============ LOOP NODE ACTIVATION ============
-    // Cycle through reason → act → observe with hard step transitions.
-    if (!reduced) {
-      const nodes = [
-        document.getElementById('node-reason'),
-        document.getElementById('node-act'),
-        document.getElementById('node-observe'),
-      ];
-      const stepNames = ['reason', 'act', 'observe'];
-      const stateStep = document.getElementById('state-step');
-      const stateMessages = document.getElementById('state-messages');
-      const stateObs = document.getElementById('state-obs');
-      const stateTick = document.getElementById('state-tick');
-      const PERIOD = 1800; // ms per node — fast, hard cuts
-      let idx = 0;
-      let messages = 2;
-      let observations = 1;
-      let tickCount = 0;
+    // ============ INTERACTIVE AGENT-LOOP SIMULATOR ============
+    (function initSimulator() {
+      const $ = (id) => document.getElementById(id);
+      const frame = $('sim-frame'); if (!frame) return;
+      const nReason = $('sim-node-reason'), nAct = $('sim-node-act'),
+            nObs = $('sim-node-observe'), nFin = $('sim-node-finish');
+      const dots = $('tool-dots');
+      const trails = {
+        sr: $('trail-start-reason'), ra: $('trail-reason-act'),
+        ao: $('trail-act-observe'), or: $('trail-observe-reason'),
+        rf: $('trail-reason-finish'),
+      };
+      const elJson = $('sim-state'), elTick = $('sim-tick'),
+            elCur  = $('sim-cur'),   elStat = $('sim-pill-status'),
+            elHist = $('sim-history');
+      const btnRun = $('sim-run'), btnStep = $('sim-step'), btnRst = $('sim-reset');
+      const speedBtns = document.querySelectorAll('.sim-speed-btn');
 
-      function step() {
-        nodes.forEach((n, i) => n && n.classList.toggle('active', i === idx));
-        if (stateStep) stateStep.textContent = stepNames[idx];
-        if (stepNames[idx] === 'act' && stateMessages) {
-          messages = Math.min(messages + 1, 12);
-          stateMessages.textContent = messages;
-        }
-        if (stepNames[idx] === 'observe' && stateObs) {
-          observations = Math.min(observations + 1, 12);
-          stateObs.textContent = observations;
-        }
-        if (idx === 0) {
-          // new cycle — reset counters periodically
-          if (messages > 8) messages = 2;
-          if (observations > 8) observations = 1;
-          tickCount++;
-        }
-        if (stateTick) {
-          stateTick.textContent = 't=' + String(tickCount * 3 + idx).padStart(3, '0');
-        }
-        idx = (idx + 1) % 3;
+      const SCENARIOS = [
+        { thought: 'I need to look up the user\'s shipping question.', tool: { name: 'search', args: { q: 'order status #4821' } }, obs: 'found 3 results: order shipped 2026-05-12, tracking 1Z...' },
+        { thought: 'I have the tracking number — fetch carrier status.', tool: { name: 'http_get', args: { url: '/carriers/ups/1Z...' } }, obs: 'in transit; delivery ETA 2026-05-17' },
+        { thought: 'User also asked about returns. Check the policy doc.', tool: { name: 'rag_query', args: { q: 'return window' } }, obs: '30-day window, free label, no questions' },
+        { thought: 'I have enough to answer. Compose final response.', tool: null, obs: null },
+      ];
+
+      let state, idx, phase, running, speed = 1, timer, finished;
+
+      const defaultState = () => ({ thoughts: [], tool_calls: [], observations: [],
+        iterations: 0, next_step: 'reason', done: false });
+
+      const escapeHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const dur = (base) => Math.round(base / speed);
+      const pad = (n) => String(n).padStart(3, '0');
+
+      function clearPulses() {
+        [nReason, nAct, nObs, nFin].forEach(n => n && n.classList.remove('pulse', 'pulse-act', 'pulse-obs'));
+        Object.values(trails).forEach(t => t && t.classList.remove('firing'));
       }
-      step();
-      setInterval(step, PERIOD);
-    } else {
-      const reason = document.getElementById('node-reason');
-      if (reason) reason.classList.add('active');
-    }
+      function setStatus(s) {
+        elStat.textContent = s;
+        frame.classList.remove('idle', 'running', 'finished');
+        frame.classList.add(s);
+      }
+      function setRunBtn(label, pressed) {
+        btnRun.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+        btnRun.innerHTML = '<span aria-hidden="true">&gt;</span> ' + label;
+      }
+      function stopTimer() { if (timer) { clearTimeout(timer); timer = null; } }
+      function fireTrail(t) {
+        if (!t) return;
+        t.classList.remove('firing');
+        void t.getBoundingClientRect();
+        t.classList.add('firing');
+      }
+
+      const sp = (cls, txt) => '<span class="' + cls + '">' + txt + '</span>';
+      function fmtVal(v, newCls) {
+        if (typeof v === 'string') return sp('s' + newCls, '"' + escapeHtml(v) + '"');
+        if (typeof v === 'number') return sp('n' + newCls, v);
+        if (typeof v === 'boolean') return sp('o' + newCls, v);
+        if (v === null) return sp('c', 'null');
+        if (typeof v === 'object') {
+          const parts = Object.keys(v).map(k => {
+            const sub = (typeof v[k] === 'object' && v[k] !== null)
+              ? sp('br', '{') + ' ' + Object.keys(v[k]).map(sk => sp('k', sk) + ': ' + sp('s', escapeHtml(JSON.stringify(v[k][sk])))).join(', ') + ' ' + sp('br', '}')
+              : sp('s', escapeHtml(JSON.stringify(v[k])));
+            return sp('k', k) + ': ' + sub;
+          });
+          return sp('br', '{') + ' ' + parts.join(', ') + ' ' + sp('br', '}');
+        }
+        return String(v);
+      }
+      function renderState(changed) {
+        const keys = ['thoughts', 'tool_calls', 'observations', 'iterations', 'next_step', 'done'];
+        const lines = [sp('br', '{')];
+        keys.forEach((k, i) => {
+          const v = state[k];
+          const tail = i === keys.length - 1 ? '' : sp('br', ',');
+          const nc = changed[k] ? ' new' : '';
+          const kStr = sp('k' + nc, '"' + k + '"') + sp('br', ':') + ' ';
+          let vStr;
+          if (Array.isArray(v)) {
+            if (!v.length) vStr = sp('br', '[]');
+            else {
+              const items = v.map((it, ix) => {
+                const last = ix === v.length - 1;
+                const cn = (changed[k] === 'last' && last) ? ' new' : '';
+                return '    ' + (cn ? sp('new', fmtVal(it, '')) : fmtVal(it, ''));
+              }).join(sp('br', ',') + '\n');
+              vStr = sp('br', '[') + '\n' + items + '\n  ' + sp('br', ']');
+            }
+          } else vStr = fmtVal(v, nc);
+          lines.push('  ' + kStr + vStr + tail);
+        });
+        lines.push(sp('br', '}'));
+        elJson.innerHTML = lines.join('\n');
+        elJson.scrollTop = elJson.scrollHeight;
+      }
+
+      function pushHist(t, n, d, cls) {
+        const row = document.createElement('div');
+        row.className = 'sim-hist-row';
+        row.innerHTML = '<span class="t">' + t + '</span><span class="n ' + (cls || '') + '">' + n + '</span><span class="d">' + d + '</span>';
+        elHist.appendChild(row);
+        elHist.scrollTop = elHist.scrollHeight;
+      }
+
+      function resetSim(soft) {
+        state = defaultState();
+        idx = 0; phase = 'idle'; running = false; finished = false;
+        stopTimer();
+        clearPulses();
+        dots.classList.remove('active');
+        nFin.classList.remove('active');
+        renderState({});
+        elTick.textContent = '000';
+        elCur.textContent  = '—';
+        setStatus('idle');
+        setRunBtn('run', false);
+        btnStep.disabled = false;
+        if (!soft) {
+          elHist.innerHTML = '';
+          pushHist('t=000', 'init', 'reset — press &gt; run or &gt; step to execute', 'reason');
+        }
+      }
+
+      const D_NODE = 700, D_EDGE = 700, D_TOOL = 900;
+
+      function tickOnce(cb) {
+        if (finished) return cb && cb();
+        clearPulses();
+        dots.classList.remove('active');
+        if (phase === 'idle') {
+          fireTrail(trails.sr); phase = 'reason';
+          elCur.textContent = 'reason';
+          elTick.textContent = pad(state.iterations);
+          setStatus('running');
+          timer = setTimeout(() => doReason(cb), dur(D_EDGE));
+          return;
+        }
+        if (phase === 'reason-next') {
+          fireTrail(trails.or);
+          elCur.textContent = 'reason';
+          timer = setTimeout(() => doReason(cb), dur(D_EDGE));
+          return;
+        }
+        cb && cb();
+      }
+
+      function doReason(cb) {
+        const s = SCENARIOS[Math.min(idx, SCENARIOS.length - 1)];
+        nReason.classList.add('pulse');
+        state.iterations += 1;
+        elTick.textContent = pad(state.iterations);
+        state.thoughts.push(s.thought);
+        state.next_step = s.tool ? 'act' : 'finish';
+        renderState({ thoughts: 'last', iterations: true, next_step: true });
+        pushHist('t=' + pad(state.iterations), 'REASON', s.thought, '');
+        timer = setTimeout(() => {
+          if (!s.tool || idx >= SCENARIOS.length - 1) {
+            clearPulses(); fireTrail(trails.rf);
+            phase = 'finish'; elCur.textContent = 'finish';
+            timer = setTimeout(() => doFinish(cb), dur(D_EDGE));
+          } else {
+            clearPulses(); fireTrail(trails.ra);
+            phase = 'act'; elCur.textContent = 'act';
+            timer = setTimeout(() => doAct(cb), dur(D_EDGE));
+          }
+        }, dur(D_NODE));
+      }
+
+      function doAct(cb) {
+        const s = SCENARIOS[Math.min(idx, SCENARIOS.length - 1)];
+        nAct.classList.add('pulse-act');
+        state.tool_calls.push(s.tool);
+        state.next_step = 'observe';
+        renderState({ tool_calls: 'last', next_step: true });
+        const argstr = Object.keys(s.tool.args).map(k => k + '=' + JSON.stringify(s.tool.args[k])).join(',');
+        pushHist('t=' + pad(state.iterations), 'ACT', s.tool.name + '(' + argstr + ')', 'act');
+        timer = setTimeout(() => {
+          clearPulses();
+          dots.classList.add('active');
+          fireTrail(trails.ao);
+          phase = 'tool'; elCur.textContent = 'tool';
+          timer = setTimeout(() => doObserve(cb), dur(D_TOOL));
+        }, dur(D_NODE));
+      }
+
+      function doObserve(cb) {
+        dots.classList.remove('active');
+        const s = SCENARIOS[Math.min(idx, SCENARIOS.length - 1)];
+        nObs.classList.add('pulse-obs');
+        state.observations.push(s.obs);
+        state.next_step = 'reason';
+        renderState({ observations: 'last', next_step: true });
+        pushHist('t=' + pad(state.iterations), 'OBSERVE', s.obs, 'observe');
+        idx += 1;
+        timer = setTimeout(() => {
+          clearPulses();
+          phase = 'reason-next';
+          if (running) tickOnce(cb); else cb && cb();
+        }, dur(D_NODE));
+      }
+
+      function doFinish(cb) {
+        nFin.classList.add('active');
+        state.done = true; state.next_step = 'END';
+        renderState({ done: true, next_step: true });
+        pushHist('t=' + pad(state.iterations), 'FINISH',
+          'agent.invoke complete — ' + state.observations.length + ' tool calls', 'finish');
+        finished = true; running = false;
+        setStatus('finished');
+        elCur.textContent = 'END';
+        setRunBtn('run', false);
+        btnStep.disabled = true;
+        cb && cb();
+      }
+
+      function runLoop() {
+        if (!running || finished) return;
+        tickOnce(() => {
+          if (running && !finished) timer = setTimeout(runLoop, dur(200));
+        });
+      }
+
+      btnRun.addEventListener('click', () => {
+        if (finished) resetSim(false);
+        if (running) {
+          running = false; stopTimer(); setRunBtn('run', false); setStatus('idle');
+        } else {
+          running = true; setRunBtn('pause', true); setStatus('running'); runLoop();
+        }
+      });
+      btnStep.addEventListener('click', () => {
+        if (finished) { resetSim(false); return; }
+        if (running) { running = false; stopTimer(); setRunBtn('run', false); }
+        tickOnce(() => {});
+      });
+      btnRst.addEventListener('click', () => resetSim(false));
+      speedBtns.forEach(b => b.addEventListener('click', () => {
+        speedBtns.forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        speed = parseFloat(b.dataset.speed) || 1;
+      }));
+
+      // tap-to-step on touch devices
+      const svg = frame.querySelector('.sim-svg');
+      if (svg && ('ontouchstart' in window)) {
+        svg.addEventListener('click', (e) => {
+          if (e.target.closest('.sim-controls')) return;
+          btnStep.click();
+        });
+      }
+
+      if (reduced) {
+        resetSim(false);
+        nReason.classList.add('pulse');
+        btnRun.disabled = btnStep.disabled = btnRst.disabled = true;
+        speedBtns.forEach(b => b.disabled = true);
+        elStat.textContent = 'static';
+      } else {
+        resetSim(false);
+      }
+    })();
+
+    // ============ CODE EXPAND + TABLE SORT ============
+    document.querySelectorAll('.code-expand').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const t = document.getElementById(btn.dataset.target);
+        if (!t) return;
+        const open = t.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.innerHTML = '<span aria-hidden="true">&gt;</span> ' + (open ? 'collapse' : 'expand');
+        t.setAttribute('aria-hidden', open ? 'false' : 'true');
+      });
+    });
+    (function initTableSort() {
+      const table = document.getElementById('comp-table');
+      if (!table) return;
+      const headers = table.querySelectorAll('thead th');
+      const tbody = table.querySelector('tbody');
+      let lastKey = null, asc = true;
+      headers.forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.dataset.key;
+          if (lastKey === key) asc = !asc; else { asc = true; lastKey = key; }
+          headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+          th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+          const rows = Array.from(tbody.querySelectorAll('tr'));
+          const colIdx = Array.from(headers).indexOf(th);
+          rows.sort((a, b) => {
+            const av = (a.children[colIdx]?.textContent || '').trim().toLowerCase();
+            const bv = (b.children[colIdx]?.textContent || '').trim().toLowerCase();
+            const an = parseFloat(av), bn = parseFloat(bv);
+            const cmp = (!isNaN(an) && !isNaN(bn)) ? an - bn : av.localeCompare(bv);
+            return asc ? cmp : -cmp;
+          });
+          rows.forEach(r => tbody.appendChild(r));
+        });
+      });
+    })();
   </script>
   <script src="../shared/nav.js" defer></script>
 </body>

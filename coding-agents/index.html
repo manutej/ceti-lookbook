@@ -1308,6 +1308,403 @@ footer {
   .card { opacity: 1 !important; transform: none !important; }
   .matrix .cap-fill { width: calc(var(--v, 0) * 1%) !important; transition: none !important; }
   .bench-fill { width: calc(var(--v, 0) * 1%) !important; transition: none !important; }
+  .sim-bar-fill { width: var(--target-w, 0) !important; transition: none !important; }
+  .card-inner { transition: none !important; }
+  .card-tilt:hover .card-inner,
+  .card-tilt:focus-within .card-inner { transform: rotateY(180deg) !important; }
+}
+
+/* ====== MATCHUP SIMULATOR ====== */
+.sim {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.sim-eyebrow {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 0 0 0.3rem;
+}
+.sim-title {
+  font-family: var(--f-display);
+  font-size: 1.8rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1;
+  margin: 0 0 0.4rem;
+}
+.sim-sub {
+  font-size: 0.88rem;
+  color: var(--text-2);
+  margin: 0 0 1.2rem;
+  max-width: 60ch;
+}
+.sim-controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 1.3rem;
+  padding-bottom: 1.3rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+.sim-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.sim-field-k {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.sim-field select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--f-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--bg-card-deep);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--team-color, var(--text-3));
+  border-radius: 4px;
+  padding: 0.6rem 1.8rem 0.6rem 0.7rem;
+  cursor: pointer;
+  transition: border-color var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease);
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-3) 50%), linear-gradient(135deg, var(--text-3) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+.sim-field select:hover, .sim-field select:focus {
+  outline: none;
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 1px var(--team-color, var(--line-strong));
+}
+.sim-vs {
+  font-family: var(--f-display);
+  font-size: 1.4rem;
+  color: var(--text-3);
+  padding-bottom: 0.65rem;
+}
+.sim-fight {
+  font-family: var(--f-display);
+  font-size: 1.4rem;
+  letter-spacing: 0.08em;
+  background: var(--team-a, var(--t-claude));
+  color: #0A0E14;
+  border: none;
+  border-radius: 4px;
+  padding: 0.7rem 1.4rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: transform var(--d-fast) var(--ease), box-shadow var(--d-fast) var(--ease), filter var(--d-fast) var(--ease);
+  box-shadow: 0 6px 0 -2px color-mix(in srgb, var(--team-a, var(--t-claude)) 50%, black);
+}
+.sim-fight:hover { transform: translateY(-2px); box-shadow: 0 8px 0 -2px color-mix(in srgb, var(--team-a, var(--t-claude)) 50%, black); }
+.sim-fight:active { transform: translateY(1px); box-shadow: 0 3px 0 -1px color-mix(in srgb, var(--team-a, var(--t-claude)) 50%, black); }
+.sim-fight:disabled { filter: grayscale(0.5) opacity(0.6); cursor: wait; transform: none; }
+
+.sim-arena {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.1rem;
+  min-height: 230px;
+}
+.sim-lane {
+  display: grid;
+  grid-template-columns: 130px 1fr 110px;
+  gap: 0.85rem;
+  align-items: center;
+  position: relative;
+}
+.sim-lane-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.sim-lane-jersey {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--f-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.sim-lane-jersey::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--lane-color, var(--text-2));
+}
+.sim-lane-pos {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+.sim-bar-track {
+  position: relative;
+  height: 42px;
+  background: var(--bg-card-deep);
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.sim-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--lane-color, var(--t-claude));
+  opacity: 0.92;
+  transition: width 80ms linear;
+}
+.sim-bar-fill::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 3px;
+  background: rgba(255,255,255,0.35);
+  box-shadow: 0 0 10px var(--lane-color);
+}
+.sim-bar-stripes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    -55deg,
+    transparent 0 12px,
+    color-mix(in srgb, var(--lane-color) 18%, transparent) 12px 16px
+  );
+  opacity: 0;
+  transition: opacity 220ms var(--ease);
+}
+.sim-lane.win .sim-bar-stripes { opacity: 1; }
+.sim-bar-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(90deg,
+    transparent 0 calc(25% - 1px), rgba(255,255,255,0.06) calc(25% - 1px) 25%,
+    transparent 25% calc(50% - 1px), rgba(255,255,255,0.10) calc(50% - 1px) 50%,
+    transparent 50% calc(75% - 1px), rgba(255,255,255,0.06) calc(75% - 1px) 75%,
+    transparent 75% 100%
+  );
+}
+.sim-lane-val {
+  font-family: var(--f-display);
+  font-size: 2.4rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-stat);
+}
+.sim-lane-val .pct {
+  font-size: 1.1rem;
+  color: var(--text-3);
+  margin-left: 0.1rem;
+}
+.sim-lane.win .sim-lane-val { color: var(--lane-color); }
+.sim-champ {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 0.18rem 0.45rem;
+  background: var(--lane-color);
+  color: #0A0E14;
+  border-radius: 2px;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.9);
+  transition: opacity 250ms var(--ease), transform 250ms var(--ease-spring);
+}
+.sim-lane.win .sim-champ { opacity: 1; transform: translateY(0) scale(1); }
+.sim-result-line {
+  margin-top: 1.1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--line-soft);
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  color: var(--text-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 1.5rem;
+}
+.sim-result-line .sim-result-bench {
+  color: var(--text-3);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.sim-result-line .sim-result-status {
+  color: var(--text);
+  font-family: var(--f-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.sim-result-line .sim-result-status.is-fighting { color: var(--t-claude); }
+.sim-result-line .sim-result-status.is-done    { color: var(--t-cline); }
+.sim-result-line .sim-result-status.is-tied    { color: var(--t-codeium); }
+
+/* ====== REPLAY-RACE BUTTON ====== */
+.bench-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.95rem;
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  transition: color var(--d-fast) var(--ease), border-color var(--d-fast) var(--ease), background var(--d-fast) var(--ease);
+}
+.bench-replay:hover { color: var(--text); border-color: var(--line-strong); background: var(--bg-card-deep); }
+.bench-replay::before { content: "▷"; color: var(--text-3); font-size: 0.8rem; }
+.bench-card.racing .bench-fill { transition: width 280ms var(--ease) !important; }
+
+/* ====== CARD 3D TILT (cursor-parallax pre-flip) ====== */
+.card-tilt .card-inner {
+  will-change: transform;
+}
+.card-tilt:not(.flipped):hover .card-inner,
+.card-tilt:not(.flipped):focus-within .card-inner {
+  transform:
+    perspective(1200px)
+    rotateY(calc(180deg + var(--tilt-y, 0deg)))
+    rotateX(var(--tilt-x, 0deg));
+}
+
+/* ====== MATRIX CELL TOOLTIP ====== */
+.matrix tbody td.cap-cell,
+.matrix tbody td:nth-child(8),
+.matrix tbody td:nth-child(9) { cursor: help; position: relative; }
+.matrix tbody td.is-active { background: rgba(255,255,255,0.04); }
+.cap-tip {
+  position: fixed;
+  z-index: 80;
+  width: 280px;
+  max-width: calc(100vw - 32px);
+  background: var(--bg-card-deep);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--tip-color, var(--t-claude));
+  border-radius: 5px;
+  padding: 0.85rem 0.95rem 0.9rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 160ms var(--ease), transform 160ms var(--ease);
+  box-shadow: 0 14px 40px -10px rgba(0,0,0,0.6);
+}
+.cap-tip.show { opacity: 1; transform: translateY(0); }
+.cap-tip .tip-k {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 0 0 0.25rem;
+}
+.cap-tip .tip-h {
+  font-family: var(--f-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+.cap-tip .tip-body {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-2);
+  margin: 0 0 0.55rem;
+}
+.cap-tip .tip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  padding: 0.25rem 0;
+  border-top: 1px solid var(--line-soft);
+}
+.cap-tip .tip-row .tip-agent { color: var(--text); }
+.cap-tip .tip-row .tip-score { color: var(--tip-color, var(--t-claude)); font-weight: 600; }
+.cap-tip .tip-ex {
+  margin-top: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text-3);
+  border-top: 1px dashed var(--line-soft);
+  padding-top: 0.5rem;
+  line-height: 1.45;
+}
+.cap-tip .tip-ex strong { color: var(--text-2); font-weight: 600; }
+
+/* ====== DECISION-ROW HOVER GLOW ====== */
+.decision-row {
+  transition: background var(--d-fast) var(--ease), box-shadow var(--d-norm) var(--ease), transform var(--d-norm) var(--ease);
+}
+.decision-row:not(.head):hover {
+  background: rgba(255,255,255,0.025);
+  box-shadow: inset 4px 0 0 0 var(--row-color, var(--t-claude)),
+              0 0 36px -10px color-mix(in srgb, var(--row-color, var(--t-claude)) 60%, transparent);
+  transform: translateY(-1px);
+}
+.decision-row .dec-pick {
+  transition: box-shadow var(--d-norm) var(--ease);
+}
+.decision-row:not(.head):hover .dec-pick {
+  box-shadow: 0 0 18px -4px color-mix(in srgb, var(--row-color, var(--t-claude)) 80%, transparent);
+}
+
+/* ====== RESPONSIVE: simulator ====== */
+@media (max-width: 880px) {
+  .sim-controls {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 0.9rem;
+    column-gap: 0.6rem;
+  }
+  .sim-vs { display: none; }
+  .sim-fight { grid-column: 1 / -1; }
+  .sim-lane { grid-template-columns: 100px 1fr 86px; }
+  .sim-lane-val { font-size: 1.9rem; }
+  .sim-lane-jersey { font-size: 1rem; }
+}
+@media (max-width: 520px) {
+  .sim-lane { grid-template-columns: 76px 1fr 70px; gap: 0.5rem; }
+  .sim-lane-val { font-size: 1.6rem; }
+  .sim-bar-track { height: 36px; }
 }
 </style>
 </head>
@@ -1366,7 +1763,7 @@ footer {
 
     <div class="roster-grid">
       <!-- ===== CARD 1 · CLAUDE CODE ===== -->
-      <article class="card" style="--team: var(--t-claude)" tabindex="0">
+      <article class="card card-tilt" data-agent="claude" style="--team: var(--t-claude)" tabindex="0">
         <div class="card-inner">
           <div class="card-face card-front">
             <div class="card-header">
@@ -1412,7 +1809,7 @@ footer {
       </article>
 
       <!-- ===== CARD 2 · CURSOR ===== -->
-      <article class="card" style="--team: var(--t-cursor)" tabindex="0">
+      <article class="card card-tilt" data-agent="cursor" style="--team: var(--t-cursor)" tabindex="0">
         <div class="card-inner">
           <div class="card-face card-front">
             <div class="card-header">
@@ -1458,7 +1855,7 @@ footer {
       </article>
 
       <!-- ===== CARD 3 · GITHUB COPILOT ===== -->
-      <article class="card" style="--team: var(--t-copilot)" tabindex="0">
+      <article class="card card-tilt" data-agent="copilot" style="--team: var(--t-copilot)" tabindex="0">
         <div class="card-inner">
           <div class="card-face card-front">
             <div class="card-header">
@@ -1504,7 +1901,7 @@ footer {
       </article>
 
       <!-- ===== CARD 4 · AIDER ===== -->
-      <article class="card" style="--team: var(--t-aider)" tabindex="0">
+      <article class="card card-tilt" data-agent="aider" style="--team: var(--t-aider)" tabindex="0">
         <div class="card-inner">
           <div class="card-face card-front">
             <div class="card-header">
@@ -1550,7 +1947,7 @@ footer {
       </article>
 
       <!-- ===== CARD 5 · CLINE ===== -->
-      <article class="card" style="--team: var(--t-cline)" tabindex="0">
+      <article class="card card-tilt" data-agent="cline" style="--team: var(--t-cline)" tabindex="0">
         <div class="card-inner">
           <div class="card-face card-front">
             <div class="card-header">
@@ -1596,7 +1993,7 @@ footer {
       </article>
 
       <!-- ===== CARD 6 · DEVIN ===== -->
-      <article class="card" style="--team: var(--t-devin)" tabindex="0">
+      <article class="card card-tilt" data-agent="devin" style="--team: var(--t-devin)" tabindex="0">
         <div class="card-inner">
           <div class="card-face card-front">
             <div class="card-header">
@@ -1642,7 +2039,7 @@ footer {
       </article>
 
       <!-- ===== CARD 7 · CODEIUM / WINDSURF ===== -->
-      <article class="card" style="--team: var(--t-codeium)" tabindex="0">
+      <article class="card card-tilt" data-agent="windsurf" style="--team: var(--t-codeium)" tabindex="0">
         <div class="card-inner">
           <div class="card-face card-front">
             <div class="card-header">
@@ -1714,18 +2111,18 @@ footer {
           <thead>
             <tr>
               <th class="first">Agent</th>
-              <th>Autonomy</th>
-              <th>Multi-file</th>
-              <th>Terminal</th>
-              <th>MCP</th>
-              <th>IDE Integ.</th>
-              <th>CLI</th>
-              <th>Cost / mo</th>
-              <th>SWE-bench V.</th>
+              <th data-cap="autonomy">Autonomy</th>
+              <th data-cap="multifile">Multi-file</th>
+              <th data-cap="terminal">Terminal</th>
+              <th data-cap="mcp">MCP</th>
+              <th data-cap="ide">IDE Integ.</th>
+              <th data-cap="cli">CLI</th>
+              <th data-cap="cost">Cost / mo</th>
+              <th data-cap="swe">SWE-bench V.</th>
             </tr>
           </thead>
           <tbody>
-            <tr style="--team: var(--t-claude)">
+            <tr data-agent="claude" style="--team: var(--t-claude)">
               <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Claude Code</span><span class="m-team">Anthropic · CLI</span></span></span></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><span class="cap-num">95</span></div></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><span class="cap-num">95</span></div></td>
@@ -1736,7 +2133,7 @@ footer {
               <td><span class="cost-bullet high">$$$ · 100–200</span></td>
               <td><span class="swe-bench">87.6%</span></td>
             </tr>
-            <tr style="--team: var(--t-cursor)">
+            <tr data-agent="cursor" style="--team: var(--t-cursor)">
               <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Cursor</span><span class="m-team">Anysphere · IDE</span></span></span></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 75"></div></div><span class="cap-num">75</span></div></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 90"></div></div><span class="cap-num">90</span></div></td>
@@ -1747,7 +2144,7 @@ footer {
               <td><span class="cost-bullet mid">$$ · 20–60</span></td>
               <td><span class="swe-bench">67.2%</span></td>
             </tr>
-            <tr style="--team: var(--t-copilot)">
+            <tr data-agent="copilot" style="--team: var(--t-copilot)">
               <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">GitHub Copilot</span><span class="m-team">GitHub · IDE</span></span></span></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 55"></div></div><span class="cap-num">55</span></div></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 70"></div></div><span class="cap-num">70</span></div></td>
@@ -1758,7 +2155,7 @@ footer {
               <td><span class="cost-bullet mid">$$ · 10–39</span></td>
               <td><span class="swe-bench">62.0%</span></td>
             </tr>
-            <tr style="--team: var(--t-aider)">
+            <tr data-agent="aider" style="--team: var(--t-aider)">
               <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Aider</span><span class="m-team">OSS · CLI</span></span></span></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 60"></div></div><span class="cap-num">60</span></div></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 85"></div></div><span class="cap-num">85</span></div></td>
@@ -1769,7 +2166,7 @@ footer {
               <td><span class="cost-bullet low">$ · BYO key</span></td>
               <td><span class="swe-bench">—</span></td>
             </tr>
-            <tr style="--team: var(--t-cline)">
+            <tr data-agent="cline" style="--team: var(--t-cline)">
               <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Cline</span><span class="m-team">OSS · VS Code</span></span></span></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><span class="cap-num">80</span></div></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 90"></div></div><span class="cap-num">90</span></div></td>
@@ -1780,7 +2177,7 @@ footer {
               <td><span class="cost-bullet low">$ · BYO key</span></td>
               <td><span class="swe-bench">—</span></td>
             </tr>
-            <tr style="--team: var(--t-devin)">
+            <tr data-agent="devin" style="--team: var(--t-devin)">
               <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Devin</span><span class="m-team">Cognition · Cloud</span></span></span></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><span class="cap-num">100</span></div></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><span class="cap-num">95</span></div></td>
@@ -1791,7 +2188,7 @@ footer {
               <td><span class="cost-bullet vhi">$$$$ · 500+</span></td>
               <td><span class="swe-bench">60.8%</span></td>
             </tr>
-            <tr style="--team: var(--t-codeium)">
+            <tr data-agent="windsurf" style="--team: var(--t-codeium)">
               <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Windsurf</span><span class="m-team">Codeium · IDE</span></span></span></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 65"></div></div><span class="cap-num">65</span></div></td>
               <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><span class="cap-num">80</span></div></td>
@@ -1823,6 +2220,84 @@ footer {
       <div>
         <p class="section-num">Section 04 · Head-to-Head</p>
         <h2 class="section-title">Three Matchups That Settle Most Arguments</h2>
+      </div>
+    </div>
+
+    <!-- ====== MATCHUP SIMULATOR ====== -->
+    <div class="sim" id="sim" aria-label="Build your own matchup simulator">
+      <p class="sim-eyebrow">Interactive · Build Your Own Matchup</p>
+      <h3 class="sim-title">Pick Two Players, Pick A Benchmark, Press Fight</h3>
+      <p class="sim-sub">Each agent is paired with its strongest published model in our 2026 dataset. Numbers below the league average are dashes — that benchmark isn't reported for that agent's harness.</p>
+
+      <div class="sim-controls">
+        <label class="sim-field">
+          <span class="sim-field-k">Pick Agent A</span>
+          <select id="sim-a" aria-label="Pick agent A">
+            <option value="claude" selected>Claude Code</option>
+            <option value="cursor">Cursor</option>
+            <option value="copilot">GitHub Copilot</option>
+            <option value="aider">Aider</option>
+            <option value="cline">Cline</option>
+            <option value="devin">Devin</option>
+            <option value="windsurf">Windsurf</option>
+          </select>
+        </label>
+        <span class="sim-vs">VS</span>
+        <label class="sim-field">
+          <span class="sim-field-k">Pick Agent B</span>
+          <select id="sim-b" aria-label="Pick agent B">
+            <option value="claude">Claude Code</option>
+            <option value="cursor" selected>Cursor</option>
+            <option value="copilot">GitHub Copilot</option>
+            <option value="aider">Aider</option>
+            <option value="cline">Cline</option>
+            <option value="devin">Devin</option>
+            <option value="windsurf">Windsurf</option>
+          </select>
+        </label>
+        <label class="sim-field">
+          <span class="sim-field-k">Pick A Benchmark</span>
+          <select id="sim-bench" aria-label="Pick a benchmark">
+            <option value="swe" selected>SWE-bench Verified</option>
+            <option value="polyglot">Aider Polyglot</option>
+            <option value="mle">MLE-bench Lite</option>
+          </select>
+        </label>
+        <button type="button" class="sim-fight" id="sim-fight" aria-label="Run matchup">▶ Fight</button>
+      </div>
+
+      <div class="sim-arena" id="sim-arena">
+        <div class="sim-lane" id="sim-lane-a">
+          <div class="sim-lane-name">
+            <span class="sim-lane-jersey" id="sim-name-a">Claude Code</span>
+            <span class="sim-lane-pos" id="sim-pos-a">CLI · Anthropic</span>
+          </div>
+          <div class="sim-bar-track">
+            <div class="sim-bar-grid"></div>
+            <div class="sim-bar-fill" id="sim-fill-a"></div>
+            <div class="sim-bar-stripes"></div>
+          </div>
+          <div class="sim-lane-val"><span id="sim-val-a">0.0</span><span class="pct">%</span></div>
+          <span class="sim-champ">Champion</span>
+        </div>
+        <div class="sim-lane" id="sim-lane-b">
+          <div class="sim-lane-name">
+            <span class="sim-lane-jersey" id="sim-name-b">Cursor</span>
+            <span class="sim-lane-pos" id="sim-pos-b">IDE · Anysphere</span>
+          </div>
+          <div class="sim-bar-track">
+            <div class="sim-bar-grid"></div>
+            <div class="sim-bar-fill" id="sim-fill-b"></div>
+            <div class="sim-bar-stripes"></div>
+          </div>
+          <div class="sim-lane-val"><span id="sim-val-b">0.0</span><span class="pct">%</span></div>
+          <span class="sim-champ">Champion</span>
+        </div>
+      </div>
+
+      <div class="sim-result-line">
+        <span class="sim-result-bench" id="sim-bench-label">Benchmark · SWE-bench Verified · 2026</span>
+        <span class="sim-result-status" id="sim-status">Ready</span>
       </div>
     </div>
 
@@ -1949,6 +2424,7 @@ footer {
           <div class="bench-row"><span class="bench-rank">10</span><div class="bench-name" style="--bar: var(--t-codeium)"><div class="bench-fill" style="--v: 55.4"></div><span class="bench-label">Windsurf Cascade</span></div><span class="bench-val">55.4%</span></div>
         </div>
         <p class="bench-foot">Source · swebench.com Verified split + vendor reports, May 2026</p>
+        <button type="button" class="bench-replay" data-bench-target="bench-swe">Replay Race</button>
       </div>
 
       <!-- AIDER POLYGLOT -->
@@ -1969,6 +2445,7 @@ footer {
           <div class="bench-row"><span class="bench-rank">10</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 59.1"></div><span class="bench-label">Qwen 2.5 Coder 32B</span></div><span class="bench-val">59.1%</span></div>
         </div>
         <p class="bench-foot">Source · aider.chat/docs/leaderboards, 2026</p>
+        <button type="button" class="bench-replay" data-bench-target="bench-aider">Replay Race</button>
       </div>
     </div>
 
@@ -2106,42 +2583,42 @@ footer {
         <div>Sensible Default</div>
         <div>Why</div>
       </div>
-      <div class="decision-row">
+      <div class="decision-row" data-agent="cursor" style="--row-color: var(--t-cursor)">
         <div class="dec-case">Greenfield, fast iteration</div>
         <div><span class="dec-pick" style="--pick: var(--t-cursor)">Cursor</span></div>
         <div class="dec-why">Tab completion plus Composer keeps you in the editor while the codebase is small enough to hold in your head. Agentic work is still cheap, model swaps are one click.</div>
       </div>
-      <div class="decision-row">
+      <div class="decision-row" data-agent="claude" style="--row-color: var(--t-claude)">
         <div class="dec-case">Refactor a large codebase</div>
         <div><span class="dec-pick" style="--pick: var(--t-claude)">Claude Code</span></div>
         <div class="dec-why">Long-horizon planning, repo-wide context, terminal access, MCP servers for project-specific tools. The leash is intentionally long and the SWE-bench numbers back it up.</div>
       </div>
-      <div class="decision-row">
+      <div class="decision-row" data-agent="cline" style="--row-color: var(--t-cline)">
         <div class="dec-case">Debug a tricky failure</div>
         <div><span class="dec-pick" style="--pick: var(--t-cline)">Cline</span></div>
         <div class="dec-why">Every action is explicit and approval-gated. You watch it form a hypothesis, run a test, revise. BYO key means model swaps are free; observability is total.</div>
       </div>
-      <div class="decision-row">
+      <div class="decision-row" data-agent="claude" style="--row-color: var(--t-claude)">
         <div class="dec-case">Navigate a large unfamiliar repo</div>
         <div><span class="dec-pick" style="--pick: var(--t-claude)">Claude Code</span></div>
         <div class="dec-why">Repo-wide planning and long context windows let you ask "where does X happen?" and get an answer grounded in real file paths, not hallucinations.</div>
       </div>
-      <div class="decision-row">
+      <div class="decision-row" data-agent="aider" style="--row-color: var(--t-aider)">
         <div class="dec-case">Learning a new language</div>
         <div><span class="dec-pick" style="--pick: var(--t-aider)">Aider</span></div>
         <div class="dec-why">Aider's Polyglot benchmark exists because Aider is good at polyglot work. Git-native, transparent edits, zero subscription friction, any frontier model you want.</div>
       </div>
-      <div class="decision-row">
+      <div class="decision-row" data-agent="devin" style="--row-color: var(--t-devin)">
         <div class="dec-case">Ship a small ticket end-to-end</div>
         <div><span class="dec-pick" style="--pick: var(--t-devin)">Devin</span></div>
         <div class="dec-why">When the work is well-scoped and you'd rather review than write, the autonomous path is cheapest in human-minutes. Pricier in dollars; still cheaper than your time.</div>
       </div>
-      <div class="decision-row">
+      <div class="decision-row" data-agent="copilot" style="--row-color: var(--t-copilot)">
         <div class="dec-case">Onboarding a junior engineer</div>
         <div><span class="dec-pick" style="--pick: var(--t-copilot)">GitHub Copilot</span></div>
         <div class="dec-why">Lowest cognitive overhead, zero setup, lives inside the IDE the junior already learned in school. Lets them learn the codebase while shipping.</div>
       </div>
-      <div class="decision-row">
+      <div class="decision-row" data-agent="claude" style="--row-color: var(--t-claude)">
         <div class="dec-case">Ops scripts, glue code, one-shots</div>
         <div><span class="dec-pick" style="--pick: var(--t-claude)">Claude Code</span></div>
         <div class="dec-why">Terminal-native means the agent is already where the work happens — bash, awk, kubectl, terraform. No editor context-switch tax.</div>
@@ -2401,6 +2878,430 @@ footer {
       card.addEventListener('click', () => card.classList.toggle('flipped'));
     });
   }
+
+  // ============ REDUCED MOTION CHECK ============
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ============ AGENT REGISTRY (shared lookup) ============
+  const AGENTS = {
+    claude:   { name: 'Claude Code',    pos: 'CLI · Anthropic',     color: 'var(--t-claude)',   jersey: 'CC' },
+    cursor:   { name: 'Cursor',         pos: 'IDE · Anysphere',     color: 'var(--t-cursor)',   jersey: 'CR' },
+    copilot:  { name: 'GitHub Copilot', pos: 'IDE · GitHub',        color: 'var(--t-copilot)',  jersey: 'GH' },
+    aider:    { name: 'Aider',          pos: 'CLI · Open Source',   color: 'var(--t-aider)',    jersey: 'AD' },
+    cline:    { name: 'Cline',          pos: 'VS Code · OSS',       color: 'var(--t-cline)',    jersey: 'CL' },
+    devin:    { name: 'Devin',          pos: 'CLOUD · Cognition',   color: 'var(--t-devin)',    jersey: 'DV' },
+    windsurf: { name: 'Windsurf',       pos: 'IDE · Codeium',       color: 'var(--t-codeium)',  jersey: 'WS' }
+  };
+
+  // Plausible 2026 benchmark scores per agent × benchmark.
+  // null = "not published with this agent's harness" → renders as 0 / "—" in result line.
+  const BENCH_DATA = {
+    swe: {
+      label: 'SWE-bench Verified · 500 Python issues · May 2026',
+      claude: 87.6, cursor: 67.2, copilot: 62.0, aider: 64.2,
+      cline: 65.4, devin: 60.8, windsurf: 55.4
+    },
+    polyglot: {
+      label: 'Aider Polyglot · 225 hard Exercism · 2026',
+      claude: 89.4, cursor: 71.6, copilot: 70.2, aider: 79.0,
+      cline: 76.8, devin: 58.4, windsurf: 62.5
+    },
+    mle: {
+      label: 'MLE-bench Lite · 22 ML tasks · medal rate · 2026',
+      claude: 24.0, cursor: 14.0, copilot: 16.0, aider: 12.0,
+      cline: 18.0, devin: 28.0, windsurf: 10.0
+    }
+  };
+
+  // ============ MATCHUP SIMULATOR ============
+  (function initSim() {
+    const sim = document.getElementById('sim');
+    if (!sim) return;
+
+    const selA = document.getElementById('sim-a');
+    const selB = document.getElementById('sim-b');
+    const selBench = document.getElementById('sim-bench');
+    const fightBtn = document.getElementById('sim-fight');
+    const laneA = document.getElementById('sim-lane-a');
+    const laneB = document.getElementById('sim-lane-b');
+    const nameA = document.getElementById('sim-name-a');
+    const nameB = document.getElementById('sim-name-b');
+    const posA  = document.getElementById('sim-pos-a');
+    const posB  = document.getElementById('sim-pos-b');
+    const valA  = document.getElementById('sim-val-a');
+    const valB  = document.getElementById('sim-val-b');
+    const fillA = document.getElementById('sim-fill-a');
+    const fillB = document.getElementById('sim-fill-b');
+    const benchLabel = document.getElementById('sim-bench-label');
+    const statusEl = document.getElementById('sim-status');
+
+    let running = false;
+    let rafId = null;
+
+    function refreshHeads() {
+      const a = AGENTS[selA.value];
+      const b = AGENTS[selB.value];
+      nameA.textContent = a.name; posA.textContent = a.pos;
+      nameB.textContent = b.name; posB.textContent = b.pos;
+      laneA.style.setProperty('--lane-color', a.color);
+      laneB.style.setProperty('--lane-color', b.color);
+      // make 'A' the dominant color for fight button border-left etc.
+      sim.style.setProperty('--team-a', a.color);
+      sim.style.setProperty('--team-b', b.color);
+      selA.style.setProperty('--team-color', a.color);
+      selB.style.setProperty('--team-color', b.color);
+      fightBtn.style.background = a.color;
+      fightBtn.style.boxShadow = `0 6px 0 -2px color-mix(in srgb, ${a.color} 50%, black)`;
+    }
+    function refreshBenchLabel() {
+      benchLabel.textContent = 'Benchmark · ' + BENCH_DATA[selBench.value].label;
+    }
+    function resetArena() {
+      laneA.classList.remove('win');
+      laneB.classList.remove('win');
+      fillA.style.width = '0';
+      fillB.style.width = '0';
+      valA.textContent = '0.0';
+      valB.textContent = '0.0';
+      statusEl.textContent = 'Ready';
+      statusEl.className = 'sim-result-status';
+    }
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function fight() {
+      if (running) return;
+      const aKey = selA.value, bKey = selB.value;
+      const benchKey = selBench.value;
+      const bench = BENCH_DATA[benchKey];
+      const aRaw = bench[aKey];
+      const bRaw = bench[bKey];
+      // null guard
+      const aTarget = (typeof aRaw === 'number') ? aRaw : 0;
+      const bTarget = (typeof bRaw === 'number') ? bRaw : 0;
+      // if both 0 -> still race, both stay 0
+      resetArena();
+      statusEl.textContent = 'Fighting…';
+      statusEl.classList.add('is-fighting');
+      running = true;
+      fightBtn.disabled = true;
+
+      if (prefersReduced) {
+        // Skip animation; show final state immediately
+        fillA.style.width = aTarget + '%';
+        fillB.style.width = bTarget + '%';
+        valA.textContent = aTarget.toFixed(1);
+        valB.textContent = bTarget.toFixed(1);
+        finishFight(aKey, bKey, aTarget, bTarget);
+        return;
+      }
+
+      const duration = 4000;
+      // slight stagger: weaker agent slightly faster early (looks like a chase), stronger pulls ahead.
+      // Use slightly different exponents to create an overtake feel.
+      const startTs = performance.now();
+
+      function tick(now) {
+        const t = Math.min(1, (now - startTs) / duration);
+        // Each lane uses its own ease curve scaled to its target.
+        // Add a small wobble so bars don't appear robotic
+        const easeA = easeOutCubic(Math.min(1, t * 1.02));
+        const easeB = easeOutCubic(Math.min(1, t * 1.00));
+        const curA = aTarget * easeA;
+        const curB = bTarget * easeB;
+        fillA.style.width = curA + '%';
+        fillB.style.width = curB + '%';
+        valA.textContent = curA.toFixed(1);
+        valB.textContent = curB.toFixed(1);
+
+        if (t < 1) {
+          rafId = requestAnimationFrame(tick);
+        } else {
+          fillA.style.width = aTarget + '%';
+          fillB.style.width = bTarget + '%';
+          valA.textContent = aTarget.toFixed(1);
+          valB.textContent = bTarget.toFixed(1);
+          finishFight(aKey, bKey, aTarget, bTarget);
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function finishFight(aKey, bKey, aVal, bVal) {
+      running = false;
+      fightBtn.disabled = false;
+      statusEl.classList.remove('is-fighting');
+      const winnerLane = (aVal === bVal) ? null : (aVal > bVal ? laneA : laneB);
+      if (winnerLane) winnerLane.classList.add('win');
+      const aRaw = BENCH_DATA[selBench.value][aKey];
+      const bRaw = BENCH_DATA[selBench.value][bKey];
+
+      if (aVal === bVal) {
+        statusEl.textContent = 'Tied';
+        statusEl.classList.add('is-tied');
+      } else if (winnerLane === laneA) {
+        statusEl.textContent = AGENTS[aKey].name + ' Wins · +' + (aVal - bVal).toFixed(1) + ' pts';
+        statusEl.classList.add('is-done');
+      } else {
+        statusEl.textContent = AGENTS[bKey].name + ' Wins · +' + (bVal - aVal).toFixed(1) + ' pts';
+        statusEl.classList.add('is-done');
+      }
+    }
+
+    selA.addEventListener('change', () => { refreshHeads(); resetArena(); });
+    selB.addEventListener('change', () => { refreshHeads(); resetArena(); });
+    selBench.addEventListener('change', () => { refreshBenchLabel(); resetArena(); });
+    fightBtn.addEventListener('click', fight);
+
+    refreshHeads();
+    refreshBenchLabel();
+  })();
+
+  // ============ CARD 3D PARALLAX TILT (pre-flip) ============
+  (function initTilt() {
+    if (prefersReduced) return;
+    if (window.matchMedia('(hover: none)').matches) return; // no tilt on touch
+    document.querySelectorAll('.card-tilt').forEach((card) => {
+      let raf = 0;
+      let lastX = 0, lastY = 0;
+      function onMove(e) {
+        const r = card.getBoundingClientRect();
+        const cx = (e.clientX - r.left) / r.width;
+        const cy = (e.clientY - r.top) / r.height;
+        // map to small angles: -8..+8 deg on Y (left/right), -5..+5 deg on X (up/down)
+        lastX = (0.5 - cy) * 10;
+        lastY = (cx - 0.5) * 14;
+        if (!raf) {
+          raf = requestAnimationFrame(() => {
+            card.style.setProperty('--tilt-x', lastX.toFixed(2) + 'deg');
+            card.style.setProperty('--tilt-y', lastY.toFixed(2) + 'deg');
+            raf = 0;
+          });
+        }
+      }
+      function onLeave() {
+        card.style.setProperty('--tilt-x', '0deg');
+        card.style.setProperty('--tilt-y', '0deg');
+      }
+      card.addEventListener('mousemove', onMove);
+      card.addEventListener('mouseleave', onLeave);
+    });
+  })();
+
+  // ============ MATRIX CELL TOOLTIPS ============
+  (function initMatrixTips() {
+    const matrix = document.getElementById('matrix-table');
+    if (!matrix) return;
+
+    const CAP_INFO = {
+      autonomy: {
+        h: 'Autonomy',
+        body: 'How long the agent can run unsupervised before you have to step in. Higher means longer leash, fewer interruptions, more responsibility on the agent.',
+        excels: ['devin', 'claude', 'cline'],
+        ex: 'Devin spins up a virtual workstation and runs end-to-end. Claude Code runs tens of minutes per turn.'
+      },
+      multifile: {
+        h: 'Multi-File Edits',
+        body: 'Ability to plan and apply coordinated changes across several files in one turn — refactors, renames, cross-module work.',
+        excels: ['claude', 'cursor', 'devin', 'cline'],
+        ex: 'Claude Code rewrites a service layer + tests + types in one run. Cursor Composer touches a whole folder.'
+      },
+      terminal: {
+        h: 'Terminal Access',
+        body: 'Can the agent run real shell commands — npm test, git, kubectl — and read their output to make decisions?',
+        excels: ['claude', 'devin', 'cline', 'aider'],
+        ex: 'Claude Code runs your test suite and reads stderr. Devin uses a real bash inside its VM.'
+      },
+      mcp: {
+        h: 'MCP Support',
+        body: 'Native support for Model Context Protocol — Anthropic\'s open standard for letting an agent call your tools (Postgres, Linear, your design system, your deploy script).',
+        excels: ['claude', 'cline', 'cursor'],
+        ex: 'Claude Code was built around MCP; Cline supports it natively; Cursor added it in 2025.'
+      },
+      ide: {
+        h: 'IDE Integration',
+        body: 'Depth of integration inside an editor — inline ghost text, in-editor diffs, click-to-accept, hover docs, debugger awareness.',
+        excels: ['cursor', 'copilot', 'windsurf'],
+        ex: 'Copilot inside VS Code/JetBrains/Vim/Xcode. Cursor IS the IDE. Windsurf ships its own fork.'
+      },
+      cli: {
+        h: 'CLI Surface',
+        body: 'How thoroughly the agent ships as a real command-line tool — pipeable, scriptable, runnable from CI, headless on a server.',
+        excels: ['claude', 'aider', 'cline'],
+        ex: 'Claude Code is CLI-native. Aider is CLI-only. Cline runs headless via VS Code CLI hooks.'
+      },
+      cost: {
+        h: 'Monthly Cost Band',
+        body: 'Sticker price for one developer per month, normalized across plans. BYO-API tools add a token bill on top.',
+        excels: ['aider', 'cline', 'windsurf', 'copilot'],
+        ex: 'Aider/Cline are $0 + tokens. Copilot Pro is $10/mo. Devin starts at $500/mo.'
+      },
+      swe: {
+        h: 'SWE-bench Verified',
+        body: '500 human-validated GitHub bug fixes from 12 popular Python repos. The single most-cited coding-agent benchmark; harness-sensitive.',
+        excels: ['claude', 'cursor', 'copilot', 'devin'],
+        ex: 'Claude Opus 4.7 leads at 87.6%. Cursor Auto at 67.2%. Devin auto at 60.8%.'
+      }
+    };
+
+    // Build singleton tooltip element
+    const tip = document.createElement('div');
+    tip.className = 'cap-tip';
+    tip.setAttribute('role', 'tooltip');
+    tip.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tip);
+
+    let activeCell = null;
+    function hide() {
+      tip.classList.remove('show');
+      tip.setAttribute('aria-hidden', 'true');
+      if (activeCell) activeCell.classList.remove('is-active');
+      activeCell = null;
+    }
+    function show(cell) {
+      const tr = cell.closest('tr');
+      const cellIndex = Array.from(tr.children).indexOf(cell);
+      const head = matrix.querySelector('thead tr');
+      const th = head ? head.children[cellIndex] : null;
+      const capKey = th && th.dataset ? th.dataset.cap : null;
+      if (!capKey || !CAP_INFO[capKey]) return;
+      const info = CAP_INFO[capKey];
+      const rowAgent = tr.dataset.agent;
+      const rowAgentInfo = AGENTS[rowAgent];
+      const rowColor = rowAgentInfo ? rowAgentInfo.color : 'var(--t-claude)';
+
+      // Read current value from cell (cap bar score or cost / SWE text)
+      let val = '';
+      const num = cell.querySelector('.cap-num');
+      const swe = cell.querySelector('.swe-bench');
+      const cost = cell.querySelector('.cost-bullet');
+      if (num) val = num.textContent + ' / 100';
+      else if (swe) val = swe.textContent;
+      else if (cost) val = cost.textContent;
+
+      // Build excels list (limit to top 3, show their team-color row)
+      const excelsHTML = info.excels.slice(0, 3).map((k) => {
+        const a = AGENTS[k];
+        if (!a) return '';
+        return `<div class="tip-row"><span class="tip-agent">${a.name}</span><span class="tip-score" style="--tip-color:${a.color}; color:${a.color}">Excels</span></div>`;
+      }).join('');
+
+      tip.innerHTML = `
+        <p class="tip-k">Capability · ${rowAgentInfo ? rowAgentInfo.name : ''}</p>
+        <h4 class="tip-h">${info.h}</h4>
+        <p class="tip-body">${info.body}</p>
+        <div class="tip-row"><span class="tip-agent">This cell</span><span class="tip-score">${val}</span></div>
+        ${excelsHTML}
+        <p class="tip-ex"><strong>Example.</strong> ${info.ex}</p>
+      `;
+      tip.style.setProperty('--tip-color', rowColor);
+      tip.classList.add('show');
+      tip.setAttribute('aria-hidden', 'false');
+      cell.classList.add('is-active');
+      activeCell = cell;
+
+      // Position near cell — measure after content set
+      requestAnimationFrame(() => {
+        const cr = cell.getBoundingClientRect();
+        const tr2 = tip.getBoundingClientRect();
+        let left = cr.left + cr.width / 2 - tr2.width / 2;
+        let top  = cr.bottom + 8;
+        const margin = 12;
+        if (left < margin) left = margin;
+        if (left + tr2.width > window.innerWidth - margin) left = window.innerWidth - margin - tr2.width;
+        if (top + tr2.height > window.innerHeight - margin) {
+          top = cr.top - tr2.height - 8;
+        }
+        tip.style.left = left + 'px';
+        tip.style.top  = top + 'px';
+      });
+    }
+
+    matrix.querySelectorAll('tbody td.cap-cell, tbody td:nth-child(8), tbody td:nth-child(9)').forEach((cell) => {
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (activeCell === cell) { hide(); return; }
+        show(cell);
+      });
+      cell.addEventListener('mouseenter', () => {
+        if (window.matchMedia('(hover: none)').matches) return;
+        show(cell);
+      });
+      cell.addEventListener('mouseleave', () => {
+        if (window.matchMedia('(hover: none)').matches) return;
+        hide();
+      });
+    });
+    document.addEventListener('click', (e) => {
+      if (!tip.contains(e.target) && !(activeCell && activeCell.contains(e.target))) hide();
+    });
+    window.addEventListener('scroll', hide, { passive: true });
+    window.addEventListener('resize', hide);
+  })();
+
+  // ============ REPLAY-RACE BUTTONS ============
+  (function initReplay() {
+    document.querySelectorAll('.bench-replay').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-bench-target');
+        const card = document.getElementById(id);
+        if (!card) return;
+        if (prefersReduced) {
+          // No animation, just briefly flash
+          card.classList.add('racing');
+          setTimeout(() => card.classList.remove('racing'), 200);
+          return;
+        }
+        const fills = card.querySelectorAll('.bench-fill');
+        // freeze widths, reset to 0, then apply 'racing' (fast transition) and re-add originals in order
+        // collect targets in DOM order (already ranked top→bottom)
+        const targets = Array.from(fills).map((f) => {
+          const v = parseFloat(f.style.getPropertyValue('--v')) || 0;
+          return { fill: f, target: v };
+        });
+        // Force transition: none, reset width
+        card.classList.add('racing');
+        fills.forEach((f) => { f.style.transition = 'none'; f.style.width = '0'; });
+        // Force reflow
+        // eslint-disable-next-line no-unused-expressions
+        card.offsetHeight;
+        // Stagger by rank (winner finishes last so the race is visible in finishing order)
+        fills.forEach((f) => { f.style.transition = ''; });
+        targets.forEach((row, i) => {
+          // Higher-rank rows already at top of list (rank 01 = highest score = finishes first wave; we want it to fill quickly and others later? we'll stagger by rank so leader fills first to "win")
+          const delay = i * 90;
+          setTimeout(() => {
+            row.fill.style.width = row.target + '%';
+          }, delay);
+        });
+        // remove racing class after total animation
+        const totalMs = (targets.length - 1) * 90 + 600;
+        setTimeout(() => { card.classList.remove('racing'); }, totalMs);
+      });
+    });
+  })();
+
+  // ============ DECISION-ROW HOVER → CARD LIFT ============
+  (function initDecisionGlow() {
+    const rows = document.querySelectorAll('.decision-row[data-agent]');
+    rows.forEach((row) => {
+      const agent = row.dataset.agent;
+      const card = document.querySelector('.card-tilt[data-agent="' + agent + '"]');
+      row.addEventListener('mouseenter', () => {
+        if (!card || prefersReduced) return;
+        card.classList.add('lifted');
+        const c = AGENTS[agent] ? AGENTS[agent].color : 'var(--t-claude)';
+        card.style.transform = 'translateY(-6px)';
+        card.style.boxShadow = '0 14px 40px -12px color-mix(in srgb, ' + c + ' 70%, transparent)';
+        card.style.transition = 'transform 320ms var(--ease), box-shadow 320ms var(--ease)';
+      });
+      row.addEventListener('mouseleave', () => {
+        if (!card) return;
+        card.classList.remove('lifted');
+        card.style.transform = '';
+        card.style.boxShadow = '';
+      });
+    });
+  })();
 </script>
 <script src="../shared/nav.js" defer></script>
 </body>

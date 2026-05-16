@@ -62,7 +62,7 @@
     }
     ::selection { background: rgba(86, 182, 194, 0.3); color: var(--text); }
 
-    /* ============ NOTEBOOK CHROME ============ */
+    /* === NOTEBOOK CHROME === */
     .nb-shell {
       max-width: 1180px;
       margin: 0 auto;
@@ -119,7 +119,7 @@
       overflow: hidden;
     }
 
-    /* ============ CELLS ============ */
+    /* === CELLS === */
     .cell {
       display: grid;
       grid-template-columns: 88px 1fr;
@@ -222,7 +222,7 @@
     .s-cls { color: var(--c-yellow); }
     .s-var { color: var(--c-cyan); }
 
-    /* ============ PLOT CELLS ============ */
+    /* === PLOT CELLS === */
     .plot {
       position: relative;
       background: var(--bg-out);
@@ -248,7 +248,7 @@
       margin-bottom: 0.6rem;
     }
 
-    /* ============ PIPELINE (5-STAGE HORIZONTAL CANVAS) ============ */
+    /* === PIPELINE (5-STAGE HORIZONTAL CANVAS) === */
     .pipeline-svg {
       width: 100%;
       height: auto;
@@ -298,7 +298,7 @@
     }
     .draw-on .ps-flow-dot { opacity: 1; transition-delay: 1500ms; }
 
-    /* ============ VECTOR SCATTER PLOT ============ */
+    /* === VECTOR SCATTER PLOT === */
     .scatter-wrap {
       display: grid;
       grid-template-columns: 1fr 280px;
@@ -430,7 +430,7 @@
     .replay-btn:hover { border-color: var(--c-cyan); color: var(--c-cyan); }
     .replay-btn svg { width: 12px; height: 12px; }
 
-    /* ============ STATS PRINTOUT ============ */
+    /* === STATS PRINTOUT === */
     .printout {
       font-family: var(--font-mono);
       font-size: 13.5px;
@@ -446,7 +446,7 @@
     .printout .ret { color: var(--text-mute); padding-left: 0; }
     .printout .ret::before { content: '→ '; color: var(--text-dim); }
 
-    /* ============ SUBPLOT GRID (4 mini-plots) ============ */
+    /* === SUBPLOT GRID (4 mini-plots) === */
     .subplot-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -504,7 +504,7 @@
     .draw-on .sp-bar:nth-of-type(9) { transition-delay: 640ms; }
     .draw-on .sp-bar:nth-of-type(10) { transition-delay: 720ms; }
 
-    /* ============ FINAL "MARKDOWN" CELL — CALL TO ACTION ============ */
+    /* === FINAL "MARKDOWN" CELL — CALL TO ACTION === */
     .cta-cell .md p { max-width: 60ch; }
     .cta-link {
       display: inline-flex;
@@ -539,10 +539,10 @@
     .nb-footer a { color: var(--text-mute); text-decoration: none; }
     .nb-footer a:hover { color: var(--c-cyan); }
 
-    /* ============ NUMBER TICKER (printout) ============ */
+    /* === NUMBER TICKER (printout) === */
     .num.ticking { color: var(--c-yellow); }
 
-    /* ============ RESPONSIVE ============ */
+    /* === RESPONSIVE === */
     @media (max-width: 640px) {
       .cell { grid-template-columns: 56px 1fr; }
       .gutter { padding: 0.85rem 0.5rem 0.85rem 0.6rem; font-size: 10px; }
@@ -553,21 +553,256 @@
       .nb-meta { display: none; }
     }
 
-    /* ============ REDUCED MOTION ============ */
+    /* === REDUCED MOTION === */
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-        transition-delay: 0ms !important;
-      }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; transition-delay: 0ms !important; }
       .ps-stage-rect, .ps-arrow, .ps-flow-dot { opacity: 1 !important; stroke-dashoffset: 0 !important; }
       .sc-dot { opacity: 0.75 !important; }
       .sc-query, .sc-query-halo, .sc-ring { opacity: 1 !important; transform: scale(1) !important; }
       .sc-query-halo { opacity: 0.35 !important; }
       .sc-ray { stroke-dashoffset: 0 !important; opacity: 0.85 !important; }
-      .sc-query-text { opacity: 1 !important; }
-      .sp-bar { opacity: 1 !important; }
+      .sc-query-text, .sp-bar { opacity: 1 !important; }
+      .cell.dyn-out-cell { display: grid !important; }
+      .me-dot, .me-label { opacity: 1 !important; transform: scale(1) !important; }
     }
+
+    /* === RUN BUTTON === */
+    .cell.runnable, .cell.runnable .cell-body { position: relative; }
+    .run-btn {
+      position: absolute; top: 0.6rem; right: 0.85rem;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.28rem 0.6rem; background: var(--bg-out);
+      border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text-mute); font-family: var(--font-mono);
+      font-size: 10.5px; letter-spacing: 0.04em; cursor: pointer;
+      transition: border-color 180ms, color 180ms, background 180ms;
+      z-index: 2; user-select: none;
+    }
+    .run-btn:hover { border-color: var(--c-cyan); color: var(--c-cyan); }
+    .run-btn:active { transform: translateY(1px); }
+    .run-btn .icon {
+      display: inline-block; width: 0; height: 0;
+      border-style: solid; border-width: 4px 0 4px 6px;
+      border-color: transparent transparent transparent currentColor;
+    }
+    .run-btn.is-running { color: var(--c-yellow); border-color: var(--c-yellow); }
+    .run-btn.is-running .icon { display: none; }
+    .run-btn.is-done { color: var(--c-green); border-color: var(--c-green); }
+    .run-btn .dots { display: none; gap: 3px; }
+    .run-btn.is-running .dots { display: inline-flex; }
+    .run-btn .dots i {
+      width: 4px; height: 4px; background: currentColor;
+      border-radius: 50%; animation: dotBlink 900ms infinite ease-in-out;
+    }
+    .run-btn .dots i:nth-child(2) { animation-delay: 150ms; }
+    .run-btn .dots i:nth-child(3) { animation-delay: 300ms; }
+    @keyframes dotBlink { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+    @media (max-width: 640px) {
+      .run-btn { padding: 0.4rem 0.7rem; font-size: 11px; top: 0.5rem; right: 0.5rem; }
+    }
+    .cell.runnable.flash { animation: cellFlash 600ms ease; }
+    @keyframes cellFlash {
+      0% { box-shadow: inset 0 0 0 0 transparent; }
+      40% { box-shadow: inset 2px 0 0 0 var(--c-cyan), inset 0 2px 0 0 var(--c-cyan), inset -2px 0 0 0 var(--c-cyan), inset 0 -2px 0 0 var(--c-cyan); background: rgba(86,182,194,0.04); }
+      100% { box-shadow: inset 0 0 0 0 transparent; }
+    }
+
+    /* === DYNAMIC OUTPUT CELLS === */
+    .cell.dyn-out-cell { display: none; }
+    .cell.dyn-out-cell.shown { display: grid; animation: outFade 320ms ease; }
+    @keyframes outFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .dyn-out-replace { transition: opacity 240ms ease; }
+    .dyn-out-replace.fading { opacity: 0.15; }
+
+    /* === CHUNKING DEMO === */
+    .chunk-demo {
+      font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7;
+      color: var(--text-mute); background: var(--bg-out);
+      border: 1px solid var(--border-soft); border-radius: 4px;
+      padding: 0.85rem 1rem; margin-top: 0.4rem;
+    }
+    .chunk-demo .chunk-text { color: var(--text); display: block; margin-bottom: 0.5rem; }
+    .chunk-demo .chunk-seg {
+      display: inline; padding: 0.05em 0.18em; border-radius: 2px;
+      transition: background 360ms ease; background: transparent;
+    }
+    .chunk-demo .chunk-seg.s0 { background: rgba(86,182,194,0.16); box-shadow: inset 0 -1px 0 var(--c-cyan); }
+    .chunk-demo .chunk-seg.s1 { background: rgba(198,120,221,0.16); box-shadow: inset 0 -1px 0 var(--c-magenta); }
+    .chunk-demo .chunk-seg.s2 { background: rgba(229,192,123,0.16); box-shadow: inset 0 -1px 0 var(--c-yellow); }
+    .chunk-demo .chunk-seg.s3 { background: rgba(152,195,121,0.16); box-shadow: inset 0 -1px 0 var(--c-green); }
+    .chunk-meta {
+      margin-top: 0.6rem; padding-top: 0.55rem; border-top: 1px dashed var(--border);
+      font-size: 11px; color: var(--text-dim); display: flex; gap: 1.1rem; flex-wrap: wrap;
+    }
+    .chunk-meta b { color: var(--text-mute); margin-right: 0.35rem; font-weight: 500; }
+    .chunk-meta span.k { color: var(--c-yellow); }
+
+    /* === MINI EMBED PLOT === */
+    .mini-embed-wrap { display: grid; grid-template-columns: 1fr 220px; gap: 1rem; margin-top: 0.4rem; align-items: start; }
+    @media (max-width: 720px) { .mini-embed-wrap { grid-template-columns: 1fr; } }
+    .mini-embed-svg {
+      width: 100%; height: auto; aspect-ratio: 1.5/1;
+      background: var(--bg-out); border: 1px solid var(--border-soft);
+      border-radius: 4px; display: block;
+    }
+    .me-dot {
+      opacity: 0; transform-origin: center; transform-box: fill-box; transform: scale(0);
+      transition: opacity 320ms ease, transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .me-dot.in { opacity: 1; transform: scale(1); }
+    .me-label { font-family: var(--font-mono); font-size: 6.5px; fill: var(--text-mute); opacity: 0; transition: opacity 280ms ease; }
+    .me-label.in { opacity: 1; }
+    .mini-embed-legend { font-family: var(--font-mono); font-size: 11px; color: var(--text-mute); line-height: 1.7; }
+    .mini-embed-legend .row { display: flex; align-items: center; gap: 0.5rem; }
+    .mini-embed-legend .row i { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .mini-embed-legend .row .lbl { color: var(--text); }
+    .mini-embed-legend .row .v { margin-left: auto; color: var(--c-yellow); font-variant-numeric: tabular-nums; }
+
+    /* === HYBRID SEARCH BAR CHART === */
+    .hybrid-bars {
+      font-family: var(--font-mono); font-size: 11.5px; color: var(--text);
+      background: var(--bg-out); border: 1px solid var(--border-soft);
+      border-radius: 4px; padding: 0.85rem 1rem; margin-top: 0.4rem;
+    }
+    .hb-head, .hb-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5rem; }
+    .hb-head {
+      font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim);
+      padding-bottom: 0.5rem; border-bottom: 1px dashed var(--border); margin-bottom: 0.5rem;
+    }
+    .hb-head span:nth-child(n+2) { text-align: right; }
+    .hb-row { align-items: center; padding: 0.32rem 0; border-bottom: 1px solid var(--border-soft); }
+    .hb-row:last-child { border-bottom: none; }
+    .hb-doc { color: var(--text); font-size: 11.5px; }
+    .hb-doc .id { color: var(--text-dim); margin-right: 0.4rem; }
+    .hb-cell { position: relative; height: 16px; background: rgba(255,255,255,0.02); border-radius: 2px; overflow: hidden; }
+    .hb-fill { position: absolute; inset: 0 auto 0 0; width: 0%; transition: width 700ms cubic-bezier(0.25, 0.8, 0.3, 1); }
+    .hb-fill.bm25 { background: linear-gradient(to right, rgba(86,182,194,0), rgba(86,182,194,0.55)); }
+    .hb-fill.cos  { background: linear-gradient(to right, rgba(198,120,221,0), rgba(198,120,221,0.55)); }
+    .hb-fill.rrf  { background: linear-gradient(to right, rgba(229,192,123,0), rgba(229,192,123,0.7)); }
+    .hb-num { position: absolute; top: 0; right: 4px; bottom: 0; display: flex; align-items: center; font-variant-numeric: tabular-nums; font-size: 10.5px; color: var(--text); }
+
+    /* === RERANKER TABLE · FLIP === */
+    .rerank-table {
+      font-family: var(--font-mono); font-size: 11.5px;
+      background: var(--bg-out); border: 1px solid var(--border-soft);
+      border-radius: 4px; padding: 0.6rem 0.85rem; margin-top: 0.4rem; position: relative;
+    }
+    .rerank-row, .rerank-head { display: grid; grid-template-columns: 30px 1fr 70px 70px; gap: 0.6rem; }
+    .rerank-row {
+      align-items: center; padding: 0.45rem 0.4rem;
+      border-bottom: 1px solid var(--border-soft);
+      transition: transform 700ms cubic-bezier(0.5, 0, 0.25, 1.5), background 240ms ease;
+      will-change: transform;
+    }
+    .rerank-row:last-child { border-bottom: none; }
+    .rerank-row.moved { background: rgba(152,195,121,0.06); }
+    .rerank-row .rank { color: var(--c-yellow); font-weight: 500; font-variant-numeric: tabular-nums; }
+    .rerank-row .doc { color: var(--text); }
+    .rerank-row .doc .id { color: var(--text-dim); margin-right: 0.35rem; }
+    .rerank-row .col-num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-mute); font-size: 11px; }
+    .rerank-row .col-num.high { color: var(--c-green); }
+    .rerank-head {
+      padding: 0.3rem 0.4rem 0.45rem; font-size: 10px;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim);
+      border-bottom: 1px dashed var(--border);
+    }
+    .rerank-head span:nth-child(n+3) { text-align: right; }
+
+    /* === RAGAS METRIC TILES === */
+    .ragas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin-top: 0.4rem; }
+    @media (max-width: 640px) { .ragas-grid { grid-template-columns: 1fr 1fr; } }
+    .ragas-tile {
+      background: var(--bg-out); border: 1px solid var(--border-soft);
+      border-left: 2px solid var(--text-dim); border-radius: 4px;
+      padding: 0.7rem 0.85rem; font-family: var(--font-mono);
+    }
+    .ragas-tile.m0 { border-left-color: var(--c-cyan); }
+    .ragas-tile.m1 { border-left-color: var(--c-magenta); }
+    .ragas-tile.m2 { border-left-color: var(--c-yellow); }
+    .ragas-tile.m3 { border-left-color: var(--c-green); }
+    .ragas-tile .lbl { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.45rem; }
+    .ragas-tile .val { font-size: 22px; font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+    .ragas-tile.m0 .val { color: var(--c-cyan); }
+    .ragas-tile.m1 .val { color: var(--c-magenta); }
+    .ragas-tile.m2 .val { color: var(--c-yellow); }
+    .ragas-tile.m3 .val { color: var(--c-green); }
+    .ragas-tile .meter { margin-top: 0.55rem; height: 3px; background: rgba(255,255,255,0.04); border-radius: 2px; overflow: hidden; }
+    .ragas-tile .meter-fill { height: 100%; width: 0%; transition: width 900ms cubic-bezier(0.25,0.8,0.3,1); }
+    .ragas-tile.m0 .meter-fill { background: var(--c-cyan); }
+    .ragas-tile.m1 .meter-fill { background: var(--c-magenta); }
+    .ragas-tile.m2 .meter-fill { background: var(--c-yellow); }
+    .ragas-tile.m3 .meter-fill { background: var(--c-green); }
+
+    /* === PIPELINE SCRUBBER === */
+    .pipe-scrubber { margin-top: 0.85rem; padding-top: 0.7rem; border-top: 1px dashed var(--border); }
+    .scrubber-row { display: flex; align-items: center; gap: 0.85rem; font-family: var(--font-mono); font-size: 11px; color: var(--text-mute); }
+    .scrubber-row label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+    .scrubber-input {
+      -webkit-appearance: none; appearance: none; flex: 1; height: 4px;
+      background: linear-gradient(to right, var(--c-cyan), var(--c-magenta), var(--c-yellow), var(--c-green), var(--c-salmon));
+      border-radius: 2px; outline: none; cursor: pointer;
+    }
+    .scrubber-input::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--bg); border: 2px solid var(--text); cursor: grab;
+      transition: transform 140ms ease, border-color 140ms ease;
+    }
+    .scrubber-input::-webkit-slider-thumb:active { transform: scale(1.15); border-color: var(--c-cyan); }
+    .scrubber-input::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--bg); border: 2px solid var(--text); cursor: grab; }
+    .scrubber-label { min-width: 90px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+    .scrubber-panel {
+      margin-top: 0.6rem; padding: 0.7rem 0.85rem;
+      background: var(--bg-out); border: 1px solid var(--border-soft);
+      border-left: 2px solid var(--c-cyan); border-radius: 4px;
+      font-family: var(--font-mono); font-size: 11.5px; color: var(--text);
+      min-height: 64px; transition: border-left-color 240ms ease;
+    }
+    .scrubber-panel .ttl { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.45rem; }
+    .scrubber-panel .state { font-family: var(--font-mono); font-size: 12px; line-height: 1.55; color: var(--text); }
+    .scrubber-panel .state .k { color: var(--text-dim); }
+    .scrubber-panel .state .v { color: var(--c-yellow); }
+    .scrubber-panel .state .s { color: var(--c-green); }
+    .scrubber-panel .state code { background: rgba(255,255,255,0.03); padding: 0 0.3em; border-radius: 2px; color: var(--c-cyan); font-size: 11.5px; }
+    .ps-stage-rect.active { stroke-width: 2.5; filter: drop-shadow(0 0 6px currentColor); }
+    .ps-stage-rect.past { opacity: 0.35; }
+
+    /* === SCATTER · click affordance === */
+    #scatterSvg { cursor: crosshair; }
+    .sc-hint { font-family: var(--font-mono); font-size: 6px; fill: var(--text-dim); pointer-events: none; opacity: 0; transition: opacity 280ms ease; }
+    .scatter-svg.played .sc-hint { opacity: 0.75; transition-delay: 2600ms; }
+
+    /* === EMBED TABLE · sparkline === */
+    table.embed-table { position: relative; }
+    table.embed-table tbody tr { cursor: pointer; transition: background 180ms ease; }
+    table.embed-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .emb-sparkline {
+      position: absolute; pointer-events: none;
+      background: var(--bg-cell); border: 1px solid var(--c-cyan); border-radius: 4px;
+      padding: 0.5rem 0.65rem; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      font-family: var(--font-mono); font-size: 10px; color: var(--text-mute);
+      opacity: 0; transform: translateY(4px);
+      transition: opacity 200ms ease, transform 200ms ease;
+      z-index: 10; width: 200px;
+    }
+    .emb-sparkline.show { opacity: 1; transform: translateY(0); }
+    .emb-sparkline .head { display: flex; justify-content: space-between; color: var(--text); margin-bottom: 0.35rem; font-size: 10.5px; }
+    .emb-sparkline .head .now { color: var(--c-yellow); font-variant-numeric: tabular-nums; }
+    .emb-sparkline svg { width: 100%; height: 36px; display: block; }
+    .emb-sparkline .axis { font-size: 8px; color: var(--text-dim); display: flex; justify-content: space-between; margin-top: 0.2rem; }
+
+    /* === SUBPLOT HOVER ANNOTATION === */
+    .subplot { position: relative; transition: border-color 200ms ease; }
+    .subplot:hover { border-color: rgba(86,182,194,0.5); }
+    .subplot-anno {
+      position: absolute; left: 0.85rem; right: 0.85rem; top: 50%;
+      transform: translateY(-50%); background: rgba(13,17,23,0.94);
+      border: 1px solid var(--c-cyan); border-radius: 3px;
+      padding: 0.45rem 0.6rem; font-family: var(--font-mono); font-size: 10.5px;
+      color: var(--text); line-height: 1.4; opacity: 0; pointer-events: none;
+      transition: opacity 200ms ease; backdrop-filter: blur(4px); z-index: 3;
+    }
+    .subplot:hover .subplot-anno { opacity: 1; }
+    .subplot-anno b { color: var(--c-cyan); font-weight: 500; }
   </style>
 </head>
 <body>
@@ -607,9 +842,10 @@
       </article>
 
       <!-- In[2] · Code + Pipeline plot -->
-      <article class="cell">
+      <article class="cell runnable" data-cell="2" data-kind="pipeline">
         <div class="gutter">In&nbsp;[<b>2</b>]:<span class="ms">12ms</span></div>
         <div class="cell-body">
+          <button class="run-btn" type="button" aria-label="Run cell 2"><span class="icon"></span><span class="lbl">run</span><span class="dots"><i></i><i></i><i></i></span></button>
           <pre class="code-block"><span class="s-cmt"># the RAG pipeline — five-stage runtime, not a model architecture</span>
 <span class="s-kw">from</span> ceti.rag <span class="s-kw">import</span> <span class="s-fn">Pipeline</span>, <span class="s-fn">Stage</span>
 
@@ -695,6 +931,8 @@ pipeline.<span class="s-fn">plot</span>()</pre>
               </g>
             </svg>
             <div class="plot-caption"><b>Fig 2.1</b> · five-stage RAG pipeline. Each request traces left→right; the model never learns your data, it borrows it once per call.</div>
+
+            <div class="pipe-scrubber"><div class="scrubber-row"><label>scrub →</label><input class="scrubber-input" type="range" id="pipeRange" min="0" max="100" value="0" aria-label="Scrub pipeline"><span class="scrubber-label" id="pipeRangeLbl">t₀ · query</span></div><div class="scrubber-panel" id="pipePanel"><div class="ttl">stage state · in‑flight payload</div><div class="state" id="pipeState"></div></div></div>
           </div>
         </div>
       </article>
@@ -803,7 +1041,8 @@ pipeline.<span class="s-fn">plot</span>()</pre>
                 <circle class="sc-ring" cx="60" cy="40" r="6" fill="none" stroke="#E06C75" stroke-width="1"/>
 
                 <!-- query label -->
-                <text class="sc-query-text" x="20" y="46">q = "refund?"</text>
+                <text class="sc-query-text" x="20" y="46" id="scQueryText">q = "refund?"</text>
+                <text class="sc-hint" x="135" y="14" text-anchor="middle">click anywhere · drop a query · 3 nearest light up</text>
               </svg>
 
               <aside class="scatter-legend">
@@ -855,9 +1094,10 @@ pipeline.<span class="s-fn">plot</span>()</pre>
       </article>
 
       <!-- In[5] · Semantic chunking code -->
-      <article class="cell">
+      <article class="cell runnable" data-cell="5" data-kind="chunking">
         <div class="gutter">In&nbsp;[<b>5</b>]:<span class="ms">214ms</span></div>
         <div class="cell-body">
+          <button class="run-btn" type="button" aria-label="Run cell 5"><span class="icon"></span><span class="lbl">run</span><span class="dots"><i></i><i></i><i></i></span></button>
           <pre class="code-block"><span class="s-cmt"># semantic chunking — split on cosine-distance jumps, not token counts</span>
 <span class="s-kw">from</span> langchain_experimental.text_splitter <span class="s-kw">import</span> <span class="s-cls">SemanticChunker</span>
 <span class="s-kw">from</span> langchain_openai <span class="s-kw">import</span> <span class="s-cls">OpenAIEmbeddings</span>
@@ -880,13 +1120,24 @@ lens <span class="s-op">=</span> [<span class="s-fn">len</span>(c.page_content) 
       </article>
 
       <!-- Out[5] · Sample output -->
-      <article class="cell is-out">
+      <article class="cell is-out" data-out-for="5">
         <div class="gutter out">Out[<b>5</b>]:</div>
         <div class="cell-body">
-          <div class="printout">
+          <div class="dyn-out-replace">
+            <div class="printout">
 <span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">n_chunks=47  mean=612  p95=1148</span>
 <span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">Refunds are processed within 14 business days of receipt of the returned merchandise. Damaged shipments are exempt from the 14-day return window — contact support within 48 hours of delivery for...</span>
-            <span class="cmt"># note: chunk #3 ends at a paragraph break, not mid-sentence — semantic boundary preserved</span>
+              <span class="cmt"># note: chunk #3 ends at a paragraph break, not mid-sentence — semantic boundary preserved</span>
+            </div>
+            <div class="chunk-demo" id="chunkDemo" aria-live="polite">
+              <span class="chunk-text" id="chunkText"><!-- populated on run --></span>
+              <div class="chunk-meta">
+                <span><b>chunks:</b> <span class="k" id="chunkN">4</span></span>
+                <span><b>mean:</b> <span class="k" id="chunkMean">142</span> chars</span>
+                <span><b>overlap:</b> <span class="k" id="chunkOverlap">~12</span> chars</span>
+                <span><b>boundary:</b> <span class="k">cos&lt;0.78</span></span>
+              </div>
+            </div>
           </div>
         </div>
       </article>
@@ -904,9 +1155,10 @@ lens <span class="s-op">=</span> [<span class="s-fn">len</span>(c.page_content) 
       </article>
 
       <!-- In[7] · Real Python RAG code (was In[4]) -->
-      <article class="cell">
+      <article class="cell runnable" data-cell="7" data-kind="chain">
         <div class="gutter">In&nbsp;[<b>7</b>]:<span class="ms">847ms</span></div>
         <div class="cell-body">
+          <button class="run-btn" type="button" aria-label="Run cell 7"><span class="icon"></span><span class="lbl">run</span><span class="dots"><i></i><i></i><i></i></span></button>
           <pre class="code-block"><span class="s-cmt"># minimal_rag.py — twelve lines, a working RAG chain</span>
 <span class="s-kw">from</span> langchain_community.document_loaders <span class="s-kw">import</span> <span class="s-cls">WebBaseLoader</span>
 <span class="s-kw">from</span> langchain.text_splitter <span class="s-kw">import</span> <span class="s-cls">RecursiveCharacterTextSplitter</span>
@@ -926,6 +1178,23 @@ chain.<span class="s-fn">invoke</span>(<span class="s-str">"What's our refund wi
         </div>
       </article>
 
+      <!-- Out[7] · injected on run -->
+      <article class="cell is-out dyn-out-cell" data-out-for="7">
+        <div class="gutter out">Out[<b>7</b>]:<span class="ms" data-ms-slot></span></div>
+        <div class="cell-body">
+          <div class="mini-embed-wrap">
+            <svg class="mini-embed-svg" viewBox="0 0 180 120" aria-label="2D embedding output">
+              <g stroke="#21262D" stroke-width="0.4"><path d="M14 14V106M14 106H174"/></g>
+              <g stroke="#21262D" stroke-width="0.3"><path d="M14 60H174M94 14V106"/></g>
+              <text x="170" y="113" font-size="5" fill="#6E7681" text-anchor="end">x</text>
+              <text x="8" y="20" font-size="5" fill="#6E7681">y</text>
+              <g id="miniEmbedDots"></g><g id="miniEmbedLabels"></g>
+            </svg>
+            <div class="mini-embed-legend" id="miniEmbedLegend"></div>
+          </div>
+        </div>
+      </article>
+
       <!-- In[8] · Choosing an embedding model -->
       <article class="cell is-md">
         <div class="gutter">In&nbsp;[<b>8</b>]:</div>
@@ -933,7 +1202,7 @@ chain.<span class="s-fn">invoke</span>(<span class="s-str">"What's our refund wi
           <span class="tag"># model selection · embeddings</span>
           <h2>Choosing an embedding model.</h2>
           <p>The embedding model is the lens through which your entire corpus is viewed. Pick the wrong one and you bake the wrong neighborhood structure into your vector store on day one — the only fix is a full reindex. As of mid-2026 four families are worth shortlisting, and the trade space is genuinely four-dimensional: <b>dimensions</b> (storage + ANN cost), <b>MTEB score</b> (retrieval quality on the standard benchmark), <b>per-million-token cost</b>, and <b>licensing</b> (API vs. self-hostable).</p>
-          <table style="font-family: var(--font-mono); font-size: 12.5px; width: 100%; max-width: 72ch; border-collapse: collapse; margin: 0.5rem 0 1rem;">
+          <table class="embed-table" style="font-family: var(--font-mono); font-size: 12.5px; width: 100%; max-width: 72ch; border-collapse: collapse; margin: 0.5rem 0 1rem;">
             <thead>
               <tr style="border-bottom: 1px solid var(--border); color: var(--text-mute); text-align: left;">
                 <th style="padding: 0.45rem 0.6rem 0.45rem 0; font-weight: 500;">model</th>
@@ -944,28 +1213,28 @@ chain.<span class="s-fn">invoke</span>(<span class="s-str">"What's our refund wi
               </tr>
             </thead>
             <tbody>
-              <tr style="border-bottom: 1px solid var(--border-soft);">
+              <tr data-model="voyage-3-large" data-mteb-series="61.4,62.8,64.1,65.0,66.2,67.1,67.8,68.2" style="border-bottom: 1px solid var(--border-soft);">
                 <td style="padding: 0.4rem 0.6rem 0.4rem 0; color: var(--c-cyan);">voyage-3-large</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">1024</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">68.2</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">0.18</td>
                 <td style="padding: 0.4rem 0; color: var(--text-mute);">API</td>
               </tr>
-              <tr style="border-bottom: 1px solid var(--border-soft);">
+              <tr data-model="text-embedding-3-large" data-mteb-series="58.2,59.6,60.8,61.7,62.5,63.2,64.0,64.6" style="border-bottom: 1px solid var(--border-soft);">
                 <td style="padding: 0.4rem 0.6rem 0.4rem 0; color: var(--c-magenta);">openai text-embedding-3-large</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">3072</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">64.6</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">0.13</td>
                 <td style="padding: 0.4rem 0; color: var(--text-mute);">API</td>
               </tr>
-              <tr style="border-bottom: 1px solid var(--border-soft);">
+              <tr data-model="cohere-embed-v4" data-mteb-series="60.1,61.2,62.4,63.5,64.4,65.2,65.9,66.5" style="border-bottom: 1px solid var(--border-soft);">
                 <td style="padding: 0.4rem 0.6rem 0.4rem 0; color: var(--c-green);">cohere embed-v4</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">1536</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">66.5</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">0.12</td>
                 <td style="padding: 0.4rem 0; color: var(--text-mute);">API (multimodal)</td>
               </tr>
-              <tr>
+              <tr data-model="bge-large-en-v1.5" data-mteb-series="56.3,57.8,59.2,60.4,61.5,62.5,63.4,64.2">
                 <td style="padding: 0.4rem 0.6rem 0.4rem 0; color: var(--c-salmon);">bge-large-en-v1.5</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">1024</td>
                 <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">64.2</td>
@@ -980,9 +1249,10 @@ chain.<span class="s-fn">invoke</span>(<span class="s-str">"What's our refund wi
       </article>
 
       <!-- In[9] · Benchmarking 4 embedding models -->
-      <article class="cell">
+      <article class="cell runnable" data-cell="9" data-kind="embed-bench">
         <div class="gutter">In&nbsp;[<b>9</b>]:<span class="ms">1.4s</span></div>
         <div class="cell-body">
+          <button class="run-btn" type="button" aria-label="Run cell 9"><span class="icon"></span><span class="lbl">run</span><span class="dots"><i></i><i></i><i></i></span></button>
           <pre class="code-block"><span class="s-cmt"># benchmark 4 embedding models · same query, same target chunk · cosine similarity</span>
 <span class="s-kw">import</span> numpy <span class="s-kw">as</span> np
 <span class="s-kw">from</span> voyageai <span class="s-kw">import</span> <span class="s-cls">Client</span> <span class="s-kw">as</span> <span class="s-cls">Voyage</span>
@@ -1005,15 +1275,17 @@ cos    <span class="s-op">=</span> <span class="s-kw">lambda</span> a, b: <span 
       </article>
 
       <!-- Out[9] · Benchmark output -->
-      <article class="cell is-out">
+      <article class="cell is-out" data-out-for="9">
         <div class="gutter out">Out[<b>9</b>]:</div>
         <div class="cell-body">
-          <div class="printout">
+          <div class="dyn-out-replace" id="bench9Out">
+            <div class="printout">
 <span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">voyage-3-large          cos(q, target) = <span style="color: var(--c-cyan);">0.8217</span></span>
 <span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">text-embed-3-large      cos(q, target) = <span style="color: var(--c-magenta);">0.7843</span></span>
 <span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">cohere-embed-v4         cos(q, target) = <span style="color: var(--c-green);">0.7962</span></span>
 <span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">bge-large-en-v1.5       cos(q, target) = <span style="color: var(--c-salmon);">0.7411</span></span>
-            <span class="cmt"># single-query snapshot, not a benchmark — run on your eval set before committing</span>
+              <span class="cmt"># single-query snapshot, not a benchmark — run on your eval set before committing</span>
+            </div>
           </div>
         </div>
       </article>
@@ -1033,9 +1305,10 @@ cos    <span class="s-op">=</span> <span class="s-kw">lambda</span> a, b: <span 
       </article>
 
       <!-- In[11] · Hybrid search code -->
-      <article class="cell">
+      <article class="cell runnable" data-cell="11" data-kind="hybrid">
         <div class="gutter">In&nbsp;[<b>11</b>]:<span class="ms">68ms</span></div>
         <div class="cell-body">
+          <button class="run-btn" type="button" aria-label="Run cell 11"><span class="icon"></span><span class="lbl">run</span><span class="dots"><i></i><i></i><i></i></span></button>
           <pre class="code-block"><span class="s-cmt"># hybrid search · BM25 + dense embeddings · reciprocal rank fusion</span>
 <span class="s-kw">from</span> rank_bm25 <span class="s-kw">import</span> <span class="s-cls">BM25Okapi</span>
 <span class="s-kw">from</span> collections <span class="s-kw">import</span> defaultdict
@@ -1058,6 +1331,16 @@ results <span class="s-op">=</span> <span class="s-fn">hybrid_search</span>(<spa
         </div>
       </article>
 
+      <!-- Out[11] · injected on run -->
+      <article class="cell is-out dyn-out-cell" data-out-for="11">
+        <div class="gutter out">Out[<b>11</b>]:<span class="ms" data-ms-slot></span></div>
+        <div class="cell-body">
+          <div class="hybrid-bars" id="hybridBars" aria-label="Hybrid search BM25 + cosine + RRF scores"></div>
+          <div class="printout" style="margin-top:0.7rem;font-size:11.5px"><span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0">5 docs · BM25 nailed the SKU · dense rescued the synonym · RRF fused both</span>
+            <span class="cmt"># top‑1 swap: BM25 wanted #12, dense wanted #04, RRF kept #12 (SKU is decisive)</span></div>
+        </div>
+      </article>
+
       <!-- In[12] · Rerankers markdown -->
       <article class="cell is-md">
         <div class="gutter">In&nbsp;[<b>12</b>]:</div>
@@ -1072,9 +1355,10 @@ results <span class="s-op">=</span> <span class="s-fn">hybrid_search</span>(<spa
       </article>
 
       <!-- In[13] · Reranker code -->
-      <article class="cell">
+      <article class="cell runnable" data-cell="13" data-kind="rerank">
         <div class="gutter">In&nbsp;[<b>13</b>]:<span class="ms">94ms</span></div>
         <div class="cell-body">
+          <button class="run-btn" type="button" aria-label="Run cell 13"><span class="icon"></span><span class="lbl">run</span><span class="dots"><i></i><i></i><i></i></span></button>
           <pre class="code-block"><span class="s-cmt"># add a reranker stage · cast wide (k=50), rerank tight (k=4)</span>
 <span class="s-kw">import</span> cohere
 
@@ -1093,10 +1377,24 @@ top4 <span class="s-op">=</span> <span class="s-fn">retrieve_then_rerank</span>(
         </div>
       </article>
 
+      <!-- Out[13] · injected on run · FLIP reorder -->
+      <article class="cell is-out dyn-out-cell" data-out-for="13">
+        <div class="gutter out">Out[<b>13</b>]:<span class="ms" data-ms-slot></span></div>
+        <div class="cell-body">
+          <div class="rerank-table" aria-label="Reranker table">
+            <div class="rerank-head"><span>#</span><span>doc</span><span>cos</span><span>rerank</span></div>
+            <div id="rerankList"></div>
+          </div>
+          <div class="printout" style="margin-top:0.7rem;font-size:11.5px"><span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0">reranked 4 of 50 candidates — nDCG@4 lift on eval set: <span style="color:var(--c-green)">+0.183</span></span>
+            <span class="cmt"># cross-encoder swapped #27 to top — the literal "damaged shipments" answer, not the broader policy</span></div>
+        </div>
+      </article>
+
       <!-- In[14] · Stats printout (was In[5]) -->
-      <article class="cell">
+      <article class="cell runnable" data-cell="14" data-kind="stats">
         <div class="gutter">In&nbsp;[<b>14</b>]:<span class="ms">3ms</span></div>
         <div class="cell-body">
+          <button class="run-btn" type="button" aria-label="Re-run cell 14"><span class="icon"></span><span class="lbl">run</span><span class="dots"><i></i><i></i><i></i></span></button>
           <pre class="code-block"><span class="s-cmt"># state of RAG · 2026 — published benchmarks</span>
 <span class="s-fn">summarize_rag_metrics</span>()</pre>
           <div class="printout" style="margin-top: 0.85rem;">
@@ -1110,9 +1408,10 @@ top4 <span class="s-op">=</span> <span class="s-fn">retrieve_then_rerank</span>(
       </article>
 
       <!-- In[15] · Subplots — 4 levers (was In[6]) -->
-      <article class="cell">
+      <article class="cell runnable" data-cell="15" data-kind="subplots">
         <div class="gutter">In&nbsp;[<b>15</b>]:<span class="ms">22ms</span></div>
         <div class="cell-body">
+          <button class="run-btn" type="button" aria-label="Re-render subplots"><span class="icon"></span><span class="lbl">run</span><span class="dots"><i></i><i></i><i></i></span></button>
           <pre class="code-block"><span class="s-cmt"># the four levers · where RAG quality is actually won or lost</span>
 fig, axes <span class="s-op">=</span> plt.<span class="s-fn">subplots</span>(<span class="s-num">1</span>, <span class="s-num">4</span>, figsize<span class="s-op">=</span>(<span class="s-num">12</span>, <span class="s-num">3</span>))
 <span class="s-kw">for</span> ax, lever <span class="s-kw">in</span> <span class="s-fn">zip</span>(axes, [<span class="s-str">"chunking"</span>, <span class="s-str">"embedding"</span>, <span class="s-str">"indexing"</span>, <span class="s-str">"reranking"</span>]):
@@ -1137,6 +1436,7 @@ fig, axes <span class="s-op">=</span> plt.<span class="s-fn">subplots</span>(<sp
                 </svg>
                 <p class="subplot-caption"><b>How you slice the source.</b> Fixed-token is easy; semantic respects paragraph boundaries; hierarchical retrieves a small chunk but passes its parent.</p>
                 <div class="subplot-stat"><b>default:</b> 512 tokens · overlap=50</div>
+                <div class="subplot-anno">bars = <b>chunk lengths</b> · 47-chunk doc, p95≈1148. Tall = sections; short = interstitials.</div>
               </div>
 
               <!-- Subplot 2: Embedding -->
@@ -1160,6 +1460,7 @@ fig, axes <span class="s-op">=</span> plt.<span class="s-fn">subplots</span>(<sp
                 </svg>
                 <p class="subplot-caption"><b>Turning meaning into math.</b> A text encoder maps each chunk to a fixed-length vector — defines how close "refund" sits to "return."</p>
                 <div class="subplot-stat"><b>common:</b> text-embedding-3-large · voyage-3</div>
+                <div class="subplot-anno">bars = <b>one chunk's 12 PCA components</b>. Heavier dims = where cosine compares the query's signature.</div>
               </div>
 
               <!-- Subplot 3: Indexing (heatmap) -->
@@ -1198,6 +1499,7 @@ fig, axes <span class="s-op">=</span> plt.<span class="s-fn">subplots</span>(<sp
                 </svg>
                 <p class="subplot-caption"><b>Where the vectors live.</b> A vector DB stores millions of embeddings and answers "give me the k closest" in milliseconds via HNSW or IVF-PQ.</p>
                 <div class="subplot-stat"><b>stack:</b> Pinecone · Weaviate · Qdrant · pgvector</div>
+                <div class="subplot-anno">heatmap = <b>HNSW cell density</b>. Bright = high-count buckets visited first; sparse cells get pruned.</div>
               </div>
 
               <!-- Subplot 4: Reranking (horizontal bars) -->
@@ -1216,6 +1518,7 @@ fig, axes <span class="s-op">=</span> plt.<span class="s-fn">subplots</span>(<sp
                 </svg>
                 <p class="subplot-caption"><b>Second pass for top-k.</b> Vector search casts wide (k=50); a cross-encoder reranker reads each one against the query and reorders by true relevance.</p>
                 <div class="subplot-stat"><b>boost:</b> ~17.5% nDCG · Cohere Rerank 3</div>
+                <div class="subplot-anno">bars = <b>cross-encoder scores</b> · top-4 after rerank. Top bar's lead over #4 = precision lift ~50ms buys.</div>
               </div>
 
             </div>
@@ -1241,9 +1544,10 @@ fig, axes <span class="s-op">=</span> plt.<span class="s-fn">subplots</span>(<sp
       </article>
 
       <!-- In[17] · RAGAS eval code -->
-      <article class="cell">
+      <article class="cell runnable" data-cell="17" data-kind="ragas">
         <div class="gutter">In&nbsp;[<b>17</b>]:<span class="ms">12.4s</span></div>
         <div class="cell-body">
+          <button class="run-btn" type="button" aria-label="Run cell 17"><span class="icon"></span><span class="lbl">run</span><span class="dots"><i></i><i></i><i></i></span></button>
           <pre class="code-block"><span class="s-cmt"># RAGAS eval · faithfulness · answer_relevancy · context_precision · context_recall</span>
 <span class="s-kw">from</span> ragas <span class="s-kw">import</span> evaluate
 <span class="s-kw">from</span> ragas.metrics <span class="s-kw">import</span> faithfulness, answer_relevancy, context_precision, context_recall
@@ -1259,6 +1563,16 @@ eval_data <span class="s-op">=</span> <span class="s-cls">Dataset</span>.<span c
 scores <span class="s-op">=</span> <span class="s-fn">evaluate</span>(eval_data, metrics<span class="s-op">=</span>[faithfulness, answer_relevancy, context_precision, context_recall])
 <span class="s-fn">print</span>(scores)
 <span class="s-cmt"># {'faithfulness': 0.94, 'answer_relevancy': 0.91, 'context_precision': 0.83, 'context_recall': 1.00}</span></pre>
+        </div>
+      </article>
+
+      <!-- Out[17] · injected on run · RAGAS metric tiles -->
+      <article class="cell is-out dyn-out-cell" data-out-for="17">
+        <div class="gutter out">Out[<b>17</b>]:<span class="ms" data-ms-slot></span></div>
+        <div class="cell-body">
+          <div class="ragas-grid" id="ragasGrid"></div>
+          <div class="printout" style="margin-top:0.7rem;font-size:11.5px"><span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0">{'faithfulness': <span style="color:var(--c-cyan)">0.94</span>, 'answer_relevancy': <span style="color:var(--c-magenta)">0.91</span>, 'context_precision': <span style="color:var(--c-yellow)">0.83</span>, 'context_recall': <span style="color:var(--c-green)">1.00</span>}</span>
+            <span class="cmt"># context_recall=1.0 → retriever found everything · faithfulness=0.94 → 1 unsupported claim → re-prompt</span></div>
         </div>
       </article>
 
@@ -1343,7 +1657,7 @@ scores <span class="s-op">=</span> <span class="s-fn">evaluate</span>(eval_data,
   </main>
 
   <script>
-    // ============ INTERSECTION-OBSERVER DRAW-ON ANIMATIONS ============
+    // INTERSECTION-OBSERVER DRAW-ON ANIMATIONS
     const drawObs = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (e.isIntersecting) {
@@ -1354,7 +1668,7 @@ scores <span class="s-op">=</span> <span class="s-fn">evaluate</span>(eval_data,
     }, { threshold: 0.25 });
     document.querySelectorAll('[data-anim]').forEach((el) => drawObs.observe(el));
 
-    // ============ SCATTER PLOT — play-once + replay() ============
+    // SCATTER PLOT — play-once + replay()
     (function scatterPlay() {
       const svg = document.getElementById('scatterSvg');
       const replayBtn = document.getElementById('replayBtn');
@@ -1390,7 +1704,7 @@ scores <span class="s-op">=</span> <span class="s-fn">evaluate</span>(eval_data,
       replayBtn.addEventListener('click', play);
     })();
 
-    // ============ NUMBER TICKER (printout values) ============
+    // NUMBER TICKER (printout values)
     function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
     function fmtNum(v, decimals) {
       if (decimals > 0) return v.toFixed(decimals);
@@ -1416,6 +1730,424 @@ scores <span class="s-op">=</span> <span class="s-fn">evaluate</span>(eval_data,
       });
     }, { threshold: 0.5 });
     document.querySelectorAll('.ticker').forEach((el) => numObs.observe(el));
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const cellHandlers = {
+      pipeline:{dur:900,run:runPipeline}, chunking:{dur:700,run:runChunking},
+      chain:{dur:1100,run:runChain}, 'embed-bench':{dur:1200,run:runEmbedBench},
+      hybrid:{dur:800,run:runHybrid}, rerank:{dur:1100,run:runRerank},
+      stats:{dur:600,run:runStats}, subplots:{dur:650,run:runSubplots},
+      ragas:{dur:1300,run:runRagas},
+    };
+
+    document.querySelectorAll('.cell.runnable').forEach(cell => {
+      const btn = cell.querySelector(':scope > .cell-body > .run-btn');
+      const handler = cellHandlers[cell.dataset.kind];
+      if (!btn || !handler) return;
+      const lbl = btn.querySelector('.lbl');
+      btn.addEventListener('click', async () => {
+        if (btn.classList.contains('is-running')) return;
+        btn.classList.remove('is-done'); btn.classList.add('is-running'); lbl.textContent = 'running';
+        if (!reducedMotion) { cell.classList.remove('flash'); void cell.offsetWidth; cell.classList.add('flash'); }
+        const t0 = performance.now();
+        await new Promise(r => setTimeout(r, reducedMotion ? 0 : handler.dur));
+        try { handler.run(cell); } catch(e) { console.error(e); }
+        const out = document.querySelector(`[data-out-for="${cell.dataset.cell}"]`);
+        const ms = out && out.querySelector('[data-ms-slot]');
+        if (ms) ms.textContent = Math.round(performance.now() - t0) + 'ms';
+        btn.classList.remove('is-running'); btn.classList.add('is-done'); lbl.textContent = 'done';
+        setTimeout(() => { btn.classList.remove('is-done'); lbl.textContent = 'run'; }, 1400);
+      });
+    });
+
+    // reduced-motion: bootstrap each cell into its "done" state on load
+    if (reducedMotion) {
+      document.querySelectorAll('.cell.runnable').forEach(cell => {
+        const h = cellHandlers[cell.dataset.kind];
+        if (h) try { h.run(cell); } catch (e) {}
+      });
+    }
+
+    function runPipeline(cell) {
+      cell.querySelectorAll('.ps-stage-rect').forEach(s => s.classList.remove('past', 'active'));
+      const range = document.getElementById('pipeRange');
+      if (!range) return;
+      let v = 0;
+      const step = () => {
+        v = Math.min(100, v + 4);
+        range.value = v;
+        range.dispatchEvent(new Event('input', { bubbles: true }));
+        if (v < 100) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    const CHUNK_TEXT = "Refunds are processed within 14 business days of receipt of the returned merchandise. Damaged shipments are exempt from the 14-day return window — contact support within 48 hours of delivery for an expedited replacement. Standard returns require an RMA number obtained via the customer portal; items must arrive in original packaging with all tags intact. Restocking fees apply only to opened electronics and are capped at 15% of the item's purchase price.";
+
+    function runChunking(cell) {
+      const target = document.getElementById('chunkText');
+      if (!target) return;
+      const sentences = CHUNK_TEXT.match(/[^.]+\.(\s|$)/g) || [CHUNK_TEXT];
+      const chunks = [];
+      let buf = '';
+      sentences.forEach(s => {
+        if (buf.length > 120 && chunks.length < 3) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+      while (chunks.length < 4) chunks.push('');
+      target.innerHTML = '';
+      chunks.forEach((c, i) => {
+        if (!c) return;
+        const seg = document.createElement('span');
+        seg.className = 'chunk-seg s' + i;
+        seg.textContent = c + ' ';
+        seg.style.background = 'transparent';
+        target.appendChild(seg);
+        if (!reducedMotion) setTimeout(() => {
+          seg.style.background = '';
+          seg.style.transition = 'background 360ms ease';
+        }, 120 * i);
+      });
+      const valid = chunks.filter(c => c);
+      const mean = Math.round(valid.reduce((a,c)=>a+c.length,0) / valid.length);
+      const nEl = document.getElementById('chunkN'), mEl = document.getElementById('chunkMean');
+      if (nEl) nEl.textContent = valid.length;
+      if (mEl) mEl.textContent = mean;
+    }
+
+    const CHAIN_DOTS = [
+      [40,38,'var(--c-cyan)','refund','refund_policy.txt',0.84],
+      [130,38,'var(--c-magenta)','shipping','shipping_terms.txt',0.41],
+      [132,86,'var(--c-yellow)','billing','billing_faq.txt',0.27],
+      [52,50,'var(--c-salmon)','q','query',1.00,true],
+    ];
+    function runChain(cell) {
+      const out = document.querySelector('[data-out-for="7"]');
+      if (!out) return;
+      out.classList.add('shown');
+      const dotsG = document.getElementById('miniEmbedDots');
+      const labelsG = document.getElementById('miniEmbedLabels');
+      const legend = document.getElementById('miniEmbedLegend');
+      if (!dotsG || !legend) return;
+      // build legend
+      legend.innerHTML = CHAIN_DOTS.map((d, i) => {
+        const isQ = d[6];
+        const shadow = isQ ? `; box-shadow: 0 0 6px ${d[2]}` : '';
+        const lblHtml = isQ ? `<b>${d[4]}</b>` : d[4];
+        return `<div class="row"><i style="background:${d[2]}${shadow}"></i> <span class="lbl">${lblHtml}</span> <span class="v" data-slot="s${i}">—</span></div>`;
+      }).join('') + `<div style="margin-top:0.55rem;padding-top:0.5rem;border-top:1px dashed var(--border);color:var(--text-dim);font-size:10px;">cos(q, refund) = <span style="color:var(--c-yellow)" data-slot="cosBest">—</span> ← top‑1</div>`;
+
+      dotsG.innerHTML = ''; labelsG.innerHTML = '';
+      // ray from q to refund
+      const NS = 'http://www.w3.org/2000/svg';
+      const ray = document.createElementNS(NS, 'line');
+      ray.setAttribute('x1', 52); ray.setAttribute('y1', 50);
+      ray.setAttribute('x2', 40); ray.setAttribute('y2', 38);
+      ray.setAttribute('stroke', 'var(--c-salmon)');
+      ray.setAttribute('stroke-width', '0.7');
+      ray.setAttribute('stroke-dasharray', '2,2');
+      ray.setAttribute('opacity', '0');
+      ray.style.transition = 'opacity 400ms ease';
+      dotsG.appendChild(ray);
+      setTimeout(() => ray.setAttribute('opacity', '0.8'), 500);
+      CHAIN_DOTS.forEach((d, i) => {
+        const [x, y, color, lbl, , , glow] = d;
+        const c = document.createElementNS(NS, 'circle');
+        c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 4.5);
+        c.setAttribute('fill', color); c.setAttribute('class', 'me-dot');
+        if (glow) c.setAttribute('filter', `drop-shadow(0 0 4px ${color})`);
+        dotsG.appendChild(c);
+        const t = document.createElementNS(NS, 'text');
+        t.setAttribute('x', x + 6.5); t.setAttribute('y', y + 2);
+        t.setAttribute('class', 'me-label'); t.textContent = lbl;
+        labelsG.appendChild(t);
+        const reveal = () => { c.classList.add('in'); t.classList.add('in'); };
+        if (reducedMotion) reveal(); else setTimeout(reveal, 80 * i);
+      });
+      // tick scores
+      CHAIN_DOTS.forEach((d, i) => {
+        const el = out.querySelector(`[data-slot="s${i}"]`);
+        if (el) animateNumber(el, 0, d[5], 600 + i * 80, 2);
+      });
+      const best = out.querySelector('[data-slot="cosBest"]');
+      if (best) animateNumber(best, 0, 0.84, 700, 4);
+    }
+
+    // ---------- runEmbedBench · re-render with noise ----------
+    function runEmbedBench(cell) {
+      const out = document.querySelector('[data-out-for="9"] .dyn-out-replace');
+      if (!out) return;
+      // produce a new sampling with tiny noise — different each run
+      const rows = [
+        { name: 'voyage-3-large',     mean: 0.8217, color: 'var(--c-cyan)' },
+        { name: 'text-embed-3-large', mean: 0.7843, color: 'var(--c-magenta)' },
+        { name: 'cohere-embed-v4',    mean: 0.7962, color: 'var(--c-green)' },
+        { name: 'bge-large-en-v1.5',  mean: 0.7411, color: 'var(--c-salmon)' },
+      ];
+      const noisy = rows.map(r => ({ ...r, val: r.mean + (Math.random() - 0.5) * 0.012 }));
+      out.classList.add('fading');
+      setTimeout(() => {
+        const html = `<div class="printout">
+${noisy.map(r => `<span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">${r.name.padEnd(22, ' ').replace(/ /g, '&nbsp;')}cos(q, target) = <span style="color: ${r.color};">${r.val.toFixed(4)}</span></span>`).join('\n')}
+          <span class="cmt"># single-query snapshot, not a benchmark — run on your eval set before committing</span>
+        </div>`;
+        out.innerHTML = html;
+        out.classList.remove('fading');
+      }, 220);
+    }
+
+    const HYBRID_DATA = [
+      ['#12','order_A-2891-X.txt',92,9.14,58,0.71,96,0.0318],
+      ['#04','refund_policy.txt',48,4.82,91,0.84,88,0.0294],
+      ['#27','damaged_shipments_faq.txt',36,3.55,78,0.79,74,0.0252],
+      ['#09','returns_terms.txt',22,2.17,64,0.73,58,0.0208],
+      ['#33','shipping_terms.txt',14,1.38,46,0.66,42,0.0167],
+    ];
+    function runHybrid(cell) {
+      const out = document.querySelector('[data-out-for="11"]');
+      if (!out) return;
+      out.classList.add('shown');
+      const host = document.getElementById('hybridBars');
+      if (!host) return;
+      const cell3 = (cls, w, v) => `<div class="hb-cell"><div class="hb-fill ${cls}" style="width:0%" data-w="${w}"></div><div class="hb-num" data-v="${v}">—</div></div>`;
+      host.innerHTML = `<div class="hb-head"><span>doc</span><span>BM25</span><span>cos</span><span>RRF</span></div>` +
+        HYBRID_DATA.map(([id, name, bm, bmv, co, cov, rr, rrv]) =>
+          `<div class="hb-row"><div class="hb-doc"><span class="id">${id}</span>${name}</div>${cell3('bm25', bm, bmv)}${cell3('cos', co, cov)}${cell3('rrf', rr, rrv)}</div>`
+        ).join('');
+      requestAnimationFrame(() => {
+        host.querySelectorAll('.hb-fill').forEach((f, i) => {
+          setTimeout(() => f.style.width = f.dataset.w + '%', 40 * i);
+        });
+        host.querySelectorAll('.hb-num').forEach((n, i) => {
+          const v = parseFloat(n.dataset.v);
+          const dec = v < 0.1 ? 4 : 2;
+          setTimeout(() => animateNumber(n, 0, v, 500, dec), 40 * i);
+        });
+      });
+    }
+
+    // initial order (cos rank) → final order after rerank
+    const RERANK_DATA = [
+      ['#27','damaged_shipments_faq.txt',0.79,0.94,1],
+      ['#04','refund_policy.txt',0.84,0.88,2],
+      ['#12','order_A-2891-X.txt',0.71,0.62,3],
+      ['#09','returns_terms.txt',0.73,0.41,4],
+    ];
+    function rerankRow(d) {
+      const high = d[3] >= 0.85 ? ' high' : '';
+      return `<div class="rerank-row" data-final="${d[4]}"><span class="rank">—</span><span class="doc"><span class="id">${d[0]}</span>${d[1]}</span><span class="col-num">${d[2].toFixed(2)}</span><span class="col-num${high}">${d[3].toFixed(2)}</span></div>`;
+    }
+    function ensureRerankInitial() {
+      const list = document.getElementById('rerankList');
+      if (!list || list.children.length) return list;
+      // initial order = by cos descending (the pre-rerank state)
+      const init = RERANK_DATA.slice().sort((a,b) => b[2] - a[2]);
+      list.innerHTML = init.map(rerankRow).join('');
+      return list;
+    }
+    function runRerank(cell) {
+      const out = document.querySelector('[data-out-for="13"]');
+      if (!out) return;
+      out.classList.add('shown');
+      const list = ensureRerankInitial();
+      if (!list) return;
+      const rows = Array.from(list.querySelectorAll('.rerank-row'));
+      const before = new Map();
+      rows.forEach(r => before.set(r, r.getBoundingClientRect()));
+      const sorted = rows.slice().sort((a, b) => +a.dataset.final - +b.dataset.final);
+      sorted.forEach(r => list.appendChild(r));
+      sorted.forEach((r, i) => { r.querySelector('.rank').textContent = '#' + (i + 1); });
+      sorted.forEach(r => {
+        const after = r.getBoundingClientRect();
+        const dy = before.get(r).top - after.top;
+        if (Math.abs(dy) < 1) return;
+        r.style.transition = 'none';
+        r.style.transform = `translateY(${dy}px)`;
+        r.classList.remove('moved');
+        if (Math.abs(dy) > 4) r.classList.add('moved');
+        requestAnimationFrame(() => {
+          r.style.transition = '';
+          r.style.transform = '';
+          setTimeout(() => r.classList.remove('moved'), 1200);
+        });
+      });
+    }
+
+    function runStats(cell) {
+      cell.querySelectorAll('.ticker').forEach(el => {
+        el.textContent = (+(el.dataset.decimals || 0) > 0) ? '0.00' : '0';
+        tickNum(el);
+      });
+    }
+    // ---------- runSubplots · re-stagger bars ----------
+    function runSubplots(cell) {
+      cell.querySelectorAll('.sp-bar').forEach((b, i) => {
+        b.style.transition = 'none'; b.style.opacity = '0';
+        requestAnimationFrame(() => {
+          b.style.transition = `opacity 500ms ease ${i * 18}ms`;
+          b.style.opacity = b.getAttribute('opacity') || '1';
+        });
+      });
+    }
+
+    const RAGAS_DATA = [['faithfulness',0.94,94],['answer_relevancy',0.91,91],['context_precision',0.83,83],['context_recall',1.00,100]];
+    function runRagas(cell) {
+      const out = document.querySelector('[data-out-for="17"]');
+      if (!out) return;
+      out.classList.add('shown');
+      const grid = document.getElementById('ragasGrid');
+      if (!grid) return;
+      grid.innerHTML = RAGAS_DATA.map(([lbl, v, w], i) =>
+        `<div class="ragas-tile m${i}"><div class="lbl">${lbl}</div><div class="val">0.00</div><div class="meter"><div class="meter-fill" style="width:0%" data-w="${w}"></div></div></div>`
+      ).join('');
+      const vals = grid.querySelectorAll('.val');
+      const meters = grid.querySelectorAll('.meter-fill');
+      RAGAS_DATA.forEach(([lbl, v, w], i) => {
+        setTimeout(() => {
+          animateNumber(vals[i], 0, v, 900, 2);
+          if (meters[i]) meters[i].style.width = w + '%';
+        }, i * 120);
+      });
+    }
+
+    // helper: number tween
+    function animateNumber(el, from, to, dur, decimals) {
+      if (reducedMotion) {
+        el.textContent = to.toFixed(decimals);
+        return;
+      }
+      const start = performance.now();
+      function step(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        el.textContent = (from + (to - from) * e).toFixed(decimals);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // PIPELINE SCRUBBER
+    (function pipeScrubber() {
+      const range = document.getElementById('pipeRange');
+      if (!range) return;
+      const lbl = document.getElementById('pipeRangeLbl');
+      const stateEl = document.getElementById('pipeState');
+      const panel = document.getElementById('pipePanel');
+      const stages = document.querySelectorAll('.ps-stage-rect');
+      const K=s=>`<span class="k">${s}</span>`, V=s=>`<span class="v">${s}</span>`, S=s=>`<span class="s">${s}</span>`;
+      const stg = (name, kvs) => `${K('stage')} = ${S(name)}  ·  ${kvs.map(([k,v])=>`${K(k)} = ${V(v)}`).join('  ·  ')}`;
+      const STAGES = [
+        { name:'QUERY', t:'t₀', color:'var(--c-cyan)',
+          state: `${K('q')} = <code>"refund window for damaged shipments?"</code><br>${stg('QUERY', [['dim','str'],['size','42 chars']])}` },
+        { name:'EMBED', t:'t₁', color:'var(--c-magenta)',
+          state: `${K('f(q)')} = <code>[-0.0182, 0.0341, -0.0114, ..., 0.0093]</code><br>${stg('EMBED', [['dim','3072'],['ms','68']])}` },
+        { name:'SEARCH', t:'t₂', color:'var(--c-yellow)',
+          state: `${K('candidates')} = [#27, #04, #12, #09]<br>${stg('SEARCH', [['cos','[0.84, 0.79, 0.73, 0.71]'],['k','4']])}` },
+        { name:'AUGMENT', t:'t₃', color:'var(--c-green)',
+          state: `${K('prompt')} = <code>"Use ONLY this context:\\n[ctx]\\n\\nQ: refund?"</code><br>${stg('AUGMENT', [['ctx_tokens','1,847'],['q_tokens','11']])}` },
+        { name:'GENERATE', t:'t₄', color:'var(--c-salmon)',
+          state: `${K('answer')} = <code>"48 hours to report, 14 business days to refund."</code><br>${stg('GENERATE', [['model','gpt-4o-mini'],['ms','412']])}` },
+      ];
+      function update() {
+        const idx = Math.min(STAGES.length - 1, Math.floor(+range.value / 20));
+        const s = STAGES[idx];
+        if (lbl) lbl.textContent = s.t + ' · ' + s.name.toLowerCase();
+        if (stateEl) stateEl.innerHTML = s.state;
+        if (panel) panel.style.borderLeftColor = s.color;
+        stages.forEach((r, i) => {
+          r.classList.remove('active', 'past');
+          if (i < idx) r.classList.add('past');
+          else if (i === idx) r.classList.add('active');
+        });
+      }
+      range.addEventListener('input', update);
+      update();
+    })();
+
+    // SCATTER · click to drop query
+    (function scatterClick() {
+      const svg = document.getElementById('scatterSvg');
+      if (!svg) return;
+      const dots = Array.from(svg.querySelectorAll('.sc-dot'));
+      const qDot = svg.querySelector('.sc-query');
+      const qHalo = svg.querySelector('.sc-query-halo');
+      const rays = Array.from(svg.querySelectorAll('.sc-ray'));
+      const rings = Array.from(svg.querySelectorAll('.sc-ring'));
+      const qText = document.getElementById('scQueryText');
+      const samples = ['"refund?"', '"shipping?"', '"billing?"', '"product?"', '"how do I?"', '"help?"'];
+
+      function getPt(evt) {
+        const pt = svg.createSVGPoint();
+        pt.x = evt.clientX; pt.y = evt.clientY;
+        return pt.matrixTransform(svg.getScreenCTM().inverse());
+      }
+      function handleClick(evt) {
+        const p = getPt(evt);
+        if (p.x < 40 || p.x > 230 || p.y < 18 || p.y > 180) return;
+        const ranked = dots.map(d => {
+          const x = +d.getAttribute('cx'), y = +d.getAttribute('cy');
+          return { d, x, y, dist: Math.hypot(p.x - x, p.y - y) };
+        }).sort((a,b)=>a.dist-b.dist).slice(0,3);
+        qDot.setAttribute('cx', p.x); qDot.setAttribute('cy', p.y);
+        qHalo.setAttribute('cx', p.x); qHalo.setAttribute('cy', p.y);
+        ranked.forEach((r, i) => {
+          if (rays[i]) { rays[i].setAttribute('x1', p.x); rays[i].setAttribute('y1', p.y); rays[i].setAttribute('x2', r.x); rays[i].setAttribute('y2', r.y); }
+          if (rings[i]) { rings[i].setAttribute('cx', r.x); rings[i].setAttribute('cy', r.y); }
+        });
+        const nset = new Set(ranked.map(r => r.d));
+        dots.forEach(d => {
+          d.classList.remove('neighbor', 'dim');
+          d.classList.add(nset.has(d) ? 'neighbor' : 'dim');
+        });
+        svg.classList.add('played');
+        if (qText) qText.textContent = 'q = ' + samples[Math.floor(Math.random() * samples.length)];
+      }
+      svg.addEventListener('click', handleClick);
+      svg.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) { handleClick(e.touches[0]); e.preventDefault(); }
+      }, { passive: false });
+    })();
+
+    // EMBED TABLE · hover sparkline
+    (function embedSparklines() {
+      const table = document.querySelector('table.embed-table');
+      if (!table) return;
+      const tip = document.createElement('div');
+      tip.className = 'emb-sparkline';
+      tip.innerHTML = '<div class="head"><span class="ttl">MTEB · v1 → v6</span><span class="now">—</span></div><svg viewBox="0 0 200 36" preserveAspectRatio="none"><polyline class="spk-line" fill="none" stroke="currentColor" stroke-width="1.5" points=""/><polyline class="spk-area" fill="currentColor" fill-opacity="0.12" stroke="none" points=""/><circle class="spk-head" r="2.5" fill="currentColor"/></svg><div class="axis"><span>2024</span><span>2026</span></div>';
+      document.body.appendChild(tip);
+      const $ = s => tip.querySelector(s);
+      const line = $('.spk-line'), area = $('.spk-area'), head = $('.spk-head'), nowEl = $('.now');
+      function show(row) {
+        const series = (row.dataset.mtebSeries || '').split(',').map(parseFloat).filter(n => !isNaN(n));
+        if (!series.length) return;
+        const min = Math.min(...series) - 1, max = Math.max(...series) + 1;
+        const W = 200, H = 36;
+        const pts = series.map((y, i) => [(i / (series.length - 1)) * W, H - ((y - min) / (max - min)) * H]);
+        const linePts = pts.map(p => p.join(',')).join(' ');
+        line.setAttribute('points', linePts);
+        area.setAttribute('points', `0,${H} ${linePts} ${W},${H}`);
+        const last = pts[pts.length - 1];
+        head.setAttribute('cx', last[0]); head.setAttribute('cy', last[1]);
+        nowEl.textContent = series[series.length - 1].toFixed(1);
+        const td0 = row.querySelector('td');
+        const col = td0 ? getComputedStyle(td0).color : 'var(--c-cyan)';
+        tip.style.color = col; tip.style.borderColor = col;
+        tip.style.boxShadow = `0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px ${col}55`;
+        const r = row.getBoundingClientRect();
+        let x = r.right + window.scrollX + 14;
+        if (x + 200 > window.innerWidth + window.scrollX) x = r.left + window.scrollX + (r.width - 200) / 2;
+        tip.style.left = x + 'px';
+        tip.style.top = (r.top + window.scrollY + r.height / 2 - 32) + 'px';
+        tip.classList.add('show');
+      }
+      const hide = () => tip.classList.remove('show');
+      table.querySelectorAll('tbody tr').forEach(r => {
+        r.addEventListener('mouseenter', () => show(r));
+        r.addEventListener('mouseleave', hide);
+      });
+    })();
   </script>
   <script src="../shared/nav.js" defer></script>
 </body>
