@@ -3,1197 +3,1780 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claude Cowork — Business AI that works with you · CETI.AI</title>
-  <meta name="description" content="A practical, anti-hype look at using Claude as a coworker for non-coding business work: research, analysis, writing, organizing, decisions. For SMB owners and operations leaders.">
+  <title>Claude Cowork — Issue 07 · CETI.AI Lookbook</title>
+  <meta name="description" content="A magazine-format lookbook on using Claude as a coworker for non-coding business work: research, analysis, writing, organizing, decisions.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
-      --color-surface-warm: #FDF9F3;
+      --paper: #FAF8F4;
+      --paper-deep: #F2EEE7;
+      --ink: #1F1A14;
+      --ink-mute: #7A7268;
+      --rule: #DCD5C9;
+      --sage: #7B9270;
+      --terracotta: #C5775F;
+      --sage-deep: #5E7556;
+      --terra-deep: #A55E48;
 
-      --color-accent: #D94F30;         /* vermillion */
-      --color-accent-hover: #C4432A;
-      --color-accent-light: #FDEEE9;
-      --color-accent-muted: #E8836C;
-
-      --color-actor-1: #D94F30;        /* vermillion */
-      --color-actor-2: #2A7B9B;        /* teal */
-      --color-actor-3: #7B6DAA;        /* muted plum */
-      --color-actor-4: #D4A843;        /* golden */
-      --color-actor-5: #2D8B55;        /* forest */
-
-      --color-grey-bg: #EFEBE4;
-      --color-grey-text: #8A857F;
-
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body: 'DM Sans', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-      --duration-fast: 150ms;
-      --duration-normal: 300ms;
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-      --stagger: 100ms;
-
-      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
-      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
-
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
+      --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image: radial-gradient(ellipse at 15% 25%, rgba(217, 79, 48, 0.04) 0%, transparent 55%);
-      line-height: 1.6;
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.55;
       -webkit-font-smoothing: antialiased;
+      font-size: 16px;
     }
-
     a { color: inherit; }
+    img { max-width: 100%; }
 
-    /* ============ LAYOUT ============ */
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-    section { padding: 5rem 0; }
-    @media (max-width: 640px) { section { padding: 3.5rem 0; } }
-
-    /* ============ NAV ============ */
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(250, 247, 242, 0.85);
-      backdrop-filter: saturate(140%) blur(8px);
-      -webkit-backdrop-filter: saturate(140%) blur(8px);
-      border-bottom: 1px solid var(--color-border-light);
-    }
-    .topbar-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0.875rem 1.5rem;
+    /* ============ MASTHEAD ============ */
+    .masthead {
+      border-bottom: 1px solid var(--ink);
+      padding: 1rem 2rem;
       display: flex;
-      align-items: center;
+      align-items: baseline;
       justify-content: space-between;
       gap: 1rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
     }
-    .brand {
-      font-family: var(--font-display);
+    .masthead .title {
+      font-family: var(--serif);
+      font-style: italic;
       font-weight: 700;
       font-size: 1.05rem;
-      letter-spacing: -0.01em;
+      letter-spacing: 0.02em;
+      text-transform: none;
       text-decoration: none;
     }
-    .brand .dot { color: var(--color-accent); }
-    .topbar a.cta-link {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      padding: 0.5rem 0.9rem;
-      border-radius: 999px;
-      border: 1px solid var(--color-border);
-      transition: color 200ms, border-color 200ms, background 200ms;
+    .masthead .meta { display: flex; gap: 1.5rem; }
+    .masthead .meta a { text-decoration: none; color: var(--ink-mute); transition: color 200ms; }
+    .masthead .meta a:hover { color: var(--terracotta); }
+    @media (max-width: 640px) {
+      .masthead { padding: 0.75rem 1.25rem; flex-wrap: wrap; gap: 0.5rem; }
+      .masthead .meta { gap: 1rem; font-size: 0.65rem; }
     }
-    .topbar a.cta-link:hover { color: var(--color-accent); border-color: var(--color-accent-muted); background: var(--color-accent-light); }
 
-    /* ============ HERO ============ */
-    .hero { padding: 5rem 0 4rem; }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      margin-bottom: 1.25rem;
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
+    /* ============ PAGE / SPREAD CONTAINERS ============ */
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
     }
-    .hero.visible .eyebrow { opacity: 1; }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.4rem, 6.5vw, 5rem);
-      line-height: 1.02;
-      letter-spacing: -0.035em;
-      margin: 0 0 1.5rem;
-      max-width: 16ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .word:nth-child(1) { transition-delay: 80ms; }
-    .hero.visible .word:nth-child(2) { transition-delay: 160ms; }
-    .hero.visible .word:nth-child(3) { transition-delay: 240ms; }
-    .hero.visible .word:nth-child(4) { transition-delay: 320ms; }
-    .hero.visible .word:nth-child(5) { transition-delay: 400ms; }
-    .hero-title em { font-style: normal; color: var(--color-accent); }
-
-    .hero-sub {
-      font-size: clamp(1.05rem, 1.6vw, 1.25rem);
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      margin: 0;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 540ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    .cta-row {
+    .folio {
       display: flex;
-      gap: 1rem;
-      margin-top: 2.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 720ms;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 2.25rem 0 0.75rem;
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 3rem;
     }
-    .hero.visible .cta-row { opacity: 1; }
-
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.95rem 1.6rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 0.98rem;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms var(--ease-spring), background 200ms;
-      will-change: transform;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); display: inline-block; }
-    .magnetic:hover .arrow { transform: translateX(3px); }
-
-    .magnetic.ghost {
-      background: transparent;
-      color: var(--color-text);
-      border: 1px solid var(--color-border);
-    }
-    .magnetic.ghost:hover { background: var(--color-surface); border-color: var(--color-text-secondary); }
-
-    /* ============ TUESDAY MORNING — signature visual ============ */
-    .tuesday {
-      background: var(--color-bg-warm);
-      border-top: 1px solid var(--color-border-light);
-      border-bottom: 1px solid var(--color-border-light);
-    }
-    .tuesday h2 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(1.75rem, 3.6vw, 2.5rem);
-      letter-spacing: -0.025em;
-      line-height: 1.1;
-      max-width: 26ch;
-      margin: 0 0 0.875rem;
-    }
-    .tuesday .lede {
-      color: var(--color-text-secondary);
-      max-width: 62ch;
-      margin: 0 0 0.75rem;
-      font-size: 1.05rem;
-    }
-    .tuesday .lede.small { font-size: 0.95rem; }
-
-    .compare {
-      margin-top: 3rem;
+    .folio .folio-title { font-style: italic; font-family: var(--serif); text-transform: none; letter-spacing: 0; font-size: 0.82rem; color: var(--ink); }
+    .spread {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
+      gap: 3.5rem;
       align-items: stretch;
+      min-height: 78vh;
+      padding-bottom: 6rem;
     }
-    .compare-col {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem 1.5rem 2rem;
-      position: relative;
-      display: flex;
-      flex-direction: column;
+    .spread.flip { grid-template-columns: 1fr 1.1fr; }
+    .spread.flip-r { grid-template-columns: 1.1fr 1fr; }
+    @media (max-width: 820px) {
+      .page { padding: 0 1.25rem; }
+      .folio { padding: 1.5rem 0 0.75rem; margin-bottom: 2rem; }
+      .spread, .spread.flip, .spread.flip-r { grid-template-columns: 1fr; gap: 2rem; min-height: 0; padding-bottom: 3rem; }
     }
-    .compare-col.before {
-      background: var(--color-grey-bg);
-      border-color: #DCD6CD;
+
+    /* ============ COVER ============ */
+    .cover {
+      padding: 0 2.5rem 4rem;
+      max-width: 1180px;
+      margin: 0 auto;
     }
-    .compare-col.after {
-      border-color: var(--color-accent-muted);
-      box-shadow: 0 0 0 1px var(--color-accent-light), 0 12px 32px rgba(217, 79, 48, 0.08);
+    .cover-band {
+      display: grid;
+      grid-template-columns: 0.55fr 1fr;
+      gap: 3rem;
+      align-items: end;
+      padding-top: 3rem;
     }
-    .compare-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 0.75rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--color-border-light);
+    .cover-issue {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
       margin-bottom: 1.25rem;
     }
-    .compare-col.before .compare-head { border-bottom-color: #D8D2C8; }
-    .compare-label {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.14em;
+    .cover-kicker {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--color-grey-text);
+      color: var(--ink-mute);
+      margin: 0 0 2rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--rule);
     }
-    .compare-col.after .compare-label { color: var(--color-accent); }
-    .compare-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: -0.02em;
-      margin: 0.25rem 0 0;
-    }
-    .compare-col.before .compare-title { color: var(--color-grey-text); }
-
-    .clock {
-      font-family: var(--font-mono);
-      font-size: 0.95rem;
-      font-weight: 500;
-      font-variant-numeric: tabular-nums;
-      color: var(--color-grey-text);
-    }
-    .compare-col.after .clock { color: var(--color-accent); }
-
-    .steps {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+    .cover-block {
+      background: var(--sage);
+      aspect-ratio: 3 / 4;
+      position: relative;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      gap: 0.625rem;
+      justify-content: space-between;
+      will-change: transform;
     }
-    .step {
+    .cover-block::after {
+      content: '';
+      position: absolute;
+      inset: 0.875rem;
+      border: 1px solid rgba(31, 26, 20, 0.18);
+      pointer-events: none;
+    }
+    .cover-block .tag {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--paper);
+      position: relative;
+      z-index: 1;
+    }
+    .cover-block .caption {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1rem;
+      line-height: 1.35;
+      color: var(--paper);
+      max-width: 24ch;
+      position: relative;
+      z-index: 1;
+    }
+    .cover-headline {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: clamp(3rem, 8.5vw, 7.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin: 0 0 1.5rem;
+      transition: letter-spacing 900ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .cover-headline.tighten { letter-spacing: -0.07em; }
+    .cover-headline .roman { font-style: normal; font-weight: 400; color: var(--terracotta); }
+    .cover-sub {
+      font-family: var(--sans);
+      font-weight: 400;
+      font-size: 1.05rem;
+      line-height: 1.55;
+      max-width: 42ch;
+      color: var(--ink);
+      margin: 0 0 2rem;
+    }
+    .cover-byline {
       display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 0.75rem 0.875rem;
-      border-radius: var(--radius-sm);
-      background: var(--color-surface-warm);
-      border: 1px solid var(--color-border-light);
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
-      font-size: 0.92rem;
-    }
-    .compare-col.before .step {
-      background: #E7E2DA;
-      border-color: #D6D0C6;
-      color: var(--color-grey-text);
-    }
-    .compare-col.after .step {
-      background: var(--color-accent-light);
-      border-color: rgba(232, 131, 108, 0.45);
-      color: var(--color-text);
-    }
-    .step.visible { opacity: 1; transform: translateY(0); }
-
-    .step-num {
-      font-family: var(--font-mono);
+      gap: 2rem;
       font-size: 0.72rem;
-      letter-spacing: 0.05em;
-      font-weight: 500;
-      padding: 0.125rem 0.4rem;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.6);
-      flex-shrink: 0;
-      min-width: 1.8rem;
-      text-align: center;
-    }
-    .compare-col.before .step-num { background: #DDD7CD; color: var(--color-grey-text); }
-    .compare-col.after .step-num { background: var(--color-accent); color: white; }
-    .step-text { flex: 1; line-height: 1.4; }
-    .step-time {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--color-text-muted);
-      flex-shrink: 0;
-    }
-    .compare-col.after .step-time { color: var(--color-accent-hover); }
-
-    .compare-foot {
-      margin-top: auto;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
       padding-top: 1.5rem;
-      border-top: 1px solid var(--color-border-light);
+      border-top: 1px solid var(--rule);
+    }
+    .cover-byline strong { color: var(--ink); font-weight: 500; letter-spacing: 0.18em; }
+    .cover-cta {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .cover-cta a {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--ink);
+      transition: color 200ms, border-color 200ms;
+    }
+    .cover-cta a:hover { color: var(--terracotta); border-color: var(--terracotta); }
+    @media (max-width: 820px) {
+      .cover { padding: 0 1.25rem 2.5rem; }
+      .cover-band { grid-template-columns: 1fr; gap: 1.75rem; padding-top: 1.5rem; }
+      .cover-block { aspect-ratio: 4 / 3; }
+    }
+
+    /* ============ EDITOR'S NOTE ============ */
+    .editors-note {
+      max-width: 760px;
+      margin: 0 auto 5rem;
+      padding-bottom: 4rem;
+    }
+    .note-rule {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
       gap: 1rem;
-    }
-    .compare-col.before .compare-foot { border-top-color: #D8D2C8; }
-    .foot-label {
-      font-family: var(--font-mono);
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--ink);
+      font-family: var(--sans);
       font-size: 0.7rem;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--color-text-muted);
+      color: var(--ink-mute);
+      margin-bottom: 2rem;
     }
-    .foot-value {
-      font-family: var(--font-display);
+    .note-rule span:nth-child(2) { font-style: italic; font-family: var(--serif); text-transform: none; letter-spacing: 0.02em; color: var(--ink); }
+    .note-lede {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+      line-height: 1.4;
+      color: var(--ink);
+      margin: 0 0 1.5rem;
+      max-width: 38ch;
+    }
+    .note-lede em { color: var(--terracotta); font-weight: 700; }
+    .note-text {
+      font-family: var(--sans);
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--ink);
+      max-width: 56ch;
+      margin: 0 0 1.5rem;
+    }
+    .note-signoff {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--ink);
+      margin: 0;
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule);
+      max-width: 56ch;
+    }
+    .note-signature {
+      font-family: var(--serif);
+      font-style: italic;
       font-weight: 700;
-      font-size: 1.6rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin: 0.35rem 0 0;
+    }
+
+    /* ============ LONG-FORM PROSE (essay style) ============ */
+    .essay {
+      max-width: 760px;
+      margin: 0 auto 6rem;
+      padding-bottom: 3rem;
+    }
+    .essay-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--ink);
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      margin-bottom: 1.75rem;
+    }
+    .essay-head span:nth-child(2) { font-style: italic; font-family: var(--serif); text-transform: none; letter-spacing: 0.02em; color: var(--ink); }
+    .essay h2 {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: -0.022em;
+      margin: 0 0 1rem;
+      max-width: 22ch;
+      color: var(--ink);
+    }
+    .essay h2 em { font-style: italic; color: var(--terracotta); font-weight: 700; }
+    .essay h2.sage em { color: var(--sage-deep); }
+    .essay .standfirst {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: clamp(1.15rem, 2vw, 1.35rem);
+      line-height: 1.45;
+      color: var(--ink);
+      max-width: 44ch;
+      margin: 0 0 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .essay p {
+      font-family: var(--sans);
+      font-size: 1rem;
+      line-height: 1.75;
+      color: var(--ink);
+      max-width: 60ch;
+      margin: 0 0 1.1rem;
+    }
+    .essay p strong { font-weight: 600; }
+    .essay p em { font-style: italic; }
+    .essay .dropcap {
+      font-family: var(--serif);
+      font-weight: 900;
+      font-size: 4rem;
+      line-height: 0.82;
+      float: left;
+      padding: 0.35rem 0.6rem 0 0;
+      color: var(--terracotta);
+    }
+    .essay .essay-sub {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin: 2rem 0 0.5rem;
+    }
+    .essay .essay-sub.sage { color: var(--sage-deep); }
+    .essay .essay-sub.terra { color: var(--terra-deep); }
+
+    /* ============ PHOTO ESSAY (color block pages + prose) ============ */
+    .photo-essay {
+      max-width: 1180px;
+      margin: 0 auto 6rem;
+      padding: 0 2.5rem;
+    }
+    .photo-plates {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .plate {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      will-change: transform;
+    }
+    .plate::after {
+      content: '';
+      position: absolute;
+      inset: 1rem;
+      border: 1px solid rgba(31, 26, 20, 0.18);
+      pointer-events: none;
+    }
+    .plate.terra { background: var(--terracotta); }
+    .plate.sage { background: var(--sage); }
+    .plate .tag {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--paper);
+      position: relative;
+      z-index: 1;
+    }
+    .plate .caption {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1.02rem;
+      line-height: 1.4;
+      max-width: 26ch;
+      color: var(--paper);
+      position: relative;
+      z-index: 1;
+    }
+    .plate .word {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: clamp(2.6rem, 6vw, 4.4rem);
+      line-height: 0.95;
+      color: var(--paper);
       letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
+      position: relative;
+      z-index: 1;
+      max-width: 14ch;
     }
-    .compare-col.before .foot-value { color: var(--color-grey-text); }
-    .compare-col.after .foot-value { color: var(--color-accent); }
-
-    @media (max-width: 760px) {
-      .compare { grid-template-columns: 1fr; gap: 1rem; }
+    @media (max-width: 820px) {
+      .photo-essay { padding: 0 1.25rem; }
+      .photo-plates { grid-template-columns: 1fr; gap: 1rem; }
+      .plate { aspect-ratio: 4 / 3; padding: 1.5rem; }
     }
 
-    /* ============ WHAT YOU CAN DO — BENTO ============ */
-    .can-do .section-head { margin-bottom: 2.5rem; }
-    .section-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
+    /* ============ COLOR BLOCK / IMAGE-REPLACEMENT ============ */
+    .block {
+      position: relative;
+      min-height: 70vh;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      will-change: transform;
+    }
+    .block::after {
+      content: '';
+      position: absolute;
+      inset: 1rem;
+      border: 1px solid rgba(31, 26, 20, 0.18);
+      pointer-events: none;
+    }
+    .block.sage { background: var(--sage); }
+    .block.terra { background: var(--terracotta); }
+    .block.paper-deep { background: var(--paper-deep); }
+    .block .tag {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--color-accent);
-      margin-bottom: 0.875rem;
+      color: var(--paper);
+      position: relative;
+      z-index: 1;
     }
-    .section-title {
-      font-family: var(--font-display);
+    .block.paper-deep .tag { color: var(--ink-mute); }
+    .block .caption {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1.05rem;
+      line-height: 1.4;
+      max-width: 28ch;
+      color: var(--paper);
+      position: relative;
+      z-index: 1;
+    }
+    .block.paper-deep .caption { color: var(--ink); }
+    .block .numeral {
+      font-family: var(--serif);
+      font-weight: 900;
+      font-size: clamp(5rem, 14vw, 10rem);
+      line-height: 0.85;
+      color: rgba(250, 248, 244, 0.92);
+      position: relative;
+      z-index: 1;
+      letter-spacing: -0.04em;
+    }
+    .block.paper-deep .numeral { color: var(--terracotta); }
+    @media (max-width: 820px) {
+      .block { min-height: 55vh; }
+    }
+
+    /* ============ MAGAZINE COLUMN (right page) ============ */
+    .col {
+      display: flex;
+      flex-direction: column;
+      padding-top: 0.5rem;
+    }
+    .section-kicker {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin-bottom: 1.5rem;
+    }
+    .section-kicker.sage { color: var(--sage-deep); }
+    .headline {
+      font-family: var(--serif);
       font-weight: 700;
-      font-size: clamp(1.75rem, 3.6vw, 2.5rem);
-      letter-spacing: -0.025em;
-      line-height: 1.1;
+      font-size: clamp(2rem, 4.5vw, 3.4rem);
+      line-height: 1.04;
+      letter-spacing: -0.022em;
+      margin: 0 0 1.5rem;
+      max-width: 18ch;
+      color: var(--ink);
+    }
+    .headline em { font-style: italic; color: var(--terracotta); font-weight: 700; }
+    .headline.sage em { color: var(--sage-deep); }
+    .standfirst {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.18rem;
+      line-height: 1.5;
+      max-width: 38ch;
+      color: var(--ink);
+      margin: 0 0 1.75rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .body-text {
+      font-family: var(--sans);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 38ch;
+      color: var(--ink);
+      margin: 0 0 1rem;
+    }
+    .body-text + .body-text { margin-top: 0.25rem; }
+    .body-text .dropcap {
+      font-family: var(--serif);
+      font-weight: 900;
+      font-size: 3.4rem;
+      line-height: 0.85;
+      float: left;
+      padding: 0.35rem 0.5rem 0 0;
+      color: var(--terracotta);
+    }
+    .body-text strong { font-weight: 600; }
+
+    /* ============ BEFORE/AFTER COLUMN (Tuesday spread) ============ */
+    .vs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--rule);
+    }
+    .vs-col h4 {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      margin: 0 0 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .vs-col.after h4 { color: var(--sage-deep); border-bottom-color: var(--sage); }
+    .vs-col .title {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 1.05rem;
       margin: 0 0 0.875rem;
+      line-height: 1.2;
+    }
+    .vs-col ol {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1rem;
+      counter-reset: step;
+    }
+    .vs-col li {
+      counter-increment: step;
+      font-family: var(--sans);
+      font-size: 0.86rem;
+      line-height: 1.45;
+      padding: 0.4rem 0 0.4rem 1.6rem;
+      position: relative;
+      border-bottom: 1px dotted var(--rule);
+      color: var(--ink);
+    }
+    .vs-col li::before {
+      content: counter(step, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0.45rem;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 0.85rem;
+      color: var(--ink-mute);
+    }
+    .vs-col.after li::before { color: var(--sage-deep); }
+    .vs-tally {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--ink);
+      margin-top: 0.5rem;
+    }
+    .vs-tally .lbl {
+      font-family: var(--sans);
+      font-style: normal;
+      font-weight: 400;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .vs-col.after .vs-tally { color: var(--sage-deep); }
+    @media (max-width: 520px) {
+      .vs { grid-template-columns: 1fr; }
+    }
+
+    /* ============ USE-CASE VIGNETTES (prose, not lists) ============ */
+    .use-essays {
+      max-width: 1180px;
+      margin: 0 auto 6rem;
+      padding: 0 2.5rem;
+    }
+    .use-essays-head {
+      max-width: 760px;
+      margin: 0 auto 3rem;
+      text-align: center;
+    }
+    .use-essays-head .section-kicker {
+      color: var(--sage-deep);
+      margin-bottom: 1rem;
+    }
+    .use-essays-head h2 {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      line-height: 1.05;
+      letter-spacing: -0.022em;
+      margin: 0 auto 1rem;
+      max-width: 24ch;
+      color: var(--ink);
+    }
+    .use-essays-head h2 em { font-style: italic; color: var(--sage-deep); font-weight: 700; }
+    .use-essays-head .standfirst {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.15rem;
+      line-height: 1.45;
+      max-width: 44ch;
+      color: var(--ink);
+      margin: 0 auto;
+      padding-bottom: 0;
+      border: none;
+    }
+    .use-essays-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3rem 3.5rem;
+      border-top: 1px solid var(--ink);
+      padding-top: 3rem;
+    }
+    .use-essay .use-num {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 2.4rem;
+      line-height: 1;
+      color: var(--terracotta);
+      margin-bottom: 0.5rem;
+    }
+    .use-essay:nth-child(2n) .use-num { color: var(--sage-deep); }
+    .use-essay:nth-child(3n) .use-num { color: var(--terra-deep); }
+    .use-essay .cat {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      margin-bottom: 0.5rem;
+    }
+    .use-essay h3 {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 1.55rem;
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+      margin: 0 0 1rem;
       max-width: 22ch;
     }
-    .section-sub {
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      margin: 0;
+    .use-essay p {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--ink);
+      max-width: 44ch;
+      margin: 0 0 0.75rem;
+    }
+    .use-essay p em { font-style: italic; }
+    @media (max-width: 820px) {
+      .use-essays { padding: 0 1.25rem; }
+      .use-essays-grid { grid-template-columns: 1fr; gap: 2.5rem; padding-top: 2rem; }
     }
 
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-auto-rows: minmax(170px, auto);
+    /* ============ PULL QUOTE SPREAD ============ */
+    .pullquote {
+      padding: 8rem 2.5rem;
+      max-width: 1180px;
+      margin: 0 auto;
+      text-align: center;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .pullquote blockquote {
+      margin: 0 auto;
+      max-width: 22ch;
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(2.4rem, 6vw, 4.6rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .pullquote blockquote::before { content: '"'; color: var(--terracotta); font-style: normal; }
+    .pullquote blockquote::after { content: '"'; color: var(--terracotta); font-style: normal; }
+    .pullquote cite {
+      display: block;
+      margin-top: 2.5rem;
+      font-family: var(--sans);
+      font-style: normal;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+    }
+    @media (max-width: 820px) {
+      .pullquote { padding: 4rem 1.25rem; }
+    }
+
+    /* ============ DIAGRAM SPREAD (connected workspace) ============ */
+    .diagram-wrap {
+      display: flex;
+      flex-direction: column;
       gap: 1rem;
     }
-    .tile {
+    .diagram-frame {
+      background: var(--paper-deep);
+      padding: 2.5rem 1.5rem;
       position: relative;
-      padding: 1.5rem 1.5rem 1.75rem;
-      border-radius: var(--radius-lg);
-      background:
-        radial-gradient(420px circle at var(--mx, -200px) var(--my, -200px),
-          rgba(217, 79, 48, 0.07), transparent 40%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal);
-      opacity: 0;
-      transform: translateY(18px);
-    }
-    .tile.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring); }
-    .tile.visible:hover { transform: translateY(-3px); border-color: var(--color-accent-muted); box-shadow: var(--shadow-md); }
-    .tile-glyph {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: var(--color-accent-light);
+      aspect-ratio: 4 / 5;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 1rem;
-      color: var(--color-accent);
     }
-    .tile h3 {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-accent);
-      margin: 0 0 0.6rem;
-      font-weight: 500;
-    }
-    .tile h4 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.3rem;
-      letter-spacing: -0.015em;
-      line-height: 1.2;
-      margin: 0 0 0.5rem;
-    }
-    .tile p {
-      margin: 0;
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
-      line-height: 1.55;
-    }
-    /* Accent rotation per tile */
-    .tile:nth-child(2) .tile-glyph { background: #E4F2F7; color: var(--color-actor-2); }
-    .tile:nth-child(2) h3 { color: var(--color-actor-2); }
-    .tile:nth-child(3) .tile-glyph { background: #EFECF6; color: var(--color-actor-3); }
-    .tile:nth-child(3) h3 { color: var(--color-actor-3); }
-    .tile:nth-child(4) .tile-glyph { background: #F8EFCF; color: #A88A2E; }
-    .tile:nth-child(4) h3 { color: #A88A2E; }
-    .tile:nth-child(5) .tile-glyph { background: #E2F0E7; color: var(--color-actor-5); }
-    .tile:nth-child(5) h3 { color: var(--color-actor-5); }
-
-    @media (max-width: 860px) {
-      .bento { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 520px) {
-      .bento { grid-template-columns: 1fr; }
-    }
-
-    /* ============ CONNECTED WORKSPACE ============ */
-    .connected { background: var(--color-bg-warm); border-top: 1px solid var(--color-border-light); border-bottom: 1px solid var(--color-border-light); }
-    .connected-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      align-items: center;
-    }
-    .connected-grid p { color: var(--color-text-secondary); font-size: 1.02rem; max-width: 48ch; }
-    .ring-wrap {
-      position: relative;
-      aspect-ratio: 1 / 1;
-      max-width: 380px;
-      margin: 0 auto;
-    }
-    .ring-svg { width: 100%; height: 100%; display: block; }
-    .ring-svg circle.orbit { fill: none; stroke: var(--color-border); stroke-width: 1; stroke-dasharray: 3 5; }
-    .ring-svg circle.hub { fill: var(--color-accent); }
-    .ring-svg text.hub-label { font-family: 'Bricolage Grotesque', Georgia, serif; font-weight: 700; font-size: 14px; fill: white; text-anchor: middle; dominant-baseline: central; letter-spacing: -0.02em; }
-    .ring-svg g.node circle { fill: var(--color-surface); stroke: var(--color-border); stroke-width: 1.5; transition: stroke 300ms, fill 300ms; }
-    .ring-svg g.node text { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; fill: var(--color-text); text-anchor: middle; dominant-baseline: central; letter-spacing: 0.04em; }
-    .ring-svg g.node:hover circle { stroke: var(--color-accent); fill: var(--color-accent-light); }
-    .ring-svg line.spoke { stroke: var(--color-border); stroke-width: 1; }
-    .ring-svg .pulse {
-      fill: none;
-      stroke: var(--color-accent);
-      stroke-width: 1.5;
-      transform-origin: center;
-      animation: ring-pulse 4s var(--ease-out) infinite;
-      opacity: 0;
-    }
-    @keyframes ring-pulse {
-      0%   { transform: scale(0.3); opacity: 0.6; }
-      80%  { transform: scale(1.4); opacity: 0; }
-      100% { opacity: 0; }
-    }
-
-    @media (max-width: 760px) {
-      .connected-grid { grid-template-columns: 1fr; gap: 2rem; }
-      .ring-wrap { max-width: 300px; }
-    }
-
-    /* ============ REAL WINS — VIGNETTES ============ */
-    .wins-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin-top: 2.5rem;
-    }
-    .vignette {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem 1.5rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.875rem;
-      opacity: 0;
-      transform: translateY(18px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal);
-    }
-    .vignette.visible { opacity: 1; transform: translateY(0); }
-    .vignette:hover { border-color: var(--color-accent-muted); }
-    .vignette-role {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-    .vignette:nth-child(1) .vignette-role { color: var(--color-actor-1); }
-    .vignette:nth-child(2) .vignette-role { color: var(--color-actor-2); }
-    .vignette:nth-child(3) .vignette-role { color: var(--color-actor-5); }
-    .vignette h4 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      margin: 0;
-    }
-    .vignette p {
-      margin: 0;
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-    .vignette .quote {
-      margin-top: auto;
-      padding-top: 0.875rem;
-      border-top: 1px solid var(--color-border-light);
-      font-family: var(--font-display);
-      font-style: italic;
-      font-size: 1rem;
-      color: var(--color-text);
-      line-height: 1.4;
-    }
-    @media (max-width: 860px) { .wins-grid { grid-template-columns: 1fr; } }
-
-    /* ============ NUMBER ROW ============ */
-    .numrow { background: var(--color-bg-warm); border-top: 1px solid var(--color-border-light); border-bottom: 1px solid var(--color-border-light); }
-    .nums {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-    }
-    .num-cell {
-      padding: 1.5rem 0.5rem;
-      text-align: left;
-      border-left: 1px solid var(--color-border);
-      padding-left: 1.25rem;
-    }
-    .num-value {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      letter-spacing: -0.03em;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-      color: var(--color-accent);
-    }
-    .num-value .unit { font-size: 0.55em; color: var(--color-text-secondary); margin-left: 0.15em; letter-spacing: -0.01em; }
-    .num-label {
-      margin-top: 0.5rem;
-      font-size: 0.88rem;
-      color: var(--color-text-secondary);
-      max-width: 22ch;
-      line-height: 1.4;
-    }
-    @media (max-width: 760px) {
-      .nums { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 420px) {
-      .nums { grid-template-columns: 1fr; }
-    }
-
-    /* ============ PLANS ============ */
-    .plans-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin-top: 2.5rem;
-    }
-    .plan {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.875rem;
-    }
-    .plan.featured {
-      border-color: var(--color-accent);
-      box-shadow: 0 0 0 1px var(--color-accent-light), 0 12px 32px rgba(217, 79, 48, 0.08);
-      position: relative;
-    }
-    .plan.featured::before {
-      content: 'Most relevant for SMBs';
-      position: absolute;
-      top: -0.6rem;
-      left: 1.25rem;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: white;
-      background: var(--color-accent);
-      padding: 0.25rem 0.6rem;
-      border-radius: 999px;
-    }
-    .plan-name {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.3rem;
-      letter-spacing: -0.02em;
-      margin: 0;
-    }
-    .plan-price {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 2rem;
-      letter-spacing: -0.03em;
-      color: var(--color-text);
-      font-variant-numeric: tabular-nums;
-    }
-    .plan-price .per { font-size: 0.85rem; font-weight: 400; color: var(--color-text-secondary); letter-spacing: 0; font-family: var(--font-body); margin-left: 0.25rem; }
-    .plan-desc { color: var(--color-text-secondary); font-size: 0.92rem; margin: 0; }
-    .plan ul { list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-direction: column; gap: 0.4rem; }
-    .plan li {
-      font-size: 0.9rem;
-      padding-left: 1.2rem;
-      position: relative;
-      color: var(--color-text-secondary);
-    }
-    .plan li::before {
+    .diagram-frame::after {
       content: '';
       position: absolute;
-      left: 0;
-      top: 0.55em;
-      width: 6px;
-      height: 6px;
-      background: var(--color-accent);
-      border-radius: 50%;
+      inset: 0.875rem;
+      border: 1px solid rgba(31, 26, 20, 0.12);
+      pointer-events: none;
     }
-    @media (max-width: 760px) { .plans-grid { grid-template-columns: 1fr; } }
-
-    /* ============ FINAL CTA ============ */
-    .final {
+    .diagram-svg {
+      width: 100%;
+      height: 100%;
+      max-width: 360px;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+    .diagram-svg .hub-circle { fill: var(--ink); }
+    .diagram-svg .hub-text {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 18px;
+      fill: var(--paper);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .diagram-svg .spoke { stroke: var(--ink-mute); stroke-width: 0.5; stroke-dasharray: 2 3; }
+    .diagram-svg .node-circle { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+    .diagram-svg .node-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      fill: var(--ink);
+      text-anchor: middle;
+      dominant-baseline: central;
+      text-transform: uppercase;
+    }
+    .diagram-caption {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--ink-mute);
       text-align: center;
-      padding-top: 6rem;
-      padding-bottom: 6rem;
+      margin: 0;
+      max-width: 38ch;
+      align-self: center;
+      line-height: 1.4;
     }
-    .final .section-title { margin-left: auto; margin-right: auto; }
-    .final .section-sub { margin: 0.5rem auto 2.5rem; }
-    .final .cta-row { justify-content: center; opacity: 1; transition: none; }
+    .diagram-caption strong { font-style: normal; color: var(--ink); font-weight: 500; }
 
-    /* ============ FOOTER ============ */
-    footer {
-      padding: 2.5rem 0 3.5rem;
-      border-top: 1px solid var(--color-border);
-      background: var(--color-bg-warm);
+    /* ============ VIGNETTES (case studies — narrative) ============ */
+    .vignettes-wrap { padding-bottom: 6rem; }
+    .vignettes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.75rem;
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--ink);
     }
-    .foot-inner {
-      max-width: 1100px;
+    .vignette {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .vignette .role {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 0.5rem;
+    }
+    .vignette:nth-child(2) .role { color: var(--sage-deep); }
+    .vignette:nth-child(3) .role { color: var(--terra-deep); }
+    .vignette h3 {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 1.4rem;
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+      margin: 0 0 0.75rem;
+    }
+    .vignette p {
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--ink);
+      margin: 0 0 0.75rem;
+    }
+    .vignette .quote {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.1rem;
+      line-height: 1.35;
+      color: var(--ink);
+      margin: 0.5rem 0 0;
+      padding-top: 0.875rem;
+      border-top: 1px solid var(--rule);
+    }
+    @media (max-width: 820px) {
+      .vignettes { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    /* ============ SIDEBAR (narrow magazine column) ============ */
+    .sidebar-wrap {
+      max-width: 1180px;
+      margin: 0 auto 6rem;
+      padding: 0 2.5rem;
+    }
+    .sidebar-grid {
+      display: grid;
+      grid-template-columns: 0.4fr 1fr;
+      gap: 3rem;
+      border-top: 1px solid var(--ink);
+      padding-top: 2rem;
+    }
+    .sidebar-tag {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--terra-deep);
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      padding-left: 0.5rem;
+      border-left: 1px solid var(--terra-deep);
+      justify-self: start;
+    }
+    .sidebar-body {
+      max-width: 36ch;
+      border-left: 1px solid var(--rule);
+      padding-left: 2rem;
+    }
+    .sidebar-body h2 {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: clamp(1.5rem, 2.8vw, 2rem);
+      line-height: 1.15;
+      letter-spacing: -0.018em;
+      margin: 0 0 1rem;
+      color: var(--ink);
+    }
+    .sidebar-body h2 em { color: var(--terra-deep); }
+    .sidebar-body .kicker {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--terra-deep);
+      margin-bottom: 0.75rem;
+    }
+    .sidebar-body p {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--ink);
+      margin: 0 0 1rem;
+    }
+    .sidebar-body p em { font-style: italic; }
+    .sidebar-body p strong { font-weight: 600; }
+    .sidebar-body .signoff {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--ink-mute);
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule);
+      margin: 1rem 0 0;
+    }
+    @media (max-width: 820px) {
+      .sidebar-wrap { padding: 0 1.25rem; }
+      .sidebar-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+      .sidebar-tag { writing-mode: horizontal-tb; transform: none; border-left: none; border-bottom: 1px solid var(--terra-deep); padding: 0 0 0.5rem; }
+      .sidebar-body { border-left: none; padding-left: 0; }
+    }
+
+    /* ============ SUBSCRIBE / PRICING ============ */
+    .subscribe {
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 0 1.5rem;
+      padding: 4rem 2.5rem 5rem;
+      border-top: 1px solid var(--ink);
+    }
+    .subscribe-head {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      gap: 1rem;
       flex-wrap: wrap;
-      font-size: 0.88rem;
-      color: var(--color-text-secondary);
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
-    .foot-inner a { color: var(--color-text-secondary); text-decoration: none; transition: color 200ms; }
-    .foot-inner a:hover { color: var(--color-accent); }
-    .foot-links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .subscribe-head h2 {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 0;
+      color: var(--ink);
+      max-width: 18ch;
+    }
+    .subscribe-head .small {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+    }
+    .subscribe-intro {
+      max-width: 60ch;
+      margin: 0 0 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .subscribe-intro p {
+      font-family: var(--sans);
+      font-size: 0.98rem;
+      line-height: 1.7;
+      color: var(--ink);
+      margin: 0 0 0.875rem;
+    }
+    .subscribe-intro p:last-child { margin-bottom: 0; }
+    .subscribe-intro p em { font-style: italic; }
+    .subscribe-intro p strong { font-weight: 600; }
+    .tiers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--rule);
+    }
+    .tier {
+      padding: 2rem 1.5rem 2rem 0;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+    .tier:last-child { border-right: none; padding-right: 0; }
+    .tier { padding-left: 1.5rem; }
+    .tier:first-child { padding-left: 0; }
+    .tier.featured { background: rgba(123, 146, 112, 0.08); position: relative; padding-left: 1.5rem; padding-right: 1.5rem; }
+    .tier.featured::before {
+      content: 'Most relevant';
+      position: absolute;
+      top: -0.7rem;
+      left: 1rem;
+      background: var(--sage);
+      color: var(--paper);
+      font-family: var(--sans);
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.65rem;
+    }
+    .tier-name {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 700;
+      font-size: 1.6rem;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .tier-price {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: 2.4rem;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .tier-price .per {
+      font-family: var(--sans);
+      font-weight: 400;
+      font-size: 0.78rem;
+      color: var(--ink-mute);
+      letter-spacing: 0.04em;
+      margin-left: 0.25rem;
+    }
+    .tier-desc {
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--ink);
+      margin: 0;
+    }
+    .tier ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .tier li {
+      padding: 0.35rem 0;
+      border-bottom: 1px dotted var(--rule);
+      color: var(--ink);
+    }
+    .tier li:last-child { border-bottom: none; }
+    @media (max-width: 820px) {
+      .subscribe { padding: 3rem 1.25rem 3rem; }
+      .tiers { grid-template-columns: 1fr; }
+      .tier { padding: 1.75rem 0; border-right: none; }
+      .tier.featured { padding: 1.75rem 1rem; }
+    }
+
+    /* ============ NUMBER STRIP ============ */
+    .stats {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+    .stat {
+      border-left: 1px solid var(--rule);
+      padding-left: 1rem;
+    }
+    .stat:first-child { border-left: none; padding-left: 0; }
+    .stat-num {
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: clamp(1.8rem, 3.8vw, 2.8rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--terracotta);
+      font-variant-numeric: tabular-nums;
+    }
+    .stat:nth-child(2) .stat-num { color: var(--sage-deep); }
+    .stat:nth-child(4) .stat-num { color: var(--sage-deep); }
+    .stat-num .unit {
+      font-family: var(--sans);
+      font-weight: 400;
+      font-size: 0.85rem;
+      color: var(--ink-mute);
+      letter-spacing: 0.04em;
+      margin-left: 0.25rem;
+    }
+    .stat-label {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: var(--ink);
+      margin: 0.5rem 0 0;
+    }
+    @media (max-width: 760px) {
+      .stats { padding: 2rem 1.25rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    }
+    @media (max-width: 420px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .stat { border-left: none; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 1rem; }
+      .stat:first-child { border-top: none; padding-top: 0; }
+    }
+
+    /* ============ COLOPHON ============ */
+    .colophon {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem 4rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+      border-top: 1px solid var(--ink);
+    }
+    .colophon-left h3 {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      margin: 0 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--rule);
+    }
+    .colophon-left p {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1rem;
+      line-height: 1.55;
+      color: var(--ink);
+      max-width: 40ch;
+      margin: 0 0 0.875rem;
+    }
+    .colophon-left p strong {
+      font-style: normal;
+      font-family: var(--sans);
+      font-weight: 500;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+    .colophon-right {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-mute);
+      text-align: right;
+    }
+    .colophon-right a { color: var(--ink-mute); text-decoration: none; display: block; margin-bottom: 0.4rem; transition: color 200ms; }
+    .colophon-right a:hover { color: var(--terracotta); }
+    .colophon-right .issue-mark {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      text-transform: none;
+      color: var(--ink);
+      margin-top: 1rem;
+    }
+    .colophon-right .next {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.85rem;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--ink-mute);
+      margin-top: 0.5rem;
+      max-width: 30ch;
+      margin-left: auto;
+      line-height: 1.45;
+    }
+    @media (max-width: 820px) {
+      .colophon { padding: 2rem 1.25rem 3rem; grid-template-columns: 1fr; gap: 1.5rem; }
+      .colophon-right { text-align: left; }
+      .colophon-right .next { margin-left: 0; }
+    }
 
     /* ============ REDUCED MOTION ============ */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-      .word, .hero-sub, .cta-row, .eyebrow, .step, .tile, .vignette { opacity: 1 !important; transform: none !important; }
-      .ring-svg .pulse { display: none !important; }
+      .cover-block, .block, .plate { transform: none !important; }
     }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .tile:hover { transform: none !important; }
+
+    /* ============ FADE-IN ON SCROLL ============ */
+    .reveal { opacity: 0; transform: translateY(8px); transition: opacity 700ms ease, transform 700ms ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="../">CETI<span class="dot">.</span>AI <span style="color: var(--color-text-muted); font-weight: 400; margin-left: 0.5rem; font-size: 0.85rem;">/ Lookbook</span></a>
-      <a class="cta-link" href="#workshop">Book a workshop</a>
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <a class="title" href="../">CETI.AI Lookbook</a>
+    <div class="meta">
+      <span>Issue 07</span>
+      <span>May 2026</span>
+      <a href="#subscribe">Subscribe</a>
     </div>
-  </div>
+  </header>
 
-  <!-- HERO -->
-  <section class="hero" id="hero">
-    <div class="wrap">
-      <p class="eyebrow">Claude Cowork · Business AI that works with you</p>
-      <h1 class="hero-title">
-        <span class="word">The</span>
-        <span class="word">analyst</span>
-        <span class="word">who</span>
-        <span class="word"><em>never</em></span>
-        <span class="word">sleeps.</span>
-      </h1>
-      <p class="hero-sub">Imagine a brilliant coworker who knew your industry, sat next to you, worked at the speed of thought, and never asked for a raise. That's what Claude already is for thousands of business users — for research, analysis, writing, organizing, and decision support. No code required.</p>
-      <div class="cta-row">
-        <a class="magnetic" href="https://claude.ai" target="_blank" rel="noopener">
-          Try Claude
-          <span class="arrow">&rarr;</span>
-        </a>
-        <a class="magnetic ghost" href="#workshop">
-          Roll it out across your team
-          <span class="arrow">&rarr;</span>
-        </a>
-      </div>
+  <!-- ============ COVER ============ -->
+  <section class="cover">
+    <div class="folio">
+      <span>Issue 07 &middot; Page 01</span>
+      <span class="folio-title">Cover</span>
+      <span>The Cowork Number</span>
     </div>
-  </section>
-
-  <!-- TUESDAY MORNING — SIGNATURE BEFORE / AFTER -->
-  <section class="tuesday" id="tuesday">
-    <div class="wrap">
-      <p class="section-eyebrow">A Tuesday morning</p>
-      <h2>You need to understand a competitor before the 11 a.m. meeting.</h2>
-      <p class="lede">Same task, same person, same coffee. Two ways of doing it. The first is how most of us still work — switching tabs, copy-pasting, building tables by hand. The second is what already exists if you have Claude open.</p>
-      <p class="lede small">Watch each column build itself as you scroll.</p>
-
-      <div class="compare" id="compare">
-
-        <!-- BEFORE -->
-        <article class="compare-col before">
-          <div class="compare-head">
-            <div>
-              <div class="compare-label">Before</div>
-              <h3 class="compare-title">The browser-tab method</h3>
-            </div>
-            <div class="clock" data-clock="before">00:00</div>
-          </div>
-          <ol class="steps" data-side="before">
-            <li class="step"><span class="step-num">01</span><span class="step-text">Search Google for the competitor's name + "pricing"</span><span class="step-time">00:04</span></li>
-            <li class="step"><span class="step-num">02</span><span class="step-text">Open 12 tabs. Skim, lose your place, open three more.</span><span class="step-time">00:18</span></li>
-            <li class="step"><span class="step-num">03</span><span class="step-text">Read 5 articles. Forget what was in the first one.</span><span class="step-time">00:41</span></li>
-            <li class="step"><span class="step-num">04</span><span class="step-text">Switch to Notion. Make a blank page. Stare at it.</span><span class="step-time">00:52</span></li>
-            <li class="step"><span class="step-num">05</span><span class="step-text">Copy-paste quotes back and forth. Lose formatting.</span><span class="step-time">01:23</span></li>
-            <li class="step"><span class="step-num">06</span><span class="step-text">Build a comparison table by hand. Realize you missed a column.</span><span class="step-time">01:48</span></li>
-            <li class="step"><span class="step-num">07</span><span class="step-text">Run out of time. Bring half-finished notes to the meeting.</span><span class="step-time">02:03</span></li>
-          </ol>
-          <div class="compare-foot">
-            <span class="foot-label">Time spent</span>
-            <span class="foot-value" data-clock-final="before">2h 03m</span>
-          </div>
-        </article>
-
-        <!-- AFTER -->
-        <article class="compare-col after">
-          <div class="compare-head">
-            <div>
-              <div class="compare-label">With Claude</div>
-              <h3 class="compare-title">The cowork method</h3>
-            </div>
-            <div class="clock" data-clock="after">00:00</div>
-          </div>
-          <ol class="steps" data-side="after">
-            <li class="step"><span class="step-num">01</span><span class="step-text">Open Claude. Type one sentence describing what you need.</span><span class="step-time">00:00</span></li>
-            <li class="step"><span class="step-num">02</span><span class="step-text">Claude pulls from your connected Drive, Notion, and the open web.</span><span class="step-time">00:01</span></li>
-            <li class="step"><span class="step-num">03</span><span class="step-text">A clean comparison table appears as an Artifact — pricing, positioning, recent moves.</span><span class="step-time">00:02</span></li>
-            <li class="step"><span class="step-num">04</span><span class="step-text">You ask one follow-up: "What about their enterprise tier?"</span><span class="step-time">00:03</span></li>
-            <li class="step"><span class="step-num">05</span><span class="step-text">Table updates. Sources cited inline. You read, edit, save to Notion.</span><span class="step-time">00:04</span></li>
-          </ol>
-          <div class="compare-foot">
-            <span class="foot-label">Time spent</span>
-            <span class="foot-value" data-clock-final="after">4 min</span>
-          </div>
-        </article>
-
+    <div class="cover-band">
+      <div class="cover-block" data-parallax="0.08">
+        <span class="tag">Plate I</span>
+        <p class="caption">A still life of an afternoon that didn't get away.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- WHAT YOU CAN DO -->
-  <section class="can-do" id="can-do">
-    <div class="wrap">
-      <div class="section-head">
-        <p class="section-eyebrow">What you can actually do</p>
-        <h2 class="section-title">Six kinds of work Claude does well — today, without you writing a line of code.</h2>
-        <p class="section-sub">Each of these is something people are already doing in their Claude.ai chat right now. The trick isn't the tool — it's knowing which tasks to bring to it.</p>
-      </div>
-
-      <div class="bento" id="bento">
-        <article class="tile">
-          <div class="tile-glyph" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          </div>
-          <h3>Research</h3>
-          <h4>Map a market in minutes.</h4>
-          <p>Competitor scans, regulatory landscapes, customer-segment research — Claude pulls, summarizes, and cites the sources you can defend in a meeting.</p>
-        </article>
-
-        <article class="tile">
-          <div class="tile-glyph" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-          </div>
-          <h3>Write</h3>
-          <h4>First drafts that respect your voice.</h4>
-          <p>Proposals, board updates, client emails, RFP responses. Give Claude two past examples and a brief — get a draft that doesn't sound like a robot.</p>
-        </article>
-
-        <article class="tile">
-          <div class="tile-glyph" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 4 4 5-5"/></svg>
-          </div>
-          <h3>Analyze</h3>
-          <h4>Make sense of a messy spreadsheet.</h4>
-          <p>Upload a CSV of last quarter's pipeline, last month's expenses, last year's NPS. Ask plain questions. Get charts and the "so what" in one pass.</p>
-        </article>
-
-        <article class="tile">
-          <div class="tile-glyph" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>
-          </div>
-          <h3>Organize</h3>
-          <h4>Turn a folder into a system.</h4>
-          <p>Twelve scattered vendor PDFs become one comparison table. Four meeting transcripts become a clean decision log with owners and dates.</p>
-        </article>
-
-        <article class="tile">
-          <div class="tile-glyph" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-          </div>
-          <h3>Decide</h3>
-          <h4>A structured second opinion.</h4>
-          <p>Lay out a hard call — vendor choice, hire-or-promote, build-or-buy. Claude lists trade-offs, surfaces what you haven't considered, doesn't pretend to know your business better than you.</p>
-        </article>
-
-        <article class="tile">
-          <div class="tile-glyph" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M5 12H2M22 12h-3M6.3 6.3 4.2 4.2M19.8 19.8l-2.1-2.1M6.3 17.7l-2.1 2.1M19.8 4.2l-2.1 2.1"/></svg>
-          </div>
-          <h3>Build</h3>
-          <h4>Tiny tools, not big projects.</h4>
-          <p>A pricing calculator. A meeting-prep checklist generator. A one-page client dashboard. Claude builds it as an Artifact — you use it five minutes later.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONNECTED WORKSPACE -->
-  <section class="connected" id="connected">
-    <div class="wrap">
-      <div class="connected-grid">
-        <div>
-          <p class="section-eyebrow">The connected workspace</p>
-          <h2 class="section-title">No more copy-paste.</h2>
-          <p>Claude can now read directly from your Notion, Gmail, Google Drive, Linear, Asana, HubSpot, and dozens more — through a standard called MCP. You give permission once. Then Claude works with your real material instead of asking you to paste it in.</p>
-          <p style="font-size: 0.92rem; margin-top: 1rem;">As of early 2026, the connector ecosystem covers <strong>6,000+</strong> business apps. The boring parts of your job — finding things, pulling things together — stop being your job.</p>
+      <div>
+        <p class="cover-issue">Issue 07 &middot; The Cowork Number &middot; May 2026</p>
+        <h1 class="cover-headline" id="cover-headline">
+          Your coworker, <span class="roman">on demand.</span>
+        </h1>
+        <p class="cover-sub">Imagine a brilliant analyst who knew your industry, sat next to you, worked at the speed of thought, and never asked for a raise. That is what Claude already is for thousands of business teams &mdash; for research, analysis, writing, organizing, and decision support. No code required.</p>
+        <div class="cover-byline">
+          <span>Writing &nbsp;<strong>CETI.AI</strong></span>
+          <span>Imagery &nbsp;<strong>Studio C</strong></span>
         </div>
-        <div class="ring-wrap" aria-hidden="true">
-          <svg class="ring-svg" viewBox="0 0 360 360">
-            <circle class="orbit" cx="180" cy="180" r="130"/>
-            <circle class="orbit" cx="180" cy="180" r="85" opacity="0.6"/>
-            <circle class="pulse" cx="180" cy="180" r="60"/>
+        <div class="cover-cta">
+          <a href="https://claude.ai" target="_blank" rel="noopener">Try Claude</a>
+          <a href="#subscribe">Roll it out across your team</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
+  <!-- ============ EDITOR'S LETTER ============ -->
+  <section class="page">
+    <div class="folio">
+      <span>Issue 07 &middot; Page 02</span>
+      <span class="folio-title">From the editor</span>
+      <span>A small letter before we begin</span>
+    </div>
+    <div class="editors-note reveal">
+      <div class="note-rule">
+        <span>No. 01</span>
+        <span>Editor's letter</span>
+        <span>CETI.AI</span>
+      </div>
+      <div class="note-body">
+        <p class="note-lede">There is a particular kind of <em>professional fatigue</em> that comes from doing the same coordination work twice a week, every week, for years. It is the fatigue of pulling things together that already exist. Of looking up what you already knew. Of formatting what you already wrote.</p>
+        <p class="note-text">I have spent the last three years sitting next to marketers, operators, partners, and founders while they tried to bend new software to old habits. The pattern is always the same. The first week is novelty. The second week is mild disappointment. The third week is quiet abandonment. The tool was never the problem. The frame was.</p>
+        <p class="note-text">This issue is built around a different frame. We are not asking you to adopt a productivity stack, change your workflow, or pivot your team. We are asking you to imagine, plainly, that you have <strong>one additional coworker</strong> &mdash; someone patient, well-read, fast, and at the desk whenever you arrive. Someone who will not author the thing that only you can author, but who will gather, sort, draft, and reformat all the material around it so the version that takes your name on it can be the version that deserves to.</p>
+        <p class="note-text">What follows are eight pages that try to give that coworker a face. A Tuesday morning, narrated twice. Six kinds of work, illustrated. A diagram of how Claude reaches into the apps your work already lives in. Three small case studies from people doing this work today. A short reflection on judgment. And, at the back, the simple pricing &mdash; because pricing has stopped being a reason to wait.</p>
+        <p class="note-text">Read it as you would a magazine, not a manual. The point is the picture, not the procedure.</p>
+        <p class="note-signoff">Yours,<br>Manu &middot; CETI.AI</p>
+        <p class="note-signature">M.M. &middot; Editor &middot; May 2026</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SPREAD 1 — TUESDAY MORNING (the existing before/after spread) ============ -->
+  <section class="page">
+    <div class="folio">
+      <span>Issue 07 &middot; Pages 03&ndash;04</span>
+      <span class="folio-title">Feature &mdash; A Tuesday morning</span>
+      <span>The before &amp; after</span>
+    </div>
+    <div class="spread">
+      <!-- LEFT: terracotta block -->
+      <aside class="block terra" data-parallax="0.05">
+        <div>
+          <span class="tag">Plate II</span>
+        </div>
+        <div class="numeral">9:14</div>
+        <p class="caption">Tuesday morning, 9:14 a.m. The competitor brief is due at eleven. The kettle is still warm.</p>
+      </aside>
+
+      <!-- RIGHT: editorial column -->
+      <article class="col">
+        <p class="section-kicker">A Tuesday morning</p>
+        <h2 class="headline">You need to understand a competitor before the <em>eleven a.m.</em> meeting.</h2>
+        <p class="standfirst">Same task, same person, same coffee. Two ways of doing it &mdash; one of which has not aged well.</p>
+        <p class="body-text"><span class="dropcap">T</span>he first method is how most of us still work. Tabs upon tabs, copy-paste, building tables by hand, losing the thread, watching the clock. The second is what already exists if you simply have Claude open in one of those tabs instead.</p>
+        <p class="body-text">What follows is the same brief, narrated twice. Read it as a small <strong>before-and-after photograph</strong> of an ordinary morning.</p>
+
+        <div class="vs">
+          <div class="vs-col before">
+            <h4>Before</h4>
+            <p class="title">The browser-tab method</p>
+            <ol>
+              <li>Search for the competitor's name plus &ldquo;pricing.&rdquo;</li>
+              <li>Open twelve tabs. Skim. Lose your place. Open three more.</li>
+              <li>Read five articles. Forget what was in the first one.</li>
+              <li>Open Notion. Make a blank page. Stare.</li>
+              <li>Copy-paste quotes. Lose formatting.</li>
+              <li>Build a comparison table by hand. Miss a column.</li>
+              <li>Bring half-finished notes to the meeting.</li>
+            </ol>
+            <div class="vs-tally"><span class="lbl">Time spent</span>2h 03m</div>
+          </div>
+
+          <div class="vs-col after">
+            <h4>With Claude</h4>
+            <p class="title">The cowork method</p>
+            <ol>
+              <li>Open Claude. Type one sentence describing what you need.</li>
+              <li>Claude pulls from your Drive, Notion, and the open web.</li>
+              <li>A clean comparison table appears as an Artifact.</li>
+              <li>You ask: &ldquo;What about their enterprise tier?&rdquo;</li>
+              <li>Table updates. Sources cited. You save to Notion.</li>
+            </ol>
+            <div class="vs-tally"><span class="lbl">Time spent</span>4 minutes</div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ FEATURE ESSAY — TUESDAY MORNING (long-form narrative) ============ -->
+  <section class="page">
+    <div class="folio">
+      <span>Issue 07 &middot; Page 05</span>
+      <span class="folio-title">Feature essay &mdash; Tuesday morning</span>
+      <span>A narrative in two hours</span>
+    </div>
+    <article class="essay reveal">
+      <div class="essay-head">
+        <span>Essay No. 01</span>
+        <span>Tuesday morning</span>
+        <span>2,000 words, narrated</span>
+      </div>
+      <h2>The morning Sarah stopped working <em>twice</em>.</h2>
+      <p class="standfirst">A marketing lead at a fifty-person startup opens her laptop, makes a flat white, and decides — for reasons she cannot quite name — to try something different.</p>
+
+      <p><span class="dropcap">S</span>arah is forty-one, has been a marketing lead for nine years, and has the good fortune of working from a kitchen table that gets the morning light. It is a Tuesday in early spring. The flat white is still warm, the dog is already disappointed, and there is a competitor brief due to her CEO at eleven. She has done this brief, in one form or another, perhaps four hundred times. She is very good at it.</p>
+
+      <p>The competitor in question is a series-B company that her sales team has started losing deals to. She needs to understand them, quickly. Their pricing, their positioning, their last three product launches, the way their CEO talks on podcasts, what their customers complain about. Sarah opens her laptop the way she has opened it every Tuesday for nine years. She opens a new browser window. She types the company's name plus the word "pricing." She opens twelve tabs.</p>
+
+      <p>By 9:31 she has skimmed three articles, lost her place in two more, and re-read the same paragraph in a TechCrunch piece because her eye kept drifting. She switches to Notion. She makes a blank page titled <em>Competitor Brief</em>. She stares at it. She switches back to the browser and copy-pastes a quote, which arrives missing its formatting and with a stray hyperlink. She begins to build a comparison table by hand, which means typing column headers, then typing values, then realizing the values are inconsistent because the source articles are from different quarters.</p>
+
+      <p>At 10:17 she has a table that is roughly accurate and entirely ugly. She has not yet started writing the brief itself. She makes a second flat white. She loses ten minutes to an email about office snacks. She watches the clock the way she used to watch the clock in school.</p>
+
+      <p class="essay-sub terra">The other morning</p>
+
+      <p>The day before, by accident, Sarah had a different Tuesday. The competitor had been someone else &mdash; a German company she had never heard of &mdash; and she had been even more behind. She had opened Claude, which her team had been quietly using for six weeks, and typed a single sentence: <em>"I need a competitor brief on Acme by 11 a.m. Pull their public pricing, last three launches, recent customer reviews, and how their CEO talks about the category. Format it the way I formatted the brief on Beacon last quarter."</em></p>
+
+      <p>Claude had read the Beacon brief from her Drive. It had pulled from the web. It had built a comparison table as an Artifact, which sat there in the side panel like a polite intern holding a clipboard. Sarah had asked, on a hunch, "what about their enterprise tier?" and the table had updated, with two new rows and three new citations. She had asked, again, "what are their three biggest weaknesses on review sites?" and the answer had come back specific enough to be useful, hedged enough to be honest.</p>
+
+      <p>She had spent the rest of that hour <strong>writing</strong>. The actual brief. The judgment of what to recommend. The story about why this competitor mattered to her CEO and to the sales team. She had been &mdash; and this is the part she remembers &mdash; <em>thinking</em>. Not gathering. Not formatting. Not coordinating between twelve tabs. Thinking.</p>
+
+      <p class="essay-sub terra">The handoff</p>
+
+      <p>Today, back in the kitchen, Sarah closes the Notion tab. She closes nine of the twelve browser tabs. She opens Claude again. She types her one sentence. She watches, this time with less surprise, as the work she would have done by 11:30 appears by 9:38. She spends the next hour writing the brief, in her voice, with her judgment. She sends it to her CEO at 10:42. She walks the dog. The kettle, by then, is cold &mdash; but it is cold in the way of a morning that ended on time, not a morning that ran out.</p>
+
+      <p>What changed between the two Tuesdays is not that Sarah became faster at typing. She is the same typist she has been since college. What changed is what she did with the first hour. She no longer spent it as a research analyst. She spent it as a marketing lead. The difference, multiplied across forty-seven Tuesdays a year, is the entire difference between someone who feels useful and someone who feels behind.</p>
+    </article>
+  </section>
+
+  <!-- ============ SPREAD 2 — WHAT YOU CAN DO (the existing six-grid) ============ -->
+  <section class="page">
+    <div class="folio">
+      <span>Issue 07 &middot; Pages 06&ndash;07</span>
+      <span class="folio-title">Feature &mdash; The six kinds of work</span>
+      <span>An inventory</span>
+    </div>
+    <div class="spread flip-r">
+      <!-- LEFT: editorial column -->
+      <article class="col">
+        <p class="section-kicker sage">What you can actually do</p>
+        <h2 class="headline sage">Six kinds of work Claude does <em>well</em> &mdash; today, without code.</h2>
+        <p class="standfirst">Each of these is something thousands of people are doing in Claude right now. The trick is not the tool; it is knowing which tasks to bring to it.</p>
+        <p class="body-text"><span class="dropcap">T</span>he inventory that follows is descriptive, not aspirational. It is what we observe when we sit next to operators, marketers, analysts, and founders during a CETI training week. We have grouped the work into six categories. The vignettes on the following pages take each category and tell a small story about it, because lists are not how work is felt.</p>
+        <p class="body-text">Read it the way you might read a contents page of a magazine, not the line items of a feature comparison. The categories overlap. Real work always overlaps.</p>
+      </article>
+
+      <!-- RIGHT: sage block -->
+      <aside class="block sage" data-parallax="0.04">
+        <div>
+          <span class="tag">Plate III</span>
+        </div>
+        <div class="numeral">VI</div>
+        <p class="caption">Six categories of work. One coworker. The shape of an ordinary week begins to give.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ USE-CASE PROSE VIGNETTES ============ -->
+  <section class="use-essays reveal">
+    <div class="use-essays-head">
+      <p class="section-kicker sage">What you can actually do &middot; In prose</p>
+      <h2>Six small portraits of <em>cowork</em>.</h2>
+      <p class="standfirst">Each portrait is a single person, a single task, a single Tuesday. The categories are the same. The texture is what matters.</p>
+    </div>
+
+    <div class="use-essays-grid">
+      <article class="use-essay">
+        <div class="use-num">01</div>
+        <p class="cat">The researcher</p>
+        <h3>Mapping a market before the meeting begins.</h3>
+        <p>Priya runs corporate development for a forty-person services firm. On a Tuesday morning she is asked, with no warning, to brief her CEO on the competitive landscape for a category they are considering entering. The category did not exist three years ago. She has ninety minutes.</p>
+        <p>She opens Claude. She asks for the eight companies operating in the space, their funding history, their stated positioning, and the three reviews she should read first for each one. Within four minutes she has a structured map with citations. She spends the rest of the ninety minutes doing what she is actually paid for: <em>deciding which of those eight matter</em>, and why. The map is not the brief. The map is what frees her to write the brief.</p>
+      </article>
+
+      <article class="use-essay">
+        <div class="use-num">02</div>
+        <p class="cat">The writer</p>
+        <h3>A first draft that already sounds like the firm.</h3>
+        <p>Marcus is a partner at a boutique strategy consultancy. He has a proposal due to a healthcare client tomorrow. He gives Claude two past winning proposals, the discovery notes from the client conversations, and a one-paragraph brief on what he wants the engagement to look like. Twelve minutes later he has a draft.</p>
+        <p>The draft is not finished. It is a first draft. But it is a first draft <em>in his voice</em>, with his structure, with his firm's vocabulary. He spends the next two hours rewriting the parts that need his judgment, sharpening the close, deleting the paragraphs that were too generic. The proposal goes out at six. He is home in time for dinner. This used to be a Saturday.</p>
+      </article>
+
+      <article class="use-essay">
+        <div class="use-num">03</div>
+        <p class="cat">The analyst</p>
+        <h3>A messy spreadsheet, made legible.</h3>
+        <p>Aisha is a finance manager at a direct-to-consumer brand. The expense report she just received from her ops team is the same expense report she has been receiving for three years: nine tabs, inconsistent categories, three different formats for dates. She has historically spent half a Tuesday reconciling it before she can even begin to analyze it.</p>
+        <p>She drops the file into Claude with the message: <em>"Reconcile this against the chart of accounts I uploaded last quarter. Flag anything that looks like a category change. Show me a clean monthly trend by department."</em> The reconciled file appears as an Artifact. The flagged items are footnoted. The trend chart is rendered. Aisha now begins her real work, which is asking why marketing spend in February was twice what was forecast.</p>
+      </article>
+
+      <article class="use-essay">
+        <div class="use-num">04</div>
+        <p class="cat">The organizer</p>
+        <h3>A folder, turned into a system.</h3>
+        <p>Diego is the chief of staff at an early-stage company. There is a folder in the shared Drive labelled <em>Vendor Quotes &mdash; 2026</em> that contains forty-three PDFs from twelve vendors across three categories. Nobody, including Diego, has ever sat down and read all of them. The folder has the gravitational pull of a project that will never start.</p>
+        <p>He gives Claude permission to read the folder. He asks for a single comparison table across all vendors, with columns for price, contract length, included support, and the three most important fine-print clauses. He asks for a one-paragraph summary of each vendor's overall pitch. The table is built. The folder, for the first time in eighteen months, becomes a tool instead of a backlog.</p>
+      </article>
+
+      <article class="use-essay">
+        <div class="use-num">05</div>
+        <p class="cat">The decision-maker</p>
+        <h3>A structured second opinion, before the call.</h3>
+        <p>Yuki is the founder of a sixty-person product company. She has a hard call to make: whether to extend an offer to a senior hire who interviewed brilliantly but whose references were uneven. She has the candidate's resume, her own notes, the panel feedback, and the reference summaries. She has, also, the discomfort of a decision she does not yet trust.</p>
+        <p>She gives Claude the documents and asks for the three strongest arguments in favour, the three strongest arguments against, and the questions she has not yet asked herself. The reply is not a recommendation. It is a <em>structured second opinion</em> &mdash; the kind a good advisor would give in a coffee, if she had one available on a Tuesday morning. She makes the call. She knows why.</p>
+      </article>
+
+      <article class="use-essay">
+        <div class="use-num">06</div>
+        <p class="cat">The builder</p>
+        <h3>A tiny tool, ready in twenty minutes.</h3>
+        <p>Esme runs operations for a fourteen-person agency. Her team has been guessing at project pricing using a spreadsheet that is technically a calculator but practically a museum piece. She does not have a developer. She does not want one.</p>
+        <p>She describes the calculator she wishes she had &mdash; inputs for scope, team size, project length, complexity multiplier; outputs for floor, target, and ceiling price. Claude builds it as an Artifact. She tests it against five recent projects. She tweaks two of the multipliers. She shares the link with her team. Twenty minutes. It is not a product. It is a <em>tiny tool</em>. The category is new, and it is one of the most useful things her team will use this year.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ PULL QUOTE (existing) ============ -->
+  <section class="pullquote">
+    <blockquote>
+      I am not faster at typing. I am faster at <em>starting.</em>
+    </blockquote>
+    <cite>Maya &middot; Marketing lead, twelve-person agency</cite>
+  </section>
+
+  <!-- ============ PHOTO ESSAY — THE CONNECTED WORKSPACE ============ -->
+  <section class="page">
+    <div class="folio">
+      <span>Issue 07 &middot; Page 08</span>
+      <span class="folio-title">Photo essay &mdash; The connected workspace</span>
+      <span>An anatomy in plates</span>
+    </div>
+  </section>
+
+  <section class="photo-essay">
+    <div class="photo-plates reveal">
+      <figure class="plate terra" data-parallax="0.04">
+        <span class="tag">Plate IV</span>
+        <p class="word">No more copy &middot; paste.</p>
+        <p class="caption">Permission, granted once. Material, read where it lives.</p>
+      </figure>
+      <figure class="plate sage" data-parallax="0.05">
+        <span class="tag">Plate V</span>
+        <p class="word">Six thousand front doors.</p>
+        <p class="caption">The connector ecosystem, in early 2026, has stopped being a thing you have to wait for.</p>
+      </figure>
+    </div>
+
+    <article class="essay reveal" style="margin-bottom: 3rem;">
+      <div class="essay-head">
+        <span>Essay No. 02</span>
+        <span>The connected workspace</span>
+        <span>A business-side view of MCP</span>
+      </div>
+      <h2 class="sage">When the tool stops asking you to <em>paste</em>.</h2>
+      <p class="standfirst">There is a quiet shift happening underneath the surface of every team's software. We are going to describe it without using a single acronym.</p>
+
+      <p><span class="dropcap">F</span>or the last twenty years, the way software has worked together at a small business is the way two people who do not share a language work together. They gesture. They point. They write notes on the backs of receipts. They paste, into one window, the thing they copied out of another. The cost of this gesture work &mdash; the carrying of material from one application to another &mdash; is the single largest hidden tax on a knowledge worker's day.</p>
+
+      <p>What has changed in the last twelve months is that the tools have learned, finally, to talk to each other directly. Claude can now read, with your permission, from the places your work already lives: Notion, Gmail, Drive, HubSpot, Linear, Asana, Slack, your calendar, your CRM, your support tickets, your accounting software. You do not paste. You do not export. You do not copy. You say what you want, and the material arrives.</p>
+
+      <p>The permission, importantly, is yours to give and yours to take back. It is granted per connector, per workspace, with a visible audit trail. It is the opposite of the old "give us read-write access to everything in your Google account" model that taught a generation of workers to be cautious about anything that asked. You connect what you need. You disconnect what you don't.</p>
+
+      <p>For an operator, the felt experience is this: the friction at the seam between applications &mdash; the friction that used to demand five minutes here, two minutes there, all day long &mdash; is simply gone. The folder is the folder. The inbox is the inbox. The brief gets written from real material, not from a hand-assembled copy of real material. And the ecosystem, as of this spring, covers more than six thousand business applications. The boring parts of the job have begun, finally, to stop being the job.</p>
+    </article>
+  </section>
+
+  <!-- ============ DIAGRAM SPREAD — CONNECTED WORKSPACE (existing) ============ -->
+  <section class="page">
+    <div class="folio">
+      <span>Issue 07 &middot; Pages 09&ndash;10</span>
+      <span class="folio-title">Diagram &mdash; The connected workspace</span>
+      <span>An anatomy</span>
+    </div>
+    <div class="spread flip">
+      <article class="col">
+        <p class="section-kicker">The connected workspace</p>
+        <h2 class="headline">No more <em>copy-paste.</em></h2>
+        <p class="standfirst">Claude reads, with your permission, directly from the places your work already lives.</p>
+        <p class="body-text">It speaks to Notion, Gmail, Google Drive, Linear, Asana, HubSpot, and dozens more through an emerging standard called <strong>MCP</strong>. You give permission once. After that, Claude works with your real material instead of asking you to paste it in.</p>
+        <p class="body-text">As of early 2026, the connector ecosystem covers <strong>more than six thousand</strong> business applications. The boring parts of the job &mdash; finding things, pulling things together &mdash; stop being the job.</p>
+      </article>
+
+      <aside class="diagram-wrap">
+        <div class="diagram-frame">
+          <svg class="diagram-svg" viewBox="0 0 360 360" aria-hidden="true">
+            <!-- orbits -->
+            <circle cx="180" cy="180" r="135" fill="none" stroke="#7A7268" stroke-width="0.4" stroke-dasharray="1.5 3"/>
+            <circle cx="180" cy="180" r="85" fill="none" stroke="#7A7268" stroke-width="0.4" stroke-dasharray="1.5 3" opacity="0.6"/>
             <!-- spokes -->
-            <line class="spoke" x1="180" y1="180" x2="180" y2="50"/>
-            <line class="spoke" x1="180" y1="180" x2="293" y2="115"/>
-            <line class="spoke" x1="180" y1="180" x2="293" y2="245"/>
-            <line class="spoke" x1="180" y1="180" x2="180" y2="310"/>
-            <line class="spoke" x1="180" y1="180" x2="67" y2="245"/>
-            <line class="spoke" x1="180" y1="180" x2="67" y2="115"/>
-
+            <line class="spoke" x1="180" y1="180" x2="180" y2="48"/>
+            <line class="spoke" x1="180" y1="180" x2="296" y2="112"/>
+            <line class="spoke" x1="180" y1="180" x2="296" y2="248"/>
+            <line class="spoke" x1="180" y1="180" x2="180" y2="312"/>
+            <line class="spoke" x1="180" y1="180" x2="64" y2="248"/>
+            <line class="spoke" x1="180" y1="180" x2="64" y2="112"/>
             <!-- hub -->
-            <circle class="hub" cx="180" cy="180" r="38"/>
-            <text class="hub-label" x="180" y="180">Claude</text>
-
+            <circle class="hub-circle" cx="180" cy="180" r="38"/>
+            <text class="hub-text" x="180" y="180">Claude</text>
             <!-- nodes -->
-            <g class="node"><circle cx="180" cy="50" r="28"/><text x="180" y="50">NOTION</text></g>
-            <g class="node"><circle cx="293" cy="115" r="28"/><text x="293" y="115">GMAIL</text></g>
-            <g class="node"><circle cx="293" cy="245" r="28"/><text x="293" y="245">DRIVE</text></g>
-            <g class="node"><circle cx="180" cy="310" r="28"/><text x="180" y="310">HUBSPOT</text></g>
-            <g class="node"><circle cx="67" cy="245" r="28"/><text x="67" y="245">LINEAR</text></g>
-            <g class="node"><circle cx="67" cy="115" r="28"/><text x="67" y="115">ASANA</text></g>
+            <g><circle class="node-circle" cx="180" cy="48" r="26"/><text class="node-text" x="180" y="48">Notion</text></g>
+            <g><circle class="node-circle" cx="296" cy="112" r="26"/><text class="node-text" x="296" y="112">Gmail</text></g>
+            <g><circle class="node-circle" cx="296" cy="248" r="26"/><text class="node-text" x="296" y="248">Drive</text></g>
+            <g><circle class="node-circle" cx="180" cy="312" r="26"/><text class="node-text" x="180" y="312">HubSpot</text></g>
+            <g><circle class="node-circle" cx="64" cy="248" r="26"/><text class="node-text" x="64" y="248">Linear</text></g>
+            <g><circle class="node-circle" cx="64" cy="112" r="26"/><text class="node-text" x="64" y="112">Asana</text></g>
           </svg>
         </div>
+        <p class="diagram-caption">Fig. 1 &mdash; <strong>The hub-and-spoke</strong>, after MCP. Connectors approximate; ecosystem now exceeds 6,000 applications.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ NUMBER STRIP (existing) ============ -->
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-num">6<span class="unit">hrs / week</span></div>
+        <p class="stat-label">Median time business users save once Claude is part of their daily routine.</p>
+      </div>
+      <div class="stat">
+        <div class="stat-num">$20<span class="unit">/ seat / mo</span></div>
+        <p class="stat-label">Claude Team standard, billed annually. Five-seat minimum.</p>
+      </div>
+      <div class="stat">
+        <div class="stat-num">6,000<span class="unit">+ apps</span></div>
+        <p class="stat-label">Connected to Claude today via MCP &mdash; Gmail, Drive, Notion, HubSpot, and more.</p>
+      </div>
+      <div class="stat">
+        <div class="stat-num">15<span class="unit">workflows</span></div>
+        <p class="stat-label">Pre-built workflows in Claude for Small Business, launched May 2026.</p>
       </div>
     </div>
   </section>
 
-  <!-- REAL WINS -->
-  <section class="wins" id="wins">
-    <div class="wrap">
-      <p class="section-eyebrow">Real wins</p>
-      <h2 class="section-title">Three people. Three Tuesdays. Three hours of their week back.</h2>
-      <p class="section-sub">Names changed; the work is real. Patterns we see again and again across CETI's training cohorts.</p>
+  <!-- ============ LONG-FORM — THREE USERS, THREE QUARTERS IN ============ -->
+  <section class="page vignettes-wrap">
+    <div class="folio">
+      <span>Issue 07 &middot; Pages 11&ndash;12</span>
+      <span class="folio-title">Long-form &mdash; Three users, three quarters in</span>
+      <span>Case studies</span>
+    </div>
+    <div class="col reveal">
+      <p class="section-kicker">Three users, three quarters in</p>
+      <h2 class="headline">Three people. Three Tuesdays. Three hours of the week, <em>recovered.</em></h2>
+      <p class="standfirst">Names changed; the work is real. These are patterns we see again and again in CETI's training cohorts &mdash; not the first-day excitement, but what the work looks like nine months later, once the novelty has worn off and the habit has set in.</p>
+    </div>
 
-      <div class="wins-grid">
-        <article class="vignette">
-          <div class="vignette-role">Marketing lead · agency, 12 people</div>
-          <h4>Proposals that used to take a day take an hour.</h4>
-          <p>Maya kept a folder of past winning proposals. Now she gives Claude the brief, points it at the folder, and gets a draft that already sounds like her firm. She edits — she doesn't author from scratch.</p>
-          <p class="quote">"I'm not faster at typing. I'm faster at starting."</p>
-        </article>
+    <div class="vignettes reveal">
+      <article class="vignette">
+        <p class="role">Marketing lead &middot; Agency, twelve people</p>
+        <h3>Proposals that used to take a day take an hour.</h3>
+        <p>Maya kept a folder of past winning proposals the way some people keep a recipe box. Forty-eight documents, dating back four years, each one a slightly different shape of "yes." Before Claude, the folder was a reference she would dip into when she needed to remember how a clause was phrased. It was useful, but it was passive.</p>
+        <p>For the last nine months, the folder has been active. When a new RFP comes in, Maya gives Claude the brief and points it at the folder. She gets back a draft that already sounds like her firm &mdash; the cadence of the sections, the way her firm talks about pricing, the small turns of phrase her team is known for. She edits. She does not author from scratch. The proposal that used to take her a full Wednesday now takes ninety minutes. She is using that recovered time, mostly, to take on the kind of work she could not previously fit in.</p>
+        <p class="quote">&ldquo;I'm not faster at writing. I am much, much faster at <em>starting</em>. That turns out to be most of it.&rdquo;</p>
+      </article>
 
-        <article class="vignette">
-          <div class="vignette-role">Operations lead · DTC brand, $18M revenue</div>
-          <h4>Vendor data, finally clean.</h4>
-          <p>Six suppliers. Six spreadsheet formats. Diego dropped them into a Claude Project and asked for one reconciled view with cost trends. What used to be a quarterly headache is now a Monday-morning ritual.</p>
-          <p class="quote">"It noticed a 14% price drift before I did."</p>
-        </article>
+      <article class="vignette">
+        <p class="role">Operations &middot; DTC brand, $18M revenue</p>
+        <h3>Vendor data, finally clean.</h3>
+        <p>Diego inherited a supplier list that lived across six spreadsheets in six formats. Two of the suppliers were the same supplier under two different names. One had a quarterly price drift that nobody had caught. The list had been "on the list to clean up" for two and a half years &mdash; a project that was always one priority away.</p>
+        <p>In the first month of using Claude, Diego dropped all six spreadsheets into a Project. He asked for one reconciled view with cost trends by category, a flag on anything that looked like a duplicate, and a chart of price movement per supplier per quarter. The Artifact he got back was, in his words, "the version of this work I would have done if I had had three uninterrupted weeks." He now runs the same reconciliation as a monthly ritual. Last quarter, Claude caught a fourteen-per-cent price drift on a packaging supplier two weeks before it would have hit the P&amp;L. That single catch paid for the year.</p>
+        <p class="quote">&ldquo;The headache became a Monday-morning habit. That is the whole story.&rdquo;</p>
+      </article>
 
-        <article class="vignette">
-          <div class="vignette-role">CEO · services firm, 40 people</div>
-          <h4>Board updates that don't eat the weekend.</h4>
-          <p>Priya gives Claude the previous month's metrics, the team's weekly check-ins, and her three talking points. She gets a draft that's already structured the way her board reads. She rewrites the parts that need her voice.</p>
-          <p class="quote">"It's not writing for me. It's getting me to the page."</p>
-        </article>
+      <article class="vignette">
+        <p class="role">CEO &middot; Services firm, forty people</p>
+        <h3>Board updates that don't eat the weekend.</h3>
+        <p>Priya used to spend Sunday mornings writing her monthly board update. Coffee, the kitchen table, the dread of starting. She would assemble the numbers, the wins, the misses, the "asks of the board." It took, on average, four hours. It took longer when the month had been hard.</p>
+        <p>The board update now starts on Friday afternoon, in Claude. Priya gives it the month's metrics, the team's weekly check-ins, and three talking points she wants to make. She gets back a draft already structured in the way her board likes to read &mdash; numbers first, then narrative, then asks. She rewrites the parts that need her voice, which is mostly the narrative and almost all of the asks. The draft is on her chairman's desk by Friday at six. Her Sunday mornings are her own again. The board, she reports, has not noticed a thing &mdash; except that the updates have become more consistent.</p>
+        <p class="quote">&ldquo;It is not writing for me. It is getting me to the page. Once I am there, I am still me.&rdquo;</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ SIDEBAR — ON JUDGMENT ============ -->
+  <section class="sidebar-wrap reveal">
+    <div class="folio">
+      <span>Issue 07 &middot; Page 13</span>
+      <span class="folio-title">Sidebar &mdash; On judgment</span>
+      <span>A short reflection</span>
+    </div>
+    <div class="sidebar-grid">
+      <span class="sidebar-tag">A note in the margin</span>
+      <div class="sidebar-body">
+        <p class="kicker">No. 03 &middot; Sidebar</p>
+        <h2>On using AI without <em>losing your judgment</em>.</h2>
+        <p>There is a real worry, often unspoken in the room, that handing this kind of work to a model will atrophy the part of us that does the work. It is a worry worth taking seriously, and it is also &mdash; we have come to believe &mdash; the wrong framing.</p>
+        <p>Judgment is not built by doing the gathering. It is built by doing the <strong>deciding</strong>. The gathering &mdash; the searching, the formatting, the reconciling, the pasting &mdash; is not where a marketer becomes a better marketer or an operator becomes a better operator. Those skills are built in the moments when you weigh two options, when you choose what to leave out, when you tell a client a hard thing, when you sign your name to a number. None of that is being handed off here.</p>
+        <p>What <em>is</em> being handed off is the coordination tax. The work that used to fill the day around the work. And what we have observed, across the teams we train, is that when that tax is paid by something else, people do not become weaker. They become sharper, because they spend more of their time at the edge of the judgment they were hired for, and less time in the middle of administrative labour they had merely become accustomed to.</p>
+        <p>The rule we offer our clients is simple: <em>let Claude do the gathering. Keep the deciding for yourself.</em> The line is sometimes blurry, but the principle is not. You will know, in your stomach, when a decision is being made. Make it. Make it slowly. Make it well. That is the part that has your name on it.</p>
+        <p class="signoff">&mdash; from the CETI cowork handbook, &sect; 4.2</p>
       </div>
     </div>
   </section>
 
-  <!-- NUMBER ROW -->
-  <section class="numrow">
-    <div class="wrap">
-      <div class="nums">
-        <div class="num-cell">
-          <div class="num-value"><span class="num" data-to="6">0</span><span class="unit">hrs / week</span></div>
-          <p class="num-label">Median time business users save once Claude is part of their daily routine.</p>
-        </div>
-        <div class="num-cell">
-          <div class="num-value">$<span class="num" data-to="20">0</span><span class="unit">/seat/mo</span></div>
-          <p class="num-label">Claude Team standard, billed annually. 5-seat minimum.</p>
-        </div>
-        <div class="num-cell">
-          <div class="num-value"><span class="num" data-to="6000">0</span><span class="unit">+ apps</span></div>
-          <p class="num-label">Connected to Claude today via MCP — Gmail, Drive, Notion, HubSpot, and more.</p>
-        </div>
-        <div class="num-cell">
-          <div class="num-value"><span class="num" data-to="15">0</span><span class="unit"> workflows</span></div>
-          <p class="num-label">Pre-built workflows in Claude for Small Business (launched May 2026).</p>
-        </div>
-      </div>
+  <!-- ============ SUBSCRIBE / PRICING (expanded with prose) ============ -->
+  <section class="subscribe" id="subscribe">
+    <div class="folio" style="border-bottom: none; margin-bottom: 1rem;">
+      <span>Issue 07 &middot; Page 14</span>
+      <span class="folio-title">Subscribe &mdash; pricing</span>
+      <span>Team &amp; Enterprise</span>
+    </div>
+    <div class="subscribe-head">
+      <h2>Subscribe &mdash; pricing is no longer the reason to wait.</h2>
+      <span class="small">Three rates &middot; May 2026</span>
+    </div>
+
+    <div class="subscribe-intro reveal">
+      <p>We are wary of the way pricing pages are usually written &mdash; in the breathless language of feature ladders and asterisked footnotes. The reality of Claude pricing in May 2026 is plainer than that, and we want to describe it plainly.</p>
+      <p>For an individual, <strong>Claude Pro</strong> is twenty dollars a month and includes everything we have written about in this issue: Opus, Sonnet, and Haiku models; Projects for grouping related work; Artifacts for the side-panel canvas; memory for continuity across conversations; and connectors to the apps your work already lives in. It is the tier we recommend to anyone who has not yet committed their team but who wants to see, for themselves, whether the change of frame is real.</p>
+      <p>For a team, <strong>Claude Team</strong> is twenty dollars per seat per month, billed annually, with a five-seat minimum. It adds shared Projects (the firm's collective memory, not just an individual's), centralized admin, a single bill, and the new <em>Claude for Small Business</em> workflows &mdash; fifteen pre-built patterns for common business work, launched in May 2026. We find this is the tier most operating teams settle on within their first month, because shared Projects turn out to be the unlock: when your colleagues' best prompts become part of the firm's working memory, the team's average output rises faster than any single member's would in isolation.</p>
+      <p>For an organization with compliance, single-sign-on, or data-residency requirements, <strong>Enterprise</strong> is custom and usage-based. It adds SSO, audit logs, SCIM provisioning, data-residency options, and dedicated support. The pricing conversation is short, and the procurement conversation is &mdash; finally &mdash; the longer one.</p>
+      <p>Three rates. Each is honest. Each has stopped being a reason to wait. The reason to wait, if there is one, is not the price; it is the absence of a frame for using the tool well. That is what this magazine is for, and that is what our workshop is for.</p>
+    </div>
+
+    <div class="tiers">
+      <article class="tier">
+        <h3 class="tier-name">Pro</h3>
+        <div class="tier-price">$20<span class="per">/ user / mo</span></div>
+        <p class="tier-desc">For one person who wants to try the full thing without committing the team.</p>
+        <ul>
+          <li>Claude Opus, Sonnet, Haiku</li>
+          <li>Projects, Artifacts, Memory</li>
+          <li>Connectors (Gmail, Drive, Notion&hellip;)</li>
+        </ul>
+      </article>
+      <article class="tier featured">
+        <h3 class="tier-name">Team</h3>
+        <div class="tier-price">$20<span class="per">/ seat / mo &middot; annual &middot; 5 min</span></div>
+        <p class="tier-desc">For SMBs and operating teams. Shared Projects, central admin, no surprise bills.</p>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>Shared Projects &amp; Artifacts</li>
+          <li>Admin console, central billing</li>
+          <li>Claude for Small Business workflows</li>
+        </ul>
+      </article>
+      <article class="tier">
+        <h3 class="tier-name">Enterprise</h3>
+        <div class="tier-price">Custom<span class="per">usage-based</span></div>
+        <p class="tier-desc">For organizations with compliance, data-residency, or single-sign-on requirements.</p>
+        <ul>
+          <li>SSO, audit logs, SCIM</li>
+          <li>Data-residency options</li>
+          <li>Dedicated support</li>
+        </ul>
+      </article>
     </div>
   </section>
 
-  <!-- PLANS -->
-  <section class="plans" id="plans">
-    <div class="wrap">
-      <p class="section-eyebrow">Pick a starting point</p>
-      <h2 class="section-title">Pricing is no longer the reason to wait.</h2>
-      <p class="section-sub">Claude's business pricing in 2026, distilled. Numbers below are Anthropic's published tiers — confirm at checkout.</p>
-
-      <div class="plans-grid">
-        <article class="plan">
-          <h3 class="plan-name">Pro</h3>
-          <div class="plan-price">$20<span class="per">/user/month</span></div>
-          <p class="plan-desc">For one person who wants to try the full thing without committing the team.</p>
-          <ul>
-            <li>Claude Opus, Sonnet, Haiku</li>
-            <li>Projects, Artifacts, Memory</li>
-            <li>Connectors (Gmail, Drive, Notion…)</li>
-          </ul>
-        </article>
-
-        <article class="plan featured">
-          <h3 class="plan-name">Team</h3>
-          <div class="plan-price">$20<span class="per">/seat/month · annual · 5 min</span></div>
-          <p class="plan-desc">For SMBs and operating teams. Shared Projects, central admin, no surprise bills.</p>
-          <ul>
-            <li>Everything in Pro</li>
-            <li>Shared Projects + Artifacts</li>
-            <li>Admin console, central billing</li>
-            <li>Claude for Small Business workflows</li>
-          </ul>
-        </article>
-
-        <article class="plan">
-          <h3 class="plan-name">Enterprise</h3>
-          <div class="plan-price">Custom<span class="per"> · usage-based</span></div>
-          <p class="plan-desc">For organizations with compliance, data-residency, or single-sign-on requirements.</p>
-          <ul>
-            <li>SSO, audit logs, SCIM</li>
-            <li>Data-residency options</li>
-            <li>Dedicated support</li>
-          </ul>
-        </article>
-      </div>
+  <!-- ============ COLOPHON (magazine-style) ============ -->
+  <footer class="colophon">
+    <div class="colophon-left">
+      <h3>Colophon</h3>
+      <p><strong>Paper</strong>Set in a warm uncoated cream stock, simulated here as #FAF8F4. The deep brown-black is #1F1A14, chosen for its softness against the cream rather than the harder #000.</p>
+      <p><strong>Type</strong>Display and editorial set in Playfair Display, in the manner of a long-running magazine. Body text in Inter, 1rem, leading 1.7. Pull quotes set 4.6rem, italic, with terracotta quotation marks.</p>
+      <p><strong>Palette</strong>Two accents: sage #7B9270 and terracotta #C5775F, used as flat color blocks in the manner of image-replacement plates.</p>
+      <p><strong>Contributors</strong>Writing and editing by Manu Mulaveesala for CETI.AI. Diagrams and color-block plates by Studio C. Case study subjects appear under changed names; the work described is real and is drawn from CETI's training cohorts during the spring of 2026.</p>
+      <p><strong>About</strong>The CETI.AI Lookbook is a quarterly publication on practical, business-grade use of AI in operating teams. Issue 07 was assembled in May 2026.</p>
     </div>
-  </section>
-
-  <!-- FINAL CTA -->
-  <section class="final" id="workshop">
-    <div class="wrap">
-      <p class="section-eyebrow">Two doors</p>
-      <h2 class="section-title">Try Claude today. Roll it out properly when you're ready.</h2>
-      <p class="section-sub">Most teams figure out Claude alone and plateau at 20% of the value. CETI's Claude Cowork workshop is a one-day intensive that gets a whole team to the high-leverage 80% — same week.</p>
-      <div class="cta-row">
-        <a class="magnetic" href="https://claude.ai" target="_blank" rel="noopener">
-          Try Claude
-          <span class="arrow">&rarr;</span>
-        </a>
-        <a class="magnetic ghost" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
-          Book a CETI workshop
-          <span class="arrow">&rarr;</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div class="foot-inner">
-      <div>CETI.AI · AI training and consulting · <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a></div>
-      <div class="foot-links">
-        <a href="https://cetiai.co">cetiai.co</a>
-        <a href="https://calendly.com/manutej/30min">Calendly</a>
-        <a href="https://wa.me/16502832299">WhatsApp</a>
-      </div>
+    <div class="colophon-right">
+      <a href="https://cetiai.co">cetiai.co</a>
+      <a href="https://calendly.com/manutej/30min">Book a workshop</a>
+      <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a>
+      <div class="issue-mark">Issue 07 / 18 &middot; May 2026</div>
+      <p class="next">Next issue: <em>The Operator's Dashboard</em> &mdash; June 2026. On the small tools that quietly run a team.</p>
     </div>
   </footer>
 
   <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+    // Letter-spacing tighten on cover headline entry
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced) {
+      requestAnimationFrame(() => {
+        const h = document.getElementById('cover-headline');
+        if (h) h.classList.add('tighten');
+      });
 
-    // ============ GENERIC REVEAL (tiles, vignettes) ============
-    const reveal = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
+      // Parallax on color blocks — slight, magazine-page feel
+      const parallaxEls = document.querySelectorAll('[data-parallax]');
+      let ticking = false;
+      function applyParallax() {
+        const vh = window.innerHeight;
+        parallaxEls.forEach((el) => {
+          const rate = parseFloat(el.dataset.parallax) || 0.05;
+          const rect = el.getBoundingClientRect();
+          const center = rect.top + rect.height / 2;
+          const offset = (center - vh / 2) * -rate;
+          el.style.transform = `translate3d(0, ${offset.toFixed(2)}px, 0)`;
+        });
+        ticking = false;
+      }
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(applyParallax);
+          ticking = true;
         }
-      });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.15 });
-    document.querySelectorAll('.tile, .vignette').forEach((el) => reveal.observe(el));
+      }, { passive: true });
+      applyParallax();
 
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 28;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-
-    // ============ MAGIC-CARD CURSOR GLOW ============
-    document.querySelectorAll('.tile').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.setProperty('--mx', `-200px`);
-        card.style.setProperty('--my', `-200px`);
-      });
-    });
-
-    // ============ NUMBER TICKER ============
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const dur = 1200;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
+      // Fade-in reveals
+      const revealEls = document.querySelectorAll('.reveal');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      revealEls.forEach((el) => io.observe(el));
+    } else {
+      // Reduced motion: reveal everything immediately
+      document.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
     }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.4 });
-    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
-
-    // ============ TUESDAY MORNING — staged steps + clocks ============
-    const compare = document.getElementById('compare');
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    function runCompare() {
-      const beforeSteps = compare.querySelectorAll('[data-side="before"] .step');
-      const afterSteps = compare.querySelectorAll('[data-side="after"] .step');
-      const beforeClock = compare.querySelector('[data-clock="before"]');
-      const afterClock = compare.querySelector('[data-clock="after"]');
-
-      if (reducedMotion) {
-        beforeSteps.forEach((s) => s.classList.add('visible'));
-        afterSteps.forEach((s) => s.classList.add('visible'));
-        beforeClock.textContent = '02:03';
-        afterClock.textContent = '00:04';
-        return;
-      }
-
-      // BEFORE: slow, sequential, ~440ms apart. Clock crawls.
-      beforeSteps.forEach((step, i) => {
-        setTimeout(() => step.classList.add('visible'), i * 440);
-      });
-      const beforeTotalMs = (beforeSteps.length - 1) * 440 + 500;
-      const beforeFinal = 123; // 2h 03m → seconds for ticker display
-      const bStart = performance.now();
-      function bTick(now) {
-        const p = Math.min((now - bStart) / beforeTotalMs, 1);
-        const v = Math.floor(easeOutCubic(p) * beforeFinal);
-        const mm = String(Math.floor(v / 60)).padStart(2, '0');
-        const ss = String(v % 60).padStart(2, '0');
-        beforeClock.textContent = `${mm}:${ss}`;
-        if (p < 1) requestAnimationFrame(bTick);
-        else beforeClock.textContent = '02:03';
-      }
-      requestAnimationFrame(bTick);
-
-      // AFTER: snappy, almost parallel, ~140ms apart. Clock barely moves.
-      afterSteps.forEach((step, i) => {
-        setTimeout(() => step.classList.add('visible'), i * 140 + 120);
-      });
-      const afterTotalMs = (afterSteps.length - 1) * 140 + 500;
-      const afterFinal = 4;
-      const aStart = performance.now();
-      function aTick(now) {
-        const p = Math.min((now - aStart) / afterTotalMs, 1);
-        const v = easeOutCubic(p) * afterFinal;
-        afterClock.textContent = `00:0${Math.min(Math.floor(v), 4)}`;
-        if (p < 1) requestAnimationFrame(aTick);
-        else afterClock.textContent = '00:04';
-      }
-      requestAnimationFrame(aTick);
-    }
-
-    const compareObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { runCompare(); compareObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.2 });
-    compareObs.observe(compare);
   </script>
   <script src="../shared/nav.js" defer></script>
 </body>

@@ -3,763 +3,789 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code — A Non-Technical Introduction · CETI.AI</title>
-<meta name="description" content="A warm, demystifying tour of Claude Code — Anthropic's terminal-based AI work-partner. Built for curious non-technical leaders.">
+<title>CLAUDE-CODE.SH // CRT Terminal // CETI.AI Lookbook</title>
+<meta name="description" content="A green-on-black CRT terminal lookbook page for Claude Code — Anthropic's terminal-based AI work-partner.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --color-bg: #FAF7F2;
-  --color-bg-warm: #F5F0E8;
-  --color-text: #2C2A28;
-  --color-text-secondary: #6B6560;
-  --color-text-muted: #9E9790;
-  --color-border: #E5DFD6;
-  --color-border-light: #EEEBE5;
-  --color-surface: #FFFFFF;
-  --color-surface-warm: #FDF9F3;
+  --bg: #0A0E0A;
+  --bg-deeper: #050805;
+  --phosphor: #33FF33;
+  --phosphor-dim: #22AA22;
+  --phosphor-faint: #186118;
+  --amber: #FFB000;
+  --amber-dim: #B07800;
+  --cyan: #00FFFF;
+  --bezel: #1a1c1a;
+  --bezel-edge: #2a2c2a;
+  --bezel-screw: #0c0e0c;
 
-  --color-accent: #D94F30;
-  --color-accent-hover: #C4432A;
-  --color-accent-light: #FDEEE9;
-  --color-accent-muted: #E8836C;
-
-  --color-actor-1: #D94F30;
-  --color-actor-2: #2A7B9B;
-  --color-actor-3: #7B6DAA;
-  --color-actor-4: #D4A843;
-  --color-actor-5: #2D8B55;
-
-  /* Catppuccin Mocha for the terminal */
-  --term-bg: #1E1E2E;
-  --term-bg-soft: #181825;
-  --term-text: #CDD6F4;
-  --term-muted: #6C7086;
-  --term-prompt: #A6E3A1;
-  --term-cyan: #94E2D5;
-  --term-mauve: #CBA6F7;
-  --term-yellow: #F9E2AF;
-  --term-peach: #FAB387;
-
-  --font-display: 'Bricolage Grotesque', Georgia, serif;
-  --font-body: 'DM Sans', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  --duration-fast: 150ms;
-  --duration-normal: 300ms;
-  --duration-slow: 500ms;
-  --duration-slower: 700ms;
-  --stagger: 80ms;
-
-  --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-  --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-  --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
-  --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.14);
+  --font-crt: 'VT323', 'JetBrains Mono', monospace;
+  --font-mono: 'JetBrains Mono', 'VT323', monospace;
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: #000; }
+
 body {
   margin: 0;
-  font-family: var(--font-body);
-  color: var(--color-text);
-  background: var(--color-bg);
-  background-image:
-    radial-gradient(ellipse at 18% 24%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
-    radial-gradient(ellipse at 82% 10%, rgba(42, 123, 155, 0.04) 0%, transparent 50%);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-mono);
+  color: var(--phosphor);
+  background: #000;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  text-rendering: geometricPrecision;
+  min-height: 100vh;
 }
 
-::selection { background: var(--color-accent-light); color: var(--color-accent-hover); }
+::selection { background: var(--phosphor); color: var(--bg); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-deeper); }
+::-webkit-scrollbar-thumb { background: var(--phosphor-faint); }
+::-webkit-scrollbar-thumb:hover { background: var(--phosphor-dim); }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 999px; }
+a { color: var(--cyan); text-decoration: none; border-bottom: 1px dotted var(--cyan); }
+a:hover { color: var(--phosphor); border-color: var(--phosphor); text-shadow: 0 0 6px var(--phosphor); }
 
-/* ============ TOP NAV ============ */
-.topbar {
+/* ============================================
+   BEZEL — CRT MONITOR FRAME
+   ============================================ */
+.bezel {
+  position: relative;
+  max-width: 1280px;
+  margin: 24px auto;
+  padding: 28px 30px 44px;
+  background:
+    linear-gradient(180deg, #1f211f 0%, #14161480 100%),
+    var(--bezel);
+  border-radius: 18px;
+  border: 1px solid var(--bezel-edge);
+  box-shadow:
+    inset 0 0 0 6px #0c0d0c,
+    inset 0 0 24px rgba(0,0,0,0.85),
+    0 0 0 1px #000,
+    0 24px 60px rgba(0,0,0,0.6);
+}
+
+/* bezel screws */
+.bezel::before,
+.bezel::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #444, var(--bezel-screw) 70%);
+  box-shadow: inset 0 0 2px #000;
+}
+.bezel::before { top: 10px; left: 10px; }
+.bezel::after { top: 10px; right: 10px; }
+
+.bezel-bottom-screws {
+  position: absolute;
+  left: 0; right: 0; bottom: 10px;
+  pointer-events: none;
+}
+.bezel-bottom-screws::before,
+.bezel-bottom-screws::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #444, var(--bezel-screw) 70%);
+  box-shadow: inset 0 0 2px #000;
+}
+.bezel-bottom-screws::before { bottom: 0; left: 10px; }
+.bezel-bottom-screws::after { bottom: 0; right: 10px; }
+
+/* bezel label */
+.bezel-label {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.4em;
+  color: #4a4c4a;
+  text-transform: uppercase;
+}
+.bezel-watermark {
+  position: absolute;
+  bottom: 16px;
+  right: 28px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--phosphor-dim);
+  text-transform: uppercase;
+  text-shadow: 0 0 4px rgba(34, 170, 34, 0.5);
+}
+.bezel-led {
+  position: absolute;
+  bottom: 18px;
+  left: 28px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: #4a4c4a;
+  text-transform: uppercase;
 }
-.brand {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
-  color: var(--color-text);
-  text-decoration: none;
-}
-.brand-dot {
-  display: inline-block;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: var(--color-accent);
+.bezel-led .dot {
+  width: 7px; height: 7px;
+  background: var(--phosphor);
   border-radius: 50%;
-  margin-right: 0.5rem;
-  vertical-align: middle;
-  transform: translateY(-2px);
+  box-shadow: 0 0 6px var(--phosphor), 0 0 12px var(--phosphor);
+  animation: ledPulse 2.4s ease-in-out infinite;
 }
-.topbar-meta {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
+@keyframes ledPulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+
+/* ============================================
+   SCREEN — phosphor surface
+   ============================================ */
+.screen {
+  position: relative;
+  background: var(--bg);
+  border-radius: 12px;
+  border: 2px solid #000;
+  box-shadow:
+    inset 0 0 80px rgba(0,0,0,0.85),
+    inset 0 0 120px rgba(0, 30, 0, 0.4);
+  overflow: hidden;
+  padding: 36px 40px 50px;
+  text-shadow: 0 0 3px rgba(51, 255, 51, 0.55);
 }
 
-/* ============ HERO ============ */
-.hero {
-  padding: 4rem 1.5rem 5rem;
-  max-width: 1200px;
+/* SCANLINES — subtle horizontal stripes */
+.screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.18) 2px,
+    rgba(0, 0, 0, 0.18) 3px
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* SCREEN GLOW + vignette */
+.screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.5) 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(51, 255, 51, 0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* FLICKER LAYER — animated subtle scanline drift */
+.flicker {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(51, 255, 51, 0.04) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 7;
+  animation: scanFlicker 8s infinite linear;
+  mix-blend-mode: screen;
+}
+@keyframes scanFlicker {
+  0%, 100% { opacity: 0; }
+  3% { opacity: 0.5; }
+  5% { opacity: 0; }
+  92% { opacity: 0; }
+  94% { opacity: 0.7; transform: translateY(-2px); }
+  96% { opacity: 0; }
+}
+
+/* content sits above the overlays */
+.screen-content {
+  position: relative;
+  z-index: 4;
+  max-width: 84ch;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 4rem;
-  align-items: center;
 }
-.hero-text { min-width: 0; }
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--color-accent);
-  opacity: 0;
-  transition: opacity var(--duration-slow) var(--ease-out);
-}
-.hero.visible .eyebrow { opacity: 1; }
-.eyebrow .sep { color: var(--color-text-muted); margin: 0 0.5rem; }
 
-.hero-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(2.4rem, 5.4vw, 4.25rem);
-  line-height: 1.02;
-  letter-spacing: -0.035em;
-  margin: 1.5rem 0 1.5rem;
-  max-width: 14ch;
+/* ============================================
+   TOP STATUS BAR
+   ============================================ */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--phosphor-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding-bottom: 14px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--phosphor-faint);
 }
-.hero-title .word {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(28px);
-  transition:
-    opacity var(--duration-slower) var(--ease-spring),
-    transform var(--duration-slower) var(--ease-spring);
+.status-bar .status-left,
+.status-bar .status-right { display: flex; gap: 18px; }
+.status-bar .blink { animation: blinkSlow 1.4s steps(2) infinite; }
+@keyframes blinkSlow { 50% { opacity: 0; } }
+
+/* ============================================
+   HERO — ASCII BANNER
+   ============================================ */
+.hero {
+  text-align: center;
+  padding: 8px 0 24px;
 }
-.hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-.hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
-.hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
-.hero.visible .hero-title .word:nth-child(3) { transition-delay: 260ms; }
-.hero.visible .hero-title .word:nth-child(4) { transition-delay: 340ms; }
-.hero-title em {
-  font-style: normal;
-  color: var(--color-accent);
+
+.ascii-banner {
+  font-family: var(--font-mono);
+  font-size: clamp(7px, 1.15vw, 12px);
+  line-height: 1.05;
+  color: var(--phosphor);
+  white-space: pre;
+  text-shadow:
+    0 0 4px var(--phosphor),
+    0 0 12px rgba(51, 255, 51, 0.5);
+  margin: 0 0 20px;
+  overflow-x: auto;
+}
+
+.hero-tagline {
+  font-family: var(--font-crt);
+  font-size: 28px;
+  color: var(--amber);
+  text-shadow: 0 0 6px var(--amber);
+  letter-spacing: 0.05em;
+  margin: 0 0 8px;
+  min-height: 1.2em;
 }
 
 .hero-sub {
-  font-size: 1.2rem;
-  color: var(--color-text-secondary);
-  max-width: 48ch;
-  margin: 0 0 2.5rem;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-  transition-delay: 540ms;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--phosphor-dim);
+  max-width: 64ch;
+  margin: 0 auto 28px;
+  line-height: 1.6;
 }
-.hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
 
-.cta-row {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-  opacity: 0;
-  transition: opacity var(--duration-slower) var(--ease-out);
-  transition-delay: 760ms;
-}
-.hero.visible .cta-row { opacity: 1; }
-
-.magnetic {
+.hero-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 1.75rem;
-  border-radius: 9999px;
-  background: var(--color-accent);
-  color: white;
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-  transition: transform 600ms var(--ease-spring), background 200ms ease;
-  will-change: transform;
-}
-.magnetic:hover { background: var(--color-accent-hover); }
-.magnetic .arrow { transition: transform var(--duration-normal) var(--ease-out); }
-.magnetic:hover .arrow { transform: translateX(3px); }
-
-.secondary-link {
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  font-size: 0.95rem;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 2px;
-  transition: color var(--duration-fast), border-color var(--duration-fast);
-}
-.secondary-link:hover {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-}
-
-.hero-visual {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-spring);
-  transition-delay: 200ms;
-}
-.hero.visible .hero-visual { opacity: 1; transform: translateY(0); }
-
-/* ============ TERMINAL ============ */
-.terminal {
-  position: relative;
-  background: var(--term-bg);
-  border-radius: 14px;
-  box-shadow: var(--shadow-xl), 0 0 0 1px rgba(44, 42, 40, 0.06);
-  overflow: hidden;
+  gap: 10px;
   font-family: var(--font-mono);
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: var(--term-text);
+  font-size: 14px;
+  color: var(--phosphor);
+  background: transparent;
+  border: 1px solid var(--phosphor);
+  padding: 10px 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.terminal-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.75rem 1rem;
-  background: var(--term-bg-soft);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+.hero-cta:hover {
+  background: var(--phosphor);
+  color: var(--bg);
+  box-shadow: 0 0 14px var(--phosphor), 0 0 28px rgba(51, 255, 51, 0.6);
+  text-shadow: none;
 }
-.tdot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  display: inline-block;
+.hero-cta + .hero-cta { margin-left: 12px; }
+
+/* ============================================
+   SECTIONS — terminal blocks
+   ============================================ */
+.block {
+  margin: 56px 0;
+  position: relative;
 }
-.tdot.r { background: #F38BA8; }
-.tdot.y { background: #F9E2AF; }
-.tdot.g { background: #A6E3A1; }
-.terminal-title {
-  flex: 1;
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--term-muted);
-  letter-spacing: 0.06em;
+
+.block-header {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.4);
 }
-.terminal-body {
-  padding: 1.25rem 1.25rem 1.5rem;
-  min-height: 380px;
+
+.block-title {
+  font-family: var(--font-crt);
+  font-size: 36px;
+  color: var(--phosphor);
+  text-shadow: 0 0 6px var(--phosphor);
+  margin: 0 0 12px;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+.block-title .em { color: var(--amber); text-shadow: 0 0 6px var(--amber); }
+
+.block-lead {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--phosphor-dim);
+  max-width: 72ch;
+  margin: 0 0 28px;
+}
+
+/* divider */
+.hr {
+  border: none;
+  border-top: 1px solid var(--phosphor-faint);
+  margin: 56px 0;
+  position: relative;
+}
+.hr::before {
+  content: "// ============================================ //";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  padding: 0 16px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--phosphor-faint);
+}
+
+/* ============================================
+   TERMINAL SESSION (animated)
+   ============================================ */
+.term-session {
+  background: var(--bg-deeper);
+  border: 1px solid var(--phosphor-faint);
+  padding: 18px 22px;
+  margin: 22px 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 420px;
   white-space: pre-wrap;
   word-break: break-word;
 }
-.term-line { display: block; min-height: 1.55em; }
-.term-line.cmd { color: var(--term-text); }
-.term-line.cmd .prompt { color: var(--term-prompt); margin-right: 0.5rem; font-weight: 500; }
-.term-line.user-q { color: var(--term-cyan); }
-.term-line.label { color: var(--term-mauve); margin-top: 1rem; font-weight: 600; }
-.term-line.body { color: var(--term-text); }
+
+.term-line { display: block; min-height: 1.6em; }
+.term-line.cmd { color: var(--phosphor); }
+.term-line.cmd .prompt { color: var(--phosphor); margin-right: 8px; }
+.term-line.user-q { color: var(--cyan); text-shadow: 0 0 4px rgba(0, 255, 255, 0.5); }
+.term-line.label {
+  color: var(--amber);
+  margin-top: 12px;
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.5);
+}
+.term-line.body { color: var(--phosphor-dim); }
 .term-line.check {
-  color: var(--term-prompt);
+  color: var(--phosphor);
   opacity: 0;
-  transform: translateX(-6px);
-  transition: opacity 320ms var(--ease-out), transform 320ms var(--ease-spring);
+  transform: translateX(-8px);
+  transition: opacity 280ms ease-out, transform 280ms ease-out;
 }
 .term-line.check.in { opacity: 1; transform: translateX(0); }
-.term-line.check .mark { color: var(--term-prompt); margin-right: 0.6rem; font-weight: 700; }
-.term-line.check .meta { color: var(--term-muted); margin-left: 0.5rem; font-size: 0.85em; }
+.term-line.check .mark { color: var(--phosphor); margin-right: 10px; text-shadow: 0 0 6px var(--phosphor); }
+.term-line.check .meta { color: var(--phosphor-faint); margin-left: 10px; font-size: 0.92em; }
 
 .caret {
   display: inline-block;
-  width: 0.55em;
-  height: 1.1em;
-  background: var(--term-text);
+  width: 0.6em;
+  height: 1em;
+  background: var(--phosphor);
   vertical-align: -2px;
-  margin-left: 1px;
+  margin-left: 2px;
+  box-shadow: 0 0 6px var(--phosphor);
   animation: caretBlink 1s steps(1) infinite;
 }
 @keyframes caretBlink { 50% { opacity: 0; } }
 
-.terminal-foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 1rem 0.75rem;
-  font-size: 0.7rem;
-  color: var(--term-muted);
-  border-top: 1px solid rgba(255,255,255,0.04);
-}
-.terminal-foot .pulse {
-  display: inline-block;
-  width: 0.45rem;
-  height: 0.45rem;
-  background: var(--term-prompt);
-  border-radius: 50%;
-  margin-right: 0.4rem;
-  box-shadow: 0 0 8px var(--term-prompt);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-
-/* ============ SECTION SHELL ============ */
-.section {
-  padding: 5rem 1.5rem;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-.section-eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--color-text-muted);
-  margin: 0 0 1rem;
-}
-.section-heading {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.05;
-  letter-spacing: -0.028em;
-  margin: 0 0 1rem;
-  max-width: 22ch;
-}
-.section-heading em {
-  font-style: normal;
-  color: var(--color-accent);
-}
-.section-lead {
-  font-size: 1.125rem;
-  color: var(--color-text-secondary);
-  max-width: 60ch;
-  margin: 0 0 3rem;
-}
-
-/* ============ SEE IT WORK ============ */
-.see-it {
-  background: var(--color-bg-warm);
-  border-top: 1px solid var(--color-border-light);
-  border-bottom: 1px solid var(--color-border-light);
-}
-.see-it-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 5rem 1.5rem;
-}
-.see-it-grid p {
-  color: var(--color-text-secondary);
-  margin: 0 0 1.25rem;
-  font-size: 1.05rem;
-}
-.see-it-grid p strong {
-  color: var(--color-text);
-  font-weight: 600;
-}
-
-/* ============ BENTO ============ */
-.bento {
+/* ============================================
+   ASCII BENTO — bordered boxes
+   ============================================ */
+.bento-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: minmax(180px, auto);
-  gap: 1rem;
+  gap: 18px;
+  margin: 30px 0;
 }
-.tile {
-  position: relative;
-  padding: 1.75rem;
-  border-radius: 16px;
-  background:
-    radial-gradient(560px circle at var(--mx, 50%) var(--my, 50%),
-      rgba(217, 79, 48, 0.07), transparent 40%),
-    var(--color-surface);
-  border: 1px solid var(--color-border);
-  transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal) var(--ease-out);
-  opacity: 0;
-  transform: translateY(20px);
-  overflow: hidden;
-}
-.tile.visible {
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity var(--duration-slower) var(--ease-spring),
-    transform var(--duration-slower) var(--ease-spring),
-    border-color var(--duration-normal),
-    box-shadow var(--duration-normal) var(--ease-out);
-}
-.tile.visible:hover {
-  transform: translateY(-3px);
-  border-color: var(--color-accent-muted);
-  box-shadow: var(--shadow-lg);
-}
-.tile.span-2 { grid-column: span 2; }
 
-.tile .tile-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+.ascii-box {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-  padding: 0.3rem 0.65rem;
-  border-radius: 999px;
-}
-.tile.t2 .tile-tag { color: var(--color-actor-2); background: rgba(42, 123, 155, 0.10); }
-.tile.t3 .tile-tag { color: var(--color-actor-3); background: rgba(123, 109, 170, 0.10); }
-.tile.t4 .tile-tag { color: var(--color-actor-4); background: rgba(212, 168, 67, 0.12); }
-.tile.t5 .tile-tag { color: var(--color-actor-5); background: rgba(45, 139, 85, 0.10); }
-.tile.t6 .tile-tag { color: var(--color-accent); background: var(--color-accent-light); }
-
-.tile h3 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.35rem;
-  letter-spacing: -0.015em;
-  margin: 1rem 0 0.6rem;
-  line-height: 1.2;
-}
-.tile p {
-  color: var(--color-text-secondary);
-  font-size: 0.95rem;
-  margin: 0;
+  font-size: 13px;
   line-height: 1.55;
+  color: var(--phosphor-dim);
+  padding: 18px;
+  position: relative;
+  background: var(--bg-deeper);
+  border: 1px dashed var(--phosphor-faint);
+  transition: all 0.25s ease;
 }
-.tile-glyph {
+.ascii-box:hover {
+  border-color: var(--phosphor);
+  border-style: solid;
+  box-shadow: inset 0 0 16px rgba(51, 255, 51, 0.08), 0 0 12px rgba(51, 255, 51, 0.12);
+}
+.ascii-box:hover .ascii-box-title { text-shadow: 0 0 8px var(--phosphor), 0 0 16px rgba(51,255,51,0.5); }
+.ascii-box.span-2 { grid-column: span 2; }
+
+.ascii-box-tag {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--amber);
+  letter-spacing: 0.18em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.ascii-box-idx {
   position: absolute;
-  right: 1.1rem;
-  top: 1.1rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
+  top: 12px;
+  right: 16px;
+  font-size: 11px;
+  color: var(--phosphor-faint);
   letter-spacing: 0.1em;
 }
+.ascii-box-title {
+  font-family: var(--font-crt);
+  font-size: 22px;
+  color: var(--phosphor);
+  text-shadow: 0 0 4px var(--phosphor);
+  margin: 4px 0 8px;
+  line-height: 1.15;
+  transition: text-shadow 0.25s ease;
+}
+.ascii-box-body {
+  font-size: 13px;
+  color: var(--phosphor-dim);
+  margin: 0;
+}
+.ascii-box-body strong { color: var(--phosphor); font-weight: 500; }
 
-/* ============ WHERE IT LIVES ============ */
-.where-it {
-  background: var(--color-bg-warm);
-  border-top: 1px solid var(--color-border-light);
-  border-bottom: 1px solid var(--color-border-light);
+/* corner brackets */
+.ascii-box::before,
+.ascii-box::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--phosphor);
 }
-.where-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 5rem 1.5rem;
-  align-items: start;
+.ascii-box::before {
+  top: 4px;
+  left: 4px;
+  border-top: 1px solid;
+  border-left: 1px solid;
 }
-.compare {
-  display: grid;
-  gap: 0.85rem;
+.ascii-box::after {
+  bottom: 4px;
+  right: 4px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+}
+
+/* ============================================
+   COMPARE TABLE
+   ============================================ */
+.compare-table {
+  margin: 30px 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
 }
 .compare-row {
   display: grid;
-  grid-template-columns: 8rem 1fr;
-  gap: 1rem;
+  grid-template-columns: 16ch 1fr;
+  gap: 16px;
+  padding: 10px 14px;
+  border-bottom: 1px dashed var(--phosphor-faint);
   align-items: baseline;
-  padding: 1.1rem 1.25rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
 }
 .compare-row .label {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  color: var(--amber);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-text-muted);
+  font-size: 12px;
 }
-.compare-row .desc {
-  color: var(--color-text);
-  font-size: 0.98rem;
-}
+.compare-row .desc { color: var(--phosphor-dim); }
 .compare-row.highlight {
-  background: var(--color-accent-light);
-  border-color: var(--color-accent-muted);
+  background: rgba(51, 255, 51, 0.06);
+  border: 1px solid var(--phosphor);
+  padding: 12px 14px;
+  margin-top: 4px;
 }
-.compare-row.highlight .label { color: var(--color-accent-hover); }
-.compare-row.highlight .desc { color: var(--color-text); font-weight: 500; }
+.compare-row.highlight .label { color: var(--phosphor); text-shadow: 0 0 4px var(--phosphor); }
+.compare-row.highlight .desc { color: var(--phosphor); }
 
-.where-prose p {
-  font-size: 1.05rem;
-  color: var(--color-text-secondary);
-  margin: 0 0 1rem;
+.demystify {
+  margin-top: 24px;
+  padding: 16px 20px;
+  border-left: 3px solid var(--amber);
+  background: rgba(255, 176, 0, 0.05);
+  font-size: 13px;
+  color: var(--phosphor);
 }
-.where-prose p strong { color: var(--color-text); font-weight: 600; }
-.where-prose .demystify {
-  margin-top: 1.75rem;
-  padding: 1.25rem 1.4rem;
-  border-left: 3px solid var(--color-accent);
-  background: var(--color-surface);
-  border-radius: 0 12px 12px 0;
-  font-size: 0.98rem;
-  color: var(--color-text);
-}
+.demystify strong { color: var(--amber); }
 
-/* ============ VIGNETTES ============ */
+/* ============================================
+   VIGNETTES
+   ============================================ */
 .vignettes {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
+  gap: 18px;
+  margin: 30px 0;
 }
 .vignette {
-  padding: 2rem 1.75rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
+  background: var(--bg-deeper);
+  border: 1px solid var(--phosphor-faint);
+  padding: 20px;
   position: relative;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
+  transition: all 0.25s ease;
 }
-.vignette.visible { opacity: 1; transform: translateY(0); }
-.vignette:hover { border-color: var(--color-accent-muted); box-shadow: var(--shadow-md); }
+.vignette:hover {
+  border-color: var(--phosphor);
+  box-shadow: 0 0 12px rgba(51, 255, 51, 0.15);
+}
 .vignette .who {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 10px;
+  color: var(--amber);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--color-accent);
-  margin-bottom: 0.85rem;
+  margin-bottom: 10px;
+  text-shadow: 0 0 4px rgba(255, 176, 0, 0.4);
 }
-.vignette.v2 .who { color: var(--color-actor-2); }
-.vignette.v3 .who { color: var(--color-actor-5); }
-.vignette h3 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.35rem;
-  letter-spacing: -0.015em;
-  margin: 0 0 0.85rem;
-  line-height: 1.2;
+.vignette-title {
+  font-family: var(--font-crt);
+  font-size: 22px;
+  color: var(--phosphor);
+  text-shadow: 0 0 4px var(--phosphor);
+  margin: 0 0 10px;
+  line-height: 1.15;
 }
-.vignette p {
-  color: var(--color-text-secondary);
-  font-size: 0.98rem;
-  margin: 0;
-  line-height: 1.6;
+.vignette-body {
+  font-size: 13px;
+  color: var(--phosphor-dim);
+  margin: 0 0 14px;
+  line-height: 1.55;
 }
-.vignette .ask {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px dashed var(--color-border);
+.ask-label {
+  font-size: 9px;
+  color: var(--phosphor-faint);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.ask {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
+  font-size: 11.5px;
+  color: var(--cyan);
+  border-top: 1px dashed var(--phosphor-faint);
+  padding-top: 10px;
+  word-break: break-word;
   line-height: 1.5;
 }
-.vignette .ask::before {
-  content: "WHAT THEY TYPED";
-  display: block;
-  font-size: 0.65rem;
-  letter-spacing: 0.16em;
-  margin-bottom: 0.4rem;
-  color: var(--color-text-muted);
-  opacity: 0.8;
-}
+.ask::before { content: "$ "; color: var(--phosphor); }
 
-/* ============ PRICING ============ */
-.pricing-section {
-  background: var(--color-bg-warm);
-  border-top: 1px solid var(--color-border-light);
-  border-bottom: 1px solid var(--color-border-light);
-}
-.pricing {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-top: 2.5rem;
-}
-.plan {
-  padding: 1.75rem 1.5rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
-}
-.plan.visible { opacity: 1; transform: translateY(0); }
-.plan.recommended {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent-muted), var(--shadow-md);
-  position: relative;
-}
-.plan.recommended::before {
-  content: "BEST FOR CURIOUS LEADERS";
-  position: absolute;
-  top: -0.6rem;
-  left: 1.25rem;
-  background: var(--color-accent);
-  color: white;
+/* ============================================
+   MAN PAGE PRICING
+   ============================================ */
+.manpage {
+  background: var(--bg-deeper);
+  border: 1px solid var(--phosphor-faint);
+  padding: 22px 28px;
+  margin: 30px 0;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
+  font-size: 13px;
+  color: var(--phosphor-dim);
+  line-height: 1.65;
+  white-space: pre-wrap;
 }
-.plan .name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.2rem;
-  letter-spacing: -0.01em;
-  margin: 0 0 0.4rem;
-}
-.plan .for {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  margin: 0 0 1.25rem;
-  font-family: var(--font-mono);
+.manpage .man-header {
+  display: flex;
+  justify-content: space-between;
+  color: var(--amber);
+  margin-bottom: 18px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--phosphor-faint);
+  letter-spacing: 0.1em;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.7rem;
 }
-.plan .price {
-  display: flex;
-  align-items: baseline;
-  gap: 0.35rem;
-  margin-bottom: 1rem;
-  font-variant-numeric: tabular-nums;
+.manpage .section-name {
+  color: var(--phosphor);
+  font-weight: 600;
+  text-shadow: 0 0 4px var(--phosphor);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 18px 0 6px;
+  font-size: 12px;
 }
-.plan .price .currency {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-text-muted);
+.manpage .plan-entry { margin: 14px 0; padding-left: 4px; }
+.manpage .plan-name {
+  color: var(--cyan);
+  font-weight: 600;
+  font-size: 14px;
+  text-shadow: 0 0 4px rgba(0, 255, 255, 0.4);
 }
-.plan .price .num {
-  font-family: var(--font-display);
-  font-size: 2.75rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
+.manpage .plan-price { color: var(--amber); }
+.manpage .plan-tag {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 1px 6px;
+  background: var(--phosphor);
+  color: var(--bg);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
-.plan .price .per {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
+.manpage .plan-desc {
+  color: var(--phosphor-dim);
+  padding-left: 18px;
+  display: block;
 }
-.plan ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-}
-.plan ul li {
-  padding: 0.45rem 0;
-  border-top: 1px solid var(--color-border-light);
-  display: flex;
-  gap: 0.6rem;
-  align-items: flex-start;
-}
-.plan ul li::before {
-  content: "·";
-  color: var(--color-accent);
-  font-weight: 700;
-  flex-shrink: 0;
-  font-size: 1.2em;
-  line-height: 1;
-  margin-top: -2px;
-}
-.plan.recommended ul li::before { color: var(--color-accent); }
-.plan-foot {
-  margin-top: 2rem;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  text-align: center;
+.manpage .plan-feat { color: var(--phosphor); }
+.manpage .plan-foot {
+  margin-top: 22px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--phosphor-faint);
+  color: var(--phosphor-faint);
+  font-size: 11px;
 }
 
-/* ============ FINAL CTA ============ */
-.final {
-  padding: 6rem 1.5rem;
-  max-width: 760px;
-  margin: 0 auto;
+/* ============================================
+   FINAL CTA — BLINKING PROMPT
+   ============================================ */
+.final-cta {
   text-align: center;
+  padding: 50px 20px 40px;
+  margin: 56px 0 20px;
 }
-.final h2 {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
-  letter-spacing: -0.028em;
-  margin: 0 0 1rem;
-  line-height: 1.05;
+.final-cta-title {
+  font-family: var(--font-crt);
+  font-size: 42px;
+  color: var(--phosphor);
+  text-shadow: 0 0 8px var(--phosphor), 0 0 24px rgba(51, 255, 51, 0.4);
+  margin: 0 0 14px;
+  line-height: 1.1;
 }
-.final h2 em { font-style: normal; color: var(--color-accent); }
-.final p {
-  color: var(--color-text-secondary);
-  margin: 0 0 2.5rem;
-  font-size: 1.1rem;
+.final-cta-title .em { color: var(--amber); text-shadow: 0 0 8px var(--amber); }
+.final-cta-sub {
+  font-size: 14px;
+  color: var(--phosphor-dim);
+  max-width: 58ch;
+  margin: 0 auto 36px;
+  line-height: 1.6;
 }
-.final .cta-row { justify-content: center; opacity: 1; }
+.blinking-prompt {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-crt);
+  font-size: 32px;
+  color: var(--phosphor);
+  text-shadow: 0 0 8px var(--phosphor);
+  background: var(--bg-deeper);
+  padding: 14px 28px;
+  border: 1px solid var(--phosphor);
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px solid var(--phosphor);
+  transition: all 0.2s ease;
+}
+.blinking-prompt:hover {
+  background: var(--phosphor);
+  color: var(--bg);
+  text-shadow: none;
+  box-shadow: 0 0 18px var(--phosphor), 0 0 36px rgba(51,255,51,0.6);
+}
+.blinking-prompt .big-caret {
+  display: inline-block;
+  width: 14px;
+  height: 28px;
+  background: var(--phosphor);
+  margin-left: 6px;
+  vertical-align: middle;
+  box-shadow: 0 0 8px var(--phosphor);
+  animation: caretBlink 1s steps(1) infinite;
+}
+.blinking-prompt:hover .big-caret { background: var(--bg); box-shadow: none; }
+.final-cta-secondary {
+  display: block;
+  margin-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--phosphor-dim);
+}
 
-footer {
-  padding: 2.5rem 1.5rem;
+/* ============================================
+   FOOTER
+   ============================================ */
+.foot {
+  margin-top: 60px;
+  padding: 22px 0 12px;
+  border-top: 1px solid var(--phosphor-faint);
   text-align: center;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-  border-top: 1px solid var(--color-border-light);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--phosphor-faint);
+  letter-spacing: 0.1em;
 }
-footer a { color: var(--color-text-secondary); text-decoration: none; border-bottom: 1px dotted var(--color-border); }
-footer a:hover { color: var(--color-accent); }
+.foot a { color: var(--phosphor-dim); border-bottom-color: var(--phosphor-faint); }
+.foot a:hover { color: var(--phosphor); }
 
-/* ============ RESPONSIVE ============ */
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 @media (max-width: 960px) {
-  .hero { grid-template-columns: 1fr; gap: 3rem; padding-top: 2rem; padding-bottom: 3rem; }
-  .see-it-grid, .where-grid { grid-template-columns: 1fr; gap: 2.5rem; padding: 4rem 1.5rem; }
-  .bento { grid-template-columns: repeat(2, 1fr); }
-  .tile.span-2 { grid-column: span 2; }
+  .bezel { padding: 22px 18px 36px; margin: 14px; }
+  .screen { padding: 24px 20px 36px; }
+  .ascii-banner { font-size: 6px; }
+  .bento-grid { grid-template-columns: repeat(2, 1fr); }
+  .ascii-box.span-2 { grid-column: span 2; }
   .vignettes { grid-template-columns: 1fr; }
-  .pricing { grid-template-columns: repeat(2, 1fr); }
-  .section { padding: 3.5rem 1.5rem; }
+  .hero-tagline { font-size: 22px; }
+  .block-title { font-size: 28px; }
+  .final-cta-title { font-size: 32px; }
+  .blinking-prompt { font-size: 24px; padding: 12px 22px; }
+  .compare-row { grid-template-columns: 1fr; gap: 4px; }
+  .status-bar { font-size: 9px; flex-wrap: wrap; gap: 8px; }
+  .status-bar .status-left, .status-bar .status-right { gap: 10px; }
+  .bezel-watermark { font-size: 9px; right: 14px; }
+  .bezel-led { left: 14px; font-size: 9px; }
 }
 @media (max-width: 560px) {
-  .topbar { padding: 1rem; }
-  .topbar-meta { display: none; }
-  .hero { padding: 1.5rem 1rem 2rem; }
-  .terminal { font-size: 0.78rem; }
-  .terminal-body { padding: 1rem 0.85rem 1.25rem; min-height: 340px; }
-  .bento { grid-template-columns: 1fr; }
-  .tile.span-2 { grid-column: auto; }
-  .pricing { grid-template-columns: 1fr; }
-  .compare-row { grid-template-columns: 1fr; gap: 0.35rem; }
-  .compare-row .label { font-size: 0.7rem; }
-  .magnetic { padding: 0.85rem 1.4rem; font-size: 0.95rem; }
-  .section-heading { letter-spacing: -0.02em; }
-  .vignette { padding: 1.5rem 1.25rem; }
-}
-
-@media (hover: none) {
-  .magnetic { transform: none !important; }
-  .tile:hover { transform: none !important; }
+  body { font-size: 13px; }
+  .bezel { padding: 16px 8px 32px; margin: 8px; }
+  .screen { padding: 18px 12px 30px; }
+  .ascii-banner { font-size: 4.5px; }
+  .bento-grid { grid-template-columns: 1fr; }
+  .ascii-box.span-2 { grid-column: auto; }
+  .hero-tagline { font-size: 18px; }
+  .hero-cta { font-size: 12px; padding: 8px 14px; }
+  .hero-cta + .hero-cta { margin-left: 0; margin-top: 10px; }
+  .block-title { font-size: 24px; }
+  .term-session { padding: 12px 14px; font-size: 12px; }
+  .final-cta-title { font-size: 24px; }
+  .blinking-prompt { font-size: 20px; padding: 10px 16px; }
+  .manpage { padding: 16px; font-size: 12px; }
+  .bezel-label { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -768,349 +794,839 @@ footer a:hover { color: var(--color-accent); }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .hero .word, .hero-sub, .cta-row, .hero-visual, .eyebrow,
-  .tile, .vignette, .plan { opacity: 1 !important; transform: none !important; }
-  .caret { animation: none; opacity: 1; }
-  .terminal-foot .pulse { animation: none; }
+  .flicker { display: none; }
+  .caret, .big-caret { animation: none; opacity: 1; }
+  .bezel-led .dot { animation: none; }
+  .blink { animation: none; }
 }
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <a class="brand" href="https://cetiai.co"><span class="brand-dot"></span>CETI.AI · Lookbook</a>
-  <span class="topbar-meta">A non-technical introduction</span>
-</header>
+<div class="bezel">
+  <div class="bezel-bottom-screws"></div>
+  <div class="bezel-led"><span class="dot"></span>POWER</div>
+  <div class="bezel-label">CETI-OS // MODEL CRT-1971</div>
+  <div class="bezel-watermark">06 / 18 &middot; ceti.lookbook</div>
 
-<!-- ============ HERO ============ -->
-<section class="hero" id="hero">
-  <div class="hero-text">
-    <p class="eyebrow">CLAUDE CODE <span class="sep">·</span> YOUR AI WORK-PARTNER</p>
-    <h1 class="hero-title">
-      <span class="word">Not</span>
-      <span class="word">a chatbot.</span>
-      <span class="word">A</span>
-      <span class="word"><em>teammate.</em></span>
-    </h1>
-    <p class="hero-sub">Claude Code is Anthropic's terminal-based AI work-partner. It reads your files, writes new ones, runs commands, and follows multi-step instructions — autonomously, with your supervision. You don't need to be technical. You just need to know what you want done.</p>
-    <div class="cta-row">
-      <a class="magnetic" href="#terminal-demo">
-        See it work
-        <span class="arrow">→</span>
-      </a>
-      <a class="secondary-link" href="#start">Plans &amp; pricing</a>
-    </div>
-  </div>
+  <div class="screen">
+    <div class="flicker"></div>
+    <div class="screen-content">
 
-  <div class="hero-visual" id="terminal-demo">
-    <div class="terminal" role="img" aria-label="An animated demo of a Claude Code terminal session organizing a Notion workspace.">
-      <div class="terminal-bar">
-        <span class="tdot r"></span>
-        <span class="tdot y"></span>
-        <span class="tdot g"></span>
-        <span class="terminal-title">~/work — claude</span>
+      <!-- ============ STATUS BAR ============ -->
+      <div class="status-bar">
+        <div class="status-left">
+          <span>CETI-OS v6.18</span>
+          <span>TTY1</span>
+          <span class="blink">[ ONLINE ]</span>
+        </div>
+        <div class="status-right">
+          <span id="clock">--:--:--</span>
+          <span>OPUS-4.7</span>
+        </div>
       </div>
-      <div class="terminal-body" id="term-body"></div>
-      <div class="terminal-foot">
-        <span><span class="pulse"></span> claude-code · v2.1</span>
-        <span>opus-4.7 · 1M ctx</span>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- ============ SEE IT WORK ============ -->
-<section class="see-it">
-  <div class="see-it-grid">
-    <div>
-      <p class="section-eyebrow">SECTION 01 · WATCH IT THINK</p>
-      <h2 class="section-heading">You type what you need. <em>Claude figures out the steps.</em></h2>
-      <p>The black box on the left is a terminal — the same kind of text-in, text-out window your IT folks live in. But what's happening inside it is new. You're not typing commands. You're typing <strong>intent</strong>.</p>
-      <p>Claude reads the situation, lays out a plan, and starts executing — scanning, finding, generating. You watch each step land. If a checkmark looks wrong, you intervene. Most of the time you don't have to.</p>
-      <p>The skill isn't typing. The skill is <strong>knowing what to ask for.</strong></p>
-    </div>
-    <div>
-      <!-- terminal lives in hero on desktop; placeholder copy here on mobile -->
-      <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-text-muted); padding: 1.5rem; background: var(--color-surface); border: 1px dashed var(--color-border); border-radius: 12px;">
-        <p style="margin: 0 0 0.75rem; color: var(--color-text);"><strong>What you saw in the hero terminal</strong></p>
-        <p style="margin: 0 0 0.4rem;">→ A plain-English request</p>
-        <p style="margin: 0 0 0.4rem;">→ A plan ("Let me help…")</p>
-        <p style="margin: 0 0 0.4rem;">→ Four real actions, each verified</p>
-        <p style="margin: 0;">→ A finished result you could use</p>
-      </div>
-    </div>
-  </div>
-</section>
+      <!-- ============ HERO ============ -->
+      <section class="hero">
+<pre class="ascii-banner" aria-hidden="true">
+  ___  _      _   _   _  ___   ___       ___  ___   ___   ___    ___  _   _
+ / __|| |    /_\ | | | ||   \ | __|_____/ __|/ _ \ |   \ | __|  / __|| | | |
+| (__ | |__ / _ \| |_| || |) || _||_____| (__| (_) || |) || _|  _\__ \| |_| |
+ \___||____/_/ \_\\___/ |___/ |___|     \___|\___/ |___/ |___|(_)___/ |_|_|
+</pre>
+        <p class="hero-tagline" id="hero-tagline">&nbsp;</p>
+        <p class="hero-sub">
+          &gt; Claude Code is Anthropic's terminal-based AI work-partner. It reads your files,
+          writes new ones, runs commands, and follows multi-step instructions &mdash; autonomously,
+          with your supervision. You don't need to be technical. You just need to know what
+          you want done.
+        </p>
+        <div>
+          <a class="hero-cta" href="#session">[ Run Demo ]</a>
+          <a class="hero-cta" href="#pricing">[ man pricing ]</a>
+        </div>
+      </section>
 
-<!-- ============ WHAT IT DOES ============ -->
-<section class="section">
-  <p class="section-eyebrow">SECTION 02 · WHAT IT ACTUALLY DOES</p>
-  <h2 class="section-heading">Six jobs that used to need an engineer.</h2>
-  <p class="section-lead">Claude Code isn't a chatbot with extra steps. It has hands. It edits real files on your computer, runs real commands, and reads real codebases. Below: the six things business teams actually use it for.</p>
+      <hr class="hr">
 
-  <div class="bento">
-    <article class="tile span-2 t1">
-      <span class="tile-glyph">01</span>
-      <span class="tile-tag">WRITE &amp; EDIT FILES</span>
-      <h3>Build a working app from a paragraph.</h3>
-      <p>Describe a tool you wish existed — a client report generator, an inventory dashboard, a webhook router — and watch Claude write the files for it across folders. It plans, drafts, tests, fixes its own mistakes, and shows you the diff before saving anything.</p>
-    </article>
-    <article class="tile t2">
-      <span class="tile-glyph">02</span>
-      <span class="tile-tag">RUN COMMANDS</span>
-      <h3>Press play on the boring stuff.</h3>
-      <p>Installs, deploys, migrations, backups — Claude runs them, reads the output, and tells you what happened in plain English.</p>
-    </article>
-    <article class="tile t3">
-      <span class="tile-glyph">03</span>
-      <span class="tile-tag">DEBUG</span>
-      <h3>"It broke. Make it work."</h3>
-      <p>Paste an error message. Claude traces the cause, names the file and line, suggests a fix, and offers to apply it.</p>
-    </article>
-    <article class="tile t4">
-      <span class="tile-glyph">04</span>
-      <span class="tile-tag">DEPLOY</span>
-      <h3>From draft to live URL.</h3>
-      <p>"Put this on Vercel." Claude configures the project, pushes it, and reports the production URL back. Same workflow for Netlify, Cloudflare, or your own server.</p>
-    </article>
-    <article class="tile t5">
-      <span class="tile-glyph">05</span>
-      <span class="tile-tag">SEARCH ACROSS CODEBASES</span>
-      <h3>Find a needle in 10,000 files.</h3>
-      <p>"Where do we set the trial length to 14 days?" Claude reads the whole project and points to the exact line — no grep skills required.</p>
-    </article>
-    <article class="tile span-2 t6">
-      <span class="tile-glyph">06</span>
-      <span class="tile-tag">CHAT + DO</span>
-      <h3>A conversation that leaves footprints.</h3>
-      <p>You and Claude talk back and forth like a Slack thread — but every reply can ship as a file, a commit, a deployment, a sent email. Think of regular Claude as a brilliant assistant who can only point. Claude Code can <strong>pick things up.</strong></p>
-    </article>
-  </div>
-</section>
+      <!-- ============ SECTION 01 — TERMINAL SESSION ============ -->
+      <section class="block" id="session">
+        <div class="block-header">SECTION 01 &middot; WATCH IT THINK</div>
+        <h2 class="block-title">You type what you need. <span class="em">Claude figures out the steps.</span></h2>
+        <p class="block-lead">
+          You're not typing commands. You're typing <strong style="color:var(--phosphor)">intent</strong>.
+          Claude reads the situation, lays out a plan, and starts executing &mdash; scanning, finding,
+          generating. The skill isn't typing. The skill is knowing what to ask for.
+        </p>
 
-<!-- ============ WHERE IT LIVES ============ -->
-<section class="where-it">
-  <div class="where-grid">
-    <div>
-      <p class="section-eyebrow">SECTION 03 · WHERE IT LIVES</p>
-      <h2 class="section-heading">The terminal is just a place where text goes in and out.</h2>
-      <div class="where-prose">
-        <p>If "the terminal" sounds intimidating, here's the secret: it's <strong>just a chat window</strong>. You type, something replies, you read the reply, you type back. The format hasn't changed since 1971.</p>
-        <p>The difference with Claude Code is that the thing on the other end of your typing isn't a script anymore. It's an intelligent partner that can take real actions on your behalf. So the same window that used to be hostile becomes the most flexible workspace you've ever had.</p>
-        <p>You can also use Claude Code in <strong>VS Code, your browser, or a desktop app</strong> if the terminal is too spartan. The same engine, just dressed up.</p>
+        <div class="term-session" id="term-body" role="img" aria-label="An animated demo of a Claude Code terminal session organizing a Notion workspace."></div>
+
+        <p style="font-family:var(--font-mono);font-size:11px;color:var(--phosphor-faint);letter-spacing:0.1em;margin-top:14px;">
+          &gt; A plain-English request &middot; A plan &middot; Four real actions, each verified &middot; A finished result you could use.
+        </p>
+
+        <!-- ============ ADDITIONAL SESSION DEMOS ============ -->
+        <div style="margin-top:48px;">
+          <div class="block-header">SESSION DEMOS &middot; STATIC SAMPLES</div>
+          <h3 class="block-title" style="font-size:26px;">four more sessions, <span class="em">scroll-back included.</span></h3>
+          <p class="block-lead">
+            real-shape transcripts: green prompt, amber checkmarks, white-ish body.
+            no animation, just <em>scroll-back history</em> &mdash; the same way you'd see it
+            after closing a shell pane.
+          </p>
+
+          <!-- demo a: refactor python codebase -->
+          <p style="color:var(--amber);letter-spacing:0.16em;font-size:11px;margin:30px 0 8px;text-transform:uppercase;">&gt;&gt; demo a &middot; refactor a python codebase</p>
+          <div class="term-session" style="min-height:auto;">
+<span class="term-line cmd"><span class="prompt">$</span>claude</span>
+<span class="term-line user-q">&gt; this etl/ folder has 14 files of duplication. consolidate the s3 io into one module, keep behavior identical, run pytest after each refactor.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">claude:</span>
+<span class="term-line body">  reading etl/. found 4 modules importing boto3 directly with overlapping wrappers.</span>
+<span class="term-line body">  i'll create etl/io/s3.py, route call-sites through it, then run tests.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line check in"><span class="mark">[OK]</span>scanned etl/ &middot; 14 files, 2,841 LOC<span class="meta">cyclomatic avg 8.2</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>extracted S3Client wrapper<span class="meta">etl/io/s3.py +112</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>rewired call-sites in 4 modules<span class="meta">-247 / +38 LOC</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>pytest etl/ &middot; 87 passed in 4.21s<span class="meta">0 failures</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>ruff check &middot; clean<span class="meta">0 lint errors</span></span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line body" style="color:var(--phosphor);">  net: -209 LOC, identical test coverage. ready to commit?</span>
+<span class="term-line cmd" style="color:var(--cyan);">&gt; yes, commit with a one-line message.</span>
+<span class="term-line check in"><span class="mark">[OK]</span>git commit &middot; refactor(etl): consolidate s3 io into etl/io/s3.py<span class="meta">sha 7a3c91d</span></span>
+          </div>
+
+          <!-- demo b: write a feature with tests -->
+          <p style="color:var(--amber);letter-spacing:0.16em;font-size:11px;margin:30px 0 8px;text-transform:uppercase;">&gt;&gt; demo b &middot; new feature with tests</p>
+          <div class="term-session" style="min-height:auto;">
+<span class="term-line cmd"><span class="prompt">$</span>claude --plan</span>
+<span class="term-line user-q">&gt; add a /api/exports endpoint that returns a signed s3 url for the user's latest report. write tests first. use the existing auth middleware.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">claude (plan):</span>
+<span class="term-line body">  1. write src/routes/exports.spec.ts &mdash; happy path + 401 + 404</span>
+<span class="term-line body">  2. confirm tests fail (red)</span>
+<span class="term-line body">  3. implement src/routes/exports.ts using existing s3Service + authMiddleware</span>
+<span class="term-line body">  4. confirm tests pass (green)</span>
+<span class="term-line body">  5. wire into src/server.ts router</span>
+<span class="term-line cmd" style="color:var(--cyan);">&gt; approve.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line check in"><span class="mark">[OK]</span>wrote exports.spec.ts<span class="meta">3 tests &middot; all failing as expected</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>wrote exports.ts<span class="meta">42 LOC</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>npm test &middot; 3 passed<span class="meta">happy / 401 / 404</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>wired router in server.ts<span class="meta">GET /api/exports</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>npm run typecheck &middot; clean<span class="meta">0 type errors</span></span>
+<span class="term-line body" style="color:var(--phosphor);">  feature ready. shall i open a draft PR?</span>
+          </div>
+
+          <!-- demo c: debug a flaky test -->
+          <p style="color:var(--amber);letter-spacing:0.16em;font-size:11px;margin:30px 0 8px;text-transform:uppercase;">&gt;&gt; demo c &middot; debug a flaky test</p>
+          <div class="term-session" style="min-height:auto;">
+<span class="term-line cmd"><span class="prompt">$</span>claude</span>
+<span class="term-line user-q">&gt; jobs.spec.ts &middot; "drains the queue" is flaky. fails ~1 in 8 runs in CI. fix it.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">claude:</span>
+<span class="term-line body">  running the test 30 times locally to reproduce.</span>
+<span class="term-line check in"><span class="mark">[OK]</span>npx vitest jobs --repeat 30<span class="meta">4/30 failed</span></span>
+<span class="term-line body">  failure mode: timer not advanced before queue.drain() awaits.</span>
+<span class="term-line body">  root cause: Date.now() used in setTimeout calc, not vi.useFakeTimers().</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line check in"><span class="mark">[OK]</span>patched jobs.ts &mdash; injected clock interface<span class="meta">+8 / -3 LOC</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>updated jobs.spec.ts &mdash; vi.useFakeTimers + advanceTimers<span class="meta">deterministic</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>npx vitest jobs --repeat 100<span class="meta">100/100 passed</span></span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line body" style="color:var(--amber);">  diagnosis: test was reading wall-clock time. fix: inject a fake clock.</span>
+<span class="term-line body" style="color:var(--phosphor);">  flake eliminated. 100 consecutive passes confirmed.</span>
+          </div>
+
+          <!-- demo d: writing project docs -->
+          <p style="color:var(--amber);letter-spacing:0.16em;font-size:11px;margin:30px 0 8px;text-transform:uppercase;">&gt;&gt; demo d &middot; write project docs</p>
+          <div class="term-session" style="min-height:auto;">
+<span class="term-line cmd"><span class="prompt">$</span>claude</span>
+<span class="term-line user-q">&gt; this repo has no README. read the whole codebase, then write a README.md a new contributor could actually follow.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">claude:</span>
+<span class="term-line body">  scanning repository tree, package.json, and entry-points.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line check in"><span class="mark">[OK]</span>indexed 312 files<span class="meta">73,420 LOC &middot; ts/py/sh</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>identified stack<span class="meta">next.js 15 + fastapi + postgres</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>traced entry-points<span class="meta">apps/web, services/api, scripts/seed</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>extracted env var contract from .env.example<span class="meta">14 vars documented</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>drafted README.md<span class="meta">sections: install/dev/test/deploy/troubleshooting</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>verified install command on clean clone<span class="meta">npm ci &middot; ok in 38s</span></span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line body" style="color:var(--phosphor);">  README.md written. 1,140 words. preview? open README.md ?</span>
+          </div>
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ SECTION 01.5 — MAN PAGE ============ -->
+      <section class="block" id="man">
+        <div class="block-header">SECTION 01.5 &middot; man 1 claude-code</div>
+        <h2 class="block-title">$ man claude-code <span class="em">| less</span></h2>
+        <p class="block-lead">
+          before there were dashboards there were man pages. one screenful of authoritative,
+          terse, terminally honest documentation. here is claude-code rendered the way
+          /usr/bin/* programs have introduced themselves since 1971.
+        </p>
+
+        <div class="manpage" aria-label="man page output for claude-code">
+          <div class="man-header">
+            <span>CLAUDE-CODE(1)</span>
+            <span>General Commands Manual</span>
+            <span>CLAUDE-CODE(1)</span>
+          </div>
+
+          <div class="section-name">NAME</div>
+       claude-code &mdash; terminal-resident agentic work-partner for reading,
+       writing, and running real work on a real machine.
+
+          <div class="section-name">SYNOPSIS</div>
+       <span class="plan-feat">claude</span> [<em>prompt</em>] [<em>--model</em> opus-4.7 | sonnet-4.6 | haiku-4]
+              [<em>--allowed-tools</em> Bash,Edit,Read,...] [<em>--mcp</em> server-name]
+              [<em>--plan</em>] [<em>--continue</em>] [<em>--print</em>] [<em>--cwd</em> path]
+
+       <span class="plan-feat">claude</span> mcp add <em>server-name</em> -- <em>command</em> [<em>args...</em>]
+       <span class="plan-feat">claude</span> mcp list
+       <span class="plan-feat">claude</span> /skills | /commands | /agents | /workflows
+       <span class="plan-feat">claude</span> --help
+
+          <div class="section-name">DESCRIPTION</div>
+       <span class="plan-feat">claude-code</span> is anthropic's coding-and-doing agent that runs
+       inside your terminal. unlike a chat interface, it has direct access
+       to the filesystem (read, write, edit), to shell commands (npm, git,
+       pytest, vercel, anything in $PATH), and to the network (curl, fetch,
+       MCP servers). it operates as a long-running ReAct loop: it observes
+       your project, plans, takes a tool action, observes the result, and
+       either continues or asks you a question.
+
+       the program is interactive by default. you type a request in
+       english (or any language). claude proposes a plan. if you accept,
+       claude executes each step, surfaces diffs before writing files,
+       runs your tests, and reports back. every action is auditable.
+
+       you can also drive claude non-interactively with the <em>--print</em> flag
+       for shell pipelines, or persistently with <em>--continue</em> to resume
+       a previous session in the current working directory.
+
+       claude is model-aware. by default it routes to a strong reasoner
+       (opus-4.7) and falls back to faster models (sonnet-4.6, haiku-4)
+       for trivial work. you can pin a model with <em>--model</em>.
+
+       configuration is hierarchical and lives in <em>.claude/</em> directories
+       (project) and <em>~/.claude/</em> (global). skills, commands, agents,
+       hooks, and MCP servers are all hot-reloaded.
+
+          <div class="section-name">FILES</div>
+       <span class="plan-feat">.claude/CLAUDE.md</span>              project rules &amp; context
+       <span class="plan-feat">.claude/settings.json</span>          hooks, model, permissions
+       <span class="plan-feat">.claude/skills/&lt;name&gt;/</span>       reusable skill packages
+       <span class="plan-feat">.claude/commands/&lt;name&gt;.md</span>   custom slash-commands
+       <span class="plan-feat">.claude/agents/&lt;name&gt;.md</span>     specialized sub-agents
+       <span class="plan-feat">~/.claude/</span>                     global, inherited by all repos
+
+          <div class="section-name">EXIT STATUS</div>
+       0   the agent completed the requested task to its own satisfaction.
+       1   the agent stopped because the user denied a tool call.
+       2   the agent hit a tool error it could not recover from.
+      130   user pressed Ctrl-C.
+
+          <div class="section-name">SEE ALSO</div>
+       <a href="https://claude.com/claude-code" target="_blank" rel="noopener">claude.com/claude-code</a>,
+       <a href="https://docs.claude.com/en/docs/agents/claude-code" target="_blank" rel="noopener">docs.claude.com</a>,
+       sdk(7), mcp(7), git(1), make(1), tmux(1)
+
+          <div class="plan-foot">
+            anthropic, inc.  &middot;  2026-05  &middot;  CLAUDE-CODE(1)
+          </div>
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ HISTORY LOG ============ -->
+      <section class="block" id="history">
+        <div class="block-header">SECTION 01.6 &middot; HISTORY.log</div>
+        <h2 class="block-title">$ tail -f <span class="em">/var/log/claude-code/HISTORY.log</span></h2>
+        <p class="block-lead">
+          the lineage of claude-code in one append-only log. dates from anthropic's
+          public release timeline. every entry is something you can git-blame.
+        </p>
+
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line label">[ 2025-02-24 11:02:14 PST ]</span><span class="term-line body">  claude-code public preview launched alongside claude 3.7 sonnet.</span><span class="term-line body">  first agentic coding tool from anthropic with shell + filesystem access.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">[ 2025-05-22 09:15:08 PDT ]</span><span class="term-line body">  claude 4 family released. opus-4 and sonnet-4 land in claude-code.</span><span class="term-line body">  ext. thinking ("interleaved thinking") arrives. memory windows widen.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">[ 2025-06-11 14:40:33 PDT ]</span><span class="term-line body">  Model Context Protocol (MCP) integration ships in stable channel.</span><span class="term-line body">  claude can now consume third-party tool servers (slack, gdrive, etc).</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">[ 2025-08-05 10:22:01 PDT ]</span><span class="term-line body">  claude opus 4.1 + sonnet 4.5 ship. SWE-bench Verified crosses 74%.</span><span class="term-line body">  /skills, /commands, /agents directories become first-class.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">[ 2025-09-30 08:08:54 PDT ]</span><span class="term-line body">  sonnet 4.6 + new safety stack. permission system formalized:</span><span class="term-line body">  per-tool, per-cwd, with ask/deny/auto-approve granularity.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">[ 2025-11-12 13:55:29 PST ]</span><span class="term-line body">  claude code subagents (Task tool) added. parallel work-streams.</span><span class="term-line body">  the orchestrator pattern enters mainline workflows.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">[ 2026-01-21 09:41:00 PST ]</span><span class="term-line body">  opus 4.7 released with 1M-token context window.</span><span class="term-line body">  full enterprise repos now fit in a single session.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">[ 2026-02-14 16:30:11 PST ]</span><span class="term-line body">  hooks API stabilized. user-stop, pre-tool, post-tool, pre-compact.</span><span class="term-line body">  community plugins explode: ~400 skills on github by march.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">[ 2026-03-08 11:11:11 PST ]</span><span class="term-line body">  Agent SDK 1.0. claude-code becomes a library, not just a binary.</span><span class="term-line body">  third-party agents (cursor-agent, aider++, crush) ship adapters.</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line label">[ 2026-05-15 -- now ]</span><span class="term-line body">  this lookbook page. claude-code is the default coding interface for</span><span class="term-line body">  &gt; 200k professional developers and ~5k+ ceti-trained operators.</span>
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ SECTION 02 — BENTO ============ -->
+      <section class="block">
+        <div class="block-header">SECTION 02 &middot; WHAT IT ACTUALLY DOES</div>
+        <h2 class="block-title">Six jobs that used to need <span class="em">an engineer.</span></h2>
+        <p class="block-lead">
+          Claude Code isn't a chatbot with extra steps. It has hands. It edits real files on your
+          computer, runs real commands, and reads real codebases. Below: the six things business
+          teams actually use it for.
+        </p>
+
+        <div class="bento-grid">
+          <article class="ascii-box span-2">
+            <span class="ascii-box-idx">[01]</span>
+            <span class="ascii-box-tag">// WRITE &amp; EDIT FILES</span>
+            <h3 class="ascii-box-title">Build a working app from a paragraph.</h3>
+            <p class="ascii-box-body">Describe a tool you wish existed &mdash; a client report generator, an inventory dashboard, a webhook router &mdash; and watch Claude write the files for it across folders. It plans, drafts, tests, fixes its own mistakes, and shows you the diff before saving anything.</p>
+          </article>
+          <article class="ascii-box">
+            <span class="ascii-box-idx">[02]</span>
+            <span class="ascii-box-tag">// RUN COMMANDS</span>
+            <h3 class="ascii-box-title">Press play on the boring stuff.</h3>
+            <p class="ascii-box-body">Installs, deploys, migrations, backups &mdash; Claude runs them, reads the output, and tells you what happened in plain English.</p>
+          </article>
+          <article class="ascii-box">
+            <span class="ascii-box-idx">[03]</span>
+            <span class="ascii-box-tag">// DEBUG</span>
+            <h3 class="ascii-box-title">"It broke. Make it work."</h3>
+            <p class="ascii-box-body">Paste an error message. Claude traces the cause, names the file and line, suggests a fix, and offers to apply it.</p>
+          </article>
+          <article class="ascii-box">
+            <span class="ascii-box-idx">[04]</span>
+            <span class="ascii-box-tag">// DEPLOY</span>
+            <h3 class="ascii-box-title">From draft to live URL.</h3>
+            <p class="ascii-box-body">"Put this on Vercel." Claude configures the project, pushes it, and reports the production URL back. Same workflow for Netlify, Cloudflare, or your own server.</p>
+          </article>
+          <article class="ascii-box">
+            <span class="ascii-box-idx">[05]</span>
+            <span class="ascii-box-tag">// SEARCH</span>
+            <h3 class="ascii-box-title">Find a needle in 10,000 files.</h3>
+            <p class="ascii-box-body">"Where do we set the trial length to 14 days?" Claude reads the whole project and points to the exact line &mdash; no grep skills required.</p>
+          </article>
+          <article class="ascii-box span-2">
+            <span class="ascii-box-idx">[06]</span>
+            <span class="ascii-box-tag">// CHAT + DO</span>
+            <h3 class="ascii-box-title">A conversation that leaves footprints.</h3>
+            <p class="ascii-box-body">You and Claude talk back and forth like a Slack thread &mdash; but every reply can ship as a file, a commit, a deployment, a sent email. Think of regular Claude as a brilliant assistant who can only point. Claude Code can <strong>pick things up.</strong></p>
+          </article>
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ SECTION 03 — WHERE IT LIVES ============ -->
+      <section class="block">
+        <div class="block-header">SECTION 03 &middot; WHERE IT LIVES</div>
+        <h2 class="block-title">The terminal is just a place where <span class="em">text goes in and out.</span></h2>
+        <p class="block-lead">
+          If "the terminal" sounds intimidating, here's the secret: it's <strong style="color:var(--phosphor)">just a chat window</strong>.
+          You type, something replies, you read the reply, you type back. The format hasn't changed since 1971 &mdash;
+          the same year this monitor was designed.
+        </p>
+
+        <div class="compare-table">
+          <div class="compare-row">
+            <span class="label">[ email ]</span>
+            <span class="desc">Send a request, wait, read a reply. Asynchronous.</span>
+          </div>
+          <div class="compare-row">
+            <span class="label">[ slack ]</span>
+            <span class="desc">Chat back and forth. Synchronous, words only.</span>
+          </div>
+          <div class="compare-row">
+            <span class="label">[ chatgpt/claude ]</span>
+            <span class="desc">Ask a smart friend. They reply with words and maybe a draft.</span>
+          </div>
+          <div class="compare-row highlight">
+            <span class="label">[ claude-code ]</span>
+            <span class="desc">&gt; Same chat &mdash; but the friend now has hands, a filesystem, and a deploy button.</span>
+          </div>
+        </div>
+
         <div class="demystify">
-          <strong>The metaphor:</strong> if email is talking, Slack is chatting, and ChatGPT is asking — Claude Code is <strong>delegating</strong>. It has hands, and it uses them.
+          <strong>The metaphor:</strong> if email is talking, Slack is chatting, and ChatGPT is asking &mdash;
+          Claude Code is <strong>delegating</strong>. It has hands, and it uses them.
         </div>
-      </div>
+
+        <p class="block-lead" style="margin-top:24px;">
+          You can also use Claude Code in <strong style="color:var(--phosphor)">VS Code, your browser, or a desktop app</strong>
+          if the terminal is too spartan. The same engine, just dressed up.
+        </p>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ SECTION 04 — VIGNETTES ============ -->
+      <section class="block">
+        <div class="block-header">SECTION 04 &middot; REAL WORKFLOWS</div>
+        <h2 class="block-title">Three people, <span class="em">three Tuesday afternoons.</span></h2>
+        <p class="block-lead">
+          None of these people identify as engineers. They learned the basics in an afternoon.
+          Here's what they built.
+        </p>
+
+        <div class="vignettes">
+          <article class="vignette">
+            <p class="who">&gt; THE FOUNDER</p>
+            <h3 class="vignette-title">Prototype an investor demo overnight.</h3>
+            <p class="vignette-body">Maya had a pitch on Monday and no product yet. She described her idea &mdash; a referral tracker for fitness studios &mdash; to Claude Code, slept while it built a working version, woke up to a live URL she could click. She fixed the colors herself.</p>
+            <p class="ask-label">// WHAT SHE TYPED</p>
+            <p class="ask">claude "build a referral tracker web app where studios can paste a list of clients and get a shareable referral link per client. deploy to vercel."</p>
+          </article>
+          <article class="vignette">
+            <p class="who">&gt; THE OPS LEAD</p>
+            <h3 class="vignette-title">Refactor a messy data pipeline.</h3>
+            <p class="vignette-body">Devon inherited a Python script that nobody understood. He asked Claude Code to read it, explain it in plain English, then rewrite it cleanly. The new version is half as long and has tests. Devon now actually knows how it works.</p>
+            <p class="ask-label">// WHAT HE TYPED</p>
+            <p class="ask">claude "read pipeline.py, explain what each function does in plain language, then refactor for clarity. add tests."</p>
+          </article>
+          <article class="vignette">
+            <p class="who">&gt; THE MARKETER</p>
+            <h3 class="vignette-title">Auto-generate client proposals.</h3>
+            <p class="vignette-body">Priya was hand-customizing the same proposal deck 12 times a week. She gave Claude Code her template and a CSV of clients; now a single command renders all twelve, swaps in logos, and saves them as PDFs. She edits, then sends.</p>
+            <p class="ask-label">// WHAT SHE TYPED</p>
+            <p class="ask">claude "for every row in clients.csv, render proposal-template.html with the right name, logo, and price. export as pdf."</p>
+          </article>
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ SECTION 05 — MAN PAGE PRICING ============ -->
+      <section class="block" id="pricing">
+        <div class="block-header">SECTION 05 &middot; WHAT IT COSTS</div>
+        <h2 class="block-title">Claude Code comes <span class="em">free with any paid plan.</span></h2>
+        <p class="block-lead">
+          If you're already paying for Claude, you already have it. The numbers below are
+          Anthropic's published consumer plans &mdash; same dollars whether you're using the chat
+          or the terminal.
+        </p>
+
+        <div class="manpage" aria-label="Pricing presented as a man page output">
+          <div class="man-header">
+            <span>CLAUDE-CODE(1)</span>
+            <span>Pricing Manual</span>
+            <span>CLAUDE-CODE(1)</span>
+          </div>
+
+          <div class="section-name">NAME</div>
+       claude-code &mdash; Anthropic's terminal-based AI work-partner
+
+          <div class="section-name">SYNOPSIS</div>
+       $ claude [<em>plan</em>] [<em>options</em>]
+
+          <div class="section-name">PLANS</div>
+
+          <div class="plan-entry">
+            <span class="plan-name">Free</span> &mdash; <span class="plan-price">$0 / month</span>
+            <span class="plan-desc">Try the chat. Limited daily usage. Claude Code <em>not</em> included.</span>
+          </div>
+
+          <div class="plan-entry">
+            <span class="plan-name">Pro</span> &mdash; <span class="plan-price">$20 / month</span> <span class="plan-tag">recommended</span>
+            <span class="plan-desc"><span class="plan-feat">Claude Code included.</span> ~5x the chat usage of Free.</span>
+            <span class="plan-desc">Projects, Artifacts, file uploads. $17/mo if billed annually.</span>
+          </div>
+
+          <div class="plan-entry">
+            <span class="plan-name">Max</span> &mdash; <span class="plan-price">$100+ / month</span>
+            <span class="plan-desc">Everything in Pro. 5x&ndash;20x the usage of Pro.</span>
+            <span class="plan-desc">Priority access at peak hours.</span>
+          </div>
+
+          <div class="plan-entry">
+            <span class="plan-name">Team</span> &mdash; <span class="plan-price">$20 / seat / month</span>
+            <span class="plan-desc">Claude Code + Cowork. Central admin &amp; billing.</span>
+            <span class="plan-desc">Premium tier at $100/seat.</span>
+          </div>
+
+          <div class="plan-entry">
+            <span class="plan-name">Enterprise</span> &mdash; <span class="plan-price">quote / workspace</span>
+            <span class="plan-desc">SSO/SAML, audit logs, data-residency, custom retention.</span>
+            <span class="plan-desc">Includes admin console + per-team usage analytics + SCIM.</span>
+            <span class="plan-desc">Volume seat-pricing typically $60&ndash;$120 / seat / month.</span>
+          </div>
+
+          <div class="plan-foot">
+            SEE ALSO: <a href="https://claude.com/pricing" target="_blank" rel="noopener">claude.com/pricing</a>
+            &nbsp;&middot;&nbsp; Enterprise plans quoted per workspace.
+            &nbsp;&middot;&nbsp; Per-token API billing also available for SDK use.
+          </div>
+        </div>
+
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);margin-top:20px;line-height:1.65;">
+          &gt; <strong style="color:var(--phosphor)">which tier do you actually need?</strong> if you're trying it solo: Pro at $20.
+          if you live in claude-code 4+ hours a day: Max at $200 &mdash; the higher limits pay back
+          in saved context-window churn within the first week. if you're a 5-50 person team:
+          Team at $30/seat/month gets you central billing + the admin console. enterprise
+          starts to make sense above ~50 seats or when legal needs a BAA / DPA on file.
+        </p>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ CONFIGURATION ============ -->
+      <section class="block" id="config">
+        <div class="block-header">SECTION 06 &middot; CONFIGURATION</div>
+        <h2 class="block-title">$ tree <span class="em">.claude/</span></h2>
+        <p class="block-lead">
+          everything claude-code knows about your project lives in a <strong style="color:var(--phosphor)">.claude/</strong>
+          directory. it is plain text, version-controlled, diffable. one folder per concern:
+          skills, commands, agents, hooks. nothing magic.
+        </p>
+
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line cmd"><span class="prompt">$</span>tree .claude/</span>
+<span class="term-line body">.claude/</span>
+<span class="term-line body">├── CLAUDE.md              # project rules + context. read on every session.</span>
+<span class="term-line body">├── settings.json          # hooks, model defaults, permissions, env</span>
+<span class="term-line body">├── settings.local.json    # machine-only overrides (gitignored)</span>
+<span class="term-line body">├── skills/</span>
+<span class="term-line body">│   ├── codebase-to-course/SKILL.md</span>
+<span class="term-line body">│   └── kenya-hara/SKILL.md</span>
+<span class="term-line body">├── commands/</span>
+<span class="term-line body">│   ├── ship.md            # /ship  &mdash; build, test, deploy, post-mortem</span>
+<span class="term-line body">│   └── review.md          # /review &mdash; multi-agent code review</span>
+<span class="term-line body">├── agents/</span>
+<span class="term-line body">│   ├── ui-reviewer.md     # specialist: 6-pillar visual audit</span>
+<span class="term-line body">│   └── security-triage.md # specialist: AppSec hardening</span>
+<span class="term-line body">└── hooks/</span>
+<span class="term-line body">    ├── pre-tool.sh        # block dangerous Bash commands</span>
+<span class="term-line body">    └── post-tool.sh       # auto-format on every Edit</span>
+        </div>
+
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);margin-top:18px;line-height:1.65;">
+          &gt; a minimal <strong style="color:var(--phosphor)">settings.json</strong>:
+        </p>
+
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line body" style="color:var(--cyan);">{</span>
+<span class="term-line body" style="color:var(--cyan);">  "model": "claude-opus-4-7",</span>
+<span class="term-line body" style="color:var(--cyan);">  "permissions": {</span>
+<span class="term-line body" style="color:var(--cyan);">    "allow": ["Read", "Edit", "Bash(npm test:*)", "Bash(git status)"],</span>
+<span class="term-line body" style="color:var(--cyan);">    "deny": ["Bash(rm -rf:*)", "Bash(curl:*)"]</span>
+<span class="term-line body" style="color:var(--cyan);">  },</span>
+<span class="term-line body" style="color:var(--cyan);">  "hooks": {</span>
+<span class="term-line body" style="color:var(--cyan);">    "PostToolUse": [{ "matcher": "Edit", "command": ".claude/hooks/post-tool.sh" }]</span>
+<span class="term-line body" style="color:var(--cyan);">  }</span>
+<span class="term-line body" style="color:var(--cyan);">}</span>
+        </div>
+
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);margin-top:14px;line-height:1.65;">
+          <strong style="color:var(--phosphor)">skills</strong> are reusable, model-discoverable capability bundles (a SKILL.md + helper files).
+          <strong style="color:var(--phosphor)">commands</strong> are slash-prefixed prompts (/ship, /review) that compose into workflows.
+          <strong style="color:var(--phosphor)">agents</strong> are scoped sub-claudes &mdash; launched in their own context to handle narrow specialist work.
+          <strong style="color:var(--phosphor)">hooks</strong> fire deterministically around every tool call. they are how you teach claude
+          to obey the rules of your repo without re-explaining them.
+        </p>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ MCP INTEGRATION ============ -->
+      <section class="block" id="mcp">
+        <div class="block-header">SECTION 07 &middot; MCP_INTEGRATION</div>
+        <h2 class="block-title">$ claude mcp add <span class="em">&lt;server&gt;</span></h2>
+        <p class="block-lead">
+          the <strong style="color:var(--phosphor)">Model Context Protocol</strong> is the wire format that lets claude-code
+          talk to external tools &mdash; slack, gdrive, notion, your internal API. each MCP server
+          is a small program that exposes typed tools; claude discovers them and calls them
+          like local functions.
+        </p>
+
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line cmd"><span class="prompt">$</span>claude mcp add slack -- npx -y @modelcontextprotocol/server-slack</span>
+<span class="term-line check in"><span class="mark">[OK]</span>registered server &middot; slack<span class="meta">17 tools exposed</span></span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line cmd"><span class="prompt">$</span>claude mcp add github -- npx -y @modelcontextprotocol/server-github</span>
+<span class="term-line check in"><span class="mark">[OK]</span>registered server &middot; github<span class="meta">23 tools exposed</span></span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line cmd"><span class="prompt">$</span>claude mcp list</span>
+<span class="term-line body">  slack    &middot; 17 tools  &middot; running</span>
+<span class="term-line body">  github   &middot; 23 tools  &middot; running</span>
+<span class="term-line body">  context7 &middot; 4  tools  &middot; running</span>
+<span class="term-line body">  notion   &middot; 12 tools  &middot; running</span>
+<span class="term-line">&nbsp;</span>
+<span class="term-line cmd"><span class="prompt">$</span>claude</span>
+<span class="term-line user-q">&gt; post a summary of today's commits to #engineering on slack.</span>
+<span class="term-line check in"><span class="mark">[OK]</span>github.list_commits &middot; 14 commits today<span class="meta">main branch</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>summarized &middot; 4 features, 2 fixes, 1 chore<span class="meta">128 words</span></span>
+<span class="term-line check in"><span class="mark">[OK]</span>slack.post_message &middot; #engineering<span class="meta">ts 1747...</span></span>
+        </div>
+
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);margin-top:16px;line-height:1.65;">
+          &gt; an MCP server is just a child process speaking JSON-RPC over stdio (or sse for
+          remote servers). you can write your own in any language in ~100 LOC. see the
+          dedicated <a href="../mcp/">MCP lookbook page &raquo;</a> for the full architecture, lifecycle,
+          and a step-by-step build of a server in python &amp; typescript.
+        </p>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ BENCHMARKS ============ -->
+      <section class="block" id="benchmarks">
+        <div class="block-header">SECTION 08 &middot; BENCHMARKS.txt</div>
+        <h2 class="block-title">$ cat <span class="em">benchmarks/swe-bench-verified.txt</span></h2>
+        <p class="block-lead">
+          <strong style="color:var(--phosphor)">SWE-bench Verified</strong> is the de-facto "can it close a real github issue end-to-end"
+          test: 500 hand-verified bug-fix tasks pulled from real OSS python repos. higher
+          is better. claude-code drives the agent harness here.
+        </p>
+
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line body" style="color:var(--amber);">  AGENT                                       SCORE        RELEASE</span>
+<span class="term-line body" style="color:var(--phosphor-faint);">  ----------------------------------------------------------------</span>
+<span class="term-line body" style="color:var(--phosphor);">  claude-code &middot; opus 4.7 &middot; 1M ctx          82.4 %        2026-01</span>
+<span class="term-line body" style="color:var(--phosphor-dim);">  claude-code &middot; sonnet 4.6                   77.2 %        2025-09</span>
+<span class="term-line body" style="color:var(--phosphor-dim);">  claude-code &middot; opus 4.1                     74.5 %        2025-08</span>
+<span class="term-line body" style="color:var(--phosphor-dim);">  cursor agent &middot; (closed)                    73.8 %        2026-03</span>
+<span class="term-line body" style="color:var(--phosphor-dim);">  openai codex-1                               69.1 %        2025-12</span>
+<span class="term-line body" style="color:var(--phosphor-dim);">  gemini 2.5 pro &middot; jules                     65.4 %        2025-11</span>
+<span class="term-line body" style="color:var(--phosphor-dim);">  aider &middot; with claude sonnet 4.5             62.8 %        2025-10</span>
+<span class="term-line body" style="color:var(--phosphor-dim);">  devin &middot; cognition                          57.6 %        2025-09</span>
+<span class="term-line body" style="color:var(--phosphor-faint);">  ----------------------------------------------------------------</span>
+        </div>
+
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);margin-top:16px;line-height:1.65;">
+          &gt; <strong style="color:var(--phosphor)">caveats matter.</strong> SWE-bench scores creep upward partly because models train on
+          adjacent OSS issues. internal benchmarks at ceti &mdash; closed-source codebases with
+          domain language the model has never seen &mdash; show claude-code clearing roughly
+          <strong style="color:var(--phosphor)">68%</strong> of well-scoped tasks on the first attempt and <strong style="color:var(--phosphor)">~89%</strong> within three
+          retry/clarify cycles. the right question isn't "does the model solve it?" but
+          "how few rounds does it take?"
+        </p>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);margin-top:10px;line-height:1.65;">
+          &gt; other benchmarks worth knowing: <strong style="color:var(--phosphor)">terminal-bench</strong> (shell-task completion, opus 4.7 = 71%),
+          <strong style="color:var(--phosphor)">tau-bench</strong> (tool-use reliability, 79%), <strong style="color:var(--phosphor)">aider's polyglot</strong> (multi-language edits, 84%).
+        </p>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ WORKFLOWS ============ -->
+      <section class="block" id="workflows">
+        <div class="block-header">SECTION 09 &middot; WORKFLOWS.sh</div>
+        <h2 class="block-title">$ ls <span class="em">workflows/*.sh</span></h2>
+        <p class="block-lead">
+          five workflows that ceti-trained teams reach for weekly. each is a script you
+          could literally save as a shell function &mdash; or run as a one-shot via
+          <strong style="color:var(--phosphor)">claude "&lt;prompt&gt;"</strong>.
+        </p>
+
+        <p style="color:var(--amber);letter-spacing:0.16em;font-size:11px;margin:24px 0 8px;text-transform:uppercase;">&gt;&gt; 1. refactor.sh</p>
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line body" style="color:var(--phosphor-faint);">#!/usr/bin/env bash</span>
+<span class="term-line body" style="color:var(--phosphor-faint);"># consolidate a sprawling module after a quarter of feature-shipping.</span>
+<span class="term-line cmd"><span class="prompt">$</span>claude "map src/billing/. identify the 3 worst code-smells.</span>
+<span class="term-line body">        propose a refactor plan that keeps every public API stable.</span>
+<span class="term-line body">        execute step by step, running pytest after each step.</span>
+<span class="term-line body">        stop and ask if any test fails."</span>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);line-height:1.65;">
+          &gt; why it works: the agent treats the green test-suite as a tripwire. you get the
+          economic upside of a cleanup (smaller diffs, faster onboarding) without the
+          political risk of breaking prod. perfect for end-of-sprint hygiene days.
+        </p>
+
+        <p style="color:var(--amber);letter-spacing:0.16em;font-size:11px;margin:24px 0 8px;text-transform:uppercase;">&gt;&gt; 2. greenfield.sh</p>
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line body" style="color:var(--phosphor-faint);">#!/usr/bin/env bash</span>
+<span class="term-line body" style="color:var(--phosphor-faint);"># build a small full-stack app from scratch in one focused session.</span>
+<span class="term-line cmd"><span class="prompt">$</span>claude "scaffold a next.js 15 app called 'lead-router'.</span>
+<span class="term-line body">        forms in /app/intake. POST -&gt; postgres via drizzle.</span>
+<span class="term-line body">        admin table at /admin. shadcn ui. tailwind v4.</span>
+<span class="term-line body">        seed 20 fake leads. deploy to vercel. tell me the URL."</span>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);line-height:1.65;">
+          &gt; one good prompt &middot; one running URL. greenfield is where claude-code most
+          obviously beats hand-coding: there's no legacy context to load, the agent gets
+          to choose conventions, and "is it deployed?" is a binary success check. typical
+          end-to-end runtime: 12&ndash;30 minutes for a non-trivial MVP.
+        </p>
+
+        <p style="color:var(--amber);letter-spacing:0.16em;font-size:11px;margin:24px 0 8px;text-transform:uppercase;">&gt;&gt; 3. debug.sh</p>
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line body" style="color:var(--phosphor-faint);">#!/usr/bin/env bash</span>
+<span class="term-line body" style="color:var(--phosphor-faint);"># paste an error, get a hypothesis, get a fix, get a confirmation.</span>
+<span class="term-line cmd"><span class="prompt">$</span>claude "production is throwing &lt;paste stack-trace&gt;.</span>
+<span class="term-line body">        find the suspect code paths. form 3 hypotheses ranked by likelihood.</span>
+<span class="term-line body">        write a failing test that reproduces the bug.</span>
+<span class="term-line body">        then fix it. then confirm the test passes."</span>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);line-height:1.65;">
+          &gt; the "3 hypotheses" framing matters &mdash; it forces the agent to do differential
+          diagnosis instead of jumping to the first plausible cause. the "write a failing
+          test first" step turns the bug into a regression guard for the next deploy.
+        </p>
+
+        <p style="color:var(--amber);letter-spacing:0.16em;font-size:11px;margin:24px 0 8px;text-transform:uppercase;">&gt;&gt; 4. ops.sh</p>
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line body" style="color:var(--phosphor-faint);">#!/usr/bin/env bash</span>
+<span class="term-line body" style="color:var(--phosphor-faint);"># build the small internal tool nobody had time to build.</span>
+<span class="term-line cmd"><span class="prompt">$</span>claude "we re-onboard a new client every monday and it takes 2 hours.</span>
+<span class="term-line body">        write a CLI 'onboard &lt;client-slug&gt;' that does the 12 manual steps</span>
+<span class="term-line body">        in our HANDOFF.md. dry-run mode by default. real mode behind --apply."</span>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);line-height:1.65;">
+          &gt; ops scripts are the highest-leverage thing claude-code unlocks for non-engineers.
+          every team has 4&ndash;6 "we should automate this someday" tasks. someday is now a
+          friday afternoon.
+        </p>
+
+        <p style="color:var(--amber);letter-spacing:0.16em;font-size:11px;margin:24px 0 8px;text-transform:uppercase;">&gt;&gt; 5. review.sh</p>
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line body" style="color:var(--phosphor-faint);">#!/usr/bin/env bash</span>
+<span class="term-line body" style="color:var(--phosphor-faint);"># multi-pass code review before a PR is opened for human review.</span>
+<span class="term-line cmd"><span class="prompt">$</span>claude "/review HEAD~5..HEAD &mdash; run three passes in parallel:</span>
+<span class="term-line body">        (1) correctness &amp; bug risk  (2) security &amp; secrets handling</span>
+<span class="term-line body">        (3) performance &amp; complexity. consolidate into REVIEW.md."</span>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);line-height:1.65;">
+          &gt; pre-PR review catches roughly 60&ndash;70% of the comments a human reviewer would
+          have left, which means the human reviewer can focus on architecture and intent
+          instead of nit-picking. teams that adopt this report PR cycle-time dropping by
+          ~40%.
+        </p>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ COMMUNITY ============ -->
+      <section class="block" id="community">
+        <div class="block-header">SECTION 10 &middot; COMMUNITY.txt</div>
+        <h2 class="block-title">$ finger <span class="em">@agent-engineers</span></h2>
+        <p class="block-lead">
+          claude-code grew its own subculture &mdash; "agent engineers" who design hooks, skills,
+          and orchestrator-worker patterns the way frontend devs once argued about CSS-in-JS.
+          here's where they hang out.
+        </p>
+
+        <div class="term-session" style="min-height:auto;">
+<span class="term-line body" style="color:var(--amber);">  CHANNEL                  WHERE                                       VIBE</span>
+<span class="term-line body" style="color:var(--phosphor-faint);">  ----------------------------------------------------------------------------</span>
+<span class="term-line body">  anthropic discord        <a href="https://anthropic.com/discord" target="_blank" rel="noopener">anthropic.com/discord</a>           official, busy</span>
+<span class="term-line body">  github issues            <a href="https://github.com/anthropics/claude-code" target="_blank" rel="noopener">github.com/anthropics/claude-code</a>   bug-tracker, fast</span>
+<span class="term-line body">  /r/ClaudeCode            <a href="https://reddit.com/r/ClaudeCode" target="_blank" rel="noopener">reddit.com/r/ClaudeCode</a>         tips, gripes, wins</span>
+<span class="term-line body">  agent-engineers slack    invite-only &middot; ask in discord            deep technique</span>
+<span class="term-line body">  awesome-claude-code      <a href="https://github.com/hesreallyhim/awesome-claude-code" target="_blank" rel="noopener">github.com/hesreallyhim/...</a>     curated skills+cmds</span>
+<span class="term-line body">  ceti agentic-ai cohort   <a href="https://cetiai.co" target="_blank" rel="noopener">cetiai.co</a>                       cohort-based course</span>
+<span class="term-line body" style="color:var(--phosphor-faint);">  ----------------------------------------------------------------------------</span>
+        </div>
+
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--phosphor-dim);margin-top:16px;line-height:1.65;">
+          &gt; the discord is where the most current information actually lives. anthropic
+          engineers participate. the github issues queue is the closest thing to a public
+          roadmap. and if you want to learn the patterns by building 8 production agents
+          in 4 weeks alongside other operators, ceti's agentic-ai cohort is the most
+          structured path on the market.
+        </p>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ AUTHORS ============ -->
+      <section class="block" id="authors">
+        <div class="block-header">SECTION 11 &middot; AUTHORS</div>
+        <h2 class="block-title">$ cat <span class="em">AUTHORS</span></h2>
+
+        <div class="manpage" style="font-size:12px;">
+<span style="color:var(--amber);">## upstream / claude-code itself</span>
+anthropic, pbc                   &lt;<a href="https://www.anthropic.com" target="_blank" rel="noopener">anthropic.com</a>&gt;
+  claude-code core team          model + tooling + harness
+  policy &amp; safety team           the rules that keep the hands kind
+
+<span style="color:var(--amber);">## this lookbook page</span>
+manu mulaveesala                 &lt;<a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a>&gt;
+  ceti.ai                        <a href="https://cetiai.co" target="_blank" rel="noopener">cetiai.co</a>
+  role                           authored / curated / designed
+  built with                     claude opus 4.7 &middot; vt323 &middot; jetbrains mono
+
+<span style="color:var(--amber);">## thanks</span>
+the ~5,000 operators ceti has trained, who taught us which sentences
+in this manual actually land &mdash; and which ones we had to rewrite five times.
+
+<span style="color:var(--amber);">## terms</span>
+this page is part of the ceti lookbook &middot; CC BY 4.0 attribution requested.
+claude-code is a trademark of anthropic, pbc &middot; used here descriptively.
+        </div>
+      </section>
+
+      <hr class="hr">
+
+      <!-- ============ FINAL CTA ============ -->
+      <section class="final-cta" id="start">
+        <h2 class="final-cta-title">Ready to <span class="em">delegate</span><br>instead of describe?</h2>
+        <p class="final-cta-sub">
+          The hardest part of Claude Code is the first ten minutes. After that, the terminal
+          stops feeling like a black box and starts feeling like a teammate.
+        </p>
+        <a class="blinking-prompt" href="https://claude.com/claude-code" target="_blank" rel="noopener">
+          $ claude<span class="big-caret"></span>
+        </a>
+        <a href="https://calendly.com/manutej/30min" class="final-cta-secondary" target="_blank" rel="noopener">
+          &gt; or: talk to CETI for a team walkthrough
+        </a>
+      </section>
+
+      <!-- ============ FOOTER ============ -->
+      <footer class="foot">
+        <p>
+          // CETI.AI LOOKBOOK &middot; <a href="https://cetiai.co">cetiai.co</a> &middot;
+          CLAUDE-CODE is a product of <a href="https://www.anthropic.com" target="_blank" rel="noopener">ANTHROPIC</a>
+          &middot; CONNECTION TERMINATED ::
+        </p>
+      </footer>
+
     </div>
-    <div class="compare">
-      <div class="compare-row">
-        <span class="label">EMAIL</span>
-        <span class="desc">Send a request, wait, read a reply. Asynchronous.</span>
-      </div>
-      <div class="compare-row">
-        <span class="label">SLACK</span>
-        <span class="desc">Chat back and forth. Synchronous, words only.</span>
-      </div>
-      <div class="compare-row">
-        <span class="label">CHATGPT / CLAUDE</span>
-        <span class="desc">Ask a smart friend. They reply with words and maybe a draft.</span>
-      </div>
-      <div class="compare-row highlight">
-        <span class="label">CLAUDE CODE</span>
-        <span class="desc">Same chat — but the friend now has hands, a filesystem, and a deploy button.</span>
-      </div>
-    </div>
   </div>
-</section>
-
-<!-- ============ VIGNETTES ============ -->
-<section class="section">
-  <p class="section-eyebrow">SECTION 04 · REAL WORKFLOWS</p>
-  <h2 class="section-heading">Three people, three Tuesday afternoons.</h2>
-  <p class="section-lead">None of these people identify as engineers. They learned the basics in an afternoon. Here's what they built.</p>
-
-  <div class="vignettes">
-    <article class="vignette v1">
-      <p class="who">THE FOUNDER</p>
-      <h3>Prototype an investor demo overnight.</h3>
-      <p>Maya had a pitch on Monday and no product yet. She described her idea — a referral tracker for fitness studios — to Claude Code, slept while it built a working version, woke up to a live URL she could click. She fixed the colors herself.</p>
-      <p class="ask">claude "build a referral tracker web app where studios can paste a list of clients and get a shareable referral link per client. deploy to vercel."</p>
-    </article>
-    <article class="vignette v2">
-      <p class="who">THE OPS LEAD</p>
-      <h3>Refactor a messy data pipeline.</h3>
-      <p>Devon inherited a Python script that nobody understood. He asked Claude Code to read it, explain it in plain English, then rewrite it cleanly. The new version is half as long and has tests. Devon now actually knows how it works.</p>
-      <p class="ask">claude "read pipeline.py, explain what each function does in plain language, then refactor for clarity. add tests."</p>
-    </article>
-    <article class="vignette v3">
-      <p class="who">THE MARKETER</p>
-      <h3>Auto-generate client proposals.</h3>
-      <p>Priya was hand-customizing the same proposal deck 12 times a week. She gave Claude Code her template and a CSV of clients; now a single command renders all twelve, swaps in logos, and saves them as PDFs. She edits, then sends.</p>
-      <p class="ask">claude "for every row in clients.csv, render proposal-template.html with the right name, logo, and price. export as pdf."</p>
-    </article>
-  </div>
-</section>
-
-<!-- ============ PRICING ============ -->
-<section class="pricing-section">
-  <div class="section">
-    <p class="section-eyebrow">SECTION 05 · WHAT IT COSTS</p>
-    <h2 class="section-heading">Claude Code comes free with any paid Claude plan.</h2>
-    <p class="section-lead">If you're already paying for Claude, you already have it. The numbers below are Anthropic's published consumer plans — same dollars whether you're using the chat or the terminal.</p>
-
-    <div class="pricing">
-      <article class="plan">
-        <h3 class="name">Free</h3>
-        <p class="for">TRY THE CHAT</p>
-        <div class="price">
-          <span class="currency">$</span>
-          <span class="num"><span class="num-val" data-to="0">0</span></span>
-          <span class="per">/ month</span>
-        </div>
-        <ul>
-          <li>Claude.ai web chat</li>
-          <li>Limited daily usage</li>
-          <li>Claude Code <em>not</em> included</li>
-        </ul>
-      </article>
-
-      <article class="plan recommended">
-        <h3 class="name">Pro</h3>
-        <p class="for">FIRST REAL WORKSPACE</p>
-        <div class="price">
-          <span class="currency">$</span>
-          <span class="num"><span class="num-val" data-to="20">0</span></span>
-          <span class="per">/ month</span>
-        </div>
-        <ul>
-          <li><strong>Claude Code included</strong></li>
-          <li>~5× the chat usage of Free</li>
-          <li>Projects, Artifacts, file uploads</li>
-          <li>$17/mo if you pay annually</li>
-        </ul>
-      </article>
-
-      <article class="plan">
-        <h3 class="name">Max</h3>
-        <p class="for">POWER USERS</p>
-        <div class="price">
-          <span class="currency">$</span>
-          <span class="num"><span class="num-val" data-to="100">0</span></span>
-          <span class="per">/ month+</span>
-        </div>
-        <ul>
-          <li>Everything in Pro</li>
-          <li>5×–20× the usage of Pro</li>
-          <li>Priority access at peak hours</li>
-        </ul>
-      </article>
-
-      <article class="plan">
-        <h3 class="name">Team</h3>
-        <p class="for">FOR SMALL ORGS</p>
-        <div class="price">
-          <span class="currency">$</span>
-          <span class="num"><span class="num-val" data-to="20">0</span></span>
-          <span class="per">/ seat / month</span>
-        </div>
-        <ul>
-          <li>Claude Code + Cowork</li>
-          <li>Central admin &amp; billing</li>
-          <li>Premium tier at $100/seat</li>
-        </ul>
-      </article>
-    </div>
-
-    <p class="plan-foot">Pricing reflects Anthropic's public plans at <a href="https://claude.com/pricing" style="color: var(--color-text-secondary); border-bottom: 1px dotted var(--color-border); text-decoration: none;">claude.com/pricing</a>. Enterprise plans are quoted per workspace.</p>
-  </div>
-</section>
-
-<!-- ============ FINAL CTA ============ -->
-<section class="final" id="start">
-  <h2>Ready to <em>delegate</em> instead of describe?</h2>
-  <p>The hardest part of Claude Code is the first ten minutes. After that, the terminal stops feeling like a black box and starts feeling like a teammate.</p>
-  <div class="cta-row">
-    <a class="magnetic" href="https://claude.com/claude-code" target="_blank" rel="noopener">
-      Install Claude Code
-      <span class="arrow">→</span>
-    </a>
-    <a class="secondary-link" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">Or: talk to CETI for a team walkthrough</a>
-  </div>
-</section>
-
-<footer>
-  <p>Lookbook · <a href="https://cetiai.co">CETI.AI</a> · A warm, demystifying introduction. Claude Code is a product of <a href="https://www.anthropic.com" target="_blank" rel="noopener">Anthropic</a>.</p>
-</footer>
+</div>
 
 <script>
-// ============ HERO REVEAL ============
-requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-// ============ INTERSECTION REVEALS ============
-const reveal = new IntersectionObserver((entries) => {
-  entries.forEach((e) => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      reveal.unobserve(e.target);
-    }
-  });
-}, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
-document.querySelectorAll('.tile, .vignette, .plan').forEach((el) => reveal.observe(el));
-
-// ============ NUMBER TICKER (pricing) ============
-function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-function animateNum(el) {
-  const to = +el.dataset.to;
-  if (to === 0) { el.textContent = '0'; return; }
-  const dur = 1100;
-  const start = performance.now();
-  function tick(now) {
-    const p = Math.min((now - start) / dur, 1);
-    el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-    if (p < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+// ============ LIVE CLOCK ============
+function tick() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  const el = document.getElementById('clock');
+  if (el) el.textContent = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 }
-const numObs = new IntersectionObserver((entries) => {
-  entries.forEach((e) => {
-    if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-  });
-}, { threshold: 0.6 });
-document.querySelectorAll('.num-val').forEach((el) => numObs.observe(el));
+tick(); setInterval(tick, 1000);
 
-// ============ MAGNETIC BUTTONS ============
-const STRENGTH = 25;
-document.querySelectorAll('.magnetic').forEach((btn) => {
-  btn.addEventListener('mousemove', (e) => {
-    const r = btn.getBoundingClientRect();
-    const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-    const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-    btn.style.setProperty('--mx', `${x}px`);
-    btn.style.setProperty('--my', `${y}px`);
-  });
-  btn.addEventListener('mouseleave', () => {
-    btn.style.setProperty('--mx', '0px');
-    btn.style.setProperty('--my', '0px');
-  });
-});
-
-// ============ MAGIC-CARD CURSOR GLOW (tiles) ============
-document.querySelectorAll('.tile').forEach((card) => {
-  card.addEventListener('mousemove', (e) => {
-    const r = card.getBoundingClientRect();
-    card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    card.style.setProperty('--my', `${e.clientY - r.top}px`);
-  });
-});
-
-// ============ TERMINAL TYPEWRITER ============
-const termBody = document.getElementById('term-body');
+// ============ HERO TAGLINE TYPEWRITER ============
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const tagEl = document.getElementById('hero-tagline');
+const tagText = '> NOT A CHATBOT. A TEAMMATE._';
+function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }
+async function typeTagline() {
+  if (reduce) { tagEl.textContent = tagText; return; }
+  tagEl.textContent = '';
+  for (let i = 0; i < tagText.length; i++) {
+    tagEl.textContent += tagText[i];
+    await wait(45 + Math.random() * 50);
+  }
+}
+typeTagline();
 
-// The script: array of segments. Each has a type and content.
-// Types: cmd (with $ prompt), user-q (cyan question), label (mauve "Claude:"),
-//        body (plain), check (animated checkmark), blank (empty line)
+// ============ MAIN TERMINAL TYPEWRITER ============
+const termBody = document.getElementById('term-body');
+
 const script = [
   { type: 'cmd', text: 'claude' },
   { type: 'blank' },
@@ -1135,7 +1651,7 @@ function buildEmptyLines() {
     if (s.type === 'cmd') {
       span.innerHTML = '<span class="prompt">$</span><span class="cmd-text"></span><span class="caret"></span>';
     } else if (s.type === 'check') {
-      span.innerHTML = '<span class="mark">✓</span><span class="check-text"></span><span class="meta"></span>';
+      span.innerHTML = '<span class="mark">[OK]</span><span class="check-text"></span><span class="meta"></span>';
     } else if (s.type === 'blank') {
       span.innerHTML = '&nbsp;';
     } else {
@@ -1153,7 +1669,7 @@ function renderStatic() {
     if (s.type === 'cmd') {
       span.innerHTML = '<span class="prompt">$</span>' + s.text;
     } else if (s.type === 'check') {
-      span.innerHTML = '<span class="mark">✓</span>' + s.text + '<span class="meta">' + (s.meta || '') + '</span>';
+      span.innerHTML = '<span class="mark">[OK]</span>' + s.text + '<span class="meta">' + (s.meta || '') + '</span>';
       span.classList.add('in');
     } else if (s.type === 'blank') {
       span.innerHTML = '&nbsp;';
@@ -1164,13 +1680,10 @@ function renderStatic() {
   });
 }
 
-function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }
-
 async function typeInto(targetEl, text, minDelay = 38, maxDelay = 78) {
   for (let i = 0; i < text.length; i++) {
     targetEl.textContent += text[i];
     const ch = text[i];
-    // pause longer at sentence-ish chars
     let d = minDelay + Math.random() * (maxDelay - minDelay);
     if (ch === ',' || ch === '.') d += 120;
     if (ch === ' ') d *= 0.55;
@@ -1190,12 +1703,10 @@ async function runTypewriter() {
       const cmdText = line.querySelector('.cmd-text');
       await typeInto(cmdText, s.text, 70, 130);
       await wait(420);
-      // remove caret from this line; place it nowhere until next typed line
       const c = line.querySelector('.caret');
       if (c) c.remove();
     } else if (s.type === 'user-q') {
       const content = line.querySelector('.content');
-      // add caret to start typing
       const caret = document.createElement('span');
       caret.className = 'caret';
       line.appendChild(caret);
@@ -1212,23 +1723,19 @@ async function runTypewriter() {
     } else if (s.type === 'check') {
       line.querySelector('.check-text').textContent = s.text;
       if (s.meta) line.querySelector('.meta').textContent = s.meta;
-      // spring fade in
       requestAnimationFrame(() => line.classList.add('in'));
       await wait(560);
     } else {
-      // blank
       await wait(120);
     }
   }
-  // hold the final state, then loop
-  await wait(3200);
+  await wait(3600);
   runTypewriter();
 }
 
 if (reduce) {
   renderStatic();
 } else {
-  // Defer start until terminal is in view (saves CPU if scrolled past quickly)
   const termObs = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (e.isIntersecting) {
@@ -1237,9 +1744,9 @@ if (reduce) {
       }
     });
   }, { threshold: 0.2 });
-  termObs.observe(document.querySelector('.terminal'));
+  termObs.observe(termBody);
 }
 </script>
-  <script src="../shared/nav.js" defer></script>
+<script src="../shared/nav.js" defer></script>
 </body>
 </html>

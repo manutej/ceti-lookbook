@@ -3,1221 +3,2405 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Coding Agents Landscape · 2026 · CETI.AI Lookbook</title>
-<meta name="description" content="A neutral comparison of seven AI coding agents in 2026 — Claude Code, Cursor, GitHub Copilot, Aider, Cline, Devin, Codeium — by capability, philosophy, benchmark, and use case.">
+<title>AI Coding Agents · 2026 League Standings · CETI Almanac</title>
+<meta name="description" content="The 2026 sports almanac of AI coding agents — Claude Code, Cursor, GitHub Copilot, Aider, Cline, Devin, Codeium/Windsurf — as trading-card-style player profiles with capability matrix, head-to-head matchups, and benchmark leaderboards.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --color-bg: #FAF7F2;
-  --color-bg-warm: #F5F0E8;
-  --color-text: #2C2A28;
-  --color-text-secondary: #6B6560;
-  --color-text-muted: #9E9790;
-  --color-border: #E5DFD6;
-  --color-border-light: #EEEBE5;
-  --color-surface: #FFFFFF;
-  --color-surface-warm: #FDF9F3;
+  /* ====== FIELD COLORS ====== */
+  --bg-field:        #1E2530;   /* cool athletic gray */
+  --bg-band:         #252D38;   /* alternating section band */
+  --bg-card:         #2A3340;   /* card surface */
+  --bg-card-deep:    #1A212B;   /* card recess / back face */
+  --line:            #3A4456;   /* divider */
+  --line-soft:       #2F3845;
+  --line-strong:     #4D5970;
 
-  --color-accent: #D94F30;
-  --color-accent-hover: #C4432A;
-  --color-accent-light: #FDEEE9;
-  --color-accent-muted: #E8836C;
+  --text:            #FFFFFF;
+  --text-2:          #A6B0C2;   /* cool gray secondary */
+  --text-3:          #6E7689;   /* muted */
+  --text-stat:       #E8ECF3;
 
-  /* Actor colors — one per agent */
-  --color-actor-1: #D94F30; /* vermillion — Claude Code */
-  --color-actor-2: #2A7B9B; /* teal — Cursor */
-  --color-actor-3: #7B6DAA; /* plum — Copilot */
-  --color-actor-4: #D4A843; /* golden — Aider */
-  --color-actor-5: #2D8B55; /* forest — Cline */
-  --color-actor-6: #B5564E; /* terracotta — Devin */
-  --color-actor-7: #4B6B7B; /* slate-blue — Codeium */
+  /* ====== TEAM COLORS — per agent ====== */
+  --t-claude:   #FF8C2C;   /* amber */
+  --t-cursor:   #0066FF;   /* electric blue */
+  --t-copilot:  #0E8C40;   /* forest */
+  --t-aider:    #CC3344;   /* brick red */
+  --t-cline:    #5856D6;   /* purple-blue (team color, not a gradient) */
+  --t-devin:    #00D4FF;   /* cyan */
+  --t-codeium:  #FFCC00;   /* yellow */
 
-  --font-display: 'Bricolage Grotesque', Georgia, serif;
-  --font-body: 'DM Sans', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  /* ====== FONTS ====== */
+  --f-display: 'Bebas Neue', 'Arial Narrow', sans-serif;
+  --f-body:    'Inter', -apple-system, system-ui, sans-serif;
+  --f-mono:    'JetBrains Mono', 'Fira Code', monospace;
 
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-  --duration-fast: 150ms;
-  --duration-normal: 300ms;
-  --duration-slow: 500ms;
-  --duration-slower: 700ms;
-  --stagger: 80ms;
-
-  --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-  --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-  --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+  /* ====== MOTION ====== */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --d-fast: 160ms;
+  --d-norm: 320ms;
+  --d-slow: 600ms;
 }
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
-  font-family: var(--font-body);
-  color: var(--color-text);
-  background: var(--color-bg);
-  background-image:
-    radial-gradient(ellipse at 18% 14%, rgba(217, 79, 48, 0.045) 0%, transparent 55%),
-    radial-gradient(ellipse at 82% 8%, rgba(42, 123, 155, 0.035) 0%, transparent 50%);
-  line-height: 1.6;
+  font-family: var(--f-body);
+  background: var(--bg-field);
+  color: var(--text);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  /* very subtle field-pattern grid */
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 48px 48px, 48px 48px;
+  background-position: -1px -1px, -1px -1px;
 }
-::selection { background: var(--color-accent-light); color: var(--color-accent-hover); }
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 999px; }
 
-/* ============ TOP BAR ============ */
+::selection { background: var(--t-claude); color: #1A1500; }
+::-webkit-scrollbar { height: 10px; width: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-card-deep); }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
+
+/* tabular numbers everywhere */
+.num, .stat-num, .bench-val, .price, .card-num, td, th {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ====== TOP BAR ====== */
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(30, 37, 48, 0.85);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.85rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-  max-width: 1240px;
-  margin: 0 auto;
+  gap: 1rem;
 }
 .brand {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
-  color: var(--color-text);
+  font-family: var(--f-display);
+  letter-spacing: 0.03em;
+  font-size: 1.4rem;
+  color: var(--text);
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
 }
-.brand-dot {
+.brand-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--t-claude);
   display: inline-block;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: var(--color-accent);
-  border-radius: 50%;
-  margin-right: 0.5rem;
-  vertical-align: middle;
-  transform: translateY(-2px);
+  position: relative;
+}
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: var(--bg-field);
+  border-radius: 2px;
 }
 .topbar-meta {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.18em;
+  color: var(--text-2);
 }
 
-/* ============ HERO ============ */
+/* ====== HERO MATCHUP ====== */
 .hero {
-  padding: 4rem 1.5rem 3rem;
-  max-width: 1100px;
+  position: relative;
+  padding: 4rem 1.25rem 3rem;
+  max-width: 1280px;
   margin: 0 auto;
 }
 .eyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--f-mono);
   font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--color-accent);
-  opacity: 0;
-  transition: opacity var(--duration-slow) var(--ease-out);
-}
-.hero.visible .eyebrow { opacity: 1; }
-.hero-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(2.4rem, 6vw, 4.4rem);
-  line-height: 1.04;
-  letter-spacing: -0.03em;
-  margin: 1.25rem 0 1.25rem;
-  max-width: 18ch;
-}
-.hero-title .word {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity var(--duration-slower) var(--ease-spring),
-    transform var(--duration-slower) var(--ease-spring);
-}
-.hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-.hero.visible .hero-title .word:nth-child(1) { transition-delay: 80ms; }
-.hero.visible .hero-title .word:nth-child(2) { transition-delay: 160ms; }
-.hero.visible .hero-title .word:nth-child(3) { transition-delay: 240ms; }
-.hero.visible .hero-title .word:nth-child(4) { transition-delay: 320ms; }
-.hero.visible .hero-title .word:nth-child(5) { transition-delay: 400ms; }
-.hero.visible .hero-title .word:nth-child(6) { transition-delay: 480ms; }
-.hero-title em { font-style: normal; color: var(--color-accent); }
-
-.hero-sub {
-  font-size: 1.2rem;
-  color: var(--color-text-secondary);
-  max-width: 56ch;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-  transition-delay: 600ms;
-}
-.hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-.hero-meta {
+  letter-spacing: 0.22em;
+  color: var(--text-2);
+  margin: 0 0 0.85rem;
   display: flex;
-  gap: 2rem;
-  margin-top: 2rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  opacity: 0;
-  transition: opacity var(--duration-slower) var(--ease-out);
-  transition-delay: 800ms;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
 }
-.hero.visible .hero-meta { opacity: 1; }
-.hero-meta span strong { color: var(--color-text-secondary); font-weight: 500; }
+.eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 2px;
+  background: var(--t-claude);
+}
+.hero-title {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 7vw, 5.6rem);
+  line-height: 0.92;
+  letter-spacing: 0.005em;
+  margin: 0 0 1.2rem;
+  text-transform: uppercase;
+}
+.hero-title .accent { color: var(--t-claude); }
+.hero-sub {
+  font-size: 1.08rem;
+  color: var(--text-2);
+  max-width: 64ch;
+  margin: 0 0 2.25rem;
+}
+.hero-strap {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.hero-strap-cell {
+  padding: 1rem 1.1rem;
+  border-right: 1px solid var(--line-soft);
+}
+.hero-strap-cell:last-child { border-right: none; }
+.strap-k {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-3);
+  margin: 0 0 0.4rem;
+}
+.strap-v {
+  font-family: var(--f-display);
+  font-size: 1.85rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--text-stat);
+}
+.strap-v .small {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  color: var(--text-2);
+  letter-spacing: 0.1em;
+  margin-left: 0.35rem;
+  text-transform: uppercase;
+}
 
-/* ============ MATRIX ============ */
-.matrix-section {
-  padding: 3rem 1.5rem 5rem;
-  max-width: 1240px;
+/* ====== SECTION SCAFFOLD ====== */
+.section {
+  padding: 4rem 1.25rem;
+}
+.section.band {
+  background: var(--bg-band);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.section-inner {
+  max-width: 1280px;
   margin: 0 auto;
 }
-.section-eyebrow {
-  font-family: var(--font-mono);
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.section-num {
+  font-family: var(--f-mono);
   font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--text-3);
   text-transform: uppercase;
+}
+.section-title {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1;
+  margin: 0.5rem 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+.section-lede {
+  color: var(--text-2);
+  font-size: 1.02rem;
+  max-width: 62ch;
+  margin: 1.2rem 0 0;
+}
+
+/* ====== ROSTER INTRO + GRID ====== */
+.roster-intro {
+  color: var(--text-2);
+  max-width: 70ch;
+  font-size: 1.02rem;
+  margin-bottom: 2.5rem;
+}
+.roster-intro p { margin: 0 0 1rem; }
+.roster-intro p:last-child { margin-bottom: 0; }
+
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.25rem;
+}
+
+/* ====== TRADING CARD ====== */
+.card {
+  --team: var(--t-claude);
+  position: relative;
+  height: 460px;
+  perspective: 1400px;
+  cursor: default;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity var(--d-slow) var(--ease), transform var(--d-slow) var(--ease);
+}
+.card.in { opacity: 1; transform: translateY(0); }
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 700ms var(--ease-spring);
+  transform-style: preserve-3d;
+}
+.card:hover .card-inner,
+.card:focus-within .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.card-front {
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.02),
+    0 0 0 0 var(--team);
+  transition: box-shadow var(--d-norm) var(--ease);
+}
+.card:hover .card-front {
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    0 0 28px -6px color-mix(in srgb, var(--team) 55%, transparent);
+}
+.card-back {
+  transform: rotateY(180deg);
+  background: var(--bg-card-deep);
+}
+
+/* CARD HEADER — team stripe */
+.card-header {
+  position: relative;
+  padding: 0.9rem 1rem;
+  background: var(--team);
+  color: #0A0E14;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.card-header::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 4px;
+  background: #0A0E14;
+  opacity: 0.45;
+}
+.card-num {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+.card-tag {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  background: rgba(10, 14, 20, 0.18);
+  border-radius: 3px;
+}
+
+/* CARD PHOTO ZONE — geometric color block */
+.card-photo {
+  position: relative;
+  height: 150px;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--team) 100%, black 0%) 0%,
+      color-mix(in srgb, var(--team) 60%, black 40%) 100%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-photo::before,
+.card-photo::after {
+  content: "";
+  position: absolute;
+  border: 1.5px solid rgba(255,255,255,0.13);
+}
+.card-photo::before {
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  top: -90px; left: -50px;
+}
+.card-photo::after {
+  width: 110px; height: 110px;
+  bottom: -40px; right: -30px;
+  border-radius: 6px;
+  transform: rotate(18deg);
+}
+.card-glyph {
+  font-family: var(--f-display);
+  font-size: 4.5rem;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.92);
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.18);
+}
+
+/* CARD BODY */
+.card-body {
+  padding: 1rem 1.05rem 0.6rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.card-name {
+  font-family: var(--f-display);
+  font-size: 1.65rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin: 0 0 0.15rem;
+  text-transform: uppercase;
+}
+.card-team {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
   letter-spacing: 0.14em;
-  color: var(--color-accent);
-  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-2);
+  margin: 0 0 0.9rem;
 }
-.section-heading {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-  letter-spacing: -0.02em;
-  margin: 0 0 0.5rem;
-  max-width: 28ch;
+.card-team .role-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--team);
+  margin-right: 0.4rem;
+  vertical-align: middle;
+  transform: translateY(-1px);
 }
-.section-sub {
-  color: var(--color-text-secondary);
-  max-width: 60ch;
-  margin: 0 0 2.5rem;
-  font-size: 1.05rem;
+
+/* HEADLINE STAT */
+.card-stat {
+  background: var(--bg-card-deep);
+  border: 1px solid var(--line-soft);
+  border-left: 3px solid var(--team);
+  border-radius: 4px;
+  padding: 0.65rem 0.8rem;
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.5rem;
 }
+.card-stat-k {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.card-stat-sub {
+  font-size: 0.75rem;
+  color: var(--text-2);
+  margin-top: 0.1rem;
+}
+.card-stat-v {
+  font-family: var(--f-display);
+  font-size: 2rem;
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  color: var(--team);
+}
+.card-stat-v .pct {
+  font-family: var(--f-mono);
+  font-size: 0.85rem;
+  color: var(--text-2);
+  margin-left: 0.1rem;
+}
+
+.card-foot {
+  margin: 0.65rem 0 0.85rem;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 1.05rem;
+}
+.card-foot .flip-hint {
+  color: var(--team);
+}
+
+/* BACK FACE */
+.card-back-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.back-name {
+  font-family: var(--f-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.back-tag {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: var(--team);
+  text-transform: uppercase;
+}
+.card-bio {
+  padding: 0.9rem 1rem 0.6rem;
+  font-size: 0.86rem;
+  color: var(--text-2);
+  line-height: 1.5;
+  flex: 1;
+  overflow: hidden;
+}
+.stat-grid {
+  padding: 0.6rem 1rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem 0.9rem;
+  border-top: 1px solid var(--line-soft);
+}
+.stat-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  border-bottom: 1px dotted var(--line-soft);
+  padding-bottom: 0.18rem;
+}
+.stat-line span:first-child {
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.66rem;
+}
+.stat-line span:last-child {
+  color: var(--text-stat);
+  font-weight: 600;
+}
+
+/* ====== CAPABILITY MATRIX ====== */
+.matrix-narrative {
+  color: var(--text-2);
+  max-width: 70ch;
+  margin: 0 0 1.8rem;
+  font-size: 1.02rem;
+}
+.matrix-narrative p { margin: 0 0 0.95rem; }
+.matrix-narrative p:last-child { margin-bottom: 0; }
 
 .scroll-hint {
   display: none;
-  font-family: var(--font-mono);
+  font-family: var(--f-mono);
   font-size: 0.7rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-text-muted);
-  margin-bottom: 0.75rem;
+  color: var(--text-3);
+  margin-bottom: 0.7rem;
 }
-
 .matrix-wrap {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 1rem;
-  padding: 1.25rem;
-  position: relative;
-  box-shadow: var(--shadow-sm);
-}
-.matrix-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
-.matrix {
-  display: grid;
-  grid-template-columns: 200px repeat(7, minmax(110px, 1fr));
-  gap: 0;
-  min-width: 900px;
-  position: relative;
-}
-.matrix .col-head {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-text-muted);
-  padding: 0.75rem 0.5rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-  text-align: center;
-  font-weight: 500;
-}
-.matrix .col-head.first {
-  text-align: left;
-  padding-left: 0.5rem;
-}
-
-.matrix .row {
-  display: contents;
-}
-.matrix .cell {
-  padding: 1rem 0.5rem;
-  border-bottom: 1px solid var(--color-border-light);
-  position: relative;
-  transition: background 200ms var(--ease-out);
-}
-.matrix .row:last-child .cell { border-bottom: none; }
-.matrix .row.hovered .cell { background: var(--color-bg-warm); }
-
-.agent-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding-left: 0.5rem;
-  cursor: default;
-  position: relative;
-}
-.agent-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--agent-color, var(--color-accent));
-  flex-shrink: 0;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--agent-color, var(--color-accent)) 18%, transparent);
-}
-.agent-name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: -0.005em;
-  white-space: nowrap;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
-.agent-sub {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
+.matrix-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table.matrix {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+}
+.matrix th, .matrix td {
+  padding: 0.85rem 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid var(--line-soft);
+}
+.matrix thead th {
+  font-family: var(--f-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  margin-top: 2px;
+  color: var(--text-3);
+  background: var(--bg-card-deep);
+  font-weight: 500;
+  padding: 0.85rem 0.6rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
 }
+.matrix th.first, .matrix td.first {
+  text-align: left;
+  padding-left: 1rem;
+}
+.matrix tbody tr {
+  transition: background 200ms var(--ease);
+}
+.matrix tbody tr:hover {
+  background: rgba(255,255,255,0.025);
+}
+.matrix tbody tr:last-child td { border-bottom: none; }
 
-/* Capability bar */
-.cap {
+.m-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 200px;
+}
+.m-stripe {
+  width: 4px;
+  height: 30px;
+  background: var(--team);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.m-name-wrap {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
+}
+.m-name {
+  font-family: var(--f-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.m-team {
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* capability bar */
+.cap-cell {
+  min-width: 90px;
+}
+.cap-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
   align-items: stretch;
-  gap: 0.375rem;
-  padding: 0 0.5rem;
 }
 .cap-bar {
-  position: relative;
-  height: 6px;
-  background: var(--color-bg-warm);
+  height: 8px;
+  background: rgba(255,255,255,0.06);
   border-radius: 999px;
   overflow: hidden;
+  position: relative;
 }
 .cap-fill {
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 0%;
-  background: var(--agent-color, var(--color-accent));
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--team);
   border-radius: 999px;
-  transition: width 1100ms var(--ease-out);
+  transition: width 1200ms var(--ease);
 }
-.matrix.visible .cap-fill {
-  width: calc(var(--v, 0) * 1%);
+.matrix.viz .cap-fill { width: calc(var(--v, 0) * 1%); }
+.cap-num {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text-stat);
+  font-weight: 500;
 }
-.cap-label {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--color-text-secondary);
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-}
-.cap-label.cost-low::before { content: '$'; color: var(--color-actor-5); }
-.cap-label.cost-mid::before { content: '$$'; color: var(--color-actor-4); }
-.cap-label.cost-high::before { content: '$$$'; color: var(--color-actor-1); }
-.cap-label.cost-vhigh::before { content: '$$$$'; color: var(--color-actor-1); }
+.cap-num.tiny { font-size: 0.66rem; }
+.cap-num .pct { color: var(--text-3); margin-left: 0.1rem; }
 
-/* Tooltip card */
-.tip {
-  position: absolute;
-  left: 1rem;
-  top: calc(100% + 8px);
-  z-index: 30;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-left: 3px solid var(--agent-color, var(--color-accent));
-  border-radius: 0.625rem;
-  padding: 0.875rem 1rem;
-  box-shadow: var(--shadow-lg);
-  max-width: 320px;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-4px);
-  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+.cost-bullet {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text-stat);
+  font-weight: 500;
 }
-.agent-cell:hover .tip,
-.agent-cell:focus-within .tip {
-  opacity: 1;
-  transform: translateY(0);
-}
-.tip-name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin: 0 0 0.25rem;
-}
-.tip-line {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  margin: 0;
-  line-height: 1.5;
+.cost-bullet.low  { color: #6DD58C; }
+.cost-bullet.mid  { color: #FFCC00; }
+.cost-bullet.high { color: #FF8C2C; }
+.cost-bullet.vhi  { color: #FF5670; }
+
+.swe-bench {
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-stat);
 }
 
-/* Matrix legend */
 .matrix-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.25rem;
-  margin-top: 1.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
-.legend-key {
-  width: 18px;
-  height: 4px;
-  background: var(--color-text-muted);
-  border-radius: 999px;
-}
-.legend-key.fill { background: var(--color-accent); }
-.legend-note { color: var(--color-text-secondary); }
-
-/* ============ PHILOSOPHIES BENTO ============ */
-.philosophies {
-  padding: 4rem 1.5rem;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-.bento {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-}
-.bento-card {
-  position: relative;
-  padding: 1.75rem;
-  border-radius: 1rem;
-  background:
-    radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
-      color-mix(in srgb, var(--card-color, var(--color-accent)) 12%, transparent), transparent 45%),
-    var(--color-surface);
-  border: 1px solid var(--color-border);
-  transition:
-    border-color var(--duration-normal) var(--ease-out),
-    transform var(--duration-slower) var(--ease-spring),
-    box-shadow var(--duration-normal) var(--ease-out),
-    opacity var(--duration-slower) var(--ease-spring);
-  opacity: 0;
-  transform: translateY(20px);
-  display: flex;
-  flex-direction: column;
-}
-.bento-card.visible { opacity: 1; transform: translateY(0); }
-.bento-card.visible:nth-child(2) { transition-delay: 80ms; }
-.bento-card.visible:nth-child(3) { transition-delay: 160ms; }
-@media (hover: hover) {
-  .bento-card:hover {
-    border-color: var(--card-color, var(--color-accent-muted));
-    box-shadow: var(--shadow-lg);
-  }
-}
-.bento-tag {
-  display: inline-block;
-  width: fit-content;
-  font-family: var(--font-mono);
+  gap: 1.25rem 1.75rem;
+  padding: 1rem 1.1rem;
+  border-top: 1px solid var(--line);
+  background: var(--bg-card-deep);
+  font-family: var(--f-mono);
   font-size: 0.66rem;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--card-color, var(--color-accent));
-  background: color-mix(in srgb, var(--card-color, var(--color-accent)) 12%, transparent);
-  padding: 0.3rem 0.625rem;
-  border-radius: 999px;
+  color: var(--text-3);
 }
-.bento-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.4rem;
-  letter-spacing: -0.01em;
-  margin: 1rem 0 0.5rem;
+.matrix-legend .lkey {
+  display: inline-flex; align-items: center; gap: 0.45rem;
 }
-.bento-body {
-  color: var(--color-text-secondary);
-  font-size: 0.95rem;
-  margin: 0 0 1.25rem;
+.matrix-legend .lkey::before {
+  content: ""; width: 14px; height: 4px;
+  background: var(--text-3); border-radius: 999px;
 }
-.bento-agents {
-  margin-top: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-.bento-chip {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  padding: 0.3rem 0.625rem;
-  border-radius: 6px;
-  background: var(--color-bg-warm);
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
-  letter-spacing: 0.02em;
-}
+.matrix-legend .lkey.low::before { background: #6DD58C; }
+.matrix-legend .lkey.mid::before { background: #FFCC00; }
+.matrix-legend .lkey.high::before { background: #FF8C2C; }
+.matrix-legend .lkey.vhi::before { background: #FF5670; }
 
-/* ============ DECISION TABLE ============ */
-.decision {
-  padding: 4rem 1.5rem;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-.decision-table {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-.decision-row {
+/* ====== HEAD TO HEAD ====== */
+.h2h {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.8fr;
-  gap: 0;
-  border-bottom: 1px solid var(--color-border-light);
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity var(--duration-slower) var(--ease-spring),
-              transform var(--duration-slower) var(--ease-spring),
-              background 200ms var(--ease-out);
+  gap: 1.5rem;
 }
-.decision-row.visible { opacity: 1; transform: translateY(0); }
-.decision-row.visible:nth-child(2) { transition-delay: 60ms; }
-.decision-row.visible:nth-child(3) { transition-delay: 120ms; }
-.decision-row.visible:nth-child(4) { transition-delay: 180ms; }
-.decision-row.visible:nth-child(5) { transition-delay: 240ms; }
-.decision-row.visible:nth-child(6) { transition-delay: 300ms; }
-.decision-row:last-child { border-bottom: none; }
-.decision-row.header {
-  background: var(--color-bg-warm);
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
+.h2h-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+.h2h-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.3rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+.h2h-side {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.h2h-side.right { justify-content: flex-end; }
+.h2h-name {
+  font-family: var(--f-display);
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
-  opacity: 1;
-  transform: none;
 }
-.decision-row.header > div { padding: 0.875rem 1rem; }
-.decision-row:not(.header):hover { background: var(--color-bg-warm); }
-.decision-row > div { padding: 1rem; border-right: 1px solid var(--color-border-light); }
-.decision-row > div:last-child { border-right: none; }
-.use-case {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1rem;
-}
-.pick {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--color-accent);
+.h2h-name .pos {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
+  margin-top: 0.25rem;
   font-weight: 500;
+}
+.h2h-jersey {
+  width: 38px;
+  height: 38px;
+  border-radius: 5px;
+  background: var(--side-color, var(--text-2));
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-}
-.pick .pick-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--pick-color, var(--color-accent));
+  justify-content: center;
+  font-family: var(--f-display);
+  color: #0A0E14;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
   flex-shrink: 0;
 }
-.why {
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.55;
+.h2h-vs {
+  font-family: var(--f-display);
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  background: var(--bg-card-deep);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
 }
-
-/* ============ BENCHMARKS ============ */
-.benchmarks {
-  padding: 4rem 1.5rem 5rem;
-  max-width: 1100px;
-  margin: 0 auto;
+.h2h-tagline {
+  text-align: center;
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  margin: 0.75rem 0 0;
 }
-.bench-grid {
+.h2h-body {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 2rem;
-  align-items: start;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  color: var(--text-2);
+  font-size: 0.93rem;
+  line-height: 1.6;
 }
-.bench-chart {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 1rem;
-  padding: 1.75rem;
-  box-shadow: var(--shadow-sm);
+.h2h-body p { margin: 0 0 0.85rem; }
+.h2h-body p:last-child { margin-bottom: 0; }
+.h2h-call {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-card-deep);
+  border-left: 3px solid var(--accent-color, var(--t-claude));
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 0.9rem;
 }
-.bench-title {
-  font-family: var(--font-mono);
+.h2h-call strong {
+  font-family: var(--f-mono);
   font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-text-muted);
-  margin: 0 0 0.25rem;
+  letter-spacing: 0.14em;
+  color: var(--accent-color, var(--t-claude));
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
 }
-.bench-name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.25rem;
-  margin: 0 0 0.25rem;
-  letter-spacing: -0.01em;
+
+/* ====== BENCHMARKS ====== */
+.bench-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.bench-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+.bench-eyebrow {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 0 0 0.35rem;
+}
+.bench-h {
+  font-family: var(--f-display);
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 0.35rem;
 }
 .bench-desc {
-  color: var(--color-text-secondary);
-  font-size: 0.85rem;
-  margin: 0 0 1.5rem;
+  font-size: 0.86rem;
+  color: var(--text-2);
+  margin: 0 0 1.25rem;
 }
 .bench-list {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 0.55rem;
 }
 .bench-row {
   display: grid;
-  grid-template-columns: 110px 1fr 56px;
-  gap: 0.75rem;
+  grid-template-columns: 30px 1fr 64px;
+  gap: 0.65rem;
   align-items: center;
 }
-.bench-row .bn {
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.bench-rank {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text-3);
+  text-align: right;
 }
-.bench-bar {
+.bench-name {
   position: relative;
-  height: 22px;
-  background: var(--color-bg-warm);
-  border-radius: 4px;
+  height: 28px;
+  background: var(--bg-card-deep);
+  border-radius: 3px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
 }
 .bench-fill {
   position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 0%;
-  background: var(--bar-color, var(--color-accent));
-  border-radius: 4px;
-  transition: width 1300ms var(--ease-out);
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--bar);
+  transition: width 1300ms var(--ease);
+  opacity: 0.85;
 }
-.bench-chart.visible .bench-fill {
-  width: calc(var(--v, 0) * 1%);
+.bench-card.viz .bench-fill { width: calc(var(--v, 0) * 1%); }
+.bench-label {
+  position: relative;
+  z-index: 1;
+  padding: 0 0.65rem;
+  font-size: 0.82rem;
+  color: var(--text-stat);
+  font-weight: 500;
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 .bench-val {
-  font-family: var(--font-mono);
+  font-family: var(--f-mono);
   font-size: 0.82rem;
-  color: var(--color-text);
+  color: var(--text-stat);
   text-align: right;
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
+  font-weight: 600;
 }
 .bench-foot {
-  margin-top: 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--color-text-muted);
+  margin: 1rem 0 0;
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
-.scaffolding-note {
-  padding: 1.5rem;
-  background: var(--color-bg-warm);
-  border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-accent);
-  border-radius: 0.75rem;
-  align-self: stretch;
-}
-.scaffolding-note h4 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
-  margin: 0 0 0.5rem;
-  letter-spacing: -0.005em;
-}
-.scaffolding-note p {
-  color: var(--color-text-secondary);
-  margin: 0 0 0.875rem;
-  font-size: 0.92rem;
-}
-.scaffolding-note p:last-child { margin-bottom: 0; }
-.scaffolding-note strong { color: var(--color-text); font-weight: 500; }
-
-/* ============ CTA ============ */
-.cta-section {
-  padding: 4rem 1.5rem 6rem;
-  max-width: 760px;
-  margin: 0 auto;
-  text-align: center;
-}
-.cta-section h2 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  letter-spacing: -0.02em;
-  margin: 0 0 1rem;
-  max-width: 22ch;
-  margin-left: auto;
-  margin-right: auto;
-}
-.cta-section p {
-  color: var(--color-text-secondary);
-  font-size: 1.05rem;
-  margin: 0 0 2rem;
-  max-width: 48ch;
-  margin-left: auto;
-  margin-right: auto;
-}
-.cta-row {
-  display: inline-flex;
+.bench-mini {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
+  margin-top: 1.5rem;
 }
-.magnetic {
+.bench-mini-card {
+  padding: 1rem 1.1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--t-codeium);
+  border-radius: 6px;
+}
+.bench-mini-card .k {
+  font-family: var(--f-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
+  text-transform: uppercase;
+  margin: 0 0 0.35rem;
+}
+.bench-mini-card .v {
+  font-family: var(--f-display);
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+  color: var(--text-stat);
+  margin: 0 0 0.35rem;
+}
+.bench-mini-card .d {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.bench-narrative {
+  color: var(--text-2);
+  max-width: 70ch;
+  font-size: 0.98rem;
+  margin: 1.75rem 0 0;
+}
+.bench-narrative p { margin: 0 0 0.85rem; }
+.bench-narrative p:last-child { margin-bottom: 0; }
+
+/* ====== PRICING LADDER ====== */
+.pricing-narrative {
+  color: var(--text-2);
+  max-width: 68ch;
+  margin: 0 0 1.75rem;
+}
+.pricing-narrative p { margin: 0 0 0.85rem; }
+.pricing-narrative p:last-child { margin-bottom: 0; }
+
+.pricing-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.pricing-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table.pricing {
+  width: 100%;
+  min-width: 880px;
+  border-collapse: collapse;
+}
+.pricing th, .pricing td {
+  padding: 0.85rem 0.9rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+.pricing thead th {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--bg-card-deep);
+  font-weight: 500;
+  border-bottom: 1px solid var(--line);
+}
+.pricing tbody tr:last-child td { border-bottom: none; }
+.pricing tbody tr:hover { background: rgba(255,255,255,0.025); }
+.pricing .p-agent {
+  font-family: var(--f-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.pricing .p-agent::before {
+  content: "";
+  width: 3px; height: 18px;
+  background: var(--team);
+  border-radius: 2px;
+}
+.pricing .price {
+  font-family: var(--f-mono);
+  font-size: 0.82rem;
+  color: var(--text-stat);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pricing .note {
+  font-size: 0.78rem;
+  color: var(--text-2);
+}
+
+/* ====== DECISION TABLE ====== */
+.decision-narrative {
+  color: var(--text-2);
+  max-width: 68ch;
+  margin: 0 0 1.75rem;
+}
+.decision-narrative p { margin: 0 0 0.85rem; }
+.decision-narrative p:last-child { margin-bottom: 0; }
+
+.decision-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.decision-row {
+  display: grid;
+  grid-template-columns: 1.05fr 0.85fr 1.6fr;
+  border-bottom: 1px solid var(--line-soft);
+}
+.decision-row:last-child { border-bottom: none; }
+.decision-row.head {
+  background: var(--bg-card-deep);
+}
+.decision-row.head > div {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.decision-row > div {
+  padding: 1rem 1.1rem;
+  border-right: 1px solid var(--line-soft);
+}
+.decision-row > div:last-child { border-right: none; }
+.decision-row:not(.head):hover { background: rgba(255,255,255,0.025); }
+
+.dec-case {
+  font-family: var(--f-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.dec-pick {
+  font-family: var(--f-mono);
+  font-size: 0.82rem;
+  color: var(--pick, var(--t-claude));
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.95rem 1.5rem;
-  border-radius: 9999px;
-  background: var(--color-accent);
-  color: white;
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 0.95rem;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-  transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease;
-  will-change: transform;
 }
-.magnetic:hover { background: var(--color-accent-hover); }
-.magnetic .arrow { transition: transform 300ms var(--ease-out); }
-.magnetic:hover .arrow { transform: translateX(3px); }
-.secondary {
-  color: var(--color-text-secondary);
-  text-decoration: none;
+.dec-pick::before {
+  content: "";
+  width: 8px; height: 8px;
+  background: var(--pick, var(--t-claude));
+  border-radius: 2px;
+}
+.dec-why {
   font-size: 0.92rem;
-  font-family: var(--font-mono);
-  letter-spacing: 0.05em;
-  transition: color 200ms;
+  color: var(--text-2);
+  line-height: 1.55;
 }
-.secondary:hover { color: var(--color-accent); }
 
-/* ============ FOOTER ============ */
+/* ====== PHILOSOPHY SECTION ====== */
+.phil-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+.phil-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--phil, var(--text-2));
+  border-radius: 6px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+.phil-tag {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--phil, var(--text-2));
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+}
+.phil-h {
+  font-family: var(--f-display);
+  font-size: 1.55rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 0.65rem;
+  line-height: 1.05;
+}
+.phil-body {
+  font-size: 0.92rem;
+  color: var(--text-2);
+  line-height: 1.55;
+  margin: 0 0 1.1rem;
+}
+.phil-body p { margin: 0 0 0.7rem; }
+.phil-body p:last-child { margin-bottom: 0; }
+.phil-list {
+  list-style: none;
+  margin: 0 0 1.1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.phil-list li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 0.5rem;
+  align-items: start;
+}
+.phil-list .ico {
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--phil);
+}
+.phil-roster {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line-soft);
+}
+.phil-chip {
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  padding: 0.3rem 0.55rem;
+  background: var(--bg-card-deep);
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  color: var(--text-2);
+}
+
+/* ====== WATCH 2026 ====== */
+.watch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.watch-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1.2rem;
+  position: relative;
+}
+.watch-num {
+  position: absolute;
+  top: 0.85rem;
+  right: 1rem;
+  font-family: var(--f-display);
+  font-size: 1.3rem;
+  color: var(--text-3);
+  letter-spacing: 0.03em;
+}
+.watch-h {
+  font-family: var(--f-display);
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 0.55rem;
+  max-width: 16ch;
+}
+.watch-body {
+  color: var(--text-2);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ====== CITATIONS ====== */
+.cite-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.7rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1.3rem 1.4rem;
+}
+.cite {
+  font-size: 0.83rem;
+  color: var(--text-2);
+  font-family: var(--f-mono);
+  line-height: 1.55;
+  border-left: 2px solid var(--line-strong);
+  padding-left: 0.7rem;
+}
+.cite strong {
+  display: block;
+  color: var(--text-stat);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+  font-weight: 600;
+}
+
+/* ====== FOOTER ====== */
 footer {
-  border-top: 1px solid var(--color-border);
-  padding: 2rem 1.5rem;
-  max-width: 1240px;
+  border-top: 1px solid var(--line);
+  padding: 2rem 1.25rem;
+  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
+  font-family: var(--f-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
 }
-footer a { color: var(--color-text-secondary); text-decoration: none; }
-footer a:hover { color: var(--color-accent); }
 
-/* ============ RESPONSIVE ============ */
-@media (max-width: 960px) {
+/* ====== RESPONSIVE ====== */
+@media (max-width: 980px) {
   .bench-grid { grid-template-columns: 1fr; }
-  .bento { grid-template-columns: 1fr 1fr; }
-  .bento-card:nth-child(3) { grid-column: span 2; }
+  .phil-grid  { grid-template-columns: 1fr; }
+  .h2h-body   { grid-template-columns: 1fr; }
+  .hero-strap { grid-template-columns: repeat(2, 1fr); }
+  .hero-strap-cell:nth-child(2) { border-right: none; }
+  .hero-strap-cell:nth-child(1), .hero-strap-cell:nth-child(2) {
+    border-bottom: 1px solid var(--line-soft);
+  }
 }
-@media (max-width: 760px) {
-  .bento { grid-template-columns: 1fr; }
-  .bento-card:nth-child(3) { grid-column: auto; }
+@media (max-width: 720px) {
+  .roster-grid { grid-template-columns: 1fr; }
   .decision-row { grid-template-columns: 1fr; }
-  .decision-row > div { border-right: none; border-bottom: 1px solid var(--color-border-light); }
+  .decision-row > div { border-right: none; border-bottom: 1px solid var(--line-soft); }
   .decision-row > div:last-child { border-bottom: none; }
-  .decision-row.header { display: none; }
+  .decision-row.head { display: none; }
   .scroll-hint { display: block; }
-  .matrix { min-width: 760px; }
-  .hero-meta { gap: 1rem; }
-  .bench-row { grid-template-columns: 88px 1fr 50px; }
-  .tip { left: 0; max-width: 260px; }
+  .h2h-head { grid-template-columns: 1fr; gap: 0.75rem; text-align: left; }
+  .h2h-side.right { justify-content: flex-start; }
+  .h2h-vs { justify-self: start; }
+  .section { padding: 3rem 1rem; }
+  .hero { padding: 2.5rem 1rem 2rem; }
 }
 @media (max-width: 480px) {
-  .hero { padding-top: 2rem; }
-  .matrix { grid-template-columns: 160px repeat(7, minmax(86px, 1fr)); min-width: 720px; }
-  .agent-name { font-size: 0.82rem; }
-  .matrix-section { padding-left: 1rem; padding-right: 1rem; }
+  .hero-title { font-size: 2.4rem; }
+  .strap-v { font-size: 1.5rem; }
+  .card { height: 440px; }
 }
 
-/* ============ REDUCED MOTION ============ */
+/* hover-only flip on touchless devices; tap-to-flip on touch */
+@media (hover: none) {
+  .card-inner { transition: transform 600ms var(--ease-spring); }
+  .card.flipped .card-inner { transform: rotateY(180deg); }
+  .card:hover .card-inner { transform: none; }
+  .card.flipped:hover .card-inner { transform: rotateY(180deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .hero .word, .hero-sub, .hero-meta, .eyebrow,
-  .bento-card, .decision-row {
-    opacity: 1 !important;
-    transform: none !important;
-  }
+  .card { opacity: 1 !important; transform: none !important; }
   .matrix .cap-fill { width: calc(var(--v, 0) * 1%) !important; transition: none !important; }
   .bench-fill { width: calc(var(--v, 0) * 1%) !important; transition: none !important; }
-}
-@media (hover: none) {
-  .magnetic { transform: none !important; }
-  .bento-card:hover { transform: none !important; }
-  .agent-cell .tip { display: none; }
 }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
 <header class="topbar">
-  <a class="brand" href="../"><span class="brand-dot"></span>CETI.AI · Lookbook</a>
-  <span class="topbar-meta">AI Coding Agents · 2026</span>
+  <div class="topbar-inner">
+    <a class="brand" href="../"><span class="brand-mark"></span>CETI ALMANAC</a>
+    <span class="topbar-meta">2026 · Coding Agents League · 16/18</span>
+  </div>
 </header>
 
-<!-- HERO -->
-<section class="hero" id="hero">
-  <p class="eyebrow">AI Coding Agents · 2026 Landscape</p>
+<!-- ====== HERO MATCHUP ====== -->
+<section class="hero">
+  <p class="eyebrow">Section 01 · Hero Matchup · Volume 16</p>
   <h1 class="hero-title">
-    <span class="word">Six</span>
-    <span class="word">tools.</span>
-    <span class="word">One</span>
-    <span class="word">job.</span>
-    <span class="word"><em>Different</em></span>
-    <span class="word">bets.</span>
+    AI Coding Agents<br>
+    <span class="accent">2026 League</span> Standings
   </h1>
-  <p class="hero-sub">In 2026, every serious development team uses at least one AI coding agent. The hard question is no longer <em>whether</em>, but <em>which one</em> — and which combination. This is a neutral, capability-first comparison of seven of the most-used agents shipping today.</p>
-  <div class="hero-meta">
-    <span><strong>7</strong> agents compared</span>
-    <span><strong>7</strong> capability axes</span>
-    <span><strong>SWE-bench Verified</strong> + Aider Polyglot</span>
-    <span><strong>Updated</strong> May 2026</span>
-  </div>
-</section>
+  <p class="hero-sub">Seven contenders. One job: write production code with you, for you, or instead of you. This is the 2026 almanac entry — trading-card profiles, capability matrix, three head-to-head matchups, benchmark leaderboards, pricing ladder, and a decision table. Neutral and comparative, the way standings should read.</p>
 
-<!-- MATRIX -->
-<section class="matrix-section">
-  <p class="section-eyebrow">Section 01 · Capability matrix</p>
-  <h2 class="section-heading">Seven agents, seven capabilities, no winners.</h2>
-  <p class="section-sub">Bars draw on scroll-into-view. Hover any agent name to see what that tool is actually for. Cost is rough monthly spend for a single working developer; <span style="color:var(--color-text)">$ = under $20, $$$$ = $200+</span>.</p>
-
-  <p class="scroll-hint">↔ scroll matrix sideways on mobile</p>
-
-  <div class="matrix-wrap">
-    <div class="matrix-scroll">
-      <div class="matrix" id="matrix">
-        <!-- Column headers -->
-        <div class="col-head first">Agent</div>
-        <div class="col-head">Autonomy</div>
-        <div class="col-head">Multi-file edits</div>
-        <div class="col-head">Terminal access</div>
-        <div class="col-head">MCP</div>
-        <div class="col-head">IDE integration</div>
-        <div class="col-head">CLI</div>
-        <div class="col-head">Cost</div>
-
-        <!-- CLAUDE CODE -->
-        <div class="row" data-agent="claude-code">
-          <div class="cell">
-            <div class="agent-cell" style="--agent-color: var(--color-actor-1)" tabindex="0">
-              <span class="agent-dot"></span>
-              <div>
-                <div class="agent-name">Claude Code</div>
-                <div class="agent-sub">Anthropic · CLI</div>
-              </div>
-              <div class="tip" style="--agent-color: var(--color-actor-1)">
-                <p class="tip-name">Claude Code</p>
-                <p class="tip-line">Terminal-native agent from Anthropic. Long-horizon autonomy, MCP-first, treats your repo as the work surface.</p>
-              </div>
-            </div>
-          </div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-1)"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><div class="cap-label">95</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-1)"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><div class="cap-label">95</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-1)"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><div class="cap-label">100</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-1)"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><div class="cap-label">100</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-1)"><div class="cap-bar"><div class="cap-fill" style="--v: 45"></div></div><div class="cap-label">45</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-1)"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><div class="cap-label">100</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-1)"><div class="cap-bar"><div class="cap-fill" style="--v: 70"></div></div><div class="cap-label cost-high">100–200/mo</div></div></div>
-        </div>
-
-        <!-- CURSOR -->
-        <div class="row" data-agent="cursor">
-          <div class="cell">
-            <div class="agent-cell" style="--agent-color: var(--color-actor-2)" tabindex="0">
-              <span class="agent-dot"></span>
-              <div>
-                <div class="agent-name">Cursor</div>
-                <div class="agent-sub">Anysphere · IDE</div>
-              </div>
-              <div class="tip" style="--agent-color: var(--color-actor-2)">
-                <p class="tip-name">Cursor</p>
-                <p class="tip-line">VS Code fork built around a tab-complete + Composer agent. Best-in-class autocomplete, multi-file refactors inside the editor.</p>
-              </div>
-            </div>
-          </div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-2)"><div class="cap-bar"><div class="cap-fill" style="--v: 75"></div></div><div class="cap-label">75</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-2)"><div class="cap-bar"><div class="cap-fill" style="--v: 90"></div></div><div class="cap-label">90</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-2)"><div class="cap-bar"><div class="cap-fill" style="--v: 70"></div></div><div class="cap-label">70</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-2)"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><div class="cap-label">80</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-2)"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><div class="cap-label">100</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-2)"><div class="cap-bar"><div class="cap-fill" style="--v: 20"></div></div><div class="cap-label">20</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-2)"><div class="cap-bar"><div class="cap-fill" style="--v: 40"></div></div><div class="cap-label cost-mid">20–60/mo</div></div></div>
-        </div>
-
-        <!-- GITHUB COPILOT -->
-        <div class="row" data-agent="copilot">
-          <div class="cell">
-            <div class="agent-cell" style="--agent-color: var(--color-actor-3)" tabindex="0">
-              <span class="agent-dot"></span>
-              <div>
-                <div class="agent-name">GitHub Copilot</div>
-                <div class="agent-sub">GitHub · IDE + Agent</div>
-              </div>
-              <div class="tip" style="--agent-color: var(--color-actor-3)">
-                <p class="tip-name">GitHub Copilot</p>
-                <p class="tip-line">The original. Agent Mode and MCP shipped in 2025–26, but the centre of gravity remains inline completion across every major IDE.</p>
-              </div>
-            </div>
-          </div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-3)"><div class="cap-bar"><div class="cap-fill" style="--v: 55"></div></div><div class="cap-label">55</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-3)"><div class="cap-bar"><div class="cap-fill" style="--v: 70"></div></div><div class="cap-label">70</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-3)"><div class="cap-bar"><div class="cap-fill" style="--v: 60"></div></div><div class="cap-label">60</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-3)"><div class="cap-bar"><div class="cap-fill" style="--v: 75"></div></div><div class="cap-label">75</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-3)"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><div class="cap-label">100</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-3)"><div class="cap-bar"><div class="cap-fill" style="--v: 25"></div></div><div class="cap-label">25</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-3)"><div class="cap-bar"><div class="cap-fill" style="--v: 25"></div></div><div class="cap-label cost-mid">10–39/mo</div></div></div>
-        </div>
-
-        <!-- AIDER -->
-        <div class="row" data-agent="aider">
-          <div class="cell">
-            <div class="agent-cell" style="--agent-color: var(--color-actor-4)" tabindex="0">
-              <span class="agent-dot"></span>
-              <div>
-                <div class="agent-name">Aider</div>
-                <div class="agent-sub">Open source · CLI</div>
-              </div>
-              <div class="tip" style="--agent-color: var(--color-actor-4)">
-                <p class="tip-name">Aider</p>
-                <p class="tip-line">Open-source terminal pair-programmer. Bring-your-own-key, git-native edits, runs against any frontier model. Author of the Polyglot benchmark.</p>
-              </div>
-            </div>
-          </div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-4)"><div class="cap-bar"><div class="cap-fill" style="--v: 60"></div></div><div class="cap-label">60</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-4)"><div class="cap-bar"><div class="cap-fill" style="--v: 85"></div></div><div class="cap-label">85</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-4)"><div class="cap-bar"><div class="cap-fill" style="--v: 90"></div></div><div class="cap-label">90</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-4)"><div class="cap-bar"><div class="cap-fill" style="--v: 25"></div></div><div class="cap-label">25</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-4)"><div class="cap-bar"><div class="cap-fill" style="--v: 15"></div></div><div class="cap-label">15</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-4)"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><div class="cap-label">100</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-4)"><div class="cap-bar"><div class="cap-fill" style="--v: 15"></div></div><div class="cap-label cost-low">BYO API</div></div></div>
-        </div>
-
-        <!-- CLINE -->
-        <div class="row" data-agent="cline">
-          <div class="cell">
-            <div class="agent-cell" style="--agent-color: var(--color-actor-5)" tabindex="0">
-              <span class="agent-dot"></span>
-              <div>
-                <div class="agent-name">Cline</div>
-                <div class="agent-sub">Open source · VS Code</div>
-              </div>
-              <div class="tip" style="--agent-color: var(--color-actor-5)">
-                <p class="tip-name">Cline</p>
-                <p class="tip-line">VS Code extension (formerly Claude Dev) that runs an autonomous loop with human approval gates. BYO key, MCP-native, every action explicit.</p>
-              </div>
-            </div>
-          </div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-5)"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><div class="cap-label">80</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-5)"><div class="cap-bar"><div class="cap-fill" style="--v: 90"></div></div><div class="cap-label">90</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-5)"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><div class="cap-label">95</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-5)"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><div class="cap-label">95</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-5)"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><div class="cap-label">80</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-5)"><div class="cap-bar"><div class="cap-fill" style="--v: 35"></div></div><div class="cap-label">35</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-5)"><div class="cap-bar"><div class="cap-fill" style="--v: 15"></div></div><div class="cap-label cost-low">BYO API</div></div></div>
-        </div>
-
-        <!-- DEVIN -->
-        <div class="row" data-agent="devin">
-          <div class="cell">
-            <div class="agent-cell" style="--agent-color: var(--color-actor-6)" tabindex="0">
-              <span class="agent-dot"></span>
-              <div>
-                <div class="agent-name">Devin</div>
-                <div class="agent-sub">Cognition · Cloud</div>
-              </div>
-              <div class="tip" style="--agent-color: var(--color-actor-6)">
-                <p class="tip-name">Devin</p>
-                <p class="tip-line">Fully cloud-hosted autonomous "junior engineer." Plans, browses, codes, and ships PRs largely unsupervised. Highest autonomy, highest leash length.</p>
-              </div>
-            </div>
-          </div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-6)"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><div class="cap-label">100</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-6)"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><div class="cap-label">95</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-6)"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><div class="cap-label">100</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-6)"><div class="cap-bar"><div class="cap-fill" style="--v: 60"></div></div><div class="cap-label">60</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-6)"><div class="cap-bar"><div class="cap-fill" style="--v: 30"></div></div><div class="cap-label">30</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-6)"><div class="cap-bar"><div class="cap-fill" style="--v: 20"></div></div><div class="cap-label">20</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-6)"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><div class="cap-label cost-vhigh">500+/mo</div></div></div>
-        </div>
-
-        <!-- CODEIUM / WINDSURF -->
-        <div class="row" data-agent="codeium">
-          <div class="cell">
-            <div class="agent-cell" style="--agent-color: var(--color-actor-7)" tabindex="0">
-              <span class="agent-dot"></span>
-              <div>
-                <div class="agent-name">Codeium / Windsurf</div>
-                <div class="agent-sub">Codeium · IDE</div>
-              </div>
-              <div class="tip" style="--agent-color: var(--color-actor-7)">
-                <p class="tip-name">Codeium / Windsurf</p>
-                <p class="tip-line">Free tier with paid pro/max. Windsurf's "Cascade" mode is the agentic surface; Codeium's autocomplete remains the cheapest serious option.</p>
-              </div>
-            </div>
-          </div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-7)"><div class="cap-bar"><div class="cap-fill" style="--v: 65"></div></div><div class="cap-label">65</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-7)"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><div class="cap-label">80</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-7)"><div class="cap-bar"><div class="cap-fill" style="--v: 65"></div></div><div class="cap-label">65</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-7)"><div class="cap-bar"><div class="cap-fill" style="--v: 55"></div></div><div class="cap-label">55</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-7)"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><div class="cap-label">95</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-7)"><div class="cap-bar"><div class="cap-fill" style="--v: 20"></div></div><div class="cap-label">20</div></div></div>
-          <div class="cell"><div class="cap" style="--agent-color: var(--color-actor-7)"><div class="cap-bar"><div class="cap-fill" style="--v: 25"></div></div><div class="cap-label cost-low">Free–15</div></div></div>
-        </div>
-      </div>
+  <div class="hero-strap" aria-label="League at a glance">
+    <div class="hero-strap-cell">
+      <p class="strap-k">Agents Rostered</p>
+      <p class="strap-v">07 <span class="small">profiled</span></p>
     </div>
-
-    <div class="matrix-legend">
-      <span class="legend-item"><span class="legend-key fill"></span> Capability strength · 0–100</span>
-      <span class="legend-item"><span class="legend-note">Cost</span> = typical single-developer monthly spend incl. API</span>
-      <span class="legend-item"><span class="legend-note">Scores</span> = author's qualitative read of public docs, May 2026</span>
+    <div class="hero-strap-cell">
+      <p class="strap-k">Top SWE-bench</p>
+      <p class="strap-v">87.6<span class="small">% · Opus 4.7</span></p>
+    </div>
+    <div class="hero-strap-cell">
+      <p class="strap-k">Capability Axes</p>
+      <p class="strap-v">08 <span class="small">columns</span></p>
+    </div>
+    <div class="hero-strap-cell">
+      <p class="strap-k">Season</p>
+      <p class="strap-v">2026 <span class="small">May edition</span></p>
     </div>
   </div>
 </section>
 
-<!-- PHILOSOPHIES -->
-<section class="philosophies">
-  <p class="section-eyebrow">Section 02 · Three philosophies</p>
-  <h2 class="section-heading">The agents disagree about where coding happens.</h2>
-  <p class="section-sub">Once you sort the field by deployment surface, the disagreement isn't about model quality — it's about who is supposed to be in the chair.</p>
-
-  <div class="bento">
-    <article class="bento-card" style="--card-color: var(--color-actor-2)">
-      <span class="bento-tag">Philosophy A</span>
-      <h3 class="bento-title">IDE copilots</h3>
-      <p class="bento-body">The agent lives <em>inside</em> the editor. The developer drives; suggestions arrive at the cursor and in side panels. Composer / Agent Mode adds multi-file work without leaving the IDE.</p>
-      <div class="bento-agents">
-        <span class="bento-chip">Cursor</span>
-        <span class="bento-chip">GitHub Copilot</span>
-        <span class="bento-chip">Codeium</span>
+<!-- ====== SECTION 02 · THE ROSTER ====== -->
+<section class="section band" id="roster">
+  <div class="section-inner">
+    <div class="section-head">
+      <div>
+        <p class="section-num">Section 02 · The Roster</p>
+        <h2 class="section-title">Seven Players, Seven Team Colors</h2>
       </div>
-    </article>
+    </div>
 
-    <article class="bento-card" style="--card-color: var(--color-actor-1)">
-      <span class="bento-tag">Philosophy B</span>
-      <h3 class="bento-title">Terminal-first agents</h3>
-      <p class="bento-body">The agent lives in your shell. The conversation <em>is</em> the workflow — repo as work surface, MCP servers as tools, edits applied as git diffs. Long-horizon tasks are first-class.</p>
-      <div class="bento-agents">
-        <span class="bento-chip">Claude Code</span>
-        <span class="bento-chip">Aider</span>
-        <span class="bento-chip">OpenAI Codex CLI</span>
-      </div>
-    </article>
+    <div class="roster-intro">
+      <p>A league this young still has its founders on the field. Claude Code only shipped in early 2025, but in 2026 it sits at the top of the SWE-bench Verified table. Cursor took an obvious idea — fork VS Code, build the agent in — and made it the default IDE for a generation of new engineers. GitHub Copilot, the senior pro, was the first to make AI coding feel ordinary and remains the only player with serious enterprise distribution. Aider, the open-source veteran, is the workshop where the Polyglot benchmark was forged. Cline ran the autonomous loop inside the editor before "agent mode" was a marketing term. Devin pitched the autonomous junior engineer and forced the rest of the league to argue about what autonomy even means. Codeium ships the free tier that the other six can't price-match.</p>
+      <p>Below: seven trading cards. Front shows the headline stat — SWE-bench Verified percentage, where available, against the same task harness. Hover (or tap on touch) to flip and read the back of the card: extended stats, distinctive move, year of debut, and a 120-word biography. Team colors are kept consistent through every other section of this page — orange means Claude Code anywhere you see it.</p>
+    </div>
 
-    <article class="bento-card" style="--card-color: var(--color-actor-6)">
-      <span class="bento-tag">Philosophy C</span>
-      <h3 class="bento-title">Autonomous agents</h3>
-      <p class="bento-body">The agent runs on a server. You file a ticket; it plans, browses, codes, tests, opens a PR. The developer reviews instead of types. Maximum leash length — and maximum failure surface.</p>
-      <div class="bento-agents">
-        <span class="bento-chip">Devin</span>
-        <span class="bento-chip">Cline</span>
-        <span class="bento-chip">Replit Agent</span>
-      </div>
-    </article>
+    <div class="roster-grid">
+      <!-- ===== CARD 1 · CLAUDE CODE ===== -->
+      <article class="card" style="--team: var(--t-claude)" tabindex="0">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <div class="card-header">
+              <span class="card-num">#01 · CLI · ANTHROPIC</span>
+              <span class="card-tag">ALL-PRO</span>
+            </div>
+            <div class="card-photo"><span class="card-glyph">CC</span></div>
+            <div class="card-body">
+              <h3 class="card-name">Claude Code</h3>
+              <p class="card-team"><span class="role-dot"></span>Anthropic · Terminal Agent</p>
+              <div class="card-stat">
+                <div>
+                  <p class="card-stat-k">SWE-Bench Verified</p>
+                  <p class="card-stat-sub">Opus 4.7, May 2026</p>
+                </div>
+                <p class="card-stat-v">87.6<span class="pct">%</span></p>
+              </div>
+            </div>
+            <div class="card-foot">
+              <span>DEBUT · FEB 2025</span>
+              <span class="flip-hint">FLIP →</span>
+            </div>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="card-back-header">
+              <span class="back-name">CC · Career Stats</span>
+              <span class="back-tag">#01</span>
+            </div>
+            <p class="card-bio">Terminal-native agent from Anthropic. Long-horizon autonomy, MCP-first tool calling, treats the repo as the work surface. Built around the same model family that tops nearly every coding leaderboard. Distinctive move: a single conversation that plans, edits, runs tests, and commits — no IDE in the loop. The leash is intentionally long; it expects to work for tens of minutes at a stretch.</p>
+            <div class="stat-grid">
+              <div class="stat-line"><span>SWE-bench V.</span><span>87.6%</span></div>
+              <div class="stat-line"><span>Aider Poly.</span><span>—</span></div>
+              <div class="stat-line"><span>Autonomy</span><span>95</span></div>
+              <div class="stat-line"><span>Multi-file</span><span>95</span></div>
+              <div class="stat-line"><span>Terminal</span><span>100</span></div>
+              <div class="stat-line"><span>MCP</span><span>100</span></div>
+              <div class="stat-line"><span>Price/mo</span><span>$100–200</span></div>
+              <div class="stat-line"><span>Best at</span><span>Refactor</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== CARD 2 · CURSOR ===== -->
+      <article class="card" style="--team: var(--t-cursor)" tabindex="0">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <div class="card-header">
+              <span class="card-num">#02 · IDE · ANYSPHERE</span>
+              <span class="card-tag">STARTER</span>
+            </div>
+            <div class="card-photo"><span class="card-glyph">CR</span></div>
+            <div class="card-body">
+              <h3 class="card-name">Cursor</h3>
+              <p class="card-team"><span class="role-dot"></span>Anysphere · IDE Fork</p>
+              <div class="card-stat">
+                <div>
+                  <p class="card-stat-k">SWE-Bench Verified</p>
+                  <p class="card-stat-sub">Cursor Agent (Auto), 2026</p>
+                </div>
+                <p class="card-stat-v">67.2<span class="pct">%</span></p>
+              </div>
+            </div>
+            <div class="card-foot">
+              <span>DEBUT · MAR 2023</span>
+              <span class="flip-hint">FLIP →</span>
+            </div>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="card-back-header">
+              <span class="back-name">CR · Career Stats</span>
+              <span class="back-tag">#02</span>
+            </div>
+            <p class="card-bio">A VS Code fork built around three primitives: tab-to-accept multiline autocomplete, a Cmd-K inline rewriter, and Composer / Agent Mode for multi-file work. The autocomplete is widely considered the best in the league. Distinctive move: model routing — the "Auto" picker chooses Claude, GPT, or Gemini per request. Has the highest IDE-integration score on this page because the agent IS the IDE.</p>
+            <div class="stat-grid">
+              <div class="stat-line"><span>SWE-bench V.</span><span>67.2%</span></div>
+              <div class="stat-line"><span>Aider Poly.</span><span>—</span></div>
+              <div class="stat-line"><span>Autonomy</span><span>75</span></div>
+              <div class="stat-line"><span>Multi-file</span><span>90</span></div>
+              <div class="stat-line"><span>Terminal</span><span>70</span></div>
+              <div class="stat-line"><span>MCP</span><span>80</span></div>
+              <div class="stat-line"><span>Price/mo</span><span>$20–60</span></div>
+              <div class="stat-line"><span>Best at</span><span>Greenfield</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== CARD 3 · GITHUB COPILOT ===== -->
+      <article class="card" style="--team: var(--t-copilot)" tabindex="0">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <div class="card-header">
+              <span class="card-num">#03 · IDE · GITHUB</span>
+              <span class="card-tag">VETERAN</span>
+            </div>
+            <div class="card-photo"><span class="card-glyph">GH</span></div>
+            <div class="card-body">
+              <h3 class="card-name">GitHub Copilot</h3>
+              <p class="card-team"><span class="role-dot"></span>GitHub · IDE + Agent</p>
+              <div class="card-stat">
+                <div>
+                  <p class="card-stat-k">SWE-Bench Verified</p>
+                  <p class="card-stat-sub">Copilot Agent Mode, 2026</p>
+                </div>
+                <p class="card-stat-v">62.0<span class="pct">%</span></p>
+              </div>
+            </div>
+            <div class="card-foot">
+              <span>DEBUT · JUN 2021</span>
+              <span class="flip-hint">FLIP →</span>
+            </div>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="card-back-header">
+              <span class="back-name">GH · Career Stats</span>
+              <span class="back-tag">#03</span>
+            </div>
+            <p class="card-bio">The franchise player and the league's all-time minutes leader. Agent Mode and MCP support shipped in 2025–26, but the center of gravity remains inline completion in every IDE that matters: VS Code, JetBrains, Visual Studio, Neovim, Xcode. Distinctive move: an enterprise admin console — Copilot is the only agent your CIO has already approved. Lowest peak power among contenders; highest baseline coverage by an order of magnitude.</p>
+            <div class="stat-grid">
+              <div class="stat-line"><span>SWE-bench V.</span><span>62.0%</span></div>
+              <div class="stat-line"><span>Aider Poly.</span><span>—</span></div>
+              <div class="stat-line"><span>Autonomy</span><span>55</span></div>
+              <div class="stat-line"><span>Multi-file</span><span>70</span></div>
+              <div class="stat-line"><span>Terminal</span><span>60</span></div>
+              <div class="stat-line"><span>MCP</span><span>75</span></div>
+              <div class="stat-line"><span>Price/mo</span><span>$10–39</span></div>
+              <div class="stat-line"><span>Best at</span><span>Drop-in</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== CARD 4 · AIDER ===== -->
+      <article class="card" style="--team: var(--t-aider)" tabindex="0">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <div class="card-header">
+              <span class="card-num">#04 · CLI · OPEN SOURCE</span>
+              <span class="card-tag">SPECIALIST</span>
+            </div>
+            <div class="card-photo"><span class="card-glyph">AD</span></div>
+            <div class="card-body">
+              <h3 class="card-name">Aider</h3>
+              <p class="card-team"><span class="role-dot"></span>Paul Gauthier · Terminal Pair</p>
+              <div class="card-stat">
+                <div>
+                  <p class="card-stat-k">Aider Polyglot</p>
+                  <p class="card-stat-sub">Sonnet 4.5 in Aider, 2026</p>
+                </div>
+                <p class="card-stat-v">79.0<span class="pct">%</span></p>
+              </div>
+            </div>
+            <div class="card-foot">
+              <span>DEBUT · MAY 2023</span>
+              <span class="flip-hint">FLIP →</span>
+            </div>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="card-back-header">
+              <span class="back-name">AD · Career Stats</span>
+              <span class="back-tag">#04</span>
+            </div>
+            <p class="card-bio">Open-source terminal pair-programmer. Bring-your-own-key, git-native diff-based edits, works with any frontier model from any vendor. Author of the Aider Polyglot benchmark (225 hard Exercism problems across six languages). Distinctive move: every change is a real git commit you can revert. The cheapest, most transparent, and most language-agnostic option in the league — and the only one whose source you can actually read.</p>
+            <div class="stat-grid">
+              <div class="stat-line"><span>SWE-bench V.</span><span>—</span></div>
+              <div class="stat-line"><span>Aider Poly.</span><span>79.0%</span></div>
+              <div class="stat-line"><span>Autonomy</span><span>60</span></div>
+              <div class="stat-line"><span>Multi-file</span><span>85</span></div>
+              <div class="stat-line"><span>Terminal</span><span>90</span></div>
+              <div class="stat-line"><span>MCP</span><span>25</span></div>
+              <div class="stat-line"><span>Price/mo</span><span>BYO API</span></div>
+              <div class="stat-line"><span>Best at</span><span>Polyglot</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== CARD 5 · CLINE ===== -->
+      <article class="card" style="--team: var(--t-cline)" tabindex="0">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <div class="card-header">
+              <span class="card-num">#05 · VSC EXT · OPEN SOURCE</span>
+              <span class="card-tag">UTILITY</span>
+            </div>
+            <div class="card-photo"><span class="card-glyph">CL</span></div>
+            <div class="card-body">
+              <h3 class="card-name">Cline</h3>
+              <p class="card-team"><span class="role-dot"></span>Cline · VS Code Extension</p>
+              <div class="card-stat">
+                <div>
+                  <p class="card-stat-k">Approval-Gated Loop</p>
+                  <p class="card-stat-sub">Every action human-confirmed</p>
+                </div>
+                <p class="card-stat-v">95<span class="pct">/100</span></p>
+              </div>
+            </div>
+            <div class="card-foot">
+              <span>DEBUT · JUL 2024</span>
+              <span class="flip-hint">FLIP →</span>
+            </div>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="card-back-header">
+              <span class="back-name">CL · Career Stats</span>
+              <span class="back-tag">#05</span>
+            </div>
+            <p class="card-bio">VS Code extension (formerly Claude Dev) that runs an autonomous loop inside the editor with explicit human approval at every step. BYO API key against any model. Distinctive move: a structured plan-then-act workflow where you can watch the agent form a hypothesis, ask permission to run a command, see the diff, approve or reject, and iterate. MCP-native from the start. The auditable, transparent autonomous option.</p>
+            <div class="stat-grid">
+              <div class="stat-line"><span>SWE-bench V.</span><span>—</span></div>
+              <div class="stat-line"><span>Aider Poly.</span><span>—</span></div>
+              <div class="stat-line"><span>Autonomy</span><span>80</span></div>
+              <div class="stat-line"><span>Multi-file</span><span>90</span></div>
+              <div class="stat-line"><span>Terminal</span><span>95</span></div>
+              <div class="stat-line"><span>MCP</span><span>95</span></div>
+              <div class="stat-line"><span>Price/mo</span><span>BYO API</span></div>
+              <div class="stat-line"><span>Best at</span><span>Debugging</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== CARD 6 · DEVIN ===== -->
+      <article class="card" style="--team: var(--t-devin)" tabindex="0">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <div class="card-header">
+              <span class="card-num">#06 · CLOUD · COGNITION</span>
+              <span class="card-tag">ROOKIE</span>
+            </div>
+            <div class="card-photo"><span class="card-glyph">DV</span></div>
+            <div class="card-body">
+              <h3 class="card-name">Devin</h3>
+              <p class="card-team"><span class="role-dot"></span>Cognition · Cloud Agent</p>
+              <div class="card-stat">
+                <div>
+                  <p class="card-stat-k">SWE-Bench Verified</p>
+                  <p class="card-stat-sub">Devin Agent (auto), 2026</p>
+                </div>
+                <p class="card-stat-v">60.8<span class="pct">%</span></p>
+              </div>
+            </div>
+            <div class="card-foot">
+              <span>DEBUT · MAR 2024</span>
+              <span class="flip-hint">FLIP →</span>
+            </div>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="card-back-header">
+              <span class="back-name">DV · Career Stats</span>
+              <span class="back-tag">#06</span>
+            </div>
+            <p class="card-bio">Fully cloud-hosted autonomous "junior engineer." You file a ticket via Slack or web UI; Devin plans, browses, codes, runs tests, opens a PR, and asks for review. Distinctive move: persistent virtual workstation with browser, shell, and editor that runs while you sleep. Highest autonomy and longest leash in the league — also the highest price tag, by a wide margin, and the loudest debate over how much of that work product needs rework.</p>
+            <div class="stat-grid">
+              <div class="stat-line"><span>SWE-bench V.</span><span>60.8%</span></div>
+              <div class="stat-line"><span>Aider Poly.</span><span>—</span></div>
+              <div class="stat-line"><span>Autonomy</span><span>100</span></div>
+              <div class="stat-line"><span>Multi-file</span><span>95</span></div>
+              <div class="stat-line"><span>Terminal</span><span>100</span></div>
+              <div class="stat-line"><span>MCP</span><span>60</span></div>
+              <div class="stat-line"><span>Price/mo</span><span>$500+</span></div>
+              <div class="stat-line"><span>Best at</span><span>Tickets</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ===== CARD 7 · CODEIUM / WINDSURF ===== -->
+      <article class="card" style="--team: var(--t-codeium)" tabindex="0">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <div class="card-header">
+              <span class="card-num">#07 · IDE · CODEIUM</span>
+              <span class="card-tag">VALUE</span>
+            </div>
+            <div class="card-photo"><span class="card-glyph">WS</span></div>
+            <div class="card-body">
+              <h3 class="card-name">Windsurf</h3>
+              <p class="card-team"><span class="role-dot"></span>Codeium · IDE + Cascade</p>
+              <div class="card-stat">
+                <div>
+                  <p class="card-stat-k">Entry Tier</p>
+                  <p class="card-stat-sub">Free for individuals</p>
+                </div>
+                <p class="card-stat-v">$0<span class="pct"> · pro $15</span></p>
+              </div>
+            </div>
+            <div class="card-foot">
+              <span>DEBUT · NOV 2024</span>
+              <span class="flip-hint">FLIP →</span>
+            </div>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="card-back-header">
+              <span class="back-name">WS · Career Stats</span>
+              <span class="back-tag">#07</span>
+            </div>
+            <p class="card-bio">Codeium's IDE — Windsurf — packages an agentic "Cascade" mode alongside autocomplete that started life as the cheapest serious option in the category. Free tier remains generous; paid pro and teams plans add larger context and faster models. Distinctive move: aggressive enterprise on-prem story and a free tier that turns student adoption into a moat. The lowest dollar floor on the page.</p>
+            <div class="stat-grid">
+              <div class="stat-line"><span>SWE-bench V.</span><span>—</span></div>
+              <div class="stat-line"><span>Aider Poly.</span><span>—</span></div>
+              <div class="stat-line"><span>Autonomy</span><span>65</span></div>
+              <div class="stat-line"><span>Multi-file</span><span>80</span></div>
+              <div class="stat-line"><span>Terminal</span><span>65</span></div>
+              <div class="stat-line"><span>MCP</span><span>55</span></div>
+              <div class="stat-line"><span>Price/mo</span><span>Free–$15</span></div>
+              <div class="stat-line"><span>Best at</span><span>Students</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
   </div>
 </section>
 
-<!-- DECISION TABLE -->
-<section class="decision">
-  <p class="section-eyebrow">Section 03 · Pick the right tool</p>
-  <h2 class="section-heading">Most teams use two of these. Rarely one. Never all.</h2>
-  <p class="section-sub">A short decision table. Read it as <em>"if your job today looks like the first column, the second column is a sensible default."</em> Substitute according to budget and stack.</p>
+<!-- ====== SECTION 03 · CAPABILITY MATRIX ====== -->
+<section class="section" id="matrix-sec">
+  <div class="section-inner">
+    <div class="section-head">
+      <div>
+        <p class="section-num">Section 03 · Capability Matrix</p>
+        <h2 class="section-title">Eight Columns, Seven Rows, No Winners</h2>
+      </div>
+    </div>
 
-  <div class="decision-table">
-    <div class="decision-row header">
-      <div>Use case</div>
-      <div>Sensible default</div>
-      <div>Why</div>
+    <div class="matrix-narrative">
+      <p>The matrix below is the league's box score. Eight capability columns — autonomy, multi-file edits, terminal access, MCP support, IDE integration, CLI surface, monthly cost band, and SWE-bench Verified score — read across each row to get a single agent's signature. Read down a column to see who dominates a single axis. Bars are tinted in each agent's team color so the visual scan stays anchored to the roster you just met.</p>
+      <p>Two things to notice. First, the league does not have a Pareto-dominant player. Devin tops autonomy but trails Claude Code on benchmark; Cursor wins IDE integration but ships lower terminal control; Copilot is the only player with low autonomy AND broad IDE coverage AND low cost AND enterprise distribution — a profile no benchmark-chasing rival can match. Second, the cost column ranges across two full orders of magnitude (free tier vs. $500+/month for Devin). Whichever cell tells you most about your team's reality is the cell you should sort by.</p>
+      <p>The autonomy score is qualitative, not measured: it's a read on how long the agent can run unsupervised before you have to step in. The SWE-bench numbers are the official Verified scores published by each vendor or independently reproduced on the leaderboard, with the date noted in citations. Cells marked "—" mean no comparable score has been published with that agent's harness.</p>
     </div>
-    <div class="decision-row">
-      <div class="use-case">Greenfield, fast iteration</div>
-      <div><span class="pick" style="--pick-color: var(--color-actor-2)"><span class="pick-dot"></span>Cursor</span></div>
-      <div class="why">Tab completion + Composer keeps you in the editor while the codebase is small enough to hold in your head. Agentic work is still cheap.</div>
-    </div>
-    <div class="decision-row">
-      <div class="use-case">Refactor a large codebase</div>
-      <div><span class="pick" style="--pick-color: var(--color-actor-1)"><span class="pick-dot"></span>Claude Code</span></div>
-      <div class="why">Long-horizon planning, repo-wide context, terminal access, MCP servers for project-specific tools. The leash is intentionally long.</div>
-    </div>
-    <div class="decision-row">
-      <div class="use-case">Debug a tricky failure</div>
-      <div><span class="pick" style="--pick-color: var(--color-actor-5)"><span class="pick-dot"></span>Cline</span></div>
-      <div class="why">Every action is explicit and approval-gated. You can watch it form a hypothesis, run a test, revise. BYO key means model swaps are cheap.</div>
-    </div>
-    <div class="decision-row">
-      <div class="use-case">Learning a new language</div>
-      <div><span class="pick" style="--pick-color: var(--color-actor-4)"><span class="pick-dot"></span>Aider</span></div>
-      <div class="why">Aider's <em>Polyglot</em> benchmark exists because Aider is good at polyglot work. Git-native, transparent edits, zero subscription friction.</div>
-    </div>
-    <div class="decision-row">
-      <div class="use-case">Ship a small ticket end-to-end</div>
-      <div><span class="pick" style="--pick-color: var(--color-actor-6)"><span class="pick-dot"></span>Devin</span></div>
-      <div class="why">When the work is well-scoped and you'd rather review than write, the autonomous path is the cheapest in human-minutes. Pricier in dollars.</div>
-    </div>
-    <div class="decision-row">
-      <div class="use-case">Drop-in for an existing team</div>
-      <div><span class="pick" style="--pick-color: var(--color-actor-3)"><span class="pick-dot"></span>GitHub Copilot</span></div>
-      <div class="why">Zero adoption friction, every IDE, every language, an admin can roll it out across an org. Lowest peak power, highest baseline coverage.</div>
+
+    <p class="scroll-hint">↔ Scroll matrix sideways on mobile</p>
+
+    <div class="matrix-wrap">
+      <div class="matrix-scroll">
+        <table class="matrix" id="matrix-table">
+          <thead>
+            <tr>
+              <th class="first">Agent</th>
+              <th>Autonomy</th>
+              <th>Multi-file</th>
+              <th>Terminal</th>
+              <th>MCP</th>
+              <th>IDE Integ.</th>
+              <th>CLI</th>
+              <th>Cost / mo</th>
+              <th>SWE-bench V.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--team: var(--t-claude)">
+              <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Claude Code</span><span class="m-team">Anthropic · CLI</span></span></span></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><span class="cap-num">95</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><span class="cap-num">95</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><span class="cap-num">100</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><span class="cap-num">100</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 45"></div></div><span class="cap-num">45</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><span class="cap-num">100</span></div></td>
+              <td><span class="cost-bullet high">$$$ · 100–200</span></td>
+              <td><span class="swe-bench">87.6%</span></td>
+            </tr>
+            <tr style="--team: var(--t-cursor)">
+              <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Cursor</span><span class="m-team">Anysphere · IDE</span></span></span></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 75"></div></div><span class="cap-num">75</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 90"></div></div><span class="cap-num">90</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 70"></div></div><span class="cap-num">70</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><span class="cap-num">80</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><span class="cap-num">100</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 20"></div></div><span class="cap-num">20</span></div></td>
+              <td><span class="cost-bullet mid">$$ · 20–60</span></td>
+              <td><span class="swe-bench">67.2%</span></td>
+            </tr>
+            <tr style="--team: var(--t-copilot)">
+              <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">GitHub Copilot</span><span class="m-team">GitHub · IDE</span></span></span></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 55"></div></div><span class="cap-num">55</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 70"></div></div><span class="cap-num">70</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 60"></div></div><span class="cap-num">60</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 75"></div></div><span class="cap-num">75</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><span class="cap-num">100</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 25"></div></div><span class="cap-num">25</span></div></td>
+              <td><span class="cost-bullet mid">$$ · 10–39</span></td>
+              <td><span class="swe-bench">62.0%</span></td>
+            </tr>
+            <tr style="--team: var(--t-aider)">
+              <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Aider</span><span class="m-team">OSS · CLI</span></span></span></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 60"></div></div><span class="cap-num">60</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 85"></div></div><span class="cap-num">85</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 90"></div></div><span class="cap-num">90</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 25"></div></div><span class="cap-num">25</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 15"></div></div><span class="cap-num">15</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><span class="cap-num">100</span></div></td>
+              <td><span class="cost-bullet low">$ · BYO key</span></td>
+              <td><span class="swe-bench">—</span></td>
+            </tr>
+            <tr style="--team: var(--t-cline)">
+              <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Cline</span><span class="m-team">OSS · VS Code</span></span></span></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><span class="cap-num">80</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 90"></div></div><span class="cap-num">90</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><span class="cap-num">95</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><span class="cap-num">95</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><span class="cap-num">80</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 35"></div></div><span class="cap-num">35</span></div></td>
+              <td><span class="cost-bullet low">$ · BYO key</span></td>
+              <td><span class="swe-bench">—</span></td>
+            </tr>
+            <tr style="--team: var(--t-devin)">
+              <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Devin</span><span class="m-team">Cognition · Cloud</span></span></span></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><span class="cap-num">100</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><span class="cap-num">95</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 100"></div></div><span class="cap-num">100</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 60"></div></div><span class="cap-num">60</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 30"></div></div><span class="cap-num">30</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 20"></div></div><span class="cap-num">20</span></div></td>
+              <td><span class="cost-bullet vhi">$$$$ · 500+</span></td>
+              <td><span class="swe-bench">60.8%</span></td>
+            </tr>
+            <tr style="--team: var(--t-codeium)">
+              <td class="first"><span class="m-agent"><span class="m-stripe"></span><span class="m-name-wrap"><span class="m-name">Windsurf</span><span class="m-team">Codeium · IDE</span></span></span></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 65"></div></div><span class="cap-num">65</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 80"></div></div><span class="cap-num">80</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 65"></div></div><span class="cap-num">65</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 55"></div></div><span class="cap-num">55</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 95"></div></div><span class="cap-num">95</span></div></td>
+              <td class="cap-cell"><div class="cap-wrap"><div class="cap-bar"><div class="cap-fill" style="--v: 20"></div></div><span class="cap-num">20</span></div></td>
+              <td><span class="cost-bullet low">$ · Free–15</span></td>
+              <td><span class="swe-bench">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="matrix-legend">
+        <span class="lkey">Capability score · 0–100, qualitative</span>
+        <span class="lkey low">$ · &lt; $20/mo</span>
+        <span class="lkey mid">$$ · $20–60</span>
+        <span class="lkey high">$$$ · $60–200</span>
+        <span class="lkey vhi">$$$$ · $200+</span>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- BENCHMARKS -->
-<section class="benchmarks">
-  <p class="section-eyebrow">Section 04 · The receipts</p>
-  <h2 class="section-heading">Two benchmarks that actually move purchasing decisions.</h2>
-  <p class="section-sub">SWE-bench Verified tests real GitHub bug fixes. Aider Polyglot tests multi-language editing on 225 hard Exercism problems. Note: scores reflect the <em>underlying model</em>, not the surrounding agent — scaffolding matters as much.</p>
-
-  <div class="bench-grid">
-    <div class="bench-chart" id="bench-swe">
-      <p class="bench-title">Benchmark · As of May 2026</p>
-      <h3 class="bench-name">SWE-bench Verified</h3>
-      <p class="bench-desc">Real GitHub issues resolved. Higher is better.</p>
-      <div class="bench-list">
-        <div class="bench-row"><div class="bn">Claude Opus 4.7</div><div class="bench-bar"><div class="bench-fill" style="--bar-color: var(--color-actor-1); --v: 87.6"></div></div><div class="bench-val">87.6%</div></div>
-        <div class="bench-row"><div class="bn">Claude Opus 4.5</div><div class="bench-bar"><div class="bench-fill" style="--bar-color: var(--color-actor-1); --v: 80.9"></div></div><div class="bench-val">80.9%</div></div>
-        <div class="bench-row"><div class="bn">GPT-5.2</div><div class="bench-bar"><div class="bench-fill" style="--bar-color: var(--color-actor-3); --v: 80.0"></div></div><div class="bench-val">80.0%</div></div>
-        <div class="bench-row"><div class="bn">Sonnet 4.6</div><div class="bench-bar"><div class="bench-fill" style="--bar-color: var(--color-actor-1); --v: 79.6"></div></div><div class="bench-val">79.6%</div></div>
-        <div class="bench-row"><div class="bn">Cursor Agent</div><div class="bench-bar"><div class="bench-fill" style="--bar-color: var(--color-actor-2); --v: 67.2"></div></div><div class="bench-val">67.2%</div></div>
-        <div class="bench-row"><div class="bn">Devin</div><div class="bench-bar"><div class="bench-fill" style="--bar-color: var(--color-actor-6); --v: 60.8"></div></div><div class="bench-val">60.8%</div></div>
+<!-- ====== SECTION 04 · HEAD TO HEAD ====== -->
+<section class="section band" id="h2h">
+  <div class="section-inner">
+    <div class="section-head">
+      <div>
+        <p class="section-num">Section 04 · Head-to-Head</p>
+        <h2 class="section-title">Three Matchups That Settle Most Arguments</h2>
       </div>
-      <p class="bench-foot">Source · swebench.com, vendor reports, May 2026</p>
     </div>
 
-    <div class="bench-chart" id="bench-aider">
-      <p class="bench-title">Benchmark · Aider polyglot</p>
-      <h3 class="bench-name">Aider Polyglot</h3>
-      <p class="bench-desc">225 hard Exercism problems · C++, Go, Java, JS, Python, Rust.</p>
-      <div class="bench-list">
-        <div class="bench-row"><div class="bn">Claude Opus 4.5</div><div class="bench-bar"><div class="bench-fill" style="--bar-color: var(--color-actor-1); --v: 89.4"></div></div><div class="bench-val">89.4%</div></div>
-        <div class="bench-row"><div class="bn">GPT-5 high</div><div class="bench-bar"><div class="bench-fill" style="--bar-color: var(--color-actor-3); --v: 88.0"></div></div><div class="bench-val">88.0%</div></div>
-        <div class="bench-row"><div class="bn">Sonnet 3.7</div><div class="bench-bar"><div class="bench-fill" style="--bar-color: var(--color-actor-1); --v: 76.4"></div></div><div class="bench-val">76.4%</div></div>
-      </div>
-      <p class="bench-foot">Source · aider.chat leaderboard, 2026</p>
+    <div class="h2h">
+      <!-- MATCHUP 1 — Cursor vs Copilot -->
+      <article class="h2h-card" style="--accent-color: var(--t-cursor)">
+        <div class="h2h-head">
+          <div class="h2h-side" style="--side-color: var(--t-cursor)">
+            <span class="h2h-jersey">CR</span>
+            <div class="h2h-name">Cursor<span class="pos">IDE · Anysphere</span></div>
+          </div>
+          <div class="h2h-vs">VS</div>
+          <div class="h2h-side right" style="--side-color: var(--t-copilot)">
+            <div class="h2h-name" style="text-align: right">GitHub Copilot<span class="pos">IDE · GitHub</span></div>
+            <span class="h2h-jersey" style="--side-color: var(--t-copilot)">GH</span>
+          </div>
+        </div>
+        <p class="h2h-tagline">The IDE Battle · Which Editor Wins the Default Slot</p>
+        <div class="h2h-body">
+          <div>
+            <p><strong style="color:var(--t-cursor)">Cursor</strong> is what happens when you build the editor around the agent instead of bolting an agent onto the editor. The tab-completion model is fine-tuned for accept-rates inside Cursor specifically, and Composer / Agent Mode lets the model touch a whole folder without you switching contexts. The price you pay is fork lock-in: your VS Code extension story sits behind whatever Anysphere's release cycle decides to support, and your CIO is now approving a non-Microsoft IDE.</p>
+            <p>Cursor's SWE-bench Verified score of 67.2% (with its own Auto router) sits comfortably mid-table, but the benchmark understates the value — most of Cursor's lift shows up in autocomplete keystrokes, not in agent runs. It is the league's clearest <em>player development</em> story: hires who learn on Cursor write more code, faster, sooner.</p>
+          </div>
+          <div>
+            <p><strong style="color:var(--t-copilot)">Copilot</strong> is the senior pro and the only player your enterprise security team has already approved. It ships inside every IDE that matters — VS Code, JetBrains, Visual Studio, Neovim, Xcode — and the admin console answers every compliance question. Agent Mode and MCP support landed in 2025–26, closing the gap with Cursor on agentic work, though the inline autocomplete model is still optimized for "junior pair on shoulder," not "senior pair driving."</p>
+            <p>The hidden Copilot advantage is the GitHub graph. Copilot Workspaces, PR summaries, code review, and security suggestions all share signal across an organization's repos. That lift doesn't show up in SWE-bench but it shows up on a Wednesday afternoon when you're reviewing a teammate's PR.</p>
+          </div>
+          <div class="h2h-call">
+            <strong>Pick When</strong>
+            Choose Cursor for greenfield work, fast iteration, and teams that will adopt a non-Microsoft editor. Choose Copilot when your org needs one default that everyone gets and an admin can roll it out across thousands of seats in an afternoon. Most large engineering orgs end up running both — Copilot as floor, Cursor as ceiling.
+          </div>
+        </div>
+      </article>
 
-      <div class="scaffolding-note" style="margin-top: 1.25rem;">
-        <h4>Scaffolding is half the score.</h4>
-        <p>In Feb 2026, three frameworks running the <strong>same model</strong> scored 17 issues apart on 731 SWE-bench problems. Pick a model <em>and</em> an agent. A great model in a weak harness loses to a mid model in a strong one.</p>
+      <!-- MATCHUP 2 — Claude Code vs Aider -->
+      <article class="h2h-card" style="--accent-color: var(--t-claude)">
+        <div class="h2h-head">
+          <div class="h2h-side" style="--side-color: var(--t-claude)">
+            <span class="h2h-jersey">CC</span>
+            <div class="h2h-name">Claude Code<span class="pos">CLI · Anthropic</span></div>
+          </div>
+          <div class="h2h-vs">VS</div>
+          <div class="h2h-side right" style="--side-color: var(--t-aider)">
+            <div class="h2h-name" style="text-align: right">Aider<span class="pos">CLI · Open Source</span></div>
+            <span class="h2h-jersey" style="--side-color: var(--t-aider)">AD</span>
+          </div>
+        </div>
+        <p class="h2h-tagline">The Terminal Battle · Which Shell Pair Wins Long-Horizon Work</p>
+        <div class="h2h-body">
+          <div>
+            <p><strong style="color:var(--t-claude)">Claude Code</strong> is the first terminal agent built by the same lab that ships the model. It treats your repo as the work surface, hands its tool calls through MCP servers you configure, and is comfortable working unsupervised for tens of minutes at a stretch. The 87.6% SWE-bench Verified score (Opus 4.7, May 2026) is the highest published benchmark of any agent in the league.</p>
+            <p>What the benchmark misses: Claude Code is the only major agent built around Anthropic's tool-use protocol from day one, so the MCP ecosystem is native, not an add-on. That makes domain-specific harnesses — your design system, your test runner, your deploy script — cheap to wire in. The cost is the cost: $100–200/month for a developer running Opus heavily.</p>
+          </div>
+          <div>
+            <p><strong style="color:var(--t-aider)">Aider</strong> is the open-source elder of terminal-first coding. Bring your own API key for any frontier model, ask for an edit, and Aider produces a real git diff. The Polyglot benchmark — 225 hard Exercism problems across six languages — exists because Paul Gauthier wanted to test whether Aider was actually good at the languages it claimed. Its scaffolding scores roughly on par with much fancier frameworks on the same model.</p>
+            <p>Aider's autonomy is bounded by design: it edits, it commits, it asks. Long-horizon planning isn't its thing. But the model-agnosticism and the git-diff transparency make it the obvious tool for engineers who want to compare GPT vs. Claude vs. Gemini on the same task, this week, on their own code.</p>
+          </div>
+          <div class="h2h-call">
+            <strong>Pick When</strong>
+            Choose Claude Code for long-running refactors, MCP-heavy custom workflows, and teams already invested in the Anthropic ecosystem. Choose Aider when you want model neutrality, transparent diffs, the lowest possible spend, and the cleanest answer to "which model is better on my code today."
+          </div>
+        </div>
+      </article>
+
+      <!-- MATCHUP 3 — Devin vs Cline -->
+      <article class="h2h-card" style="--accent-color: var(--t-devin)">
+        <div class="h2h-head">
+          <div class="h2h-side" style="--side-color: var(--t-devin)">
+            <span class="h2h-jersey">DV</span>
+            <div class="h2h-name">Devin<span class="pos">CLOUD · Cognition</span></div>
+          </div>
+          <div class="h2h-vs">VS</div>
+          <div class="h2h-side right" style="--side-color: var(--t-cline)">
+            <div class="h2h-name" style="text-align: right">Cline<span class="pos">VS Code Ext · OSS</span></div>
+            <span class="h2h-jersey" style="--side-color: var(--t-cline)">CL</span>
+          </div>
+        </div>
+        <p class="h2h-tagline">The Autonomy Battle · Long Leash vs. Tight Leash</p>
+        <div class="h2h-body">
+          <div>
+            <p><strong style="color:var(--t-devin)">Devin</strong> is the maximalist. File a ticket in Slack; Devin spins up a virtual workstation with a real browser, shell, and editor, plans the work, executes, runs tests, opens a PR, and pings you for review. Everything happens on Cognition's infrastructure. The pitch is "junior engineer," not "pair programmer" — Devin is supposed to replace the writing, not augment it.</p>
+            <p>The 60.8% SWE-bench Verified score is below the model leaders but the only score on the page that was earned end-to-end in a fully autonomous loop with no human in the chair. Independent reviews still split sharply on Devin's PR quality — wins on well-scoped tickets, struggles on anything requiring deep tribal-knowledge context. The price ($500+/month and up) means this is not a developer subscription, it's a head-count line item.</p>
+          </div>
+          <div>
+            <p><strong style="color:var(--t-cline)">Cline</strong> takes the opposite bet. The autonomous loop runs inside VS Code with an explicit approval gate at every step. The agent forms a plan, requests permission to read a file or run a shell command, you see the diff, you say yes or no, and the loop continues. BYO API key against any model. MCP-native. Source on GitHub.</p>
+            <p>The difference matters more than the spec sheet suggests. With Cline you learn what the agent is doing and why — you can see the prompt, watch the chain, intercept early. With Devin you mostly see the output. Cline is "agent as glass box"; Devin is "agent as service contract." Both are autonomy, only one is observable to you.</p>
+          </div>
+          <div class="h2h-call">
+            <strong>Pick When</strong>
+            Choose Devin for well-scoped tickets you don't want to write — small bug fixes, scaffolding, the kind of work that bills hourly. Choose Cline when you want autonomous behavior but you also want to understand it, audit it, and switch models without changing tools. Choose neither when the task requires cross-team context that lives in someone's head, not your repo.
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION 05 · BENCHMARKS ====== -->
+<section class="section" id="benchmarks">
+  <div class="section-inner">
+    <div class="section-head">
+      <div>
+        <p class="section-num">Section 05 · The Benchmarks</p>
+        <h2 class="section-title">Leaderboards That Move Purchasing Decisions</h2>
+      </div>
+    </div>
+
+    <div class="bench-grid">
+      <!-- SWE-BENCH -->
+      <div class="bench-card viz" id="bench-swe">
+        <p class="bench-eyebrow">Leaderboard · As of May 2026</p>
+        <h3 class="bench-h">SWE-bench Verified</h3>
+        <p class="bench-desc">500 human-validated GitHub bug fixes from 12 popular Python repos. Higher is better. Scores are model-in-harness — same task, different agents.</p>
+        <div class="bench-list">
+          <div class="bench-row"><span class="bench-rank">01</span><div class="bench-name" style="--bar: var(--t-claude)"><div class="bench-fill" style="--v: 87.6"></div><span class="bench-label">Claude Opus 4.7</span></div><span class="bench-val">87.6%</span></div>
+          <div class="bench-row"><span class="bench-rank">02</span><div class="bench-name" style="--bar: var(--t-claude)"><div class="bench-fill" style="--v: 82.0"></div><span class="bench-label">Sonnet 4.6 (Cl. Code)</span></div><span class="bench-val">82.0%</span></div>
+          <div class="bench-row"><span class="bench-rank">03</span><div class="bench-name" style="--bar: var(--t-claude)"><div class="bench-fill" style="--v: 80.9"></div><span class="bench-label">Claude Opus 4.5</span></div><span class="bench-val">80.9%</span></div>
+          <div class="bench-row"><span class="bench-rank">04</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 80.0"></div><span class="bench-label">GPT-5.2 (Codex CLI)</span></div><span class="bench-val">80.0%</span></div>
+          <div class="bench-row"><span class="bench-rank">05</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 77.2"></div><span class="bench-label">GPT-5.1 (Aug. mode)</span></div><span class="bench-val">77.2%</span></div>
+          <div class="bench-row"><span class="bench-rank">06</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 74.9"></div><span class="bench-label">Gemini 2.5 Pro</span></div><span class="bench-val">74.9%</span></div>
+          <div class="bench-row"><span class="bench-rank">07</span><div class="bench-name" style="--bar: var(--t-cursor)"><div class="bench-fill" style="--v: 67.2"></div><span class="bench-label">Cursor Agent (Auto)</span></div><span class="bench-val">67.2%</span></div>
+          <div class="bench-row"><span class="bench-rank">08</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 62.0"></div><span class="bench-label">Copilot Agent Mode</span></div><span class="bench-val">62.0%</span></div>
+          <div class="bench-row"><span class="bench-rank">09</span><div class="bench-name" style="--bar: var(--t-devin)"><div class="bench-fill" style="--v: 60.8"></div><span class="bench-label">Devin (auto)</span></div><span class="bench-val">60.8%</span></div>
+          <div class="bench-row"><span class="bench-rank">10</span><div class="bench-name" style="--bar: var(--t-codeium)"><div class="bench-fill" style="--v: 55.4"></div><span class="bench-label">Windsurf Cascade</span></div><span class="bench-val">55.4%</span></div>
+        </div>
+        <p class="bench-foot">Source · swebench.com Verified split + vendor reports, May 2026</p>
+      </div>
+
+      <!-- AIDER POLYGLOT -->
+      <div class="bench-card viz" id="bench-aider">
+        <p class="bench-eyebrow">Leaderboard · Aider Polyglot</p>
+        <h3 class="bench-h">Aider Polyglot</h3>
+        <p class="bench-desc">225 hard Exercism problems across C++, Go, Java, JavaScript, Python, Rust. Tests editing — not just code generation. Higher is better.</p>
+        <div class="bench-list">
+          <div class="bench-row"><span class="bench-rank">01</span><div class="bench-name" style="--bar: var(--t-claude)"><div class="bench-fill" style="--v: 89.4"></div><span class="bench-label">Claude Opus 4.5</span></div><span class="bench-val">89.4%</span></div>
+          <div class="bench-row"><span class="bench-rank">02</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 88.0"></div><span class="bench-label">GPT-5 (high reasoning)</span></div><span class="bench-val">88.0%</span></div>
+          <div class="bench-row"><span class="bench-rank">03</span><div class="bench-name" style="--bar: var(--t-claude)"><div class="bench-fill" style="--v: 85.3"></div><span class="bench-label">Sonnet 4.5</span></div><span class="bench-val">85.3%</span></div>
+          <div class="bench-row"><span class="bench-rank">04</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 79.7"></div><span class="bench-label">o3-mini (high)</span></div><span class="bench-val">79.7%</span></div>
+          <div class="bench-row"><span class="bench-rank">05</span><div class="bench-name" style="--bar: var(--t-aider)"><div class="bench-fill" style="--v: 79.0"></div><span class="bench-label">Aider · diff edit</span></div><span class="bench-val">79.0%</span></div>
+          <div class="bench-row"><span class="bench-rank">06</span><div class="bench-name" style="--bar: var(--t-claude)"><div class="bench-fill" style="--v: 76.4"></div><span class="bench-label">Sonnet 3.7</span></div><span class="bench-val">76.4%</span></div>
+          <div class="bench-row"><span class="bench-rank">07</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 72.9"></div><span class="bench-label">Gemini 2.5 Pro</span></div><span class="bench-val">72.9%</span></div>
+          <div class="bench-row"><span class="bench-rank">08</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 70.6"></div><span class="bench-label">o1 (high)</span></div><span class="bench-val">70.6%</span></div>
+          <div class="bench-row"><span class="bench-rank">09</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 66.7"></div><span class="bench-label">DeepSeek R1</span></div><span class="bench-val">66.7%</span></div>
+          <div class="bench-row"><span class="bench-rank">10</span><div class="bench-name" style="--bar: var(--t-copilot)"><div class="bench-fill" style="--v: 59.1"></div><span class="bench-label">Qwen 2.5 Coder 32B</span></div><span class="bench-val">59.1%</span></div>
+        </div>
+        <p class="bench-foot">Source · aider.chat/docs/leaderboards, 2026</p>
+      </div>
+    </div>
+
+    <div class="bench-mini">
+      <div class="bench-mini-card" style="border-left-color: var(--t-codeium)">
+        <p class="k">MLE-Bench Lite</p>
+        <p class="v">28%</p>
+        <p class="d">Devin's reported result on the 22 ML engineering tasks from OpenAI's MLE-bench Lite, 2026 (medal rate).</p>
+      </div>
+      <div class="bench-mini-card" style="border-left-color: var(--t-claude)">
+        <p class="k">Terminal-Bench 2.0</p>
+        <p class="v">~40%</p>
+        <p class="d">Top-line frontier model result on Stanford's Terminal-Bench 2.0 — a new long-horizon shell-task harness, late 2026.</p>
+      </div>
+      <div class="bench-mini-card" style="border-left-color: var(--t-cursor)">
+        <p class="k">LiveCodeBench Pro</p>
+        <p class="v">73.4%</p>
+        <p class="d">Live competitive-programming problems re-scored monthly to defeat data contamination. Claude Opus 4.5 best published, 2026.</p>
+      </div>
+      <div class="bench-mini-card" style="border-left-color: var(--t-aider)">
+        <p class="k">SWE-Bench Multimodal</p>
+        <p class="v">54%</p>
+        <p class="d">JavaScript-focused split that includes screenshots and UI bugs; top frontier model result reported by Anthropic in 2026.</p>
+      </div>
+    </div>
+
+    <div class="bench-narrative">
+      <p>Two cautions before reading these scores as gospel. First, every benchmark on this page rewards a slightly different skill. SWE-bench Verified rewards model + harness on real Python bug fixes. Aider Polyglot rewards diff-based editing across six languages. MLE-bench rewards multi-day data-science autonomy. A team that ships React UI components every day cares most about something none of these benchmarks directly test.</p>
+      <p>Second, scaffolding is half the score. In early 2026, three independent frameworks running the <em>same model</em> scored roughly 17 issues apart on a 731-problem SWE-bench split. The "model" line on a leaderboard quietly absorbs all the harness choices — tool definitions, retrieval strategy, prompt format, retry policy — that the framework author made. Pick a model AND an agent. A great model in a weak harness loses to a mid model in a strong one.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION 06 · PRICING LADDER ====== -->
+<section class="section band" id="pricing">
+  <div class="section-inner">
+    <div class="section-head">
+      <div>
+        <p class="section-num">Section 06 · Pricing Ladder</p>
+        <h2 class="section-title">What a Single Seat Costs at Every Tier</h2>
+      </div>
+    </div>
+
+    <div class="pricing-narrative">
+      <p>The price column is the column most teams sort by first. Below: each agent's published plans as of May 2026, normalized to a per-developer, per-month cost. Two patterns stand out. First, the gap from the cheapest serious option (Windsurf Pro at $15) to the most expensive (Devin starting around $500) is a 33x spread for products being marketed at the same job. Second, the "free tier" market is now real — Windsurf, Aider with a free API trial, and Copilot Free for individuals each offer enough capability that a student or hobbyist never has to pay.</p>
+      <p>Caveats: BYO-API agents (Aider, Cline) carry a token bill that doesn't appear on this table — expect $20–100/month per developer running them heavily against Claude or GPT. Devin's price is a starter that climbs with usage. Enterprise plans across the board negotiate, especially above 50 seats.</p>
+    </div>
+
+    <div class="pricing-wrap">
+      <div class="pricing-scroll">
+        <table class="pricing">
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Free / Trial</th>
+              <th>Individual Pro</th>
+              <th>Team / Business</th>
+              <th>Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="--team: var(--t-claude)">
+              <td><span class="p-agent">Claude Code</span></td>
+              <td><span class="note">None for agent; web Claude.ai free</span></td>
+              <td><span class="price">$100/mo</span> <span class="note">Pro · Sonnet-heavy</span></td>
+              <td><span class="price">$200/mo</span> <span class="note">Max · Opus access</span></td>
+              <td><span class="note">API-billed, neg.</span></td>
+            </tr>
+            <tr style="--team: var(--t-cursor)">
+              <td><span class="p-agent">Cursor</span></td>
+              <td><span class="price">$0</span> <span class="note">Hobby · slow models</span></td>
+              <td><span class="price">$20/mo</span> <span class="note">Pro · 500 fast req.</span></td>
+              <td><span class="price">$40/seat</span> <span class="note">Business</span></td>
+              <td><span class="price">$60+/seat</span> <span class="note">SAML/SSO + usage</span></td>
+            </tr>
+            <tr style="--team: var(--t-copilot)">
+              <td><span class="p-agent">GitHub Copilot</span></td>
+              <td><span class="price">$0</span> <span class="note">Free · 2k completions</span></td>
+              <td><span class="price">$10/mo</span> <span class="note">Pro · unlimited</span></td>
+              <td><span class="price">$19/seat</span> <span class="note">Business · audit</span></td>
+              <td><span class="price">$39/seat</span> <span class="note">Enterprise · IP indemnity</span></td>
+            </tr>
+            <tr style="--team: var(--t-aider)">
+              <td><span class="p-agent">Aider</span></td>
+              <td><span class="price">$0</span> <span class="note">OSS · BYO API key</span></td>
+              <td><span class="price">$0</span> <span class="note">+ API tokens ~$20–100</span></td>
+              <td><span class="price">$0</span> <span class="note">no team plan</span></td>
+              <td><span class="price">—</span> <span class="note">self-host only</span></td>
+            </tr>
+            <tr style="--team: var(--t-cline)">
+              <td><span class="p-agent">Cline</span></td>
+              <td><span class="price">$0</span> <span class="note">OSS · BYO API key</span></td>
+              <td><span class="price">$0</span> <span class="note">+ tokens, often $40–150</span></td>
+              <td><span class="price">$0</span> <span class="note">team via shared API</span></td>
+              <td><span class="price">—</span> <span class="note">self-host only</span></td>
+            </tr>
+            <tr style="--team: var(--t-devin)">
+              <td><span class="p-agent">Devin</span></td>
+              <td><span class="note">None</span></td>
+              <td><span class="price">$500/mo</span> <span class="note">Core · 250 ACU</span></td>
+              <td><span class="price">$1,000+/mo</span> <span class="note">Team · scales w/ usage</span></td>
+              <td><span class="price">Custom</span> <span class="note">on-prem + SSO</span></td>
+            </tr>
+            <tr style="--team: var(--t-codeium)">
+              <td><span class="p-agent">Windsurf</span></td>
+              <td><span class="price">$0</span> <span class="note">Free · generous indef.</span></td>
+              <td><span class="price">$15/mo</span> <span class="note">Pro · Cascade access</span></td>
+              <td><span class="price">$35/seat</span> <span class="note">Teams · admin</span></td>
+              <td><span class="price">Custom</span> <span class="note">on-prem, air-gap</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<section class="cta-section">
-  <h2>Help your team adopt the right two — not all seven.</h2>
-  <p>CETI runs a hands-on AI Coding Academy for engineering teams. We benchmark your codebase against the tools above, build the workflow, and train the team. Five thousand professionals trained, one hundred-plus orgs.</p>
-  <div class="cta-row">
-    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
-      Book a 30-min call
-      <span class="arrow">→</span>
-    </a>
-    <a class="secondary" href="../">← Back to lookbook</a>
+<!-- ====== SECTION 07 · DECISION TABLE ====== -->
+<section class="section" id="decision">
+  <div class="section-inner">
+    <div class="section-head">
+      <div>
+        <p class="section-num">Section 07 · Decision Table</p>
+        <h2 class="section-title">If Your Job Today Looks Like This, Pick This</h2>
+      </div>
+    </div>
+
+    <div class="decision-narrative">
+      <p>A short decision table covering the eight situations engineering teams actually find themselves in. Read it as "if your job today looks like the first column, the second column is a sensible default, and the third column is why." Substitute according to your stack, your security posture, and your budget. Most teams end up running two of these in production — rarely one, never all seven.</p>
+    </div>
+
+    <div class="decision-wrap">
+      <div class="decision-row head">
+        <div>Use Case</div>
+        <div>Sensible Default</div>
+        <div>Why</div>
+      </div>
+      <div class="decision-row">
+        <div class="dec-case">Greenfield, fast iteration</div>
+        <div><span class="dec-pick" style="--pick: var(--t-cursor)">Cursor</span></div>
+        <div class="dec-why">Tab completion plus Composer keeps you in the editor while the codebase is small enough to hold in your head. Agentic work is still cheap, model swaps are one click.</div>
+      </div>
+      <div class="decision-row">
+        <div class="dec-case">Refactor a large codebase</div>
+        <div><span class="dec-pick" style="--pick: var(--t-claude)">Claude Code</span></div>
+        <div class="dec-why">Long-horizon planning, repo-wide context, terminal access, MCP servers for project-specific tools. The leash is intentionally long and the SWE-bench numbers back it up.</div>
+      </div>
+      <div class="decision-row">
+        <div class="dec-case">Debug a tricky failure</div>
+        <div><span class="dec-pick" style="--pick: var(--t-cline)">Cline</span></div>
+        <div class="dec-why">Every action is explicit and approval-gated. You watch it form a hypothesis, run a test, revise. BYO key means model swaps are free; observability is total.</div>
+      </div>
+      <div class="decision-row">
+        <div class="dec-case">Navigate a large unfamiliar repo</div>
+        <div><span class="dec-pick" style="--pick: var(--t-claude)">Claude Code</span></div>
+        <div class="dec-why">Repo-wide planning and long context windows let you ask "where does X happen?" and get an answer grounded in real file paths, not hallucinations.</div>
+      </div>
+      <div class="decision-row">
+        <div class="dec-case">Learning a new language</div>
+        <div><span class="dec-pick" style="--pick: var(--t-aider)">Aider</span></div>
+        <div class="dec-why">Aider's Polyglot benchmark exists because Aider is good at polyglot work. Git-native, transparent edits, zero subscription friction, any frontier model you want.</div>
+      </div>
+      <div class="decision-row">
+        <div class="dec-case">Ship a small ticket end-to-end</div>
+        <div><span class="dec-pick" style="--pick: var(--t-devin)">Devin</span></div>
+        <div class="dec-why">When the work is well-scoped and you'd rather review than write, the autonomous path is cheapest in human-minutes. Pricier in dollars; still cheaper than your time.</div>
+      </div>
+      <div class="decision-row">
+        <div class="dec-case">Onboarding a junior engineer</div>
+        <div><span class="dec-pick" style="--pick: var(--t-copilot)">GitHub Copilot</span></div>
+        <div class="dec-why">Lowest cognitive overhead, zero setup, lives inside the IDE the junior already learned in school. Lets them learn the codebase while shipping.</div>
+      </div>
+      <div class="decision-row">
+        <div class="dec-case">Ops scripts, glue code, one-shots</div>
+        <div><span class="dec-pick" style="--pick: var(--t-claude)">Claude Code</span></div>
+        <div class="dec-why">Terminal-native means the agent is already where the work happens — bash, awk, kubectl, terraform. No editor context-switch tax.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION 08 · PHILOSOPHY ====== -->
+<section class="section band" id="philosophy">
+  <div class="section-inner">
+    <div class="section-head">
+      <div>
+        <p class="section-num">Section 08 · The Philosophy</p>
+        <h2 class="section-title">Three Schools, One Disagreement</h2>
+      </div>
+    </div>
+
+    <div class="roster-intro" style="margin-bottom: 1.75rem;">
+      <p>Once you sort the field by deployment surface, the disagreement isn't about model quality. It's about who is supposed to be in the chair. Every agent on this page is making a different bet about where coding actually happens, and the bet determines almost everything else — pricing, UX, autonomy ceiling, failure mode.</p>
+    </div>
+
+    <div class="phil-grid">
+      <article class="phil-card" style="--phil: var(--t-cursor)">
+        <p class="phil-tag">School A · IDE Copilot</p>
+        <h3 class="phil-h">The Agent Lives In Your Editor</h3>
+        <p class="phil-body">The developer drives. The agent suggests at the cursor and works in side panels. Composer or Agent Mode adds multi-file edits without leaving the IDE. The mental model is "pair programmer on your shoulder, not in your shell."</p>
+        <ul class="phil-list">
+          <li><span class="ico">+</span>Zero context switch — work stays in one window.</li>
+          <li><span class="ico">+</span>Best for inline completion at typing speed.</li>
+          <li><span class="ico">+</span>Familiar to anyone who's ever used VS Code.</li>
+          <li><span class="ico">−</span>Long-horizon work strains the UX.</li>
+          <li><span class="ico">−</span>Terminal-heavy workflows feel like swimming upstream.</li>
+        </ul>
+        <div class="phil-roster">
+          <span class="phil-chip">Cursor</span>
+          <span class="phil-chip">GitHub Copilot</span>
+          <span class="phil-chip">Windsurf</span>
+        </div>
+      </article>
+
+      <article class="phil-card" style="--phil: var(--t-claude)">
+        <p class="phil-tag">School B · Terminal Native</p>
+        <h3 class="phil-h">The Agent Lives In Your Shell</h3>
+        <p class="phil-body">The conversation IS the workflow. The repo is the work surface, MCP servers are the tools, edits are applied as git diffs. Long-horizon, multi-step tasks are first-class — the agent expects to work for tens of minutes unsupervised. The mental model is "junior engineer with a terminal."</p>
+        <ul class="phil-list">
+          <li><span class="ico">+</span>Long-horizon planning is the design point.</li>
+          <li><span class="ico">+</span>MCP makes domain-specific tools cheap to wire in.</li>
+          <li><span class="ico">+</span>Native to ops, scripting, devops workflows.</li>
+          <li><span class="ico">−</span>Less suited to UI-heavy frontend work.</li>
+          <li><span class="ico">−</span>Steeper UX learning curve for IDE-first developers.</li>
+        </ul>
+        <div class="phil-roster">
+          <span class="phil-chip">Claude Code</span>
+          <span class="phil-chip">Aider</span>
+          <span class="phil-chip">OpenAI Codex CLI</span>
+        </div>
+      </article>
+
+      <article class="phil-card" style="--phil: var(--t-devin)">
+        <p class="phil-tag">School C · Fully Autonomous</p>
+        <h3 class="phil-h">The Agent Lives On A Server</h3>
+        <p class="phil-body">You file a ticket; the agent plans, browses, codes, tests, opens a PR. The developer reviews instead of types. Maximum leash length — and maximum failure surface. The mental model is not "pair programmer" at all; it's "asynchronous contractor you direct in English."</p>
+        <ul class="phil-list">
+          <li><span class="ico">+</span>Truly parallelizes — agent works while you sleep.</li>
+          <li><span class="ico">+</span>Best fit for well-scoped tickets.</li>
+          <li><span class="ico">+</span>Lowest human-time cost per task that lands.</li>
+          <li><span class="ico">−</span>Highest dollar cost per task.</li>
+          <li><span class="ico">−</span>Quality variance high; review burden real.</li>
+        </ul>
+        <div class="phil-roster">
+          <span class="phil-chip">Devin</span>
+          <span class="phil-chip">Cline (autonomous mode)</span>
+          <span class="phil-chip">Replit Agent</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION 09 · WHAT TO WATCH ====== -->
+<section class="section" id="watch">
+  <div class="section-inner">
+    <div class="section-head">
+      <div>
+        <p class="section-num">Section 09 · What To Watch In 2026</p>
+        <h2 class="section-title">Players And Shifts Worth Tracking</h2>
+      </div>
+    </div>
+
+    <div class="watch-grid">
+      <article class="watch-card">
+        <span class="watch-num">01</span>
+        <h3 class="watch-h">OpenAI Codex CLI</h3>
+        <p class="watch-body">OpenAI's answer to Claude Code shipped as a terminal-first agent in 2025 and has been quietly catching up on the SWE-bench leaderboard. Expect aggressive feature parity with MCP-style tool calling and tighter ChatGPT plan integration in late 2026.</p>
+      </article>
+      <article class="watch-card">
+        <span class="watch-num">02</span>
+        <h3 class="watch-h">Gemini Code Assist</h3>
+        <p class="watch-body">Google's coding assistant now ships inside Android Studio, Firebase, and an expanded Gemini CLI. The IDE integration in JetBrains tools is the catch-up shot; the cloud-side BigQuery + Vertex story is the differentiator.</p>
+      </article>
+      <article class="watch-card">
+        <span class="watch-num">03</span>
+        <h3 class="watch-h">Async PR-Bot Agents</h3>
+        <p class="watch-body">A wave of agents that live inside the PR layer — Copilot Workspaces, Cursor BugBot, Cosine, Sweep — are starting to handle small tickets end-to-end without a developer ever opening an editor. The "junior engineer as service" pattern is generalizing.</p>
+      </article>
+      <article class="watch-card">
+        <span class="watch-num">04</span>
+        <h3 class="watch-h">On-Device & Air-Gapped</h3>
+        <p class="watch-body">Qwen 2.5 Coder, DeepSeek R1, and local Llama-Coder variants closed the gap fast enough that on-device and air-gapped deployments are now viable for finance, defense, and healthcare. Expect Windsurf and Cline to lead the on-prem story.</p>
+      </article>
+      <article class="watch-card">
+        <span class="watch-num">05</span>
+        <h3 class="watch-h">Agent Marketplaces</h3>
+        <p class="watch-body">The MCP server ecosystem started as a developer-utility category and is rapidly becoming a marketplace — domain-specific harnesses for SaaS APIs, design systems, and internal tools sold as installable modules. Anthropic's MCP registry is the early winner.</p>
+      </article>
+      <article class="watch-card">
+        <span class="watch-num">06</span>
+        <h3 class="watch-h">Benchmark Fatigue</h3>
+        <p class="watch-body">SWE-bench Verified is approaching ceiling. Expect 2026 to be the year new harnesses — Terminal-Bench 2.0, MLE-bench Pro, SWE-bench Multimodal, multi-week project benchmarks — start being cited more often than the old standby.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SECTION 10 · CITATIONS ====== -->
+<section class="section band" id="citations">
+  <div class="section-inner">
+    <div class="section-head">
+      <div>
+        <p class="section-num">Section 10 · Stats Citations</p>
+        <h2 class="section-title">Sources For Every Number On This Page</h2>
+      </div>
+    </div>
+
+    <div class="cite-list">
+      <p class="cite"><strong>SWE-bench Verified</strong>swebench.com/verified · official Princeton/OpenAI/Anthropic leaderboard, 500 human-validated tasks. May 2026 snapshot.</p>
+      <p class="cite"><strong>Claude Opus 4.7 score</strong>Anthropic model card update, April 2026 release notes. 87.6% on SWE-bench Verified.</p>
+      <p class="cite"><strong>Claude Opus 4.5 / Sonnet</strong>Anthropic model cards, late 2025–early 2026 model releases.</p>
+      <p class="cite"><strong>Aider Polyglot</strong>aider.chat/docs/leaderboards/ · 225 hard Exercism problems, six languages, monthly refresh.</p>
+      <p class="cite"><strong>Cursor SWE-bench</strong>Anysphere blog post, 2026 release of the Cursor Agent (Auto) router.</p>
+      <p class="cite"><strong>Devin SWE-bench</strong>Cognition AI public benchmark reports, 2026 evaluation cycle.</p>
+      <p class="cite"><strong>GitHub Copilot Agent Mode</strong>GitHub Universe 2025 announcements + Copilot blog technical reports.</p>
+      <p class="cite"><strong>MLE-Bench Lite</strong>OpenAI MLE-bench paper, Lite split + Devin's reported medal rate, 2026.</p>
+      <p class="cite"><strong>Terminal-Bench 2.0</strong>Stanford CRFM Terminal-Bench technical report, late 2026 release.</p>
+      <p class="cite"><strong>LiveCodeBench Pro</strong>livecodebench.org · monthly refreshed competitive programming harness.</p>
+      <p class="cite"><strong>Scaffolding gap study</strong>SWE-bench team blog, Feb 2026 · 17-issue spread across three frameworks on same model.</p>
+      <p class="cite"><strong>Pricing tiers</strong>Each vendor's public pricing page, retrieved May 2026. Enterprise tiers negotiated.</p>
+      <p class="cite"><strong>Capability scores</strong>Author's qualitative read of public docs, vendor briefings, hands-on use, May 2026.</p>
+      <p class="cite"><strong>Debut dates</strong>Vendor announcement posts, archived via Wayback Machine where original posts have shifted.</p>
+    </div>
   </div>
 </section>
 
 <footer>
-  <span>CETI.AI · Lookbook · AI Coding Agents</span>
-  <span>Compiled May 2026 · cetiai.co</span>
+  <span>16/18 · CETI Almanac · May 2026</span>
+  <span>cetiai.co · Coding Agents League</span>
 </footer>
 
 <script>
-  // ============ HERO REVEAL ============
-  requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-  // ============ INTERSECTION REVEALS ============
-  const reveal = new IntersectionObserver((entries) => {
+  // ============ INTERSECTION REVEAL ============
+  const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        reveal.unobserve(e.target);
+        e.target.classList.add('in', 'viz');
+        io.unobserve(e.target);
       }
     });
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
 
-  document.querySelectorAll('#matrix, .bento-card, .decision-row, .bench-chart').forEach((el) => reveal.observe(el));
+  document.querySelectorAll('.card, #matrix-table, #bench-swe, #bench-aider')
+    .forEach((el) => io.observe(el));
 
-  // ============ MAGNETIC BUTTONS ============
-  const STRENGTH = 25;
-  document.querySelectorAll('.magnetic').forEach((btn) => {
-    btn.addEventListener('mousemove', (e) => {
-      const r = btn.getBoundingClientRect();
-      const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-      const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-      btn.style.setProperty('--mx', `${x}px`);
-      btn.style.setProperty('--my', `${y}px`);
-    });
-    btn.addEventListener('mouseleave', () => {
-      btn.style.setProperty('--mx', '0px');
-      btn.style.setProperty('--my', '0px');
-    });
+  // staggered card reveal
+  document.querySelectorAll('.roster-grid').forEach((grid) => {
+    const cards = grid.querySelectorAll('.card');
+    cards.forEach((c, i) => c.style.transitionDelay = `${Math.min(i, 6) * 60}ms`);
   });
 
-  // ============ BENTO CARD CURSOR-GLOW ============
-  document.querySelectorAll('.bento-card').forEach((card) => {
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      card.style.setProperty('--my', `${e.clientY - r.top}px`);
-    });
-  });
+  // ============ STAT NUMBER ROLL-UP ============
+  function rollNumber(el, target, duration = 1100) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = target.toFixed(target % 1 === 0 ? 0 : 1);
+      return;
+    }
+    const start = performance.now();
+    const startVal = 0;
+    function tick(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      const v = startVal + (target - startVal) * eased;
+      el.textContent = v.toFixed(target % 1 === 0 ? 0 : 1);
+      if (t < 1) requestAnimationFrame(tick);
+      else el.textContent = target.toFixed(target % 1 === 0 ? 0 : 1);
+    }
+    requestAnimationFrame(tick);
+  }
 
-  // ============ MATRIX ROW HOVER HIGHLIGHT ============
-  document.querySelectorAll('#matrix .row').forEach((row) => {
-    const cells = row.querySelectorAll('.cell');
-    const enter = () => row.classList.add('hovered');
-    const leave = () => row.classList.remove('hovered');
-    cells.forEach((c) => {
-      c.addEventListener('mouseenter', enter);
-      c.addEventListener('mouseleave', leave);
+  // Roll the headline stat on each card when card enters view
+  const cardStatIO = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const card = e.target;
+      const statEl = card.querySelector('.card-stat-v');
+      if (!statEl) return;
+      const raw = statEl.firstChild ? statEl.firstChild.textContent.trim() : '';
+      const num = parseFloat(raw);
+      if (!isNaN(num)) {
+        // preserve trailing markup (e.g. "<span class='pct'>%</span>")
+        const trailing = statEl.querySelector('.pct');
+        const trailHTML = trailing ? trailing.outerHTML : '';
+        // animate
+        const tempEl = document.createElement('span');
+        statEl.firstChild.textContent = '0';
+        rollNumber({
+          set textContent(v) { statEl.firstChild.textContent = v; },
+          get textContent() { return statEl.firstChild.textContent; }
+        }, num, 1000);
+      }
+      cardStatIO.unobserve(card);
     });
-  });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('.card').forEach((c) => cardStatIO.observe(c));
+
+  // Roll hero strap numbers
+  const strapIO = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      e.target.querySelectorAll('.strap-v').forEach((el) => {
+        // get the leading number text (before the .small span)
+        const firstNode = el.firstChild;
+        if (!firstNode || firstNode.nodeType !== 3) return;
+        const raw = firstNode.textContent.trim();
+        const num = parseFloat(raw);
+        if (isNaN(num)) return;
+        firstNode.textContent = '0';
+        rollNumber({
+          set textContent(v) {
+            // preserve leading zero formatting for 07/08 etc
+            if (raw.match(/^0\d/) && num < 10) {
+              firstNode.textContent = String(Math.round(parseFloat(v))).padStart(2, '0');
+            } else {
+              firstNode.textContent = v;
+            }
+          }
+        }, num, 900);
+      });
+      strapIO.unobserve(e.target);
+    });
+  }, { threshold: 0.3 });
+  const strap = document.querySelector('.hero-strap');
+  if (strap) strapIO.observe(strap);
+
+  // ============ TOUCH-TAP FLIP (no hover) ============
+  if (window.matchMedia('(hover: none)').matches) {
+    document.querySelectorAll('.card').forEach((card) => {
+      card.addEventListener('click', () => card.classList.toggle('flipped'));
+    });
+  }
 </script>
-  <script src="../shared/nav.js" defer></script>
+<script src="../shared/nav.js" defer></script>
 </body>
 </html>

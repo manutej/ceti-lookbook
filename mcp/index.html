@@ -3,993 +3,824 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Model Context Protocol — One protocol. Every tool.</title>
-  <meta name="description" content="A field guide to MCP — Anthropic's open standard that lets any LLM connect to tools, data, and services through a single, uniform protocol. Client, server, three primitives, two transports.">
+  <title>USB-C for LLMs — On the Model Context Protocol</title>
+  <meta name="description" content="An essay on Anthropic's Model Context Protocol: an open standard, and what it changes. By Manu Mulaveesala, CETI.AI.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Source+Serif+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-bg-code: #1E1E2E;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
+      --paper:        #F7F2E9;
+      --paper-shade:  #EFE9DD;
+      --rule:         #D9D2C2;
+      --coal:         #1A1A1A;
+      --ink:          #2A2926;
+      --secondary:    #555555;
+      --muted:        #8A857C;
+      --amber:        #C8743C;
+      --amber-soft:   rgba(200, 116, 60, 0.10);
 
-      --color-accent:        #D94F30; /* vermillion */
-      --color-accent-hover:  #C4432A;
-      --color-accent-light:  #FDEEE9;
-      --color-accent-muted:  #E8836C;
+      --font-serif:   'Tinos', 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+      --font-body:    'Source Serif Pro', 'Tinos', Georgia, serif;
+      --font-ui:      'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
 
-      --color-actor-1: #D94F30; /* vermillion */
-      --color-actor-2: #2A7B9B; /* teal */
-      --color-actor-3: #7B6DAA; /* plum */
-      --color-actor-4: #D4A843; /* golden */
-      --color-actor-5: #2D8B55; /* forest */
+      --measure: 38rem;          /* ~608px reading width */
+      --measure-wide: 42rem;     /* for diagram/pull quote breakouts */
 
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body:    'DM Sans', -apple-system, sans-serif;
-      --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
-
-      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-      --duration-fast: 150ms;
-      --duration-normal: 300ms;
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
-      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
-
-      --radius-md: 12px;
-      --radius-lg: 16px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
+      background: var(--paper);
+      color: var(--coal);
       font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image:
-        radial-gradient(ellipse at 18% 22%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
-        radial-gradient(ellipse at 82% 78%, rgba(42, 123, 155, 0.04) 0%, transparent 55%);
-      line-height: 1.6;
+      font-size: 1.1875rem;          /* 19px */
+      line-height: 1.65;
+      font-weight: 400;
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
       overflow-x: hidden;
     }
 
-    a { color: inherit; }
+    a { color: var(--amber); text-decoration: none; border-bottom: 1px solid rgba(200,116,60,0.35); transition: border-color 200ms; }
+    a:hover { border-bottom-color: var(--amber); }
 
-    /* ============ NAV ============ */
-    .topbar {
+    ::selection { background: var(--amber-soft); color: var(--coal); }
+
+    /* ====== MASTHEAD ====== */
+    .masthead {
+      max-width: var(--measure-wide);
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 0;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 1.25rem 1.75rem;
-      max-width: 1200px;
-      margin: 0 auto;
+      align-items: baseline;
       font-family: var(--font-mono);
-      font-size: 0.78rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-secondary);
+      color: var(--secondary);
     }
-    .topbar .mark { color: var(--color-accent); font-weight: 500; }
-    .topbar a { text-decoration: none; transition: color 200ms; }
-    .topbar a:hover { color: var(--color-accent); }
+    .masthead .mark { color: var(--coal); }
+    .masthead a { color: var(--secondary); border: none; }
+    .masthead a:hover { color: var(--amber); }
 
-    /* ============ HERO ============ */
-    .hero {
-      min-height: 88vh;
-      padding: 3rem 1.75rem 4rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      max-width: 1100px;
+    /* ====== ARTICLE FRAME ====== */
+    article {
+      max-width: var(--measure);
       margin: 0 auto;
+      padding: 4rem 1.5rem 5rem;
     }
+
+    .fade {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 900ms var(--ease), transform 900ms var(--ease);
+    }
+    .fade.in { opacity: 1; transform: translateY(0); }
+
+    /* ====== HEAD MATTER ====== */
     .eyebrow {
       font-family: var(--font-mono);
-      font-size: 0.78rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
+      color: var(--secondary);
+      margin: 0 0 2rem;
     }
-    .hero.visible .eyebrow { opacity: 1; }
-    .eyebrow .dot { color: var(--color-text-muted); margin: 0 0.5rem; }
-    .eyebrow .quiet { color: var(--color-text-muted); }
+    .eyebrow .pip { color: var(--amber); margin: 0 0.55em; }
 
-    .hero-title {
-      font-family: var(--font-display);
+    h1.headline {
+      font-family: var(--font-serif);
       font-weight: 700;
-      font-size: clamp(2.75rem, 7vw, 5.25rem);
+      font-size: clamp(2.75rem, 6.5vw, 4.5rem);
       line-height: 1.02;
-      letter-spacing: -0.035em;
-      margin: 1.75rem 0 1.75rem;
-      max-width: 14ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 260ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 340ms; }
-    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 420ms; }
-    .hero-title em {
-      font-style: normal;
-      color: var(--color-accent);
+      letter-spacing: -0.022em;
+      margin: 0 0 1.5rem;
+      color: var(--coal);
     }
 
-    .hero-sub {
-      font-size: clamp(1.05rem, 1.6vw, 1.25rem);
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 580ms;
+    .deck {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+      line-height: 1.4;
+      color: var(--secondary);
+      margin: 0 0 2.5rem;
+      max-width: 32ch;
     }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-    .hero-sub b { color: var(--color-text); font-weight: 500; }
 
-    .cta-row {
-      display: flex;
-      gap: 1.25rem;
-      margin-top: 2.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 760ms;
-    }
-    .hero.visible .cta-row { opacity: 1; }
-
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 1rem 1.85rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms var(--ease-spring), background 200ms ease, box-shadow 300ms ease;
-      will-change: transform;
-      box-shadow: 0 8px 22px rgba(217, 79, 48, 0.18);
-      text-decoration: none;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); box-shadow: 0 14px 32px rgba(217, 79, 48, 0.26); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(4px); }
-
-    .secondary {
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      font-size: 0.95rem;
-      transition: color 200ms;
+    .byline {
       font-family: var(--font-mono);
-      letter-spacing: 0.04em;
-    }
-    .secondary:hover { color: var(--color-accent); }
-
-    /* ============ SECTION SCAFFOLD ============ */
-    .section {
-      padding: 5rem 1.75rem;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .section-label {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      text-transform: uppercase;
+      font-size: 0.72rem;
       letter-spacing: 0.14em;
-      color: var(--color-accent);
-      margin: 0 0 1rem;
-    }
-    .section-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2rem, 4.2vw, 3rem);
-      letter-spacing: -0.025em;
-      margin: 0 0 1rem;
-      max-width: 22ch;
-    }
-    .section-sub {
-      color: var(--color-text-secondary);
-      max-width: 60ch;
-      font-size: 1.05rem;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--rule);
       margin: 0 0 3rem;
     }
+    .byline .who { color: var(--secondary); }
 
-    .animate-in {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    /* ====== BODY PROSE ====== */
+    p {
+      margin: 0 0 1.4em;
     }
-    .animate-in.visible { opacity: 1; transform: translateY(0); }
+    p + p {
+      text-indent: 1.5em;
+    }
+    p.lede + p { text-indent: 0; }
+    p.section-open + p { text-indent: 0; }
 
-    /* ============ HUB-SPOKE DIAGRAM ============ */
-    .arch {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 2.5rem 1.5rem;
-      box-shadow: var(--shadow-md);
-      position: relative;
-      overflow: hidden;
+    /* drop cap (lede + section opens) */
+    p.lede,
+    p.section-open {
+      font-size: 1.1875rem;
+      line-height: 1.62;
     }
-    .arch::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(217, 79, 48, 0.045) 0%, transparent 55%);
-      pointer-events: none;
+    p.lede::first-letter,
+    p.section-open::first-letter {
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 4.25em;
+      float: left;
+      line-height: 0.85;
+      margin: 0.08em 0.08em -0.05em 0;
+      color: var(--amber);
+      font-feature-settings: "lnum";
     }
-    .arch-svg {
+    p.section-open::first-letter {
+      font-size: 3.4em;
+      margin: 0.1em 0.09em -0.05em 0;
+    }
+
+    em, i { font-style: italic; }
+    strong, b { font-weight: 700; color: var(--coal); }
+
+    sup.fn {
+      font-family: var(--font-mono);
+      font-size: 0.62em;
+      color: var(--amber);
+      vertical-align: super;
+      line-height: 0;
+      padding-left: 0.05em;
+    }
+    sup.fn a { color: var(--amber); border-bottom: none; }
+    sup.fn a:hover { color: var(--coal); }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      color: var(--coal);
+      background: var(--paper-shade);
+      padding: 0.08em 0.38em;
+      border-radius: 2px;
+      letter-spacing: -0.005em;
+    }
+
+    /* ====== ORNAMENT DIVIDER ====== */
+    .ornament {
+      text-align: center;
+      margin: 3rem 0;
+      color: var(--muted);
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      letter-spacing: 0.8em;
+      line-height: 1;
+      user-select: none;
+    }
+    .ornament.fleuron {
+      font-size: 1.4rem;
+      letter-spacing: normal;
+      color: var(--amber);
+    }
+
+    /* ====== PULL QUOTE ====== */
+    blockquote.pull {
+      margin: 3.5rem -1rem 3.5rem 0;
+      padding: 0.25rem 0 0.25rem 1.5rem;
+      border-left: 2px solid var(--amber);
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(1.4rem, 2.6vw, 1.75rem);
+      line-height: 1.32;
+      color: var(--coal);
+      letter-spacing: -0.005em;
+    }
+    blockquote.pull cite {
+      display: block;
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-style: normal;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ====== SECTION HEADS (in-essay subhead, sparingly used) ====== */
+    h2.sub {
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 1.6rem;
+      letter-spacing: -0.01em;
+      margin: 3.5rem 0 1.5rem;
+      color: var(--coal);
+      line-height: 1.18;
+    }
+    h2.sub .roman {
+      display: block;
+      font-family: var(--font-mono);
+      font-weight: 400;
+      font-style: normal;
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 0.55rem;
+    }
+
+    h3.minor {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1.2rem;
+      color: var(--coal);
+      margin: 2rem 0 1rem;
+      letter-spacing: -0.005em;
+    }
+
+    /* ====== DIAGRAM (quiet, hand-drawn feeling) ====== */
+    figure.diagram {
+      margin: 3.5rem -0.5rem;
+      padding: 0;
+    }
+    figure.diagram svg {
       display: block;
       width: 100%;
       height: auto;
-      max-width: 720px;
-      margin: 0 auto;
-      position: relative;
+      max-width: 100%;
     }
-    .arch-caption {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      margin-top: 2rem;
-      color: var(--color-text-secondary);
-      font-size: 0.98rem;
+    figcaption {
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--secondary);
+      margin-top: 1rem;
+      text-align: center;
+      letter-spacing: 0.005em;
     }
-    .arch-caption b { color: var(--color-text); font-weight: 600; }
-    .arch-caption code {
+    figcaption .fig-no {
       font-family: var(--font-mono);
-      font-size: 0.85em;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      padding: 0.1em 0.4em;
-      border-radius: 4px;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 0.4rem;
     }
 
-    /* Diagram SVG styling */
-    .hub-glow {
-      transform-origin: 360px 240px;
-      animation: hubPulse 3.6s var(--ease-out) infinite;
-    }
-    @keyframes hubPulse {
-      0%, 100% { opacity: 0.55; transform: scale(1); }
-      50% { opacity: 0.95; transform: scale(1.08); }
-    }
-    .hub-core {
-      fill: var(--color-accent);
-    }
-    .hub-ring {
-      fill: none;
-      stroke: var(--color-accent);
-      stroke-width: 1.5;
-      opacity: 0.35;
-    }
-    .spoke {
-      stroke: var(--color-border);
+    /* hand-drawn stroke aesthetic */
+    .diag-stroke {
+      stroke: var(--coal);
       stroke-width: 1.25;
       fill: none;
-      stroke-dasharray: 3 4;
-    }
-    .beam-path {
-      stroke: var(--color-accent);
-      stroke-width: 2;
       stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .diag-dash {
+      stroke: var(--secondary);
+      stroke-width: 1;
       fill: none;
-      stroke-dasharray: 16 200;
-      stroke-dashoffset: 200;
-      filter: drop-shadow(0 0 6px rgba(217, 79, 48, 0.45));
-      animation: beamFlow 4.2s linear infinite;
+      stroke-dasharray: 3 4;
+      stroke-linecap: round;
+      opacity: 0.7;
     }
-    .beam-path.b2 { animation-delay: -0.6s; }
-    .beam-path.b3 { animation-delay: -1.2s; }
-    .beam-path.b4 { animation-delay: -1.8s; }
-    .beam-path.b5 { animation-delay: -2.4s; }
-    .beam-path.b6 { animation-delay: -3.0s; }
-    .beam-path.b7 { animation-delay: -3.6s; }
-    .beam-path.b8 { animation-delay: -4.2s; }
-    @keyframes beamFlow {
-      0%   { stroke-dashoffset: 200; }
-      100% { stroke-dashoffset: -16; }
+    .diag-fill {
+      fill: var(--paper);
+      stroke: var(--coal);
+      stroke-width: 1.25;
     }
-    .node-orb circle {
-      fill: var(--color-surface);
-      stroke: var(--color-border);
-      stroke-width: 1.5;
-      transition: stroke 300ms var(--ease-out), filter 300ms;
+    .diag-amber {
+      fill: var(--amber);
+      stroke: var(--coal);
+      stroke-width: 1.25;
     }
-    .node-orb text {
+    .diag-label {
       font-family: var(--font-mono);
-      font-size: 9px;
-      font-weight: 500;
-      letter-spacing: 0.06em;
-      fill: var(--color-text-secondary);
+      font-size: 9.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      fill: var(--coal);
       text-anchor: middle;
       dominant-baseline: middle;
     }
-    .node-orb.pulse circle {
-      stroke: var(--color-accent);
-      filter: drop-shadow(0 0 8px rgba(217, 79, 48, 0.55));
-    }
-    .node-orb.pulse text { fill: var(--color-text); }
-    .center-label {
+    .diag-center {
       font-family: var(--font-mono);
       font-size: 10px;
       letter-spacing: 0.12em;
-      fill: white;
+      fill: var(--paper);
       text-anchor: middle;
       dominant-baseline: middle;
       font-weight: 500;
     }
 
-    /* ============ PRIMITIVES BENTO ============ */
-    .primitives {
+    /* ====== INLINE STAT ROW (small, restrained) ====== */
+    .stat-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
+      gap: 1.5rem;
+      margin: 3rem 0;
+      padding: 1.75rem 0;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
     }
-    .prim {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 2rem 1.75rem;
-      position: relative;
-      overflow: hidden;
-      transition: transform var(--duration-normal) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
-    }
-    .prim::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%), var(--prim-glow, rgba(217, 79, 48, 0.08)), transparent 42%);
-      pointer-events: none;
-      transition: opacity 200ms;
-    }
-    .prim:hover {
-      transform: translateY(-4px);
-      border-color: var(--prim-accent, var(--color-accent-muted));
-      box-shadow: var(--shadow-lg);
-    }
-    .prim-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 14px;
-      background: var(--prim-bg, var(--color-accent-light));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-      color: var(--prim-accent, var(--color-accent));
-    }
-    .prim-tag {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--prim-accent, var(--color-accent));
-      margin-bottom: 0.5rem;
-    }
-    .prim h3 {
-      font-family: var(--font-display);
+    .stat .n {
+      font-family: var(--font-serif);
       font-weight: 700;
-      font-size: 1.65rem;
-      letter-spacing: -0.015em;
-      margin: 0 0 0.75rem;
+      font-size: 2rem;
+      line-height: 1;
+      color: var(--coal);
+      letter-spacing: -0.02em;
     }
-    .prim p {
-      color: var(--color-text-secondary);
-      margin: 0;
-      font-size: 0.97rem;
-    }
-    .prim p code {
-      font-family: var(--font-mono);
-      font-size: 0.85em;
-      color: var(--color-text);
-      background: var(--color-bg-warm);
-      padding: 0.08em 0.4em;
-      border-radius: 4px;
+    .stat .n .suf { color: var(--amber); }
+    .stat .l {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--secondary);
+      margin-top: 0.55rem;
+      line-height: 1.4;
     }
 
-    .prim.tools     { --prim-accent: var(--color-actor-1); --prim-bg: #FDEEE9; --prim-glow: rgba(217, 79, 48, 0.10); }
-    .prim.resources { --prim-accent: var(--color-actor-2); --prim-bg: #E4F2F7; --prim-glow: rgba(42, 123, 155, 0.10); }
-    .prim.prompts   { --prim-accent: var(--color-actor-3); --prim-bg: #EFEAF7; --prim-glow: rgba(123, 109, 170, 0.10); }
-
-    /* ============ MARQUEE ============ */
-    .marquee-wrap {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem 0;
-      overflow: hidden;
-      mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-    }
-    .marquee {
-      display: flex;
-      gap: 0.75rem;
-      width: max-content;
-      animation: marquee-l 38s linear infinite;
-      will-change: transform;
-    }
-    .marquee.reverse {
-      animation: marquee-r 44s linear infinite;
-      margin-top: 0.75rem;
-    }
-    .marquee-wrap:hover .marquee { animation-play-state: paused; }
-    @keyframes marquee-l {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
-    }
-    @keyframes marquee-r {
-      from { transform: translateX(-50%); }
-      to   { transform: translateX(0); }
-    }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1.1rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 9999px;
+    /* ====== CODE BLOCK (small, paper-toned) ====== */
+    pre.code {
       font-family: var(--font-mono);
       font-size: 0.82rem;
-      color: var(--color-text-secondary);
-      white-space: nowrap;
-      transition: border-color 200ms, color 200ms;
-    }
-    .pill .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--pill-dot, var(--color-accent));
-    }
-    .pill:hover { border-color: var(--pill-dot, var(--color-accent)); color: var(--color-text); }
-
-    /* ============ NUMBERS ============ */
-    .numbers {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
-    }
-    .number-tile {
-      padding: 2.25rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
-    }
-    .number-tile .v {
-      font-family: var(--font-display);
-      font-size: clamp(2.75rem, 5vw, 3.75rem);
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: -0.03em;
-      color: var(--color-text);
-      font-variant-numeric: tabular-nums;
-    }
-    .number-tile .v .suffix { color: var(--color-accent); margin-left: 0.1em; }
-    .number-tile .l {
-      margin-top: 0.85rem;
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-    }
-    .number-tile .sub {
-      margin-top: 0.4rem;
-      color: var(--color-text-muted);
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    /* ============ CODE BLOCK ============ */
-    .code-frame {
-      background: var(--color-bg-code);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem 1.75rem 1.5rem;
-      box-shadow: var(--shadow-xl);
-      overflow: hidden;
-      position: relative;
-    }
-    .code-frame::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 36px;
-      background: rgba(255,255,255,0.03);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .code-dots {
-      position: absolute;
-      top: 12px;
-      left: 14px;
-      display: flex;
-      gap: 6px;
-    }
-    .code-dots span {
-      width: 11px; height: 11px; border-radius: 50%; background: #45475A;
-    }
-    .code-dots span:first-child { background: #F38BA8; }
-    .code-dots span:nth-child(2) { background: #F9E2AF; }
-    .code-dots span:nth-child(3) { background: #A6E3A1; }
-    .code-filename {
-      position: absolute;
-      top: 11px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      color: #9399B2;
-      letter-spacing: 0.04em;
-    }
-    pre.code {
-      margin: 2rem 0 0;
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      color: #CDD6F4;
       line-height: 1.7;
-      white-space: pre-wrap;
-      word-break: break-word;
+      background: var(--paper-shade);
+      border-left: 2px solid var(--rule);
+      padding: 1.25rem 1.5rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+      color: var(--ink);
+      white-space: pre;
+      tab-size: 2;
     }
-    .code-keyword { color: #CBA6F7; }
-    .code-string  { color: #A6E3A1; }
-    .code-fn      { color: #89B4FA; }
-    .code-comment { color: #6C7086; font-style: italic; }
-    .code-num     { color: #FAB387; }
-    .code-prop    { color: #F9E2AF; }
-    .code-op      { color: #94E2D5; }
-    .code-type    { color: #F5C2E7; }
+    pre.code .kw { color: var(--amber); font-style: italic; }
+    pre.code .st { color: var(--secondary); }
+    pre.code .cm { color: var(--muted); font-style: italic; }
 
-    /* ============ FINAL CTA ============ */
-    .final {
-      padding: 6rem 1.75rem 7rem;
-      max-width: 760px;
-      margin: 0 auto;
-      text-align: center;
+    pre.code + figcaption {
+      margin-top: -0.75rem;
+      margin-bottom: 2rem;
+      text-align: left;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.92rem;
+      color: var(--secondary);
     }
-    .final h2 {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4.2vw, 3rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      margin: 0 0 1rem;
-    }
-    .final p {
-      color: var(--color-text-secondary);
-      margin: 0 0 2.25rem;
-      font-size: 1.05rem;
-    }
-    .final .row { display: flex; gap: 1.25rem; justify-content: center; flex-wrap: wrap; align-items: center; }
 
-    .footer {
-      text-align: center;
-      padding: 2rem 1.5rem 3rem;
-      color: var(--color-text-muted);
+    /* ====== FOOTNOTES / READING LIST ====== */
+    .reading {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--rule);
+    }
+    .reading h3 {
       font-family: var(--font-mono);
-      font-size: 0.74rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--secondary);
+      margin: 0 0 1.25rem;
+    }
+    .reading ol {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 0.92rem;
+      line-height: 1.62;
+      color: var(--secondary);
+      padding-left: 1.5rem;
+      margin: 0;
+    }
+    .reading ol li { margin-bottom: 0.85rem; }
+    .reading ol li::marker {
+      font-family: var(--font-mono);
+      font-style: normal;
+      font-size: 0.78rem;
+      color: var(--amber);
+    }
+    .reading a { color: var(--coal); border-bottom-color: var(--rule); font-style: italic; }
+    .reading a:hover { color: var(--amber); border-bottom-color: var(--amber); }
+    .reading .annot { font-style: normal; color: var(--muted); font-size: 0.88em; }
+
+    /* ====== SIGN-OFF ====== */
+    .signoff {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--rule);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
+      color: var(--secondary);
+      text-align: center;
     }
-    .footer a { color: var(--color-text-muted); text-decoration: none; }
-    .footer a:hover { color: var(--color-accent); }
-
-    /* ============ RESPONSIVE ============ */
-    @media (max-width: 860px) {
-      .primitives { grid-template-columns: 1fr; }
-      .numbers { grid-template-columns: 1fr; }
-      .arch-caption { grid-template-columns: 1fr; gap: 1.25rem; }
-      .section { padding: 4rem 1.5rem; }
-      .hero { padding-top: 1rem; }
-    }
-    @media (max-width: 480px) {
-      .topbar { padding: 1rem 1.25rem; font-size: 0.7rem; }
-      .topbar .hide-mobile { display: none; }
-      .hero { padding: 0 1.25rem 3rem; }
-      .arch { padding: 1.75rem 0.75rem; }
-      .code-frame { padding: 1.5rem 1rem 1.25rem; }
-      pre.code { font-size: 0.8rem; }
+    .signoff .author { color: var(--coal); }
+    .watermark {
+      margin-top: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      opacity: 0.7;
     }
 
-    /* ============ REDUCED MOTION ============ */
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 640px) {
+      body { font-size: 1.0625rem; line-height: 1.6; }
+      article { padding: 2.5rem 1.25rem 3.5rem; }
+      .masthead { padding: 1.5rem 1.25rem 0; font-size: 0.66rem; }
+      h1.headline { font-size: clamp(2.25rem, 9vw, 3rem); }
+      h2.sub { font-size: 1.35rem; margin: 2.75rem 0 1.25rem; }
+      blockquote.pull { margin: 2.5rem 0; font-size: 1.25rem; padding-left: 1rem; }
+      .stat-row { grid-template-columns: 1fr; gap: 1.5rem; }
+      .stat-row .stat { padding-bottom: 1.25rem; border-bottom: 1px dashed var(--rule); }
+      .stat-row .stat:last-child { border-bottom: none; padding-bottom: 0; }
+      pre.code { font-size: 0.74rem; padding: 1rem 1.1rem; }
+      p.lede::first-letter,
+      p.section-open::first-letter { font-size: 3.5em; }
+      figure.diagram { margin: 2.5rem 0; }
+    }
+
+    /* ====== REDUCED MOTION ====== */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+        animation-duration: 0.001ms !important;
       }
-      .hero .word, .hero-sub, .cta-row, .eyebrow, .animate-in {
-        opacity: 1 !important;
-        transform: none !important;
-      }
-      .beam-path { stroke-dashoffset: 0 !important; opacity: 0.5; }
-      .hub-glow { animation: none !important; opacity: 0.7; }
-      .marquee, .marquee.reverse { animation: none !important; transform: translateX(0) !important; }
-    }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .prim:hover { transform: none !important; }
+      .fade { opacity: 1 !important; transform: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <span><span class="mark">CETI.AI</span> <span class="hide-mobile">· lookbook</span></span>
-    <a href="#try">Try it ↗</a>
+  <header class="masthead">
+    <span><span class="mark">CETI.AI</span> &nbsp;Lookbook</span>
+    <a href="/">← Index</a>
   </header>
 
-  <!-- HERO -->
-  <section class="hero" id="hero">
-    <p class="eyebrow">Model Context Protocol <span class="dot">·</span> Open Standard <span class="dot">·</span> <span class="quiet">Nov 2024 →</span></p>
-    <h1 class="hero-title">
-      <span class="word">One</span>
-      <span class="word">protocol.</span>
-      <span class="word"><em>Every</em></span>
-      <span class="word">tool</span>
-      <span class="word">you'll need.</span>
-    </h1>
-    <p class="hero-sub">
-      MCP is <b>USB-C for LLMs</b> — Anthropic's open spec that lets any model
-      reach any tool, file system, database, or SaaS through one uniform interface.
-      The N×M integration problem, collapsed to N+M.
-    </p>
-    <div class="cta-row">
-      <a class="magnetic" href="#arch">
-        See how it works
-        <span class="arrow">→</span>
-      </a>
-      <a class="secondary" href="#code">[ jump to code ↓ ]</a>
-    </div>
-  </section>
+  <article>
 
-  <!-- ARCHITECTURE (signature visual) -->
-  <section class="section" id="arch">
-    <p class="section-label animate-in">The architecture</p>
-    <h2 class="section-title animate-in">Claude at the center.<br>Every service one beam away.</h2>
-    <p class="section-sub animate-in">A <b>client</b> (Claude Desktop, Cursor, an agent) speaks MCP to one or more <b>servers</b>. Each server wraps a tool, a data source, or a workflow. Beams travel both directions: model intent out, structured results back.</p>
+    <p class="eyebrow fade">On the Model Context Protocol <span class="pip">·</span> Essay <span class="pip">·</span> No. 03</p>
 
-    <div class="arch animate-in">
-      <svg class="arch-svg" viewBox="0 0 720 480" role="img" aria-label="Hub and spoke diagram: Claude at center, eight MCP servers around it.">
-        <defs>
-          <radialGradient id="hubGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#D94F30" stop-opacity="0.55"/>
-            <stop offset="60%" stop-color="#D94F30" stop-opacity="0.18"/>
-            <stop offset="100%" stop-color="#D94F30" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
+    <h1 class="headline fade">USB-C for LLMs.</h1>
 
-        <!-- Hub glow + rings -->
-        <g class="hub-glow">
-          <circle cx="360" cy="240" r="110" fill="url(#hubGrad)"/>
-        </g>
-        <circle class="hub-ring" cx="360" cy="240" r="170"/>
-        <circle class="hub-ring" cx="360" cy="240" r="120" style="opacity:0.18"/>
+    <p class="deck fade">An open standard, and what it changes.</p>
 
-        <!-- Spokes (dashed guide lines) -->
-        <line class="spoke" x1="360" y1="240" x2="360" y2="60"/>
-        <line class="spoke" x1="360" y1="240" x2="487" y2="113"/>
-        <line class="spoke" x1="360" y1="240" x2="540" y2="240"/>
-        <line class="spoke" x1="360" y1="240" x2="487" y2="367"/>
-        <line class="spoke" x1="360" y1="240" x2="360" y2="420"/>
-        <line class="spoke" x1="360" y1="240" x2="233" y2="367"/>
-        <line class="spoke" x1="360" y1="240" x2="180" y2="240"/>
-        <line class="spoke" x1="360" y1="240" x2="233" y2="113"/>
+    <p class="byline fade"><span class="who">By Manu Mulaveesala</span> &nbsp;·&nbsp; CETI.AI &nbsp;·&nbsp; Spring 2026 &nbsp;·&nbsp; 22 min read</p>
 
-        <!-- Animated beams (drawn on top of spokes) -->
-        <line class="beam-path b1" x1="360" y1="240" x2="360" y2="60"/>
-        <line class="beam-path b2" x1="360" y1="240" x2="487" y2="113"/>
-        <line class="beam-path b3" x1="360" y1="240" x2="540" y2="240"/>
-        <line class="beam-path b4" x1="360" y1="240" x2="487" y2="367"/>
-        <line class="beam-path b5" x1="360" y1="240" x2="360" y2="420"/>
-        <line class="beam-path b6" x1="360" y1="240" x2="233" y2="367"/>
-        <line class="beam-path b7" x1="360" y1="240" x2="180" y2="240"/>
-        <line class="beam-path b8" x1="360" y1="240" x2="233" y2="113"/>
+    <p class="lede fade">The day Anthropic released the Model Context Protocol, in November of 2024, nothing felt particularly seismic. There was a spec, a handful of reference servers, four SDKs, and a short blog post. The press did not bite. Most of the people who would later come to depend on MCP did not yet know they were waiting for it. And yet, looking back from 2026, that was the day the integration problem quietly stopped being interesting — which, in software, is often the highest praise an idea can earn.</p>
 
-        <!-- Hub core -->
-        <circle class="hub-core" cx="360" cy="240" r="44"/>
-        <text class="center-label" x="360" y="240">CLAUDE</text>
+    <p class="fade">For two years before that release, every team building with large language models had been writing the same kind of glue code. Each new tool the model needed to touch — a calendar, a database, a ticket system, a file on disk — required bespoke wiring: an API client, an authentication dance, a function description hand-written into the prompt, and a parser to coax the model's JSON back into something the rest of the program could use. Multiply by every model, every framework, every vendor. The number of integrations grew as <em>N × M</em>, where N was the count of applications and M was the count of LLMs. It did not scale, and everyone knew it did not scale, and everyone kept building anyway because there was no shared floor to stand on.</p>
 
-        <!-- Server nodes (orbs) -->
-        <g class="node-orb" data-i="0" transform="translate(360 60)">
-          <circle r="34"/>
-          <text>FILES</text>
-        </g>
-        <g class="node-orb" data-i="1" transform="translate(487 113)">
-          <circle r="34"/>
-          <text>GITHUB</text>
-        </g>
-        <g class="node-orb" data-i="2" transform="translate(540 240)">
-          <circle r="34"/>
-          <text>DRIVE</text>
-        </g>
-        <g class="node-orb" data-i="3" transform="translate(487 367)">
-          <circle r="34"/>
-          <text>NOTION</text>
-        </g>
-        <g class="node-orb" data-i="4" transform="translate(360 420)">
-          <circle r="34"/>
-          <text>LINEAR</text>
-        </g>
-        <g class="node-orb" data-i="5" transform="translate(233 367)">
-          <circle r="34"/>
-          <text>SLACK</text>
-        </g>
-        <g class="node-orb" data-i="6" transform="translate(180 240)">
-          <circle r="34"/>
-          <text>VERCEL</text>
-        </g>
-        <g class="node-orb" data-i="7" transform="translate(233 113)">
-          <circle r="34"/>
-          <text>CTX7</text>
-        </g>
+    <p class="fade">MCP is the shared floor. The conceit is borrowed openly from hardware: before USB-C, every device shipped with its own bespoke cable, and the industry tolerated the absurdity for decades. After USB-C, the cable became infrastructure — invisible, assumed, uninteresting. MCP proposes the same compression for software agents. One protocol, spoken on both ends, collapsing <em>N × M</em> integrations into <em>N + M</em>. A model learns to speak MCP once. A service exposes itself over MCP once. The combinatorics dissolve.</p>
+
+    <p class="fade">The architecture is deliberately small. There are <strong>clients</strong> — programs like Claude Desktop, Cursor, or any custom agent — and there are <strong>servers</strong>, which wrap a tool, a data source, or a workflow. They communicate in plain <code>JSON-RPC 2.0</code>, over one of two transports: <code>stdio</code> when the server runs locally as a spawned process, or <code>HTTP+SSE</code> when it lives behind a network. The model on the client side does not need to know which transport is in use. It does not need to know what language the server is written in. It only needs to know how to ask.</p>
+
+    <p class="fade">What it asks for is one of three things, and the entire specification turns on these three primitives. <strong>Tools</strong> are things the model can <em>do</em>: side-effecting functions like <code>create_issue</code> or <code>send_email</code>, each declared with a JSON-Schema so the model can call it correctly on the first try. <strong>Resources</strong> are things the model can <em>read</em>: a file at <code>file://repo/README.md</code>, a row in a database, a fresh response from an API — read-only context the model can pull in without ever being granted write access. <strong>Prompts</strong> are workflows the server <em>provides</em>: reusable templates like <code>/git-summarize</code> or <code>/code-review</code> that the user can invoke as a starting point. That is the whole spec. The discipline of refusing a fourth primitive is, I think, why it caught on where earlier tool-calling proposals stalled.</p>
+
+    <figure class="diagram fade" role="img" aria-label="Diagram: a client at the center speaks MCP to eight servers arranged around it.">
+      <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg">
+        <!-- Dashed orbital ring -->
+        <ellipse class="diag-dash" cx="300" cy="195" rx="220" ry="135"/>
+
+        <!-- Spokes (dashed, hand-feel) -->
+        <line class="diag-dash" x1="300" y1="195" x2="300" y2="70"/>
+        <line class="diag-dash" x1="300" y1="195" x2="455" y2="105"/>
+        <line class="diag-dash" x1="300" y1="195" x2="510" y2="195"/>
+        <line class="diag-dash" x1="300" y1="195" x2="455" y2="285"/>
+        <line class="diag-dash" x1="300" y1="195" x2="300" y2="320"/>
+        <line class="diag-dash" x1="300" y1="195" x2="145" y2="285"/>
+        <line class="diag-dash" x1="300" y1="195" x2="90"  y2="195"/>
+        <line class="diag-dash" x1="300" y1="195" x2="145" y2="105"/>
+
+        <!-- Center: client -->
+        <circle class="diag-amber" cx="300" cy="195" r="38"/>
+        <text class="diag-center" x="300" y="195">CLIENT</text>
+
+        <!-- Eight server nodes -->
+        <g><circle class="diag-fill" cx="300" cy="70"  r="26"/><text class="diag-label" x="300" y="70">FILES</text></g>
+        <g><circle class="diag-fill" cx="455" cy="105" r="26"/><text class="diag-label" x="455" y="105">GITHUB</text></g>
+        <g><circle class="diag-fill" cx="510" cy="195" r="26"/><text class="diag-label" x="510" y="195">DRIVE</text></g>
+        <g><circle class="diag-fill" cx="455" cy="285" r="26"/><text class="diag-label" x="455" y="285">NOTION</text></g>
+        <g><circle class="diag-fill" cx="300" cy="320" r="26"/><text class="diag-label" x="300" y="320">LINEAR</text></g>
+        <g><circle class="diag-fill" cx="145" cy="285" r="26"/><text class="diag-label" x="145" y="285">SLACK</text></g>
+        <g><circle class="diag-fill" cx="90"  cy="195" r="26"/><text class="diag-label" x="90"  y="195">VERCEL</text></g>
+        <g><circle class="diag-fill" cx="145" cy="105" r="26"/><text class="diag-label" x="145" y="105">CTX7</text></g>
+
+        <!-- Small annotation -->
+        <text x="300" y="362" class="diag-label" style="fill: var(--secondary); font-size: 8.5px; letter-spacing: 0.12em;">JSON-RPC 2.0 · stdio · HTTP+SSE</text>
       </svg>
+      <figcaption>
+        <span class="fig-no">Fig. 1</span>
+        A client speaks MCP to one or more servers. Each server wraps a tool, a data source, or a workflow.
+      </figcaption>
+    </figure>
 
-      <div class="arch-caption">
-        <div>
-          <p><b>Client → Server (out).</b> The model issues a <code>tools/call</code> or <code>resources/read</code>. The protocol is plain <code>JSON-RPC 2.0</code> over either <b>stdio</b> (local spawn) or <b>HTTP+SSE</b> (remote).</p>
-        </div>
-        <div>
-          <p><b>Server → Client (back).</b> Each server publishes its capabilities — what tools exist, what resources can be read, what prompts it provides. The model discovers and uses them at runtime, no glue code per integration.</p>
-        </div>
+    <div class="ornament fleuron fade">❦</div>
+
+    <!-- ================================================================== -->
+    <!--   I. A SHORT HISTORY OF LLM TOOL USE                                -->
+    <!-- ================================================================== -->
+
+    <h2 class="sub fade"><span class="roman">I · Antecedents</span>A short history of LLM tool use.</h2>
+
+    <p class="section-open fade">To understand why MCP feels inevitable in hindsight, it helps to remember how recently the idea of an LLM <em>doing</em> anything at all was novel. As late as the spring of 2023, a language model was, in the public imagination, a very fluent autocomplete. It could write a sonnet about your dog, or summarize a contract, or hallucinate a citation, but it could not check the weather. It had no hands. The frontier model providers had not yet given it any, and the rest of us were busy trying to figure out whether prompts alone could substitute for proper engineering — a question the answer to which was, predictably and disappointingly, "almost, but not quite."</p>
+
+    <p class="fade">OpenAI shipped function-calling in June of that year, and it changed the conversation almost overnight. The mechanism was simple: alongside the user's prompt, a developer could pass a list of function signatures — names, parameter schemas, short descriptions — and the model would, when it judged the moment right, emit a structured JSON object naming a function and its arguments. The runtime would execute that function, hand the result back into the next turn, and the model would continue as if nothing unusual had happened. For the first time, the LLM had hands. Or, more accurately, it had the ability to ask politely for a hand and trust that the runtime would lend it one.</p>
+
+    <p class="fade">What followed was, in retrospect, a Cambrian explosion of incompatible plumbing. LangChain wrapped functions in <code>Tool</code> classes, each with its own conventions for description, retry, and error handling. LlamaIndex did its own thing for retrieval. Every major framework — Haystack, Semantic Kernel, Autogen, CrewAI, Letta — invented a slightly different abstraction over the same underlying capability. OpenAI then introduced Plugins, which lived briefly inside ChatGPT and required a manifest at <code>/.well-known/ai-plugin.json</code> and an OpenAPI spec and a special-purpose hosting arrangement, and then Plugins were quietly retired in favor of GPTs, which were also a kind of tool-use system but with different conventions, and so on. Anthropic shipped tool use of its own in mid-2024 with a cleaner schema but the same fundamental shape. Each system worked. None of them worked with each other.</p>
+
+    <p class="fade">By the autumn of 2024, the cost of this fragmentation had become impossible to ignore. A team that wanted Claude, GPT-4, and an open-source model to all be able to read from the same internal wiki had to write three separate adapters, maintain three sets of credentials, and reconcile three slightly different ideas of what a "tool result" looked like in the conversation. Worse, the tools themselves were not reusable across teams: each company's GitHub integration was a snowflake, each customer's Salesforce wrapper was hand-rolled. The industry had collectively built the same set of integrations several thousand times, often badly, and the cost of <em>not</em> having a standard was being paid mostly by the small companies who could least afford it. The large labs could absorb the duplicated engineering; an early-stage team trying to ship an agent could not. What everyone wanted, without quite saying so, was a way to stop solving the same problem in private.</p>
+
+    <p class="fade">What had not been built — what nobody had quite found the courage to propose — was a protocol that any model could speak and any service could expose, with nobody in particular owning the middle. There had been attempts at adjacent shapes. OpenAPI was, in principle, a candidate, but its mental model had been formed around the conventions of REST and it required more ceremony than a tool-calling agent could justify. The W3C had sketched a few standards in the general vicinity. None of them had the right scope: small enough to implement in an afternoon, open enough that no single vendor could capture it, and concrete enough that two strangers shipping against it on different continents would, mechanically, interoperate. MCP, when it arrived, was that proposal. The surprise was not that it existed. The surprise was that the company that wrote it was willing to walk away from the lock-in it could have built instead.</p>
+
+    <div class="ornament fade">· · ·</div>
+
+    <!-- ================================================================== -->
+    <!--   II. THE THREE PRIMITIVES, EXPANDED                                -->
+    <!-- ================================================================== -->
+
+    <h2 class="sub fade"><span class="roman">II · The Spec</span>The three primitives, expanded.</h2>
+
+    <p class="section-open fade">Most protocols accumulate features. MCP was designed, visibly, against that gravity. The first version shipped with three primitives — tools, resources, and prompts — and the second version has, almost defiantly, the same three. The temptation to add a fourth must be considerable; the discipline of refusing has, I suspect, done more for adoption than any single technical decision. Each primitive corresponds to a different stance the model can take toward the world, and the boundary between them is doing real work.</p>
+
+    <h3 class="minor fade">Tools — the verbs.</h3>
+
+    <p class="fade">A <strong>tool</strong>, in MCP, is a function the model is allowed to invoke. Each tool declares a name, a human-readable description, and an input schema written in JSON-Schema. The schema is not decorative. It is what allows the model to construct a valid call on the first attempt without coaxing — which, when you are paying per token and waiting on a network round trip, is the difference between an agent that feels fluent and one that feels like a drunk receptionist. The model receives the list of available tools as structured context at the start of a session, and it may, at any point in the conversation, decide that it would like to call one. The server executes, returns a result, and the model integrates the result into its next turn.</p>
+
+    <p class="fade">What is interesting about tools is the discipline of what they are <em>not</em>. They are not RPCs, in the strict sense, because there is no expectation that a tool corresponds to a single backend function: a server author is free to compose, validate, retry, and reshape underneath the surface that the model sees. They are not webhooks: the model initiates, the server responds. They are not capabilities in the object-capability sense: there is no token-passing, no transitive delegation. They are, deliberately, just functions — the smallest unit of action the runtime knows how to permission and audit. Side effects belong here, and only here. If a primitive can change the world, it is a tool.</p>
+
+    <p class="fade">The reason this matters becomes obvious the first time you try to reason about safety. A user reviewing a Claude Desktop session knows, with no further interpretation required, that anything in the tools list could mutate state. The mental model for granting permission is the same as the mental model for granting access to a CLI utility: I am giving this agent the ability to do <em>these specific things</em>. If tools shared a surface with read-only data, that line would blur. By keeping side effects in their own primitive, MCP makes the question "what could this server do to me?" answerable by reading a single list. That is not a small thing.</p>
+
+    <h3 class="minor fade">Resources — the nouns.</h3>
+
+    <p class="fade">A <strong>resource</strong> is something the model can read. It is identified by a URI — <code>file:///repo/README.md</code>, <code>postgres://orders/2026-04-12</code>, <code>github://issues/open</code> — and it returns content, optionally with a MIME type, optionally watchable for change. Resources are explicitly read-only. They cannot mutate. They can, however, be subscribed to: a client may ask the server to notify it when the resource changes, and the model can incorporate the freshest version into the next turn without anybody re-prompting. This is a more useful primitive than it sounds, because it lets the server own the question of <em>when</em> data is current rather than offloading that question to the prompt author.</p>
+
+    <p class="fade">The choice to separate resources from tools is the part of the spec I find most thoughtful. In every previous tool-calling system I have used, "read this file" and "delete this file" were both functions, distinguished only by their names and their descriptions. The framework had no structural way to tell them apart, and so the user had no structural way to grant the model "read everything but write nothing" — a permission posture that, in practice, is what people actually want. By giving resources their own primitive, MCP makes that posture native. A client can connect to a server and request access to its resources without ever loading its tools. The principle of least privilege, which used to require a custom proxy layer, now requires a checkbox.</p>
+
+    <p class="fade">Resources also push the burden of freshness in the right direction. When the model wants to know the current state of an issue tracker, it does not have to be coached to call a function and remember to call it again; it can subscribe to the resource and trust the server to push updates. This is the same pattern that made reactive UI frameworks pleasant: declare what you want, let the system handle change detection. It is a small thing, but a small thing applied across ten thousand servers becomes the difference between agents that get stale and agents that stay synchronized with the world they live in.</p>
+
+    <h3 class="minor fade">Prompts — the recipes.</h3>
+
+    <p class="fade">The third primitive is the least appreciated. A <strong>prompt</strong>, in MCP, is a reusable template the server <em>offers</em> to the client. It is not a tool the model calls; it is a workflow the <em>user</em> invokes — usually through a slash command, a menu item, or a button in the host application. When invoked, the prompt expands into a structured message (sometimes with arguments, sometimes with embedded resource references) and is handed to the model as the starting point of a conversation. The Filesystem server, for example, might offer a <code>/summarize-directory</code> prompt; the GitHub server might offer <code>/review-pr</code>; a custom analytics server might offer <code>/weekly-digest</code>.</p>
+
+    <p class="fade">It is tempting to dismiss this as syntactic sugar over good prompts, and many early MCP clients did. The promise becomes clearer once you have lived with a few servers that ship thoughtful prompts. A well-authored prompt encodes the server author's expertise about how their own tools should be combined — which sequence of calls produces a useful result, which framing nudges the model away from common failure modes, which output format the user is likely to want. A good GitHub MCP server ships a <code>/triage</code> prompt that knows to fetch the open issues, group them by label, summarize the top recurring themes, and propose a triage order. The user types two words. The model does the rest. Without the prompt primitive, that expertise would live in a README that nobody reads.</p>
+
+    <p class="fade">Prompts also matter because they invert the discovery problem. New users of a tool-calling system typically struggle to know what the system can <em>do</em>: the tools list is exhaustive but inscrutable, and the documentation rarely keeps up. Prompts solve this by presenting a curated, server-authored menu of "things worth asking for." They are the table of contents of the agent's capabilities, written by the people who built them. That is a small reorientation, but it is the reorientation that makes a server feel like a product rather than a kit.</p>
+
+    <div class="ornament fade">· · ·</div>
+
+    <!-- ================================================================== -->
+    <!--   III. THE TRANSPORT DESIGN                                          -->
+    <!-- ================================================================== -->
+
+    <h2 class="sub fade"><span class="roman">III · The Wire</span>On <code>stdio</code> and HTTP+SSE.</h2>
+
+    <p class="section-open fade">Underneath the three primitives sits a transport layer, and the choices made there are revealing about the protocol's temperament. MCP supports exactly two transports. The first is <code>stdio</code> — the venerable Unix convention of speaking JSON-RPC over a child process's standard input and standard output, with the parent process spawning the child and reading its replies line by line. The second is <code>HTTP+SSE</code> — POST for client-to-server messages, Server-Sent Events for the server-to-client stream. That is all. There is no native WebSocket transport, no gRPC, no Protocol Buffers, no QUIC, no custom binary framing. The protocol designers looked at the menu and chose the two boring options.</p>
+
+    <p class="fade">The case for <code>stdio</code> is that it is, in practical terms, the cheapest possible IPC mechanism. There is no port to allocate, no certificate to mint, no firewall rule to add. A server is a process; you spawn it; you pipe to it; when you are done, it exits. This makes local servers — the kind that read your filesystem, talk to your local database, hold your SSH keys — trivial to deploy and trivial to sandbox. The host application controls the lifecycle, the credentials live in the host's environment, and the entire attack surface is the JSON the child writes to stdout. Compared to running a local HTTP daemon on a port and remembering to firewall it correctly, this is an order of magnitude less rope with which to hang yourself.</p>
+
+    <p class="fade">The case for HTTP+SSE is that it is what the rest of the web speaks. Every load balancer, every CDN, every reverse proxy, every auth gateway already knows how to handle POST and SSE. You can put an MCP server behind Cloudflare; you can host one on Vercel; you can multiplex thousands of clients onto one server with the infrastructure your ops team already operates. The absence of WebSockets is conspicuous, and the reason is mostly mundane: WebSockets are more complex to terminate at the edge, more prone to silent disconnect, and offer few real advantages for the request-shaped traffic MCP actually generates. SSE is one-way streaming, which is what server-to-client push wants to be anyway, and POST is request/response, which is what client-to-server calls want to be. The absence of gRPC has a similar shape — gRPC is a wonderful protocol for service-to-service traffic in a controlled deployment, but its binary framing, its HTTP/2 dependence, and its proto compilation step impose a tax that is wildly disproportionate to the rate of traffic an agent actually generates. MCP declines to be clever about transport precisely because cleverness about transport is where the bodies are buried.</p>
+
+    <div class="ornament fade">· · ·</div>
+
+    <!-- ================================================================== -->
+    <!--   IV. A WORKED EXAMPLE                                              -->
+    <!-- ================================================================== -->
+
+    <h2 class="sub fade"><span class="roman">IV · A Walk-Through</span>Building a Notion MCP server.</h2>
+
+    <p class="section-open fade">The fastest way to understand what MCP feels like is to write a small server. Suppose you want Claude to be able to search your Notion workspace, fetch the contents of a page, and create a new entry in a database — three operations that previously would have required a fragile wrapper, a credentials file you would feel guilty about, and a prayer. With MCP, the same functionality is about sixty lines of Python, most of which is the Notion API client you would have written anyway. The protocol-shaped portion is small enough to fit on one screen.</p>
+
+    <p class="fade">You begin with a server. You give it a name. You attach the three things the client cares about: a tool that takes a query and returns search hits, a resource template that exposes any page in the workspace by its ID, and a prompt that wraps a common workflow — say, drafting a weekly review from a database of completed tasks. The framework handles the JSON-RPC envelope, the schema validation, and the lifecycle. You handle the part that is specific to Notion.</p>
+
+<pre class="code"><span class="kw">from</span> mcp.server <span class="kw">import</span> Server
+<span class="kw">from</span> mcp.server.stdio <span class="kw">import</span> stdio_server
+<span class="kw">from</span> notion_client <span class="kw">import</span> AsyncClient
+
+notion = AsyncClient(auth=os.environ[<span class="st">"NOTION_TOKEN"</span>])
+server = Server(<span class="st">"notion"</span>)
+
+<span class="cm">@server.tool()</span>
+<span class="kw">async def</span> search(query: str, page_size: int = 10) -&gt; list[dict]:
+    <span class="st">"""Search across all pages and databases the integration can see."""</span>
+    res = <span class="kw">await</span> notion.search(query=query, page_size=page_size)
+    <span class="kw">return</span> [{<span class="st">"id"</span>: r[<span class="st">"id"</span>], <span class="st">"title"</span>: _title_of(r)} <span class="kw">for</span> r <span class="kw">in</span> res[<span class="st">"results"</span>]]
+
+<span class="cm">@server.resource(<span class="st">"notion://page/{page_id}"</span>)</span>
+<span class="kw">async def</span> read_page(page_id: str) -&gt; str:
+    <span class="st">"""Fetch a page's blocks as markdown."""</span>
+    blocks = <span class="kw">await</span> notion.blocks.children.list(block_id=page_id)
+    <span class="kw">return</span> _to_markdown(blocks[<span class="st">"results"</span>])
+
+<span class="cm">@server.prompt()</span>
+<span class="kw">def</span> weekly_review(database_id: str) -&gt; str:
+    <span class="kw">return</span> <span class="st">f"""Read the database at {database_id}. Group completed</span>
+<span class="st">    tasks by project. Write a one-paragraph weekly review in the</span>
+<span class="st">    voice of a thoughtful peer."""</span>
+
+<span class="kw">if</span> __name__ == <span class="st">"__main__"</span>:
+    stdio_server(server).run()</pre>
+    <figcaption>The shape of an MCP server in roughly sixty lines: one tool, one resource template, one prompt. The framework handles the rest.</figcaption>
+
+    <p class="fade">You register this server with Claude Desktop by adding a five-line entry to a config file: a command to run it, an argument list, the environment variable that holds the token. The next time you open the application, Claude will discover the server, list its tool and prompt in the available capabilities, and let you ask, in plain English, to "search my Notion for last quarter's planning doc and draft a weekly review." The model will call <code>search</code>, read the page through the resource URI, invoke the prompt, and return a draft. You have not written a single line of agent code. You have not had to think about parsing the model's JSON or handling tool errors or formatting the conversation history. You have written, essentially, a Notion adapter — and because you wrote it against MCP rather than against a specific model, every MCP-speaking client now benefits. Cursor will work. The Continue plugin in VS Code will work. The custom internal agent your colleague built last month will work. The integration is, at last, the integration.</p>
+
+    <div class="ornament fade">· · ·</div>
+
+    <!-- ================================================================== -->
+    <!--   V. THE ECOSYSTEM                                                  -->
+    <!-- ================================================================== -->
+
+    <h2 class="sub fade"><span class="roman">V · The Field</span>The ecosystem that emerged in six months.</h2>
+
+    <p class="section-open fade">It is worth pausing on the shape of what was built. Within a month of the protocol's release, Anthropic itself shipped reference servers for the Filesystem, GitHub, Google Drive, Slack, Postgres, SQLite, Puppeteer, Fetch, Sentry, Memory, and Sequential Thinking — a remarkably broad set for a single team to maintain, but a deliberate one, because each was meant less as a finished product than as a worked example of what a server should look like. The Filesystem server became, almost by accident, the most-installed piece of agent infrastructure in the world, because every Claude Desktop user installed it within a day of opening the app and most of them never uninstalled it. The GitHub server followed within weeks. The pattern, by that point, had visibly taken.</p>
+
+    <p class="fade">The second wave came from the SaaS vendors, and it came faster than anyone expected. Linear shipped an official server before the end of the year. Notion followed in January, then Asana, then Stripe, then Sentry's first-party version replacing the reference one. Vercel's MCP server became a way to manage deployments and logs from inside any agent; Cloudflare's exposed Workers, KV, R2, and D1; Supabase, Neon, PlanetScale, and Turso each added Postgres-shaped servers tuned to their own deployment surfaces. Upstash and Redis added cache-shaped ones. Datadog, Honeycomb, and New Relic added observability servers, which turned out to be the moment when the protocol crossed from developer-tools into operations: the on-call engineer could now ask the model, in English, what had changed in the last hour. The dashboard, after twenty years of accumulation, finally had a colleague.</p>
+
+    <p class="fade">The third wave was the long tail, and it was a long tail in the genuine sense — thousands of small, specific, often single-purpose servers built by individuals and small teams to scratch their own itch and casually published to a registry. Context7 began as one of these and grew into something close to essential: a continuously updated index of library documentation, callable as a resource, so the model is no longer reasoning from a 2024 training cutoff when you ask it about a 2026 library. PyPI got a server. Homebrew got one. The Wolfram Alpha server made the model genuinely good at arithmetic for the first time. The Excalidraw server let the model produce diagrams. Someone wrote a server that exposes the ephemerides of every planet so an astrology app could ask Claude about transits, and someone else wrote one that exposes the entire arXiv corpus so a researcher could ask Claude about the state of a field. Neither of these was a sensible thing to build, in the older calculus where every integration was expensive. In the newer calculus, they took an afternoon, and now they exist, and a small number of people are quietly grateful for them every day.</p>
+
+    <p class="fade">By the spring of 2026, the public registries indexed more than ten thousand servers, and the rate of new submissions had stopped being a useful metric — much in the way that the rate of new npm packages stopped being a useful metric around 2017. The protocol had crossed the threshold at which its growth was no longer a story about itself. It had become, instead, a story about everything else: about Cursor, about Windsurf, about Zed, about Claude Desktop and the half-dozen clones that followed, about the internal agents that companies stopped writing from scratch and started assembling from off-the-shelf servers like Lego. The MCP-shaped part of any given project shrank, in proportion, until it was no longer the part you talked about.</p>
+
+    <div class="ornament fade">· · ·</div>
+
+    <blockquote class="pull fade">
+      It is not the model that needs more capability — it is the protocol that needs less ceremony.
+      <cite>— A working theory</cite>
+    </blockquote>
+
+    <div class="stat-row fade">
+      <div class="stat">
+        <div class="n">10,000<span class="suf">+</span></div>
+        <div class="l">Public MCP servers indexed across registries.</div>
+      </div>
+      <div class="stat">
+        <div class="n">4</div>
+        <div class="l">First-party SDKs: TypeScript, Python, Kotlin, Swift.</div>
+      </div>
+      <div class="stat">
+        <div class="n">2</div>
+        <div class="l">Transports: <code>stdio</code> for local, <code>HTTP+SSE</code> for remote.</div>
       </div>
     </div>
-  </section>
 
-  <!-- THREE PRIMITIVES -->
-  <section class="section" id="primitives">
-    <p class="section-label animate-in">The three primitives</p>
-    <h2 class="section-title animate-in">Tools, resources, prompts.<br>That's the whole spec.</h2>
-    <p class="section-sub animate-in">A server exposes any combination of three primitives. Clients discover them, then the model decides which to invoke. The simplicity is the point — and the reason MCP took off where prior tool-calling specs stalled.</p>
+    <!-- ================================================================== -->
+    <!--   VI. WHAT CHANGED                                                  -->
+    <!-- ================================================================== -->
 
-    <div class="primitives">
-      <article class="prim tools animate-in" data-glow>
-        <div class="prim-icon" aria-hidden="true">
-          <!-- function/play icon -->
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z" fill="currentColor" fill-opacity="0.15"/><path d="M5 3l14 9-14 9V3z"/></svg>
-        </div>
-        <div class="prim-tag">01 · Tools</div>
-        <h3>Things the model can <em>do</em>.</h3>
-        <p>Side-effecting functions the LLM can invoke — <code>create_issue</code>, <code>send_email</code>, <code>run_query</code>. Each tool declares a JSON-Schema for its arguments so the model can call it correctly the first time.</p>
-      </article>
+    <h2 class="sub fade"><span class="roman">VI · Consequences</span>What changed when MCP shipped.</h2>
 
-      <article class="prim resources animate-in" data-glow>
-        <div class="prim-icon" aria-hidden="true">
-          <!-- document/data icon -->
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="currentColor" fill-opacity="0.12"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg>
-        </div>
-        <div class="prim-tag">02 · Resources</div>
-        <h3>Things the model can <em>read</em>.</h3>
-        <p>Read-only data the server exposes — a file at <code>file://repo/README.md</code>, a row in a database, a fresh API response. Resources give the model context without giving it write access.</p>
-      </article>
+    <p class="section-open fade">The honest answer to "what changed" is that several categories of work became cheap enough to attempt that nobody had previously bothered to attempt them. Consider the workflow of preparing for a sales call. Before MCP, this was a half-hour of clicking: open the CRM, open the email thread, open the company's website, open the last quarterly report if you could find it, open LinkedIn for the person you were meeting, open Notion for the playbook your team had written, and somewhere in there assemble a mental picture of where the conversation should go. After MCP — with HubSpot, Gmail, the Fetch server, and a Notion server all connected to the same agent — this becomes one sentence: <em>prepare me for my 2pm with Acme</em>. The model reads what it needs, drafts a one-page brief, and the half-hour becomes thirty seconds. None of the components are new. What is new is that they finally share a hallway.</p>
 
-      <article class="prim prompts animate-in" data-glow>
-        <div class="prim-icon" aria-hidden="true">
-          <!-- spark/template icon -->
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" fill="currentColor" fill-opacity="0.14"/><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/><path d="M19 19v2M5 19v2M21 5h-2M5 5H3"/></svg>
-        </div>
-        <div class="prim-tag">03 · Prompts</div>
-        <h3>Workflows the server <em>provides</em>.</h3>
-        <p>Reusable prompt templates the server ships — <code>/git-summarize</code>, <code>/code-review</code>. The user picks one and the server returns a structured starting prompt the model can then act on.</p>
-      </article>
+    <p class="fade">Or consider production incident response. Before MCP, an on-call engineer at 3am had to log into PagerDuty, follow the link to the Datadog dashboard, click through to the failing service, copy the trace ID, paste it into Honeycomb, search the GitHub repo for the last deploy that touched that service, open the PR, read the diff, and then — only then — begin to reason about what to do. After MCP, with the Datadog, Honeycomb, GitHub, and PagerDuty servers connected to Claude, the same engineer can say <em>what broke?</em> and get a paragraph back that names the service, identifies the regression, points to the commit, and suggests a rollback. The reasoning is not new. The credit goes to the engineer, not the model. What MCP supplies is the connective tissue that was previously a tab-switching ceremony.</p>
+
+    <p class="fade">A third example, more quiet but more telling: long-form research. Before MCP, asking a model to "read these twenty papers and tell me what the field thinks about X" required either a custom RAG pipeline or a lot of copy-pasting. With the arXiv server, the Zotero server, and the Context7 server, the model can pull abstracts, fetch full PDFs when needed, cross-reference against current library documentation, and assemble an annotated literature review in a single session. This is not a workflow that scales — token limits still apply, the model still hallucinates if you push it past what it knows — but it is a workflow that <em>exists</em> now, and it did not exist a year ago. The cost of curiosity went down by an order of magnitude, and we are still, I think, underestimating what that means.</p>
+
+    <div class="ornament fade">· · ·</div>
+
+    <!-- ================================================================== -->
+    <!--   VII. WHAT MCP DOESN'T DO                                          -->
+    <!-- ================================================================== -->
+
+    <h2 class="sub fade"><span class="roman">VII · Honest Limits</span>What MCP doesn't do (yet).</h2>
+
+    <p class="section-open fade">It would be a disservice to the protocol — and to the people considering whether to bet on it — to write only the appreciative half of the essay. MCP is, in the spring of 2026, still a young protocol with visible gaps. The most consequential of these is its stance toward state. MCP is largely stateless at the protocol level: each request stands more or less on its own, and the server is not expected to maintain a session-specific memory across calls. This is a design choice that pays for itself in simplicity, but it pushes the question of stateful workflows — long-running jobs, partial results, resumable computations — out of the protocol and into whatever the application layer is willing to build. For many use cases this is fine. For agent workflows that run for hours and need to survive a client disconnect, it is not yet a solved problem.</p>
+
+    <p class="fade">Closely related is the absence of native streaming for tool results. A tool, in MCP, returns its result when it finishes; there is no first-class way to stream partial output back to the model as it is produced. This means that a long-running tool — a build, a deploy, a slow query — must either block until completion or be split into a series of polling-shaped calls that pretend to be incremental. SSE handles the server-to-client direction at the transport layer, but the primitive shape of "tool returns thing" is still atomic. The community is actively working on this; the spec's evolution toward streaming responses is one of the threads worth watching closely in the next year.</p>
+
+    <p class="fade">The other unfinished area is authentication and multi-tenancy. The current spec assumes that a server runs in a trusted context — a user's local machine, or a small team's deployment — and that whoever connects to it is whoever it expects to be talking to. There is no formal OAuth flow baked into the protocol itself; servers that want to authenticate users do so out-of-band, which works fine for hosted SaaS like Linear or GitHub but is awkward for the kind of multi-tenant, per-user-credential server design that an enterprise eventually wants. Capability negotiation, similarly, is informal: a client introspects what the server offers, but there is no rigorous way for either side to declare what it requires. These are tractable problems. They are also not yet solved, and the working groups arguing about them in public have not yet reached the level of agreement that lets the rest of the ecosystem stop holding its breath.</p>
+
+    <div class="ornament fade">· · ·</div>
+
+    <!-- ================================================================== -->
+    <!--   VIII. THE FIELD WALK                                              -->
+    <!-- ================================================================== -->
+
+    <h2 class="sub fade"><span class="roman">VIII · A Field Walk</span>Through the ecosystem.</h2>
+
+    <p class="section-open fade">The servers that have come to feel most consequential are not, in general, the impressive ones. They are the boring ones — the ones that make a small piece of an existing workflow disappear into the model. Filesystem and GitHub are the two most-installed by a wide margin, because they convert the daily friction of "let me find that file" and "let me check that PR" into a sentence. Google Drive and Notion serve a similar purpose for teams whose knowledge lives somewhere other than a repo. None of these are novel categories of software. What is novel is that the model can now act inside them without a brittle integration sitting between.</p>
+
+    <p class="fade">A second cluster is more telling about where the protocol is headed. Linear, Slack, Asana, and Vercel wrap the parts of a working day that used to require context-switching between half a dozen browser tabs. Context7 exposes a continuously updated index of library documentation, so the model is no longer reasoning from a training cutoff. Stripe, Sentry, and Postgres push the protocol into operational surfaces — billing, error monitoring, production data — that used to be the territory of dashboards and on-call engineers. The shape of what one can ask the model to do has visibly widened.</p>
+
+    <p class="fade">Some of these servers are official, maintained by the vendor whose product they wrap. Others are community efforts, sometimes better than the official version. This is one of the more interesting consequences of MCP being a protocol rather than a marketplace: there is no central gatekeeper, no review queue, no rev-share. If you want your favorite tool to be addressable by an LLM, you write the server, you publish it, and the model can use it tomorrow. The registry is a discovery aid, not a permission system. Whether this will hold under load is one of the open questions of the next few years, but the early texture of it has been refreshingly old-internet.</p>
+
+    <div class="ornament fade">· · ·</div>
+
+    <!-- ================================================================== -->
+    <!--   CLOSING                                                            -->
+    <!-- ================================================================== -->
+
+    <h2 class="sub fade"><span class="roman">IX · Closing</span>The protocol that needs less ceremony.</h2>
+
+    <p class="section-open fade">What MCP gets right, in the end, is not technical so much as temperamental. It refuses to be impressive. It does not introduce new abstractions where existing ones — JSON-RPC, JSON-Schema, stdio, HTTP — already do the job. It does not try to be a runtime, an agent framework, a memory store, or a model itself. It is a protocol, in the older and humbler sense of the word: a small set of agreements that lets independent parties cooperate without having to know much about one another. That is the kind of thing that quietly becomes infrastructure, and infrastructure, when it works, is the thing you stop thinking about.</p>
+
+    <p class="fade">The conventional wisdom, for most of the last three years, has been that the path to more capable AI runs through more capable models — bigger, smarter, better post-trained, more deeply reasoned. That is true, as far as it goes, and the model labs will continue to do their work. But the second half of the sentence, the half MCP makes legible, is that capability is not only a property of the model. It is a property of the model's <em>access</em> — to the files, the systems, the data, the tools that constitute the world the model is being asked to act in. A small model with the right servers is, in many cases, more useful than a large model with none. The arithmetic of capability turns out to depend, at least partly, on the arithmetic of integration; and the arithmetic of integration, before MCP, was multiplication. It is not the model that needs more capability. It is the protocol that needs less ceremony. With ceremony reduced — with the integration problem made boring at last — the surprising thing is how much of the work was already, quietly, waiting to be done.</p>
+
+    <p class="fade">The work ahead is mostly social. The protocol exists; the SDKs exist; the registry is growing on its own. What remains is the slow accumulation of trust — that this server does what it says, that this tool will not delete your repo, that this resource is fresh — and the conventions that grow up around shared infrastructure once enough people are leaning on it. We are early in that accumulation. But the floor is poured, and we are, for the first time in this corner of the field, building on it together.</p>
+
+    <!-- ================================================================== -->
+    <!--   READING LIST                                                       -->
+    <!-- ================================================================== -->
+
+    <section class="reading fade">
+      <h3>A reading list.</h3>
+      <ol>
+        <li>
+          Anthropic, <a href="https://www.anthropic.com/news/model-context-protocol" target="_blank" rel="noopener">"Introducing the Model Context Protocol"</a> &mdash;
+          <span class="annot">the announcement post from November 2024. Short, calm, useful as a primary source for the framing.</span>
+        </li>
+        <li>
+          <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">modelcontextprotocol.io</a> &mdash;
+          <span class="annot">the canonical home for the spec, the SDKs, and the protocol's evolving documentation. Bookmark this one.</span>
+        </li>
+        <li>
+          <a href="https://modelcontextprotocol.io/specification" target="_blank" rel="noopener">The MCP specification</a> &mdash;
+          <span class="annot">the formal document. Worth reading end to end at least once; it is shorter than you expect.</span>
+        </li>
+        <li>
+          <a href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener">modelcontextprotocol/servers</a> &mdash;
+          <span class="annot">the reference server registry on GitHub. Start here for canonical implementations of Filesystem, GitHub, Drive, Slack, and friends.</span>
+        </li>
+        <li>
+          <a href="https://github.com/modelcontextprotocol/typescript-sdk" target="_blank" rel="noopener">@modelcontextprotocol/sdk</a> &nbsp;and&nbsp; <a href="https://github.com/modelcontextprotocol/python-sdk" target="_blank" rel="noopener">python-sdk</a> &mdash;
+          <span class="annot">the two SDKs you will probably reach for first. Mature, well-typed, well-documented.</span>
+        </li>
+        <li>
+          <a href="https://github.com/punkpeye/awesome-mcp-servers" target="_blank" rel="noopener">awesome-mcp-servers</a> &mdash;
+          <span class="annot">a curated community list, useful for understanding the shape of the long tail.</span>
+        </li>
+        <li>
+          <a href="https://github.com/upstash/context7" target="_blank" rel="noopener">Context7</a> &mdash;
+          <span class="annot">a working example of a resource-shaped server worth studying for its scope discipline.</span>
+        </li>
+        <li>
+          <a href="https://www.latent.space/p/mcp" target="_blank" rel="noopener">Latent Space on MCP</a> &mdash;
+          <span class="annot">one of the better long-form podcasts on the protocol's design choices, with the authors.</span>
+        </li>
+        <li>
+          <a href="https://blog.cloudflare.com/remote-model-context-protocol-servers-mcp/" target="_blank" rel="noopener">Cloudflare on remote MCP</a> &mdash;
+          <span class="annot">useful read on the HTTP+SSE side of the protocol once you have outgrown <code>stdio</code>-only setups.</span>
+        </li>
+        <li>
+          <a href="https://docs.anthropic.com/en/docs/build-with-claude/mcp" target="_blank" rel="noopener">Anthropic's MCP guide for Claude</a> &mdash;
+          <span class="annot">the practical onboarding for connecting servers to Claude Desktop, Claude Code, and the API.</span>
+        </li>
+      </ol>
+    </section>
+
+    <div class="signoff fade">
+      <span class="author">Manu Mulaveesala</span> &nbsp;·&nbsp; CETI.AI &nbsp;·&nbsp; 2026
     </div>
-  </section>
 
-  <!-- MARQUEE: ecosystem -->
-  <section style="padding: 2rem 0;">
-    <p class="section-label animate-in" style="text-align:center; max-width:1100px; margin:0 auto 0.5rem;">Today's ecosystem</p>
-    <h2 class="section-title animate-in" style="text-align:center; max-width:1100px; margin:0 auto 2rem; padding: 0 1.5rem;">A growing registry of servers.</h2>
-    <div class="marquee-wrap" aria-label="MCP servers — hover to pause">
-      <div class="marquee" id="m1">
-        <!-- list injected by JS for compactness -->
-      </div>
-      <div class="marquee reverse" id="m2"></div>
-    </div>
-  </section>
+    <div class="watermark">03 — CETI Lookbook</div>
 
-  <!-- NUMBERS -->
-  <section class="section">
-    <div class="numbers">
-      <article class="number-tile animate-in">
-        <div class="v"><span class="num" data-to="10000">0</span><span class="suffix">+</span></div>
-        <p class="l">Public MCP servers indexed across registries.</p>
-        <p class="sub">As of Q1 2026</p>
-      </article>
-      <article class="number-tile animate-in">
-        <div class="v"><span class="num" data-to="4">0</span></div>
-        <p class="l">First-party SDKs: TypeScript, Python, Kotlin, Swift.</p>
-        <p class="sub">Maintained by Anthropic + community</p>
-      </article>
-      <article class="number-tile animate-in">
-        <div class="v"><span class="num" data-to="2">0</span></div>
-        <p class="l">Transports — <span style="font-family:var(--font-mono); color:var(--color-text);">stdio</span> for local, <span style="font-family:var(--font-mono); color:var(--color-text);">HTTP+SSE</span> for remote.</p>
-        <p class="sub">JSON-RPC 2.0 under the hood</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- CODE -->
-  <section class="section" id="code">
-    <p class="section-label animate-in">What it looks like</p>
-    <h2 class="section-title animate-in">Ten lines of Python.<br>That's a server.</h2>
-    <p class="section-sub animate-in">A minimal MCP server using the Python SDK. One <code style="font-family:var(--font-mono); font-size:0.9em;">@server.tool()</code> decorator declares a callable. Claude can now use it.</p>
-
-    <div class="code-frame animate-in" role="img" aria-label="Python source code for a minimal MCP server with one tool.">
-      <div class="code-dots" aria-hidden="true"><span></span><span></span><span></span></div>
-      <div class="code-filename">weather_server.py</div>
-<pre class="code"><span class="code-keyword">from</span> mcp.server <span class="code-keyword">import</span> Server
-<span class="code-keyword">from</span> mcp.server.stdio <span class="code-keyword">import</span> stdio_server
-
-server <span class="code-op">=</span> <span class="code-fn">Server</span>(<span class="code-string">"weather"</span>)
-
-<span class="code-op">@</span>server.<span class="code-fn">tool</span>()
-<span class="code-keyword">async def</span> <span class="code-fn">get_forecast</span>(city: <span class="code-type">str</span>) <span class="code-op">-&gt;</span> <span class="code-type">str</span>:
-    <span class="code-string">"""Return today's forecast for a city."""</span>
-    <span class="code-keyword">return</span> <span class="code-keyword">await</span> <span class="code-fn">fetch</span>(<span class="code-string">f"https://api.weather.gov/{city}"</span>)
-
-<span class="code-keyword">if</span> __name__ <span class="code-op">==</span> <span class="code-string">"__main__"</span>:
-    <span class="code-fn">stdio_server</span>(server).<span class="code-fn">run</span>()</pre>
-    </div>
-  </section>
-
-  <!-- FINAL CTA -->
-  <section class="final" id="try">
-    <h2 class="animate-in">Stop writing integration glue.<br>Speak MCP instead.</h2>
-    <p class="animate-in">Pick a server from the registry, drop it into your Claude Desktop config, and the model has new powers in 30 seconds.</p>
-    <div class="row animate-in">
-      <a class="magnetic" href="https://modelcontextprotocol.io" target="_blank" rel="noopener">
-        Read the spec
-        <span class="arrow">→</span>
-      </a>
-      <a class="secondary" href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener">[ browse servers ↗ ]</a>
-    </div>
-  </section>
-
-  <footer class="footer">
-    cetiai.co · MCP lookbook · <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">modelcontextprotocol.io</a>
-  </footer>
+  </article>
 
   <script>
-    // Hero reveal on next frame
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-    // ===== IntersectionObserver reveals =====
-    const reveal = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); reveal.unobserve(e.target); }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
-    document.querySelectorAll('.animate-in').forEach((el) => reveal.observe(el));
-
-    // ===== Number ticker =====
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const dur = 1200;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
+    // Restrained reveal: text fades in once, no parallax, no springs.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          if (reduced) { e.target.textContent = (+e.target.dataset.to).toLocaleString(); }
-          else { animateNum(e.target); }
-          numObs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
-
-    // ===== Magnetic buttons =====
-    const STRENGTH = 25;
-    if (matchMedia('(hover: hover)').matches) {
-      document.querySelectorAll('.magnetic').forEach((btn) => {
-        btn.addEventListener('mousemove', (e) => {
-          const r = btn.getBoundingClientRect();
-          const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-          const y = (e.clientY - (r.top  + r.height / 2)) / STRENGTH;
-          btn.style.setProperty('--mx', `${x}px`);
-          btn.style.setProperty('--my', `${y}px`);
-        });
-        btn.addEventListener('mouseleave', () => {
-          btn.style.setProperty('--mx', '0px');
-          btn.style.setProperty('--my', '0px');
+    if (reduced) {
+      document.querySelectorAll('.fade').forEach(el => el.classList.add('in'));
+    } else {
+      // Reveal head matter immediately on next frame
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.eyebrow, .headline, .deck, .byline, .lede').forEach((el, i) => {
+          setTimeout(() => el.classList.add('in'), i * 120);
         });
       });
+      // Reveal everything else on scroll
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+      document.querySelectorAll('.fade:not(.in)').forEach(el => io.observe(el));
     }
-
-    // ===== Primitive cards: cursor-following radial glow =====
-    document.querySelectorAll('.prim').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
-
-    // ===== Hub-spoke: highlight orbs in sequence so user sees the rhythm =====
-    if (!reduced) {
-      const orbs = document.querySelectorAll('.node-orb');
-      let i = 0;
-      setInterval(() => {
-        orbs.forEach(o => o.classList.remove('pulse'));
-        orbs[i % orbs.length].classList.add('pulse');
-        i++;
-      }, 600);
-    }
-
-    // ===== Marquee population =====
-    const servers = [
-      { name: 'Filesystem', color: '#D94F30' },
-      { name: 'GitHub',     color: '#2C2A28' },
-      { name: 'Google Drive', color: '#2A7B9B' },
-      { name: 'Notion',     color: '#7B6DAA' },
-      { name: 'Linear',     color: '#5E6AD2' },
-      { name: 'Slack',      color: '#2D8B55' },
-      { name: 'Asana',      color: '#D94F30' },
-      { name: 'Vercel',     color: '#2C2A28' },
-      { name: 'Context7',   color: '#D4A843' },
-      { name: 'Stripe',     color: '#7B6DAA' },
-      { name: 'Sentry',     color: '#D94F30' },
-      { name: 'Postgres',   color: '#2A7B9B' },
-      { name: 'Git',        color: '#D4A843' },
-      { name: 'Memory',     color: '#2D8B55' },
-      { name: 'Sequential Thinking', color: '#7B6DAA' },
-      { name: 'Time',       color: '#2A7B9B' },
-      { name: 'Fetch',      color: '#D94F30' },
-      { name: 'Brave Search', color: '#D4A843' },
-      { name: 'Cloudflare', color: '#D94F30' },
-      { name: 'Heroku',     color: '#7B6DAA' },
-      { name: 'Elasticsearch', color: '#D4A843' },
-      { name: 'Grafana',    color: '#D94F30' },
-      { name: 'Sanity',     color: '#D94F30' },
-      { name: 'Supabase',   color: '#2D8B55' },
-    ];
-    const half = Math.ceil(servers.length / 2);
-    const a = servers.slice(0, half);
-    const b = servers.slice(half).concat(servers.slice(0, 4));
-    function pill(s) {
-      return `<span class="pill" style="--pill-dot:${s.color}"><span class="dot"></span>${s.name}</span>`;
-    }
-    // Duplicate the list so the marquee loops seamlessly (translateX -50%)
-    document.getElementById('m1').innerHTML = (a.map(pill).join('') ).repeat(2);
-    document.getElementById('m2').innerHTML = (b.map(pill).join('') ).repeat(2);
   </script>
   <script src="../shared/nav.js" defer></script>
 </body>

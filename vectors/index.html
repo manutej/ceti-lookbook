@@ -3,679 +3,616 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vector Databases & Embeddings — Meaning, as Coordinates · CETI Lookbook</title>
-  <meta name="description" content="An interactive explainer for embeddings and vector databases. Mid-level audience. Hover a word to see its nearest neighbors in 2D semantic space. Compare Pinecone, Weaviate, Qdrant, Chroma, pgvector, Milvus.">
+  <title>Vectors, Embeddings, &amp; Similarity — A Practical Primer · CETI Lookbook</title>
+  <meta name="description" content="Technical Note 10/18. A whitepaper-style primer on embedding spaces, distance metrics (cosine, Euclidean, dot product), HNSW indexing, quantisation, and the production vector-database landscape.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
-      --color-surface-warm: #FDF9F3;
-      --color-accent: #D94F30;
-      --color-accent-hover: #C4432A;
-      --color-accent-muted: #E8836C;
-      --color-accent-light: #FDEEE9;
-      --color-bg-code: #1E1E2E;
+      --bg:        #FFFFFF;
+      --rule:      #000000;
+      --text:      #000000;
+      --muted:     #444444;
+      --faint:     #888888;
+      --grid:      #E5E5E5;
+      --blue:      #005A8B;
+      --blue-tint: #E6EEF4;
+      --teal:      #008080;
+      --teal-tint: #E0F0F0;
 
-      --color-actor-1: #D94F30;  /* animals — vermillion */
-      --color-actor-2: #2A7B9B;  /* vehicles — teal */
-      --color-actor-3: #7B6DAA;  /* abstract — plum */
-      --color-actor-4: #D4A843;  /* food — gold */
-      --color-actor-5: #2D8B55;  /* tech — forest */
-
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body: 'DM Sans', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-      --duration-fast: 150ms;
-      --duration-normal: 300ms;
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-      --stagger: 60ms;
-
-      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.12);
+      --serif: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+      --sans:  'IBM Plex Sans', -apple-system, Helvetica, Arial, sans-serif;
+      --mono:  'IBM Plex Mono', 'SF Mono', Consolas, monospace;
     }
 
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image:
-        radial-gradient(ellipse at 12% 18%, rgba(217, 79, 48, 0.04) 0%, transparent 50%),
-        radial-gradient(ellipse at 88% 78%, rgba(42, 123, 155, 0.04) 0%, transparent 50%);
-      line-height: 1.6;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.62;
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
-    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
-
-    /* ============ NAV ============ */
-    .nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 52px;
-      background: rgba(250, 247, 242, 0.88);
-      backdrop-filter: saturate(180%) blur(8px);
-      -webkit-backdrop-filter: saturate(180%) blur(8px);
-      border-bottom: 1px solid var(--color-border-light);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      padding: 0 1.5rem;
-    }
-    .nav-inner {
-      max-width: 1140px;
+    /* ============ DOCUMENT FRAME ============ */
+    .doc {
+      max-width: 980px;
       margin: 0 auto;
-      width: 100%;
+      padding: 3.5rem 2rem 6rem;
+      /* leave room for marginal notes on wide screens */
+    }
+
+    /* ============ TOP MATTER ============ */
+    .topbar {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-    }
-    .nav-brand {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-    .nav-brand strong { color: var(--color-text); font-weight: 600; }
-    .nav-back {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      transition: color 200ms;
-    }
-    .nav-back:hover { color: var(--color-accent); }
-
-    /* ============ HERO ============ */
-    .hero {
-      padding: 8rem 1.5rem 4rem;
-      max-width: 1140px;
-      margin: 0 auto;
-    }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      margin: 0 0 1.25rem;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
-    }
-    .hero.visible .eyebrow { opacity: 1; transform: translateY(0); }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.5rem, 6.5vw, 4.75rem);
-      line-height: 1.04;
-      letter-spacing: -0.035em;
-      margin: 0 0 1.5rem;
-      max-width: 16ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
-    .hero-title em { font-style: normal; color: var(--color-accent); }
-
-    .hero-sub {
-      font-size: 1.2rem;
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 540ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    /* ============ SCATTER (signature visual) ============ */
-    .scatter-section { padding: 2rem 0 6rem; }
-    .scatter-frame {
-      position: relative;
-      border: 1px solid var(--color-border);
-      border-radius: 18px;
-      background: var(--color-surface);
-      padding: 1.25rem 1.25rem 1rem;
-      overflow: hidden;
-    }
-    .scatter-frame::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(circle at 25% 22%, rgba(217, 79, 48, 0.045), transparent 38%),
-        radial-gradient(circle at 78% 28%, rgba(42, 123, 155, 0.045), transparent 38%),
-        radial-gradient(circle at 22% 78%, rgba(212, 168, 67, 0.045), transparent 38%),
-        radial-gradient(circle at 80% 75%, rgba(123, 109, 170, 0.045), transparent 38%),
-        radial-gradient(circle at 50% 50%, rgba(45, 139, 85, 0.04), transparent 30%);
-    }
-    .scatter-meta {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      gap: 1rem;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-muted);
+      align-items: baseline;
       padding-bottom: 0.6rem;
-    }
-    .live-dot {
-      display: inline-block;
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      margin-right: 0.4rem;
-      box-shadow: 0 0 0 0 rgba(217, 79, 48, 0.55);
-      animation: pulse-dot 2.6s ease-in-out infinite;
-    }
-    @keyframes pulse-dot {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(217, 79, 48, 0.55); }
-      50%      { box-shadow: 0 0 0 7px rgba(217, 79, 48, 0); }
-    }
-    .legend {
-      display: flex;
-      gap: 0.85rem;
-      flex-wrap: wrap;
-    }
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      cursor: pointer;
-      transition: opacity 200ms;
-    }
-    .legend-item:hover { opacity: 0.7; }
-    .legend-swatch {
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      box-shadow: 0 0 0 2px var(--color-surface);
-    }
-
-    .scatter-wrap {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      aspect-ratio: 5 / 3;
-      max-height: 600px;
-      margin: 0;
-    }
-    .scatter-svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-      overflow: visible;
-    }
-
-    /* Dots */
-    .dot {
-      cursor: pointer;
-      opacity: 0;
-      transform-box: fill-box;
-      transform-origin: center;
-      transition:
-        opacity 700ms var(--ease-out),
-        transform 800ms var(--ease-spring),
-        cx 800ms var(--ease-spring),
-        cy 800ms var(--ease-spring);
-    }
-    .dot.in { opacity: 1; }
-    .dot circle.body {
-      fill: var(--dot-color, var(--color-accent));
-      stroke: var(--color-surface);
-      stroke-width: 2;
-      transition: r 250ms var(--ease-spring);
-    }
-    .dot circle.halo {
-      fill: var(--dot-color, var(--color-accent));
-      opacity: 0;
-      transition: opacity 250ms, r 250ms var(--ease-spring);
-    }
-    .dot:hover circle.body,
-    .dot.focus circle.body { r: 9; }
-    .dot:hover circle.halo,
-    .dot.focus circle.halo { opacity: 0.28; r: 22; }
-    .dot.dim { opacity: 0.18; }
-    .dot.dim:hover { opacity: 1; }
-
-    /* Edges drawn during hover */
-    .neighbor-line {
-      stroke: var(--color-accent);
-      stroke-width: 1.4;
-      opacity: 0;
-      stroke-dasharray: 200;
-      stroke-dashoffset: 200;
-      transition: opacity 200ms, stroke-dashoffset 400ms var(--ease-out);
-      pointer-events: none;
-    }
-    .neighbor-line.active {
-      opacity: 0.7;
-      stroke-dashoffset: 0;
-    }
-
-    /* Hover label */
-    .dot-label {
-      position: absolute;
-      pointer-events: none;
-      background: var(--color-text);
-      color: var(--color-bg);
-      padding: 0.35rem 0.65rem;
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.04em;
-      opacity: 0;
-      transform: translate(-50%, -135%);
-      transition: opacity 180ms var(--ease-out);
-      white-space: nowrap;
-      z-index: 5;
-      box-shadow: var(--shadow-md);
-    }
-    .dot-label.visible { opacity: 1; }
-    .dot-label::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 100%;
-      transform: translateX(-50%);
-      border: 5px solid transparent;
-      border-top-color: var(--color-text);
-    }
-
-    .scatter-hint {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-      padding-top: 0.75rem;
-      font-family: var(--font-mono);
+      border-bottom: 1px solid var(--rule);
+      font-family: var(--mono);
       font-size: 0.7rem;
-      text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: var(--color-text-muted);
-    }
-    .scatter-hint .pulse-key {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-    }
-    .scatter-hint .pulse-key .swatch {
-      width: 12px; height: 2px;
-      background: var(--color-accent);
-    }
-
-    .scatter-explainer {
-      margin: 2.5rem 0 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2.5rem;
-    }
-    .scatter-explainer p {
-      margin: 0;
-      color: var(--color-text-secondary);
-      font-size: 1.02rem;
-      max-width: 52ch;
-    }
-    .scatter-explainer p strong { color: var(--color-text); font-weight: 600; }
-    .scatter-explainer p em {
-      font-style: normal;
-      background: var(--color-accent-light);
-      padding: 0 0.3em;
-      border-radius: 3px;
-      color: var(--color-accent-hover);
-    }
-
-    /* ============ SECTION HEADERS ============ */
-    .section { padding: 5rem 0; }
-    .section-warm { background: var(--color-bg-warm); }
-    .section-header { max-width: 720px; margin: 0 0 3rem; }
-    .section-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2rem, 4vw, 2.85rem);
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      margin: 1rem 0 1rem;
-    }
-    .section-title em { font-style: normal; color: var(--color-accent); }
-    .section-sub {
-      color: var(--color-text-secondary);
-      font-size: 1.08rem;
-      max-width: 58ch;
-      margin: 0;
-    }
-
-    /* ============ BENTO (similarity / index) ============ */
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-    .bento-tile {
-      position: relative;
-      padding: 1.75rem;
-      border-radius: 16px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      overflow: hidden;
-      transition: transform 300ms var(--ease-spring), border-color 300ms, box-shadow 300ms;
-    }
-    .bento-tile:hover {
-      transform: translateY(-3px);
-      border-color: var(--color-accent-muted);
-      box-shadow: var(--shadow-lg);
-    }
-    .bento-tile::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(135deg, color-mix(in srgb, var(--tile-color) 6%, transparent), transparent 45%);
-    }
-    .bento-tag {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
       text-transform: uppercase;
+      color: var(--muted);
+    }
+    .topbar a {
+      color: var(--blue);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+    .topbar a:hover { border-bottom-color: var(--blue); }
+    .topbar .lhs { color: var(--rule); font-weight: 600; }
+
+    /* ============ TITLE PAGE ============ */
+    .titlepage {
+      padding: 3.5rem 0 3rem;
+      border-bottom: 2px solid var(--rule);
+      margin-bottom: 2.5rem;
+    }
+    .titlepage .note-no {
+      font-family: var(--mono);
+      font-size: 0.72rem;
       letter-spacing: 0.12em;
-      color: var(--tile-color, var(--color-accent));
+      text-transform: uppercase;
+      color: var(--blue);
+      margin: 0 0 1.6rem;
+    }
+    .titlepage h1 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: clamp(2rem, 4.4vw, 3.1rem);
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      margin: 0 0 0.8rem;
+      max-width: 22ch;
+    }
+    .titlepage h1 .em {
+      font-style: italic;
+      color: var(--blue);
+    }
+    .titlepage .subtitle {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.18rem;
+      color: var(--muted);
+      margin: 0 0 2rem;
+      max-width: 56ch;
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+    }
+    .meta .label {
+      text-transform: uppercase;
+      color: var(--faint);
+      font-size: 0.66rem;
+      letter-spacing: 0.1em;
+      margin: 0 0 0.3rem;
+    }
+    .meta .val { color: var(--text); }
+
+    /* ============ ABSTRACT ============ */
+    .abstract {
+      max-width: 620px;
+      margin: 0 auto 3.5rem;
+      padding: 1.5rem 0;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .abstract h2 {
+      font-family: var(--sans);
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-align: center;
+      margin: 0 0 1rem;
+      color: var(--text);
+    }
+    .abstract p {
+      font-family: var(--serif);
+      font-size: 0.98rem;
+      line-height: 1.7;
+      color: var(--text);
+      margin: 0 0 0.8rem;
+      text-align: justify;
+      hyphens: auto;
+    }
+    .abstract p:last-child { margin-bottom: 0; }
+
+    /* ============ SECTIONS ============ */
+    section.numbered {
+      margin: 3rem 0 2.4rem;
+      scroll-margin-top: 2rem;
+    }
+    .sec-head {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.4rem;
+      margin-bottom: 1.2rem;
+    }
+    .sec-no {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      color: var(--blue);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+    .sec-title {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.18rem;
+      letter-spacing: -0.005em;
+      margin: 0;
+    }
+
+    .subsec-head {
+      margin: 1.8rem 0 0.6rem;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.0rem;
+      color: var(--text);
+      letter-spacing: -0.003em;
+    }
+    .subsec-head .ssn {
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.86rem;
+      color: var(--blue);
+      margin-right: 0.7em;
+    }
+
+    p.body {
+      font-family: var(--sans);
+      max-width: 68ch;
+      margin: 0 0 1rem;
+      color: var(--text);
+    }
+    p.body em { font-style: italic; }
+    p.body code { font-family: var(--mono); font-size: 0.92em; background: #F2F2F2; padding: 0.05em 0.3em; border-radius: 2px; }
+    p.body strong { font-weight: 600; }
+
+    .figref {
+      font-family: var(--sans);
+      font-size: 0.92em;
+      color: var(--blue);
       font-weight: 500;
     }
-    .bento-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.45rem;
-      letter-spacing: -0.01em;
-      line-height: 1.2;
-      margin: 0.85rem 0 0.5rem;
+
+    /* ============ DEFINITION / THEOREM BOXES ============ */
+    .defn, .thm {
+      margin: 1.5rem 0;
+      padding: 1rem 1.25rem;
+      border-left: 3px solid var(--blue);
+      background: var(--blue-tint);
+      max-width: 66ch;
     }
-    .bento-body {
-      color: var(--color-text-secondary);
-      font-size: 0.96rem;
-      margin: 0;
-    }
-    .tile-art {
-      margin-top: 1.25rem;
+    .thm { border-left-color: var(--teal); background: var(--teal-tint); }
+    .defn .lbl, .thm .lbl {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      font-weight: 600;
       display: block;
+      margin-bottom: 0.35rem;
     }
+    .thm .lbl { color: var(--teal); }
+    .defn p, .thm p {
+      font-family: var(--serif);
+      font-size: 0.98rem;
+      line-height: 1.62;
+      margin: 0 0 0.5rem;
+      color: var(--text);
+    }
+    .defn p:last-child, .thm p:last-child { margin-bottom: 0; }
+    .defn .term, .thm .term { font-style: italic; font-weight: 600; }
 
-    /* ============ COMPARISON TABLE ============ */
-    .vdb-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
+    /* ============ EQUATIONS ============ */
+    .eq {
+      display: block;
+      margin: 1.4rem auto;
+      text-align: center;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--text);
+      position: relative;
     }
-    .vdb-row {
-      display: grid;
-      grid-template-columns: 1.2fr 2.5fr 1.2fr;
-      gap: 1.25rem;
-      align-items: center;
-      padding: 1.1rem 1.4rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      transition: border-color 300ms, transform 300ms var(--ease-spring);
-    }
-    .vdb-row:hover {
-      transform: translateX(4px);
-      border-color: var(--color-accent-muted);
-    }
-    .vdb-name {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: -0.01em;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .vdb-name .vdb-swatch {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--vdb-color, var(--color-accent));
-    }
-    .vdb-desc {
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-    }
-    .vdb-desc strong { color: var(--color-text); font-weight: 600; }
-    .vdb-bars {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-    }
-    .vdb-bar {
-      display: grid;
-      grid-template-columns: 56px 1fr;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--color-text-muted);
-    }
-    .bar-track {
-      height: 6px;
-      background: var(--color-border-light);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      width: 0;
-      background: var(--vdb-color, var(--color-accent));
-      border-radius: 999px;
-      transition: width 1100ms var(--ease-out);
-      transition-delay: var(--bar-delay, 0ms);
-    }
-    .vdb-row.visible .bar-fill { width: var(--bar-w, 0%); }
-
-    /* ============ CODE BLOCK ============ */
-    .code-wrap {
-      margin: 0;
-      background: var(--color-bg-code);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-    }
-    .code-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.85rem 1.25rem;
-      background: rgba(255, 255, 255, 0.03);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #9E9790;
-    }
-    .code-head .dots {
+    .eq .lhs, .eq .rhs { color: var(--text); }
+    .eq .op { color: var(--blue); font-style: normal; padding: 0 0.25em; }
+    .eq .frac {
       display: inline-flex;
-      gap: 0.4rem;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 0.2em;
+      font-size: 0.95em;
     }
-    .code-head .dots span {
-      width: 10px; height: 10px;
+    .eq .frac .num,
+    .eq .frac .den { padding: 0 0.3em; }
+    .eq .frac .bar { width: 100%; height: 1px; background: var(--text); }
+    .eq .vec { font-style: normal; font-weight: 700; }
+    .eq .vec-arrow {
+      position: relative;
+      font-style: normal;
+      font-weight: 700;
+    }
+    .eq .vec-arrow::after {
+      content: '→';
+      position: absolute;
+      top: -0.7em;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.55em;
+      color: var(--blue);
+    }
+    .eq .sqrt { color: var(--text); }
+    .eq .sub { font-size: 0.75em; vertical-align: sub; }
+    .eq .num-tag {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--mono);
+      font-style: normal;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .eq.with-tag { padding-right: 4rem; }
+
+    /* ============ FIGURE ============ */
+    figure.fig {
+      margin: 2rem 0;
+      padding: 0;
+    }
+    figure.fig svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: var(--bg);
+      border: 1px solid var(--rule);
+    }
+    figure.fig figcaption {
+      margin-top: 0.6rem;
+      font-family: var(--serif);
+      font-size: 0.88rem;
+      font-style: italic;
+      color: var(--muted);
+      text-align: left;
+      max-width: 70ch;
+      line-height: 1.55;
+    }
+    figure.fig figcaption .fig-no {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-style: normal;
+      color: var(--text);
+      margin-right: 0.4em;
+    }
+
+    /* axes/grid styles for figure 1 */
+    .axis-line { stroke: var(--rule); stroke-width: 1; }
+    .axis-tick { stroke: var(--rule); stroke-width: 0.5; }
+    .grid-line { stroke: var(--grid); stroke-width: 0.5; stroke-dasharray: 2 3; }
+    .axis-label {
+      font-family: 'IBM Plex Serif', serif;
+      font-style: italic;
+      font-size: 11px;
+      fill: var(--muted);
+    }
+    .axis-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      fill: var(--faint);
+    }
+    .pt {
+      r: 3.2;
+      stroke: var(--bg);
+      stroke-width: 0.8;
+    }
+    .pt-lbl {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8.5px;
+      fill: var(--text);
+    }
+    .cluster-label {
+      font-family: 'IBM Plex Serif', serif;
+      font-style: italic;
+      font-size: 11px;
+      fill: var(--muted);
+    }
+    .fig-legend-row {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .fig-legend-row .sw {
+      display: inline-block;
+      width: 8px; height: 8px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.18);
+      margin-right: 0.4rem;
+      vertical-align: middle;
+    }
+    .arrow-vec {
+      stroke: var(--blue);
+      stroke-width: 1.6;
+      fill: none;
+      stroke-linecap: round;
+      marker-end: url(#arrowhead);
+    }
+    .arrow-vec.draw {
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      animation: drawvec 1.4s ease-out forwards;
+    }
+    @keyframes drawvec {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* ============ ACADEMIC TABLE ============ */
+    .acad-table {
+      width: 100%;
+      max-width: 880px;
+      border-collapse: collapse;
+      margin: 1.5rem 0 0.5rem;
+      font-family: var(--sans);
+      font-size: 0.92rem;
+    }
+    .acad-table caption {
+      caption-side: top;
+      text-align: left;
+      margin-bottom: 0.6rem;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    .acad-table caption .tbl-no {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-style: normal;
+      color: var(--text);
+      margin-right: 0.4em;
+    }
+    .acad-table thead tr {
+      border-top: 2px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .acad-table tbody tr:last-child {
+      border-bottom: 2px solid var(--rule);
+    }
+    .acad-table th, .acad-table td {
+      padding: 0.55rem 0.7rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    .acad-table th {
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .acad-table th.num, .acad-table td.num {
+      text-align: right;
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+    }
+    .acad-table tbody tr:hover { background: #FAFAFA; }
+    .acad-table td .name { font-weight: 600; }
+    .acad-table .footnote {
+      font-family: var(--serif);
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--muted);
+      margin: 0.4rem 0 0;
+    }
+    .acad-table.compact { font-size: 0.84rem; }
+    .acad-table.compact th, .acad-table.compact td { padding: 0.45rem 0.55rem; }
+
+    /* ============ CODE LISTING ============ */
+    .listing {
+      margin: 1.4rem 0;
+      max-width: 880px;
+    }
+    .listing-cap {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .listing-cap .l-no {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-style: normal;
+      color: var(--text);
+      margin-right: 0.4em;
     }
     pre.code {
       margin: 0;
-      padding: 1.5rem 1.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.86rem;
-      line-height: 1.7;
-      color: #DCD7CA;
+      padding: 1rem 1.2rem;
+      background: #FAFAFA;
+      border-top: 1.5px solid var(--rule);
+      border-bottom: 1.5px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.62;
+      color: var(--text);
       overflow-x: auto;
+      counter-reset: line;
       white-space: pre;
     }
-    pre.code .kw { color: #CBA6F7; }
-    pre.code .fn { color: #89B4FA; }
-    pre.code .str { color: #A6E3A1; }
-    pre.code .num { color: #FAB387; }
-    pre.code .cm { color: #6C7086; font-style: italic; }
-    pre.code .pr { color: #F9E2AF; }
-    pre.code .op { color: #94E2D5; }
+    pre.code .ln {
+      display: inline-block;
+      width: 2em;
+      color: var(--faint);
+      user-select: none;
+      text-align: right;
+      padding-right: 0.85em;
+      border-right: 1px solid var(--grid);
+      margin-right: 0.85em;
+    }
+    pre.code .kw { color: var(--blue); font-weight: 500; }
+    pre.code .str { color: var(--teal); }
+    pre.code .cm { color: var(--muted); font-style: italic; }
+    pre.code .num { color: var(--text); }
+    pre.code .fn { color: var(--text); font-weight: 500; }
 
-    /* ============ STATS ============ */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+    /* ============ PITFALLS LIST ============ */
+    ol.pitfalls {
+      counter-reset: pf;
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+      max-width: 70ch;
     }
-    .stat {
-      padding: 1.5rem 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
+    ol.pitfalls li {
+      counter-increment: pf;
+      position: relative;
+      padding-left: 3.6em;
+      margin-bottom: 1rem;
+      font-family: var(--sans);
+      font-size: 0.96rem;
+      line-height: 1.55;
     }
-    .stat.visible { opacity: 1; transform: translateY(0); }
-    .stat:nth-child(2).visible { transition-delay: 80ms; }
-    .stat:nth-child(3).visible { transition-delay: 160ms; }
-    .stat:nth-child(4).visible { transition-delay: 240ms; }
-    .stat-value {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 3.6vw, 2.6rem);
-      font-weight: 700;
-      line-height: 1.05;
-      letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
-      color: var(--color-text);
+    ol.pitfalls li::before {
+      content: "P." counter(pf);
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.78rem;
+      color: var(--blue);
+      letter-spacing: 0.04em;
     }
-    .stat-value .unit { color: var(--color-accent); font-size: 0.72em; margin-left: 0.15em; }
-    .stat-label {
-      margin-top: 0.45rem;
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
-      line-height: 1.5;
+    ol.pitfalls li strong {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.15em;
     }
-    .stat-kicker {
-      font-family: var(--font-mono);
-      font-size: 0.66rem;
+
+    /* ============ RESULTS TABLE (smaller) ============ */
+    .small-table { max-width: 600px; }
+
+    /* ============ REFERENCES ============ */
+    .refs {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule);
+    }
+    .refs h2 {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-      margin: 0 0 0.7rem;
+      margin: 0 0 0.8rem;
     }
+    .refs ol {
+      list-style: none;
+      counter-reset: ref;
+      padding: 0;
+      margin: 0;
+      max-width: 70ch;
+    }
+    .refs li {
+      counter-increment: ref;
+      font-family: var(--serif);
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: var(--text);
+      padding-left: 2.8em;
+      position: relative;
+      margin-bottom: 0.55rem;
+    }
+    .refs li::before {
+      content: "[" counter(ref) "]";
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-family: var(--mono);
+      font-style: normal;
+      font-size: 0.8rem;
+      color: var(--blue);
+    }
+    .refs li .au { font-variant: small-caps; font-weight: 500; }
+    .refs li .ti { font-style: italic; }
+    .refs li .jr { color: var(--muted); }
 
-    /* ============ CTA ============ */
-    .cta {
-      padding: 6rem 1.5rem;
-      max-width: 720px;
-      margin: 0 auto;
-      text-align: center;
+    /* ============ FOOTER ============ */
+    .doc-footer {
+      margin-top: 4rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faint);
     }
-    .cta h2 {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 2.85rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin: 0 0 1rem;
-    }
-    .cta h2 em { font-style: normal; color: var(--color-accent); }
-    .cta p {
-      color: var(--color-text-secondary);
-      margin: 0 auto 2rem;
-      max-width: 48ch;
-    }
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 1rem 1.85rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms;
-      will-change: transform;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(3px); }
-
-    /* ============ ANIMATE-IN ============ */
-    .animate-in {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring),
-                  transform var(--duration-slower) var(--ease-spring);
-    }
-    .animate-in.visible { opacity: 1; transform: translateY(0); }
 
     /* ============ RESPONSIVE ============ */
-    @media (max-width: 900px) {
-      .scatter-explainer { grid-template-columns: 1fr; gap: 1.25rem; }
-      .stats { grid-template-columns: 1fr 1fr; }
-      .vdb-row { grid-template-columns: 1fr; gap: 0.85rem; }
-      .vdb-bars { max-width: 320px; }
+    @media (max-width: 760px) {
+      .doc { padding: 2rem 1.25rem 5rem; }
+      .titlepage { padding: 2rem 0; }
+      .meta { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .eq { font-size: 1.02rem; padding-right: 0 !important; }
+      .eq .num-tag { display: none; }
+      .acad-table { font-size: 0.82rem; }
+      .acad-table th, .acad-table td { padding: 0.45rem 0.4rem; }
+      .fig-legend-row { gap: 0.7rem; font-size: 0.68rem; }
+      pre.code { font-size: 0.76rem; padding: 0.8rem; }
+      pre.code .ln { width: 1.5em; padding-right: 0.5em; margin-right: 0.5em; }
+      ol.pitfalls li { padding-left: 3em; }
     }
-    @media (max-width: 640px) {
-      .bento { grid-template-columns: 1fr; }
-      .scatter-wrap { aspect-ratio: 1 / 1; max-height: 460px; }
-      .dot.mobile-hide { display: none; }
-      .dot text { display: none; }
-      .legend { gap: 0.5rem; }
-      .legend-item .legend-label { font-size: 0.62rem; }
-    }
-    @media (max-width: 460px) {
-      .stats { grid-template-columns: 1fr; }
-      .hero { padding-top: 6rem; }
-      pre.code { font-size: 0.78rem; padding: 1rem; }
+    @media (max-width: 480px) {
+      .meta { grid-template-columns: 1fr; }
+      .titlepage h1 { font-size: 1.75rem; }
     }
 
     /* ============ REDUCED MOTION ============ */
@@ -685,586 +622,724 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-      .dot { opacity: 1 !important; transform: none !important; }
-      .hero-title .word, .hero-sub, .eyebrow, .animate-in, .stat { opacity: 1 !important; transform: none !important; }
-      .vdb-row .bar-fill { width: var(--bar-w, 0%) !important; transition: none !important; }
-      .live-dot { animation: none !important; }
-    }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .bento-tile:hover, .vdb-row:hover { transform: none !important; }
+      .arrow-vec.draw { stroke-dashoffset: 0 !important; }
     }
   </style>
 </head>
 <body>
 
-  <nav class="nav">
-    <div class="nav-inner">
-      <span class="nav-brand">CETI Lookbook · <strong>Vectors</strong></span>
-      <a class="nav-back" href="../">← All concepts</a>
+  <main class="doc">
+
+    <!-- ============ TOP BAR ============ -->
+    <div class="topbar">
+      <span class="lhs">CETI Lookbook · Technical Notes</span>
+      <a href="../">Index of Notes</a>
     </div>
-  </nav>
 
-  <!-- ============ HERO ============ -->
-  <section class="hero" id="hero">
-    <p class="eyebrow">EMBEDDINGS · VECTOR DATABASES · 2026</p>
-    <h1 class="hero-title">
-      <span class="word">Meaning,</span>
-      <span class="word">as</span>
-      <span class="word"><em>coordinates.</em></span>
-    </h1>
-    <p class="hero-sub">An embedding is a paragraph compressed into 1,536 numbers — coordinates in a space where <em>nearness equals meaning</em>. A vector database is the filing cabinet that finds the nearest neighbors at a billion-point scale, in milliseconds.</p>
-  </section>
+    <!-- ============ TITLE PAGE ============ -->
+    <header class="titlepage">
+      <p class="note-no">Technical Note No. 10/18</p>
+      <h1>Vectors, Embeddings, &amp; Similarity: <span class="em">A Practical Primer</span></h1>
+      <p class="subtitle">On the geometry of meaning, the metrics that quantify it, and the data structures that retrieve nearest neighbours at scale.</p>
 
-  <!-- ============ SCATTER VISUAL ============ -->
-  <section class="scatter-section wrap" aria-labelledby="scatter-heading">
-    <div class="scatter-frame">
-      <div class="scatter-meta">
-        <span><span class="live-dot"></span>50 words · 5 semantic clusters · projected from 1,536 dims → 2D</span>
-        <div class="legend" id="legend">
-          <span class="legend-item" data-cluster="animals"><span class="legend-swatch" style="background:#D94F30"></span><span class="legend-label">Animals</span></span>
-          <span class="legend-item" data-cluster="vehicles"><span class="legend-swatch" style="background:#2A7B9B"></span><span class="legend-label">Vehicles</span></span>
-          <span class="legend-item" data-cluster="food"><span class="legend-swatch" style="background:#D4A843"></span><span class="legend-label">Food</span></span>
-          <span class="legend-item" data-cluster="abstract"><span class="legend-swatch" style="background:#7B6DAA"></span><span class="legend-label">Abstract</span></span>
-          <span class="legend-item" data-cluster="tech"><span class="legend-swatch" style="background:#2D8B55"></span><span class="legend-label">Tech</span></span>
+      <div class="meta">
+        <div>
+          <p class="label">Author</p>
+          <p class="val">M. Mulaveesala</p>
+        </div>
+        <div>
+          <p class="label">Affiliation</p>
+          <p class="val">CETI.AI Research</p>
+        </div>
+        <div>
+          <p class="label">Issued</p>
+          <p class="val">May 2026</p>
         </div>
       </div>
+    </header>
 
-      <div class="scatter-wrap" id="scatter-wrap">
-        <svg class="scatter-svg" id="scatter-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-labelledby="scatter-heading" role="img">
-          <title id="scatter-heading">2D projection of 50 word embeddings clustered by semantic meaning.</title>
-          <desc>Five clusters: animals (red), vehicles (teal), food (gold), abstract concepts (plum), and tech (green). Hover any dot to see its label and lines to its five nearest neighbors.</desc>
-          <g id="lines"></g>
-          <g id="dots"></g>
-        </svg>
-        <div class="dot-label" id="hover-label"></div>
+    <!-- ============ ABSTRACT ============ -->
+    <section class="abstract" aria-label="Abstract">
+      <h2>Abstract</h2>
+      <p>An <em>embedding</em> is a paragraph compressed into a fixed-length vector of real numbers — coordinates in a space where geometric proximity approximates semantic similarity. The substitution of <em>find similar</em> with <em>find near</em> licenses an entire production stack: retrieval-augmented generation, semantic search, deduplication, recommendation, classification by nearest centroid. None of these functions without three components in lockstep — an embedding model that produces well-separated vectors, a distance metric appropriate to the corpus, and an index that returns nearest neighbours in sub-linear time.</p>
+      <p>This note treats those three components in sequence. We formalise the four distance metrics in common use (cosine, Euclidean, dot product, Mahalanobis); state the complexity claim underlying Hierarchical Navigable Small World (HNSW) indexes and survey contemporary alternatives (IVF, ScaNN, DiskANN, SPANN); analyse scalar, product, and binary quantisation as memory–recall trade-offs; and compare eight production vector databases. Five recurring pitfalls are catalogued. A reference implementation is provided in Listing&nbsp;1; the bibliography lists nineteen primary sources.</p>
+    </section>
+
+    <!-- ============ §1 BACKGROUND ============ -->
+    <section class="numbered" id="s1">
+      <div class="sec-head">
+        <span class="sec-no">§1</span>
+        <h2 class="sec-title">Background: from one-hot to embeddings</h2>
       </div>
 
-      <div class="scatter-hint">
-        <span class="pulse-key"><span class="swatch"></span> Hover a dot → see its label + 5 nearest neighbors</span>
-        <span>cos(θ) similarity · k=5 · top-k retrieval</span>
-      </div>
-    </div>
+      <p class="body">For the first four decades of natural-language computing, words were represented as discrete symbols — atoms with no internal structure, distinguished only by their index in a vocabulary. Under this <em>one-hot</em> encoding a vocabulary of size <em>V</em> = 50,000 yields vectors with 49,999 zeros and a single one. Two distinct words are always orthogonal: the vectors for <code>dog</code> and <code>puppy</code> sit at the same angle as <code>dog</code> and <code>parliament</code>. The geometry encodes nothing.</p>
 
-    <div class="scatter-explainer">
-      <p><strong>Why this works.</strong> A neural network reads millions of sentences and learns to place words near each other in a high-dimensional space if they appear in similar contexts. The model never sees the word "dog" — it sees a list of 1,536 numbers. Two paragraphs about pets land closer together than a paragraph about pets and one about trucks. <em>Distance is meaning.</em></p>
-      <p><strong>Why a database.</strong> "Closest to" is cheap on a hundred vectors and ruinous on a billion. Vector databases use approximate-nearest-neighbor indexes (HNSW, IVF) to return the top-k matches in milliseconds — the engine behind every modern RAG system, semantic search, recommendation, and "find similar" feature.</p>
-    </div>
-  </section>
+      <p class="body">The first break came with <em>distributional semantics</em>: Latent Semantic Analysis [13] in the late 1980s ran an SVD on a term–document matrix, projecting co-occurring terms to nearby coordinates. The mathematics worked; the SVD did not scale.</p>
 
-  <!-- ============ SIMILARITY METRICS ============ -->
-  <section class="section section-warm">
-    <div class="wrap">
-      <div class="section-header animate-in">
-        <p class="eyebrow" style="opacity:1; transform:none; color:var(--color-actor-2);">FOUR THINGS TO KNOW</p>
-        <h2 class="section-title">Distance metrics &amp; <em>index algorithms.</em></h2>
-        <p class="section-sub">Picking a vector store is mostly picking these four levers. Get them wrong and your retrieval is slow, wrong, or both.</p>
+      <div class="defn">
+        <span class="lbl">Definition 1.1</span>
+        <p>An <span class="term">embedding</span> is a map <em>f : T → ℝ<sup>d</sup></em> from a token sequence <em>T</em> to a real-valued vector of fixed dimension <em>d</em>, induced by training a neural network such that semantically related inputs are placed at small mutual distance under a chosen metric.</p>
       </div>
 
-      <div class="bento">
-        <article class="bento-tile animate-in" style="--tile-color:#D94F30;">
-          <span class="bento-tag">01 · Cosine</span>
-          <h3 class="bento-title">Cosine similarity</h3>
-          <p class="bento-body">Measures the angle between two vectors, ignoring length. The default for text embeddings — a long document and a one-line query can still match perfectly.</p>
-          <svg class="tile-art" width="160" height="64" viewBox="0 0 160 64" aria-hidden="true">
-            <circle cx="20" cy="44" r="3" fill="#D94F30"/>
-            <line x1="20" y1="44" x2="130" y2="14" stroke="#D94F30" stroke-width="2" opacity="0.85"/>
-            <line x1="20" y1="44" x2="135" y2="30" stroke="#D94F30" stroke-width="2" opacity="0.45"/>
-            <path d="M 60 44 A 40 40 0 0 0 50 25" fill="none" stroke="#D94F30" stroke-width="1.4" opacity="0.6"/>
-            <text x="68" y="38" font-family="JetBrains Mono" font-size="9" fill="#D94F30" opacity="0.8">θ</text>
-          </svg>
-        </article>
+      <p class="body">The modern lineage begins with <em>word2vec</em> [4]: Mikolov and colleagues showed in 2013 that a shallow neural network, trained to predict context words from a centre word (the <em>skip-gram</em> objective), produced 300-dimensional vectors with remarkable linear-algebraic structure. The canonical demonstration — <code>king</code> − <code>man</code> + <code>woman</code> ≈ <code>queen</code> — established that geometric operations on embeddings could recover analogical relations the network was never explicitly trained on. <em>GloVe</em> [14], announced a year later, reframed the same problem as a factorisation of the global co-occurrence matrix.</p>
 
-        <article class="bento-tile animate-in" style="--tile-color:#2A7B9B;">
-          <span class="bento-tag">02 · Euclidean</span>
-          <h3 class="bento-title">Euclidean (L2) distance</h3>
-          <p class="bento-body">Straight-line distance between points. Useful when magnitude matters — image embeddings, geo, and any space where vectors aren't unit-normalized.</p>
-          <svg class="tile-art" width="160" height="64" viewBox="0 0 160 64" aria-hidden="true">
-            <circle cx="22" cy="48" r="3.5" fill="#2A7B9B"/>
-            <circle cx="132" cy="14" r="3.5" fill="#2A7B9B"/>
-            <line x1="22" y1="48" x2="132" y2="14" stroke="#2A7B9B" stroke-width="2" stroke-dasharray="4 3" opacity="0.75"/>
-            <line x1="22" y1="48" x2="132" y2="48" stroke="#2A7B9B" stroke-width="1" opacity="0.25"/>
-            <line x1="132" y1="48" x2="132" y2="14" stroke="#2A7B9B" stroke-width="1" opacity="0.25"/>
-          </svg>
-        </article>
+      <p class="body">word2vec and GloVe produced <em>static</em> embeddings — one vector per word-form, the same for <code>bank</code> in <em>river bank</em> and <em>investment bank</em>. ELMo, then <em>BERT</em> [15], then the GPT line discarded that assumption: <em>contextual</em> embeddings emit a different vector per token per sentence, so the index no longer collapses sense-distinctions.</p>
 
-        <article class="bento-tile animate-in" style="--tile-color:#D4A843;">
-          <span class="bento-tag">03 · Dot product</span>
-          <h3 class="bento-title">Dot product</h3>
-          <p class="bento-body">Cheap, fast, and equivalent to cosine when vectors are normalized. The metric most production vector DBs run on the hot path.</p>
-          <svg class="tile-art" width="160" height="64" viewBox="0 0 160 64" aria-hidden="true">
-            <line x1="20" y1="32" x2="78" y2="32" stroke="#D4A843" stroke-width="2.2" opacity="0.85"/>
-            <line x1="86" y1="32" x2="140" y2="20" stroke="#D4A843" stroke-width="2.2" opacity="0.85"/>
-            <line x1="84" y1="32" x2="84" y2="48" stroke="#D4A843" stroke-width="1" opacity="0.35" stroke-dasharray="2 2"/>
-            <text x="82" y="14" font-family="JetBrains Mono" font-size="11" fill="#D4A843" opacity="0.85">·</text>
-            <text x="78" y="14" font-family="JetBrains Mono" font-size="11" fill="#D4A843" opacity="0.85">a</text>
-            <text x="92" y="14" font-family="JetBrains Mono" font-size="11" fill="#D4A843" opacity="0.85">b</text>
-          </svg>
-        </article>
+      <p class="body">The current frontier is <em>instruction-tuned</em> embedding models — OpenAI&rsquo;s <code>text-embedding-3</code>, Voyage-3, Cohere Embed v4, BGE-M3 — pre-trained with retrieval as a first-class objective via hard-negative mining and contrastive losses. They accept up to 8,192 tokens and emit 1,024–3,072 dimensions. The Massive Text Embedding Benchmark (MTEB) [16] tracks their relative quality across 56 tasks.</p>
 
-        <article class="bento-tile animate-in" style="--tile-color:#2D8B55;">
-          <span class="bento-tag">04 · HNSW</span>
-          <h3 class="bento-title">Hierarchical Navigable Small World</h3>
-          <p class="bento-body">The default index in nearly every modern vector DB. Builds a layered graph of vectors — log-time approximate search across billions of points with &gt;95% recall.</p>
-          <svg class="tile-art" width="160" height="64" viewBox="0 0 160 64" aria-hidden="true">
-            <line x1="20" y1="18" x2="60" y2="18" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
-            <line x1="60" y1="18" x2="120" y2="18" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
-            <line x1="30" y1="38" x2="80" y2="38" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
-            <line x1="80" y1="38" x2="140" y2="38" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
-            <line x1="20" y1="56" x2="50" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
-            <line x1="50" y1="56" x2="100" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
-            <line x1="100" y1="56" x2="140" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.45"/>
-            <line x1="60" y1="18" x2="80" y2="38" stroke="#2D8B55" stroke-width="1" opacity="0.6"/>
-            <line x1="80" y1="38" x2="50" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.6"/>
-            <line x1="80" y1="38" x2="100" y2="56" stroke="#2D8B55" stroke-width="1" opacity="0.6"/>
-            <circle cx="20" cy="18" r="3" fill="#2D8B55"/>
-            <circle cx="60" cy="18" r="3" fill="#2D8B55"/>
-            <circle cx="120" cy="18" r="3" fill="#2D8B55"/>
-            <circle cx="30" cy="38" r="2.5" fill="#2D8B55" opacity="0.85"/>
-            <circle cx="80" cy="38" r="3.5" fill="#2D8B55"/>
-            <circle cx="140" cy="38" r="2.5" fill="#2D8B55" opacity="0.85"/>
-            <circle cx="20" cy="56" r="2" fill="#2D8B55" opacity="0.7"/>
-            <circle cx="50" cy="56" r="2" fill="#2D8B55" opacity="0.7"/>
-            <circle cx="100" cy="56" r="2" fill="#2D8B55" opacity="0.7"/>
-            <circle cx="140" cy="56" r="2" fill="#2D8B55" opacity="0.7"/>
-          </svg>
-        </article>
-      </div>
-    </div>
-  </section>
+      <p class="body">In practice <em>d</em> is small — 1,536 for <code>text-embedding-3-small</code>, 3,072 for the large variant, 1,024 for Voyage-3, 768 for Nomic-Embed. The network never sees the word &ldquo;dog&rdquo;; it sees a list of <em>d</em> real numbers. Two paragraphs about pets land closer in ℝ<sup>d</sup> than a paragraph about pets and one about cement trucks. Distance is meaning. Once that is granted, <em>find similar</em> becomes <em>find near</em>, and the rest of the note follows.</p>
+    </section>
 
-  <!-- ============ VDB LANDSCAPE ============ -->
-  <section class="section">
-    <div class="wrap">
-      <div class="section-header animate-in">
-        <p class="eyebrow" style="opacity:1; transform:none; color:var(--color-actor-3);">THE LANDSCAPE</p>
-        <h2 class="section-title">Six vector databases, <em>six trade-offs.</em></h2>
-        <p class="section-sub">There is no winner. There is a stack you already use, a scale you're targeting, and an ops budget. Bars show relative strength on three axes: scale, developer ergonomics, and managed-service maturity.</p>
+    <!-- ============ §2 DISTANCE METRICS ============ -->
+    <section class="numbered" id="s2">
+      <div class="sec-head">
+        <span class="sec-no">§2</span>
+        <h2 class="sec-title">Distance metrics, formally</h2>
       </div>
 
-      <div class="vdb-grid">
-        <article class="vdb-row animate-in" style="--vdb-color:#2A7B9B;">
-          <div class="vdb-name"><span class="vdb-swatch"></span>Pinecone</div>
-          <div class="vdb-desc"><strong>Managed-only, serverless.</strong> The "AWS of vector search." Pay-per-namespace, infinite scale, zero ops. Default pick when you don't want to think about infrastructure.</div>
-          <div class="vdb-bars">
-            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:96%; --bar-delay:0ms;"></div></div></div>
-            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:84%; --bar-delay:120ms;"></div></div></div>
-            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:98%; --bar-delay:240ms;"></div></div></div>
-          </div>
-        </article>
+      <p class="body">Four quantities dominate. We treat each in turn, with formal definition, geometric interpretation, and a note on the failure mode that distinguishes it from the alternatives. Throughout, fix two embeddings <em>a, b ∈ ℝ<sup>d</sup></em>.</p>
 
-        <article class="vdb-row animate-in" style="--vdb-color:#D94F30;">
-          <div class="vdb-name"><span class="vdb-swatch"></span>Weaviate</div>
-          <div class="vdb-desc"><strong>Modular, hybrid-search native.</strong> BM25 + vector out of the box, GraphQL API, multi-tenant primitives. Strong when you need keyword + semantic in one query.</div>
-          <div class="vdb-bars">
-            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:84%; --bar-delay:0ms;"></div></div></div>
-            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:88%; --bar-delay:120ms;"></div></div></div>
-            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:78%; --bar-delay:240ms;"></div></div></div>
-          </div>
-        </article>
+      <h3 class="subsec-head"><span class="ssn">§2.1</span>Cosine similarity</h3>
 
-        <article class="vdb-row animate-in" style="--vdb-color:#D4A843;">
-          <div class="vdb-name"><span class="vdb-swatch"></span>Qdrant</div>
-          <div class="vdb-desc"><strong>Rust-fast, payload-filter heavy.</strong> Best-in-class filtered search and quantization. Self-host on a single box for millions of vectors before you outgrow it.</div>
-          <div class="vdb-bars">
-            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:88%; --bar-delay:0ms;"></div></div></div>
-            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:90%; --bar-delay:120ms;"></div></div></div>
-            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:74%; --bar-delay:240ms;"></div></div></div>
-          </div>
-        </article>
-
-        <article class="vdb-row animate-in" style="--vdb-color:#7B6DAA;">
-          <div class="vdb-name"><span class="vdb-swatch"></span>Chroma</div>
-          <div class="vdb-desc"><strong>The "SQLite of vectors."</strong> npm install, in-process, perfect for prototypes and laptops. Cloud tier emerging; production scale still proving itself.</div>
-          <div class="vdb-bars">
-            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:58%; --bar-delay:0ms;"></div></div></div>
-            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:96%; --bar-delay:120ms;"></div></div></div>
-            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:54%; --bar-delay:240ms;"></div></div></div>
-          </div>
-        </article>
-
-        <article class="vdb-row animate-in" style="--vdb-color:#2D8B55;">
-          <div class="vdb-name"><span class="vdb-swatch"></span>pgvector</div>
-          <div class="vdb-desc"><strong>Postgres extension.</strong> If your data is already in Postgres, this is the answer. Joins, transactions, ACID — and now HNSW indexes. The boring choice that wins more often than people admit.</div>
-          <div class="vdb-bars">
-            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:72%; --bar-delay:0ms;"></div></div></div>
-            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:82%; --bar-delay:120ms;"></div></div></div>
-            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:92%; --bar-delay:240ms;"></div></div></div>
-          </div>
-        </article>
-
-        <article class="vdb-row animate-in" style="--vdb-color:#E8836C;">
-          <div class="vdb-name"><span class="vdb-swatch"></span>Milvus</div>
-          <div class="vdb-desc"><strong>Enterprise-scale, cloud-native.</strong> Built at Zilliz for the billion-vector regime — disaggregated compute, GPU indexes, multi-tenant pools. Heavier ops; pays off above 100M vectors.</div>
-          <div class="vdb-bars">
-            <div class="vdb-bar"><span>Scale</span><div class="bar-track"><div class="bar-fill" style="--bar-w:98%; --bar-delay:0ms;"></div></div></div>
-            <div class="vdb-bar"><span>DX</span><div class="bar-track"><div class="bar-fill" style="--bar-w:70%; --bar-delay:120ms;"></div></div></div>
-            <div class="vdb-bar"><span>Managed</span><div class="bar-track"><div class="bar-fill" style="--bar-w:84%; --bar-delay:240ms;"></div></div></div>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ CODE ============ -->
-  <section class="section section-warm">
-    <div class="wrap">
-      <div class="section-header animate-in">
-        <p class="eyebrow" style="opacity:1; transform:none; color:var(--color-actor-5);">END-TO-END IN 11 LINES</p>
-        <h2 class="section-title">Embed once, <em>query forever.</em></h2>
-        <p class="section-sub">The full RAG primitive in plain Python — embed a corpus, push to a vector store, retrieve the top-3 most similar passages for any query. Substitute your provider; the shape is identical everywhere.</p>
+      <div class="thm">
+        <span class="lbl">Equation 2.1 — Cosine similarity</span>
+        <p>The cosine similarity measures the angle <em>θ</em> between two vectors, ignoring their magnitudes. It is the default for normalised text embeddings.</p>
       </div>
 
-      <div class="code-wrap animate-in">
-        <div class="code-head">
-          <span class="dots"><span></span><span></span><span></span></span>
-          <span>embeddings.py · openai + qdrant · py 3.12</span>
-        </div>
-<pre class="code"><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
-<span class="kw">from</span> qdrant_client <span class="kw">import</span> QdrantClient, models
+      <p class="eq with-tag" aria-label="cosine similarity equation">
+        cos(<em>θ</em>) <span class="op">=</span>
+        <span class="frac">
+          <span class="num"><span class="vec-arrow">a</span> <span class="op">·</span> <span class="vec-arrow">b</span></span>
+          <span class="bar"></span>
+          <span class="den">‖<span class="vec-arrow">a</span>‖ ‖<span class="vec-arrow">b</span>‖</span>
+        </span>
+        <span class="num-tag">(2.1)</span>
+      </p>
 
-oa <span class="op">=</span> <span class="fn">OpenAI</span>()
-qd <span class="op">=</span> <span class="fn">QdrantClient</span>(<span class="str">"http://localhost:6333"</span>)
+      <p class="body">Cosine similarity ranges in [−1,&nbsp;1] and is invariant to scaling: <em>cos</em>(α<em>a</em>, β<em>b</em>) = <em>cos</em>(<em>a</em>, <em>b</em>) for any positive scalars α, β. Geometrically, it asks <em>do these vectors point in the same direction?</em> while remaining silent on magnitude. Because instruction-tuned text embeddings encode signal-strength in direction, cosine is the natural default.</p>
 
-<span class="cm"># 1 — turn text into 1,536-dim vectors</span>
-docs <span class="op">=</span> [<span class="str">"a dog wags its tail"</span>, <span class="str">"the truck hauls cement"</span>, <span class="str">"pasta needs salt"</span>]
-vecs <span class="op">=</span> [e<span class="op">.</span>embedding <span class="kw">for</span> e <span class="kw">in</span> oa<span class="op">.</span>embeddings<span class="op">.</span><span class="fn">create</span>(model<span class="op">=</span><span class="str">"text-embedding-3-small"</span>, input<span class="op">=</span>docs)<span class="op">.</span>data]
+      <p class="body"><em>When it fails.</em> Cosine treats vectors of magnitude 1.0 and 100.0 identically. If magnitude is informative — TF-IDF where document length is a feature, image embeddings where norm encodes salience — cosine throws away signal. A second failure mode arises with very short queries: a three-token query embedded by a model trained on paragraphs sits in a low-density region, and cosine ranking against longer documents grows unstable. Hybrid retrieval (cosine + BM25) is the standard mitigation.</p>
 
-<span class="cm"># 2 — index them under a collection</span>
-qd<span class="op">.</span><span class="fn">recreate_collection</span>(<span class="str">"corpus"</span>, vectors_config<span class="op">=</span>models<span class="op">.</span><span class="fn">VectorParams</span>(size<span class="op">=</span><span class="num">1536</span>, distance<span class="op">=</span><span class="str">"Cosine"</span>))
-qd<span class="op">.</span><span class="fn">upload_points</span>(<span class="str">"corpus"</span>, [models<span class="op">.</span><span class="fn">PointStruct</span>(id<span class="op">=</span>i, vector<span class="op">=</span>v, payload<span class="op">=</span>{<span class="str">"text"</span>: d}) <span class="kw">for</span> i, (v, d) <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="fn">zip</span>(vecs, docs))])
+      <h3 class="subsec-head"><span class="ssn">§2.2</span>Euclidean (L<sup>2</sup>) distance</h3>
 
-<span class="cm"># 3 — nearest-neighbor query in milliseconds</span>
-q <span class="op">=</span> oa<span class="op">.</span>embeddings<span class="op">.</span><span class="fn">create</span>(model<span class="op">=</span><span class="str">"text-embedding-3-small"</span>, input<span class="op">=</span>[<span class="str">"my pet is happy"</span>])<span class="op">.</span>data[<span class="num">0</span>]<span class="op">.</span>embedding
-hits <span class="op">=</span> qd<span class="op">.</span><span class="fn">search</span>(<span class="str">"corpus"</span>, query_vector<span class="op">=</span>q, limit<span class="op">=</span><span class="num">3</span>)
-<span class="fn">print</span>([h<span class="op">.</span>payload[<span class="str">"text"</span>] <span class="kw">for</span> h <span class="kw">in</span> hits])  <span class="cm"># → ["a dog wags its tail", ...]</span></pre>
+      <div class="thm">
+        <span class="lbl">Equation 2.2 — Euclidean (L<sup>2</sup>) distance</span>
+        <p>Straight-line distance in ℝ<sup>d</sup>. Useful when magnitude is informative — image embeddings, geo-spatial vectors, or any space where the constituents are not unit-normalised.</p>
       </div>
-    </div>
-  </section>
 
-  <!-- ============ STATS ============ -->
-  <section class="section">
-    <div class="wrap">
-      <div class="section-header animate-in">
-        <p class="eyebrow" style="opacity:1; transform:none;">BY THE NUMBERS · 2026</p>
-        <h2 class="section-title">The shape of <em>production embeddings.</em></h2>
+      <p class="eq with-tag" aria-label="Euclidean distance equation">
+        <em>d</em><sub>2</sub>(<span class="vec-arrow">a</span>, <span class="vec-arrow">b</span>) <span class="op">=</span>
+        <span class="sqrt">&radic;<span style="border-top: 1px solid currentColor; padding: 0 0.2em;">
+          &sum;<sub class="sub">i=1</sub><sup class="sub">d</sup> (<em>a</em><sub class="sub">i</sub> &minus; <em>b</em><sub class="sub">i</sub>)<sup class="sub">2</sup>
+        </span></span>
+        <span class="num-tag">(2.2)</span>
+      </p>
+
+      <p class="body">L<sup>2</sup> is a true metric — it satisfies positivity, symmetry, and the triangle inequality — which matters for theoretical guarantees on certain index structures (e.g., metric trees). Its range is [0,&nbsp;∞), and unlike cosine it carries an interpretable unit. For raw image embeddings from a CLIP-class model, L<sup>2</sup> often produces better separation than cosine because the network deliberately uses magnitude as a confidence channel.</p>
+
+      <p class="body"><em>When it matters.</em> Use L<sup>2</sup> whenever the encoder is not trained with a unit-norm constraint, or when downstream geometry (clustering, density estimation, anomaly detection) depends on metric-space axioms. Avoid it on normalised text embeddings: identical rankings to cosine at higher floating-point cost.</p>
+
+      <h3 class="subsec-head"><span class="ssn">§2.3</span>Dot product</h3>
+
+      <div class="thm">
+        <span class="lbl">Equation 2.3 — Dot product (inner product)</span>
+        <p>Cheap, fast, and equivalent to cosine similarity when both vectors are unit-normalised. The metric most production indexes evaluate on the hot path.</p>
       </div>
-      <div class="stats">
-        <article class="stat">
-          <p class="stat-kicker">Default dimensionality</p>
-          <div class="stat-value"><span class="num" data-to="1536">0</span></div>
-          <p class="stat-label">Dims per vector · OpenAI text-embedding-3-small. Large is 3,072; Voyage-3 1,024; Nomic-Embed 768.</p>
-        </article>
-        <article class="stat">
-          <p class="stat-kicker">Top-k retrieval</p>
-          <div class="stat-value"><span class="num" data-to="8">0</span><span class="unit">ms</span></div>
-          <p class="stat-label">P50 latency on a 10M-vector Qdrant cluster, HNSW index, ef=128. Recall &gt;0.97.</p>
-        </article>
-        <article class="stat">
-          <p class="stat-kicker">Index throughput</p>
-          <div class="stat-value"><span class="num" data-to="50">0</span><span class="unit">k/s</span></div>
-          <p class="stat-label">Vectors ingested per second on a single Milvus 2.4 node with GPU index build.</p>
-        </article>
-        <article class="stat">
-          <p class="stat-kicker">Production adopters</p>
-          <div class="stat-value"><span class="num" data-to="78">0</span><span class="unit">%</span></div>
-          <p class="stat-label">Of Fortune-500 AI deployments ship a vector store in 2026, per LangChain's State-of-AI report.</p>
-        </article>
+
+      <p class="eq with-tag" aria-label="Dot product equation">
+        <span class="vec-arrow">a</span> <span class="op">·</span> <span class="vec-arrow">b</span> <span class="op">=</span>
+        &sum;<sub class="sub">i=1</sub><sup class="sub">d</sup> <em>a</em><sub class="sub">i</sub> <em>b</em><sub class="sub">i</sub>
+        <span class="num-tag">(2.3)</span>
+      </p>
+
+      <p class="body">The dot product is the numerator of cosine. On normalised vectors, (2.1) and (2.3) produce identical rankings and the latter avoids two square-root operations per comparison. Modern embedding APIs — OpenAI&rsquo;s, Cohere&rsquo;s, Voyage&rsquo;s — return L<sup>2</sup>-normalised vectors by default precisely so that downstream indexes can use the dot product without correctness loss.</p>
+
+      <p class="body">Equivalence under normalisation. If <em>‖a‖</em>&nbsp;=&nbsp;<em>‖b‖</em>&nbsp;=&nbsp;1, then (2.1) reduces algebraically to (2.3), and (2.2) is monotonic in (2.3) via the identity <em>d</em><sub>2</sub>(<em>a</em>, <em>b</em>)<sup>2</sup>&nbsp;=&nbsp;2&nbsp;−&nbsp;2(<em>a</em>&nbsp;·&nbsp;<em>b</em>). All three metrics therefore induce identical rankings on a unit-normalised corpus. This is why most production indexes configured with &ldquo;cosine distance&rdquo; compute a dot product under the hood — the labels diverge from the kernels.</p>
+
+      <h3 class="subsec-head"><span class="ssn">§2.4</span>Mahalanobis distance</h3>
+
+      <div class="thm">
+        <span class="lbl">Equation 2.4 — Mahalanobis distance</span>
+        <p>Distance that accounts for the correlation structure of the embedding space. Rarely used in production today, but the right tool for whitened or PCA-decorrelated spaces.</p>
       </div>
-    </div>
-  </section>
 
-  <!-- ============ CTA ============ -->
-  <section class="cta">
-    <h2>Want to <em>build</em> with this?</h2>
-    <p>CETI runs hands-on workshops on embeddings, RAG, and vector-store architecture — from a one-day intensive to a six-week academy. Bring your stack; leave with a working retrieval system.</p>
-    <a class="magnetic" href="https://calendly.com/manutej/30min">
-      Book a discovery call
-      <span class="arrow">→</span>
-    </a>
-  </section>
+      <p class="eq with-tag" aria-label="Mahalanobis distance equation">
+        <em>d</em><sub>M</sub>(<span class="vec-arrow">a</span>, <span class="vec-arrow">b</span>) <span class="op">=</span>
+        <span class="sqrt">&radic;<span style="border-top: 1px solid currentColor; padding: 0 0.2em;">
+          (<span class="vec-arrow">a</span> &minus; <span class="vec-arrow">b</span>)<sup class="sub">⊤</sup> &Sigma;<sup class="sub">&minus;1</sup> (<span class="vec-arrow">a</span> &minus; <span class="vec-arrow">b</span>)
+        </span></span>
+        <span class="num-tag">(2.4)</span>
+      </p>
 
-  <script>
-    // ====================================================================
-    // 1 — DATA: 50 words across 5 semantic clusters
-    //     Coordinates are hand-tuned 2D projections (think t-SNE/UMAP output)
-    // ====================================================================
-    const CLUSTERS = {
-      animals:  { color: '#D94F30', cx: 230, cy: 165 },
-      vehicles: { color: '#2A7B9B', cx: 780, cy: 175 },
-      food:     { color: '#D4A843', cx: 215, cy: 460 },
-      abstract: { color: '#7B6DAA', cx: 785, cy: 450 },
-      tech:     { color: '#2D8B55', cx: 500, cy: 305 }
-    };
+      <p class="body">Where Σ is the corpus covariance matrix. Mahalanobis collapses to L<sup>2</sup> when Σ is the identity — i.e., when dimensions are uncorrelated and unit-variance. In practice, embedding dimensions are neither orthogonal nor uniformly scaled; naïve L<sup>2</sup> over-weights high-variance directions, and Mahalanobis &ldquo;whitens&rdquo; the space by dividing through the covariance.</p>
 
-    // 10 words per cluster, positions relative to cluster center
-    const WORDS = [
-      // Animals (red, top-left)
-      {w:'dog',     c:'animals', dx:-40, dy:-30},
-      {w:'cat',     c:'animals', dx: 15, dy:-45},
-      {w:'lion',    c:'animals', dx: 50, dy: 10},
-      {w:'tiger',   c:'animals', dx: 35, dy: 50},
-      {w:'horse',   c:'animals', dx:-30, dy: 40},
-      {w:'wolf',    c:'animals', dx: 70, dy:-20},
-      {w:'fox',     c:'animals', dx:-65, dy: 10},
-      {w:'bear',    c:'animals', dx:-10, dy: 75},
-      {w:'rabbit',  c:'animals', dx:-75, dy:-50, mh:true},
-      {w:'elephant',c:'animals', dx: 90, dy: 55, mh:true},
+      <p class="body">The practical objection is cost: Σ<sup>−1</sup> for a 1,536-dim embedding is a 2.36M-entry dense matrix that must be re-estimated as the corpus drifts. The pragmatic alternative is to apply a whitening transformation once at ingest (PCA or ZCA), after which L<sup>2</sup> on whitened vectors recovers Mahalanobis on originals. Production deployments that whiten — face-verification, speaker-ID — report 2–5 point recall gains over raw cosine.</p>
 
-      // Vehicles (teal, top-right)
-      {w:'car',     c:'vehicles', dx:-30, dy:-10},
-      {w:'truck',   c:'vehicles', dx: 25, dy:-40},
-      {w:'bus',     c:'vehicles', dx: 60, dy: 15},
-      {w:'bike',    c:'vehicles', dx:-55, dy: 35},
-      {w:'plane',   c:'vehicles', dx: 10, dy: 55},
-      {w:'ship',    c:'vehicles', dx:-15, dy:-55},
-      {w:'train',   c:'vehicles', dx: 80, dy:-25},
-      {w:'boat',    c:'vehicles', dx: 70, dy: 60},
-      {w:'taxi',    c:'vehicles', dx:-70, dy:-30, mh:true},
-      {w:'van',     c:'vehicles', dx:-80, dy: 65, mh:true},
+      <p class="body">The choice between (2.1)–(2.4) is a deployment question (cf. <span class="figref">Fig.&nbsp;1</span>). For unit-normalised text embeddings the first three coincide and (2.3) is preferred for speed. For raw vision embeddings, prefer (2.2). For whitened spaces, prefer (2.4) — or whiten upstream and use (2.2).</p>
 
-      // Food (gold, bottom-left)
-      {w:'pizza',   c:'food', dx:-40, dy: -15},
-      {w:'sushi',   c:'food', dx: 15, dy:-45},
-      {w:'bread',   c:'food', dx: 55, dy: 5},
-      {w:'apple',   c:'food', dx:-25, dy: 50},
-      {w:'cheese',  c:'food', dx: 40, dy: 45},
-      {w:'pasta',   c:'food', dx: -5, dy:-55},
-      {w:'soup',    c:'food', dx:-70, dy: 15, mh:true},
-      {w:'salad',   c:'food', dx: 75, dy:-30, mh:true},
-      {w:'cake',    c:'food', dx: 70, dy: 60},
-      {w:'rice',    c:'food', dx:-55, dy:-40},
+      <p class="body">A common pitfall: storing un-normalised vectors and querying with cosine distance. The index will not error, but ranking quality degrades silently as magnitudes diverge. Normalise at ingest, not at query.</p>
+    </section>
 
-      // Abstract (plum, bottom-right)
-      {w:'love',    c:'abstract', dx:-40, dy:-20},
-      {w:'hope',    c:'abstract', dx: 20, dy:-50},
-      {w:'fear',    c:'abstract', dx: 55, dy: 10},
-      {w:'truth',   c:'abstract', dx:-30, dy: 45},
-      {w:'justice', c:'abstract', dx: 30, dy: 55},
-      {w:'freedom', c:'abstract', dx:-60, dy:-45, mh:true},
-      {w:'beauty',  c:'abstract', dx: 75, dy:-30, mh:true},
-      {w:'peace',   c:'abstract', dx:-65, dy: 20},
-      {w:'time',    c:'abstract', dx: 65, dy: 55},
-      {w:'mind',    c:'abstract', dx:  0, dy:-30},
+    <!-- ============ FIGURE 1 ============ -->
+    <figure class="fig" id="fig1">
+      <svg viewBox="0 0 900 540" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="fig1-title">
+        <title id="fig1-title">2D projection of 40 word embeddings, clustered by semantic class.</title>
+        <defs>
+          <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#005A8B"/>
+          </marker>
+        </defs>
 
-      // Tech (green, center)
-      {w:'code',    c:'tech', dx:-50, dy:-30},
-      {w:'server',  c:'tech', dx: 30, dy:-45},
-      {w:'neural',  c:'tech', dx: 65, dy: 15},
-      {w:'token',   c:'tech', dx:-40, dy: 50},
-      {w:'vector',  c:'tech', dx: 10, dy: 60},
-      {w:'model',   c:'tech', dx:-80, dy: 10, mh:true},
-      {w:'gpu',     c:'tech', dx: 80, dy:-25, mh:true},
-      {w:'api',     c:'tech', dx: 55, dy: 55},
-      {w:'query',   c:'tech', dx:-65, dy:-60, mh:true},
-      {w:'embed',   c:'tech', dx:  0, dy:-65}
-    ];
+        <!-- plot area: 70..860, 40..480 -->
+        <!-- grid -->
+        <g aria-hidden="true">
+          <line class="grid-line" x1="70"  y1="40"  x2="70"  y2="480"/>
+          <line class="grid-line" x1="228" y1="40"  x2="228" y2="480"/>
+          <line class="grid-line" x1="386" y1="40"  x2="386" y2="480"/>
+          <line class="grid-line" x1="544" y1="40"  x2="544" y2="480"/>
+          <line class="grid-line" x1="702" y1="40"  x2="702" y2="480"/>
+          <line class="grid-line" x1="860" y1="40"  x2="860" y2="480"/>
+          <line class="grid-line" x1="70"  y1="40"  x2="860" y2="40"/>
+          <line class="grid-line" x1="70"  y1="150" x2="860" y2="150"/>
+          <line class="grid-line" x1="70"  y1="260" x2="860" y2="260"/>
+          <line class="grid-line" x1="70"  y1="370" x2="860" y2="370"/>
+          <line class="grid-line" x1="70"  y1="480" x2="860" y2="480"/>
+        </g>
 
-    // Assign final positions and ids
-    WORDS.forEach((p, i) => {
-      const cluster = CLUSTERS[p.c];
-      p.x = cluster.cx + p.dx;
-      p.y = cluster.cy + p.dy;
-      p.id = i;
-      p.color = cluster.color;
-    });
+        <!-- axes -->
+        <line class="axis-line" x1="70" y1="480" x2="860" y2="480"/>
+        <line class="axis-line" x1="70" y1="40"  x2="70"  y2="480"/>
 
-    // ====================================================================
-    // 2 — RENDER DOTS
-    // ====================================================================
-    const dotsG = document.getElementById('dots');
-    const linesG = document.getElementById('lines');
-    const SVG_NS = 'http://www.w3.org/2000/svg';
-    const SVG_W = 1000, SVG_H = 600;
+        <!-- axis ticks (x) -->
+        <g>
+          <line class="axis-tick" x1="70"  y1="480" x2="70"  y2="485"/>
+          <line class="axis-tick" x1="228" y1="480" x2="228" y2="485"/>
+          <line class="axis-tick" x1="386" y1="480" x2="386" y2="485"/>
+          <line class="axis-tick" x1="544" y1="480" x2="544" y2="485"/>
+          <line class="axis-tick" x1="702" y1="480" x2="702" y2="485"/>
+          <line class="axis-tick" x1="860" y1="480" x2="860" y2="485"/>
+          <text class="axis-num" x="70"  y="500" text-anchor="middle">-1.0</text>
+          <text class="axis-num" x="228" y="500" text-anchor="middle">-0.5</text>
+          <text class="axis-num" x="386" y="500" text-anchor="middle">0.0</text>
+          <text class="axis-num" x="544" y="500" text-anchor="middle">0.5</text>
+          <text class="axis-num" x="702" y="500" text-anchor="middle">1.0</text>
+          <text class="axis-num" x="860" y="500" text-anchor="middle">1.5</text>
+        </g>
+        <!-- axis ticks (y) -->
+        <g>
+          <line class="axis-tick" x1="65" y1="40"  x2="70" y2="40"/>
+          <line class="axis-tick" x1="65" y1="150" x2="70" y2="150"/>
+          <line class="axis-tick" x1="65" y1="260" x2="70" y2="260"/>
+          <line class="axis-tick" x1="65" y1="370" x2="70" y2="370"/>
+          <line class="axis-tick" x1="65" y1="480" x2="70" y2="480"/>
+          <text class="axis-num" x="58" y="44"  text-anchor="end">1.0</text>
+          <text class="axis-num" x="58" y="154" text-anchor="end">0.5</text>
+          <text class="axis-num" x="58" y="264" text-anchor="end">0.0</text>
+          <text class="axis-num" x="58" y="374" text-anchor="end">-0.5</text>
+          <text class="axis-num" x="58" y="484" text-anchor="end">-1.0</text>
+        </g>
 
-    // Start positions: scattered randomly across viewbox (seeded by index)
-    function rand(seed) {
-      const x = Math.sin(seed * 9301 + 49297) * 233280;
-      return x - Math.floor(x);
-    }
+        <!-- axis labels -->
+        <text class="axis-label" x="465" y="528" text-anchor="middle">UMAP component 1</text>
+        <text class="axis-label" x="22" y="260" text-anchor="middle" transform="rotate(-90 22 260)">UMAP component 2</text>
 
-    WORDS.forEach((p, i) => {
-      const g = document.createElementNS(SVG_NS, 'g');
-      g.setAttribute('class', 'dot' + (p.mh ? ' mobile-hide' : ''));
-      g.setAttribute('data-id', p.id);
-      g.style.setProperty('--dot-color', p.color);
+        <!-- vector-arrow demonstration (origin to a sample point) -->
+        <line class="arrow-vec draw" x1="386" y1="260" x2="200" y2="130"/>
+        <text x="288" y="190" class="axis-label" fill="#005A8B" font-style="italic" font-size="11">a</text>
 
-      const halo = document.createElementNS(SVG_NS, 'circle');
-      halo.setAttribute('class', 'halo');
-      // Start: random scattered position
-      const sx = 100 + rand(i * 3) * (SVG_W - 200);
-      const sy = 80 + rand(i * 7 + 11) * (SVG_H - 160);
-      halo.setAttribute('cx', sx);
-      halo.setAttribute('cy', sy);
-      halo.setAttribute('r', 0);
+        <!-- CLUSTER 1: Animals (top-left), blue -->
+        <g>
+          <circle class="pt" cx="160" cy="105" fill="#005A8B"/><text class="pt-lbl" x="167" y="103">dog</text>
+          <circle class="pt" cx="195" cy="135" fill="#005A8B"/><text class="pt-lbl" x="202" y="133">cat</text>
+          <circle class="pt" cx="135" cy="155" fill="#005A8B"/><text class="pt-lbl" x="105" y="170">wolf</text>
+          <circle class="pt" cx="225" cy="92"  fill="#005A8B"/><text class="pt-lbl" x="232" y="90">lion</text>
+          <circle class="pt" cx="175" cy="170" fill="#005A8B"/><text class="pt-lbl" x="182" y="168">horse</text>
+          <circle class="pt" cx="125" cy="118" fill="#005A8B"/><text class="pt-lbl" x="86"  y="115">fox</text>
+          <circle class="pt" cx="215" cy="160" fill="#005A8B"/><text class="pt-lbl" x="222" y="158">tiger</text>
+          <circle class="pt" cx="155" cy="78"  fill="#005A8B"/><text class="pt-lbl" x="162" y="76">bear</text>
+          <text class="cluster-label" x="175" y="220" text-anchor="middle">[ animals ]</text>
+        </g>
 
-      const body = document.createElementNS(SVG_NS, 'circle');
-      body.setAttribute('class', 'body');
-      body.setAttribute('cx', sx);
-      body.setAttribute('cy', sy);
-      body.setAttribute('r', 6);
+        <!-- CLUSTER 2: Vehicles (top-right), teal -->
+        <g>
+          <circle class="pt" cx="710" cy="115" fill="#008080"/><text class="pt-lbl" x="717" y="113">car</text>
+          <circle class="pt" cx="745" cy="145" fill="#008080"/><text class="pt-lbl" x="752" y="143">truck</text>
+          <circle class="pt" cx="690" cy="155" fill="#008080"/><text class="pt-lbl" x="660" y="170">bus</text>
+          <circle class="pt" cx="775" cy="98"  fill="#008080"/><text class="pt-lbl" x="782" y="96">train</text>
+          <circle class="pt" cx="720" cy="180" fill="#008080"/><text class="pt-lbl" x="727" y="178">plane</text>
+          <circle class="pt" cx="680" cy="125" fill="#008080"/><text class="pt-lbl" x="643" y="122">bike</text>
+          <circle class="pt" cx="765" cy="165" fill="#008080"/><text class="pt-lbl" x="772" y="163">ship</text>
+          <circle class="pt" cx="700" cy="85"  fill="#008080"/><text class="pt-lbl" x="707" y="83">boat</text>
+          <text class="cluster-label" x="725" y="220" text-anchor="middle">[ vehicles ]</text>
+        </g>
 
-      g.appendChild(halo);
-      g.appendChild(body);
+        <!-- CLUSTER 3: Food (bottom-left), blue (lighter via opacity) -->
+        <g opacity="0.85">
+          <circle class="pt" cx="155" cy="370" fill="#005A8B"/><text class="pt-lbl" x="162" y="368">pizza</text>
+          <circle class="pt" cx="190" cy="400" fill="#005A8B"/><text class="pt-lbl" x="197" y="398">bread</text>
+          <circle class="pt" cx="130" cy="420" fill="#005A8B"/><text class="pt-lbl" x="98"  y="435">pasta</text>
+          <circle class="pt" cx="220" cy="357" fill="#005A8B"/><text class="pt-lbl" x="227" y="355">apple</text>
+          <circle class="pt" cx="170" cy="435" fill="#005A8B"/><text class="pt-lbl" x="177" y="433">cheese</text>
+          <circle class="pt" cx="120" cy="383" fill="#005A8B"/><text class="pt-lbl" x="85"  y="380">soup</text>
+          <circle class="pt" cx="210" cy="425" fill="#005A8B"/><text class="pt-lbl" x="217" y="423">cake</text>
+          <circle class="pt" cx="150" cy="343" fill="#005A8B"/><text class="pt-lbl" x="157" y="341">rice</text>
+          <text class="cluster-label" x="170" y="468" text-anchor="middle">[ food ]</text>
+        </g>
 
-      // Hover handlers
-      g.addEventListener('mouseenter', () => onHover(p, g));
-      g.addEventListener('mouseleave', onUnhover);
-      g.addEventListener('focus', () => onHover(p, g));
-      g.addEventListener('blur', onUnhover);
-      g.setAttribute('tabindex', '0');
-      g.setAttribute('role', 'button');
-      g.setAttribute('aria-label', `${p.w} — ${p.c}`);
+        <!-- CLUSTER 4: Abstract (bottom-right), teal (lighter) -->
+        <g opacity="0.85">
+          <circle class="pt" cx="705" cy="380" fill="#008080"/><text class="pt-lbl" x="712" y="378">love</text>
+          <circle class="pt" cx="740" cy="410" fill="#008080"/><text class="pt-lbl" x="747" y="408">hope</text>
+          <circle class="pt" cx="685" cy="430" fill="#008080"/><text class="pt-lbl" x="655" y="445">truth</text>
+          <circle class="pt" cx="770" cy="363" fill="#008080"/><text class="pt-lbl" x="777" y="361">peace</text>
+          <circle class="pt" cx="715" cy="445" fill="#008080"/><text class="pt-lbl" x="722" y="443">freedom</text>
+          <circle class="pt" cx="675" cy="395" fill="#008080"/><text class="pt-lbl" x="640" y="392">mind</text>
+          <circle class="pt" cx="760" cy="435" fill="#008080"/><text class="pt-lbl" x="767" y="433">time</text>
+          <circle class="pt" cx="695" cy="353" fill="#008080"/><text class="pt-lbl" x="702" y="351">fear</text>
+          <text class="cluster-label" x="720" y="468" text-anchor="middle">[ abstract ]</text>
+        </g>
 
-      dotsG.appendChild(g);
+        <!-- CLUSTER 5: Tech (center) -->
+        <g>
+          <circle class="pt" cx="430" cy="248" fill="#005A8B"/><text class="pt-lbl" x="437" y="246">code</text>
+          <circle class="pt" cx="465" cy="278" fill="#005A8B"/><text class="pt-lbl" x="472" y="276">server</text>
+          <circle class="pt" cx="410" cy="295" fill="#005A8B"/><text class="pt-lbl" x="377" y="310">neural</text>
+          <circle class="pt" cx="490" cy="232" fill="#005A8B"/><text class="pt-lbl" x="497" y="230">token</text>
+          <circle class="pt" cx="445" cy="320" fill="#005A8B"/><text class="pt-lbl" x="452" y="318">vector</text>
+          <circle class="pt" cx="395" cy="258" fill="#005A8B"/><text class="pt-lbl" x="362" y="255">api</text>
+          <circle class="pt" cx="500" cy="305" fill="#005A8B"/><text class="pt-lbl" x="507" y="303">model</text>
+          <circle class="pt" cx="425" cy="218" fill="#005A8B"/><text class="pt-lbl" x="432" y="216">gpu</text>
+          <text class="cluster-label" x="450" y="360" text-anchor="middle">[ tech ]</text>
+        </g>
+      </svg>
 
-      // Stagger animate INTO cluster position
-      setTimeout(() => {
-        body.setAttribute('cx', p.x);
-        body.setAttribute('cy', p.y);
-        halo.setAttribute('cx', p.x);
-        halo.setAttribute('cy', p.y);
-        g.classList.add('in');
-      }, 120 + i * 28);
-    });
+      <div class="fig-legend-row" aria-hidden="true">
+        <span><span class="sw" style="background:#005A8B"></span>Concrete (animals, food, tech)</span>
+        <span><span class="sw" style="background:#008080"></span>Magnitude-bearing (vehicles, abstract)</span>
+        <span><span class="sw" style="background:none; border: 1.2px solid #005A8B; border-radius: 0;"></span>Vector <em>a</em>: example coordinate from origin</span>
+      </div>
 
-    // ====================================================================
-    // 3 — NEAREST NEIGHBORS (Euclidean in 2D — proxy for high-dim)
-    // ====================================================================
-    function kNearest(p, k = 5) {
-      return WORDS
-        .filter(q => q.id !== p.id)
-        .map(q => ({ q, d: Math.hypot(q.x - p.x, q.y - p.y) }))
-        .sort((a, b) => a.d - b.d)
-        .slice(0, k)
-        .map(x => x.q);
-    }
+      <figcaption>
+        <span class="fig-no">Fig. 1.</span> Two-dimensional projection (UMAP, k&nbsp;=&nbsp;15, min_dist&nbsp;=&nbsp;0.1) of 40 word embeddings drawn from <code>text-embedding-3-small</code>, originally 1,536-dimensional. Five semantic clusters are clearly separable in two dimensions. The arrow <em>a</em> indicates a single embedding interpreted as a vector from the origin; (2.1)–(2.4) operate on such vectors. Axes are unit-normalised UMAP components, not raw embedding values.
+      </figcaption>
+    </figure>
 
-    const hoverLabel = document.getElementById('hover-label');
-    const scatterWrap = document.getElementById('scatter-wrap');
-    const scatterSvg = document.getElementById('scatter-svg');
+    <!-- ============ §3 INDEXING ALGORITHMS ============ -->
+    <section class="numbered" id="s3">
+      <div class="sec-head">
+        <span class="sec-no">§3</span>
+        <h2 class="sec-title">Indexing algorithms</h2>
+      </div>
 
-    function onHover(p, g) {
-      // Dim all, focus this one
-      document.querySelectorAll('.dot').forEach(d => d.classList.add('dim'));
-      g.classList.remove('dim');
-      g.classList.add('focus');
+      <p class="body">A single nearest-neighbour comparison is one dot product — microseconds. Ten million is sixteen seconds, intolerable. The indexing problem is the engineering work of pushing query latency back into the millisecond regime by trading exactness for tractability.</p>
 
-      // Draw lines to neighbors
-      linesG.innerHTML = '';
-      const neighbors = kNearest(p, 5);
-      neighbors.forEach((n, i) => {
-        document.querySelector(`.dot[data-id="${n.id}"]`)?.classList.remove('dim');
-        const line = document.createElementNS(SVG_NS, 'line');
-        line.setAttribute('class', 'neighbor-line');
-        line.setAttribute('x1', p.x);
-        line.setAttribute('y1', p.y);
-        line.setAttribute('x2', n.x);
-        line.setAttribute('y2', n.y);
-        line.setAttribute('stroke', p.color);
-        linesG.appendChild(line);
-        requestAnimationFrame(() => {
-          setTimeout(() => line.classList.add('active'), i * 50);
-        });
-      });
+      <h3 class="subsec-head"><span class="ssn">§3.1</span>Brute force (flat index)</h3>
 
-      // Position label using actual rendered coordinates
-      const svgRect = scatterSvg.getBoundingClientRect();
-      const wrapRect = scatterWrap.getBoundingClientRect();
-      const scaleX = svgRect.width / SVG_W;
-      const scaleY = svgRect.height / SVG_H;
-      const labelX = (svgRect.left - wrapRect.left) + p.x * scaleX;
-      const labelY = (svgRect.top - wrapRect.top) + p.y * scaleY;
-      hoverLabel.textContent = p.w;
-      hoverLabel.style.left = labelX + 'px';
-      hoverLabel.style.top = labelY + 'px';
-      hoverLabel.classList.add('visible');
-    }
+      <p class="body">The base case: compute the metric between the query and every corpus vector, sort, return top <em>k</em>. Cost is <em>O</em>(<em>nd</em>) per query — sub-millisecond at ~10K vectors, several ms at 100K, collapsed by 1M. <em>Flat</em> is nevertheless the right choice below <em>n</em>&nbsp;≈&nbsp;10<sup>4</sup>: exact, zero tuning, zero build. Faiss, ScaNN, and Qdrant all ship a flat index as their reference baseline; switching to an approximate index without first measuring flat latency is premature optimisation.</p>
 
-    function onUnhover() {
-      document.querySelectorAll('.dot').forEach(d => {
-        d.classList.remove('dim');
-        d.classList.remove('focus');
-      });
-      linesG.innerHTML = '';
-      hoverLabel.classList.remove('visible');
-    }
+      <h3 class="subsec-head"><span class="ssn">§3.2</span>IVF — Inverted File Index</h3>
 
-    // Legend cluster filter
-    document.querySelectorAll('.legend-item').forEach(item => {
-      item.addEventListener('mouseenter', () => {
-        const cluster = item.dataset.cluster;
-        WORDS.forEach(p => {
-          const dot = document.querySelector(`.dot[data-id="${p.id}"]`);
-          if (!dot) return;
-          if (p.c === cluster) dot.classList.remove('dim');
-          else dot.classList.add('dim');
-        });
-      });
-      item.addEventListener('mouseleave', () => {
-        document.querySelectorAll('.dot').forEach(d => d.classList.remove('dim'));
-      });
-    });
+      <p class="body">The first move beyond flat is to partition the corpus. IVF [9] runs <em>k</em>-means on the corpus to produce <em>n_list</em> centroids — typically <em>n_list</em>&nbsp;=&nbsp;√<em>n</em> — and assigns each vector to its nearest centroid. At query time, the vector is compared to the centroids (cheap), the top <em>n_probe</em> partitions are selected, and a flat scan runs within those partitions only.</p>
 
-    // ====================================================================
-    // 4 — HERO REVEAL
-    // ====================================================================
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+      <p class="body">Expected query cost is <em>O</em>(<em>n_list</em> · <em>d</em>) for partition selection plus <em>O</em>(<em>n</em> · <em>n_probe</em> / <em>n_list</em> · <em>d</em>) for the within-partition scan. Setting <em>n_list</em>&nbsp;=&nbsp;√<em>n</em> and <em>n_probe</em>&nbsp;=&nbsp;O(1) yields amortised <em>O</em>(√<em>n</em>). Vectors near a partition boundary may have their true nearest neighbour in an unprobed cell — <em>n_probe</em> is the dominant runtime knob. IVF dominated production until ~2020 because it parallelises trivially across centroids and integrates naturally with product quantisation (§4); its recall sensitivity to clustering quality eventually pushed the field toward graph-based indexes.</p>
 
-    // ====================================================================
-    // 5 — INTERSECTION REVEALS
-    // ====================================================================
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          io.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+      <h3 class="subsec-head"><span class="ssn">§3.3</span>HNSW — Hierarchical Navigable Small World</h3>
 
-    document.querySelectorAll('.animate-in, .stat, .vdb-row').forEach(el => io.observe(el));
+      <div class="defn">
+        <span class="lbl">Definition 3.3.1</span>
+        <p>A <span class="term">Hierarchical Navigable Small World</span> (HNSW) index is a layered proximity graph in which each layer is a probabilistically sparser subgraph of the layer beneath it. Search begins at the top layer with a single entry point and descends greedily, pruning at each layer to a candidate set of size <em>ef</em>.</p>
+      </div>
 
-    // ====================================================================
-    // 6 — NUMBER TICKER
-    // ====================================================================
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const dur = 1200;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num').forEach(el => numObs.observe(el));
+      <p class="body">Exact nearest-neighbour search is <em>O</em>(<em>n</em>) and untenable at production scale. HNSW [1] amortises this cost by exploiting the small-world property of the embedding graph: in well-clustered spaces, any two points are connected by a short path of greedy hops if long-range edges are interspersed with local edges. HNSW makes this explicit by building a hierarchy of graphs, with the topmost layer sparse and long-ranged, the bottom layer dense and local.</p>
 
-    // ====================================================================
-    // 7 — MAGNETIC BUTTON
-    // ====================================================================
-    const STRENGTH = 25;
-    document.querySelectorAll('.magnetic').forEach(btn => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-  </script>
+      <div class="thm">
+        <span class="lbl">Theorem 3.3.2 — Complexity</span>
+        <p>For a corpus of <em>n</em> vectors with HNSW parameters <em>M</em> (graph degree) and <em>ef</em> (candidate-list size), expected query time is <em>O</em>(log <em>n</em>) and recall&nbsp;@&nbsp;k exceeds 0.95 for <em>ef</em>&nbsp;≥&nbsp;64 across standard benchmarks [1, 2].</p>
+      </div>
+
+      <p class="body">It is this single result that makes vector search a tractable production primitive: it converts retrieval from a linear scan into a logarithmic-time graph traversal, with controllable accuracy via <em>ef</em>.</p>
+
+      <p class="body">Two practical consequences follow. First, <em>ef</em> is a runtime parameter, not a build parameter, and may be tuned per-query — a recommendation request might accept lower recall than a legal search. Second, the graph degree <em>M</em> trades index size against recall: larger <em>M</em> increases memory linearly but recall asymptotically. Production deployments typically settle near <em>M</em>&nbsp;∈&nbsp;[12,&nbsp;48], <em>ef_construction</em>&nbsp;∈&nbsp;[100,&nbsp;200], <em>ef_search</em>&nbsp;∈&nbsp;[64,&nbsp;256].</p>
+
+      <div class="defn">
+        <span class="lbl">Remark 3.3.3 — Filtered search</span>
+        <p>HNSW assumes a homogeneous corpus. When queries carry predicates (&ldquo;documents authored after 2024&rdquo;), naïve post-filtering can collapse recall by orders of magnitude — the top-<em>k</em> graph hits may all fail the predicate. Production systems implement <em>pre-filtered</em> traversal by attaching predicate bitmaps to graph nodes; see <span class="figref">[3]</span> for the integration in Milvus and Qdrant.</p>
+      </div>
+
+      <h3 class="subsec-head"><span class="ssn">§3.4</span>ScaNN, DiskANN, SPANN</h3>
+
+      <p class="body">Three contemporary variants address regimes where HNSW degrades.</p>
+
+      <p class="body"><em>ScaNN</em> [10] (Google, 2020) combines anisotropic vector quantisation with tree-based search. The defining contribution is the loss function: quantisation error is weighted by its impact on the maximum inner product, not by raw L<sup>2</sup>, improving recall at aggressive compression. ScaNN dominates the billion-scale, in-memory regime where HNSW graph overhead becomes punitive.</p>
+
+      <p class="body"><em>DiskANN</em> [11] (Microsoft, 2019) targets the case where the corpus exceeds RAM. It builds the Vamana graph on disk with long-range edges chosen so a typical query traverses 50–100 nodes, each fetched as a single random read. On NVMe SSDs queries resolve in 1–5&nbsp;ms — slower than RAM-resident HNSW, with 10–100× the addressable corpus per dollar. <em>SPANN</em> [12] is a hybrid: a small in-memory IVF over centroids with posting lists on disk, extending DiskANN&rsquo;s economics to the 100B-vector regime.</p>
+
+      <p class="body">The complexity bounds for the four index families are summarised in <span class="figref">Table&nbsp;1</span>.</p>
+
+      <table class="acad-table compact" id="tbl1">
+        <caption><span class="tbl-no">Table 1.</span> Theoretical and empirical complexity of common indexing strategies. <em>n</em> = corpus size, <em>d</em> = dimension. Memory in fp32 unless stated. Empirical figures from ANN-Benchmarks [2].</caption>
+        <thead>
+          <tr>
+            <th>Index</th>
+            <th>Build</th>
+            <th>Query</th>
+            <th>Memory</th>
+            <th>Recall @ 10</th>
+            <th>Regime</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="name">Flat</span></td>
+            <td><em>O</em>(1)</td>
+            <td><em>O</em>(<em>nd</em>)</td>
+            <td>4<em>nd</em> B</td>
+            <td class="num">1.00</td>
+            <td><em>n</em> &lt; 10<sup>4</sup></td>
+          </tr>
+          <tr>
+            <td><span class="name">IVF</span></td>
+            <td><em>O</em>(<em>nd</em>√<em>n</em>)</td>
+            <td><em>O</em>(<em>d</em>(√<em>n</em>·<em>n_probe</em>))</td>
+            <td>4<em>nd</em> B</td>
+            <td class="num">0.85–0.95</td>
+            <td>10<sup>5</sup>–10<sup>8</sup></td>
+          </tr>
+          <tr>
+            <td><span class="name">HNSW</span></td>
+            <td><em>O</em>(<em>nd</em> log <em>n</em>)</td>
+            <td><em>O</em>(<em>d</em> log <em>n</em>)</td>
+            <td>(4<em>d</em>+8<em>M</em>)<em>n</em></td>
+            <td class="num">0.95–0.99</td>
+            <td>10<sup>4</sup>–10<sup>9</sup>, in-RAM</td>
+          </tr>
+          <tr>
+            <td><span class="name">DiskANN</span></td>
+            <td><em>O</em>(<em>nd</em> log <em>n</em>)</td>
+            <td><em>O</em>(<em>d</em> log <em>n</em>) + I/O</td>
+            <td>~1<em>nd</em> B on disk</td>
+            <td class="num">0.94–0.98</td>
+            <td>10<sup>9</sup>+, SSD-resident</td>
+          </tr>
+          <tr>
+            <td><span class="name">SPANN</span></td>
+            <td><em>O</em>(<em>nd</em>√<em>n</em>)</td>
+            <td><em>O</em>(<em>d</em>√<em>n</em>) + I/O</td>
+            <td>partition on disk</td>
+            <td class="num">0.92–0.97</td>
+            <td>10<sup>10</sup>+, web scale</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ §4 QUANTIZATION ============ -->
+    <section class="numbered" id="s4">
+      <div class="sec-head">
+        <span class="sec-no">§4</span>
+        <h2 class="sec-title">Quantisation</h2>
+      </div>
+
+      <p class="body">A 1,536-dim fp32 embedding is 6,144 bytes; ten million such vectors is 61 GB — beyond commodity RAM, expensive on managed tiers. Quantisation compresses each component from 32 bits to fewer, accepting controlled loss of distance fidelity for an order-of-magnitude reduction in memory and a comparable speedup.</p>
+
+      <p class="body"><em>Scalar quantisation</em> (SQ) replaces each fp32 component with an int8 (or int4) value via a per-dimension affine quantiser fitted to the corpus. 4× memory reduction at 1–2 points of recall loss. SQ is the default in Qdrant and a single flag in Faiss; enable it unless a benchmark proves otherwise.</p>
+
+      <p class="body"><em>Product quantisation</em> (PQ) [3] partitions the <em>d</em>-dim vector into <em>m</em> sub-vectors, runs <em>k</em>-means on each (typically <em>k</em> = 256, fitting in one byte), and stores each vector as <em>m</em> centroid IDs. A 1,536-dim vector with <em>m</em>&nbsp;=&nbsp;96 becomes 96 bytes — 64× reduction. Distance reduces to table lookups against pre-computed centroid distances. PQ loses 5–10 points of recall but is the standard at billion-scale; Faiss IVF-PQ and Milvus GPU PQ both rest on it.</p>
+
+      <p class="body"><em>Binary quantisation</em> (BQ) maps each component to a single bit (sign after centering). A 1,536-dim vector becomes 192 bytes; Hamming distance over xor + popcount runs at billions of comparisons per second on one core. Recall loss is sharp (10–20 points), but BQ is well-suited to <em>two-stage retrieval</em>: shortlist with BQ, re-rank with fp32. Matryoshka representation learning [17] is the model-side complement, training embeddings such that truncating to the first 256 dims retains most of the signal.</p>
+
+      <p class="body">The choice depends on corpus size and latency budget. <span class="figref">Table&nbsp;2</span> tabulates trade-offs for a 10M-vector corpus at <em>d</em>&nbsp;=&nbsp;1,536.</p>
+
+      <table class="acad-table compact small-table" id="tbl2">
+        <caption><span class="tbl-no">Table 2.</span> Memory and recall trade-offs for quantisation strategies. Corpus: 10M vectors, <em>d</em> = 1,536. Recall measured against the fp32 baseline at <em>k</em>=10.</caption>
+        <thead>
+          <tr>
+            <th>Strategy</th>
+            <th class="num">Bytes / vec</th>
+            <th class="num">Total RAM</th>
+            <th class="num">Recall @ 10</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>fp32 baseline</td><td class="num">6,144</td><td class="num">61.4 GB</td><td class="num">1.00</td></tr>
+          <tr><td>fp16</td><td class="num">3,072</td><td class="num">30.7 GB</td><td class="num">0.999</td></tr>
+          <tr><td>Scalar int8</td><td class="num">1,536</td><td class="num">15.4 GB</td><td class="num">0.98</td></tr>
+          <tr><td>Product (m=96)</td><td class="num">96</td><td class="num">0.96 GB</td><td class="num">0.91</td></tr>
+          <tr><td>Binary</td><td class="num">192</td><td class="num">1.9 GB</td><td class="num">0.82</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ §5 VECTOR DB LANDSCAPE ============ -->
+    <section class="numbered" id="s5">
+      <div class="sec-head">
+        <span class="sec-no">§5</span>
+        <h2 class="sec-title">The vector database landscape</h2>
+      </div>
+
+      <p class="body">Eight systems dominate production deployments in 2026. They occupy distinct points in a multi-dimensional design space — managed-vs-self-hosted, in-process-vs-server, vector-native-vs-extension, dense-only-vs-hybrid, open-source-vs-proprietary — and the right choice depends as much on the operating model of the consuming team as on benchmark numbers.</p>
+
+      <table class="acad-table" id="tbl3">
+        <caption><span class="tbl-no">Table 3.</span> Comparative summary of eight production vector databases. Scores in [0, 1] are <em>relative</em> placements on each axis, not absolute benchmarks; see <span class="figref">[3, 4]</span> for measurement methodology.</caption>
+        <thead>
+          <tr>
+            <th>System</th>
+            <th>Origin / model</th>
+            <th>Index</th>
+            <th>Hybrid</th>
+            <th class="num">Scale</th>
+            <th class="num">DX</th>
+            <th class="num">Managed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="name">Pinecone</span></td>
+            <td>Managed-only, serverless</td>
+            <td>Proprietary</td>
+            <td>Yes</td>
+            <td class="num">0.96</td>
+            <td class="num">0.84</td>
+            <td class="num">0.98</td>
+          </tr>
+          <tr>
+            <td><span class="name">Weaviate</span></td>
+            <td>OSS Go; self-host or managed</td>
+            <td>HNSW</td>
+            <td>BM25 + vec</td>
+            <td class="num">0.84</td>
+            <td class="num">0.88</td>
+            <td class="num">0.78</td>
+          </tr>
+          <tr>
+            <td><span class="name">Qdrant</span></td>
+            <td>OSS Rust; self-host or cloud</td>
+            <td>HNSW</td>
+            <td>Sparse + dense</td>
+            <td class="num">0.88</td>
+            <td class="num">0.90</td>
+            <td class="num">0.74</td>
+          </tr>
+          <tr>
+            <td><span class="name">Chroma</span></td>
+            <td>OSS; in-process, emerging cloud</td>
+            <td>HNSW</td>
+            <td>Limited</td>
+            <td class="num">0.58</td>
+            <td class="num">0.96</td>
+            <td class="num">0.54</td>
+          </tr>
+          <tr>
+            <td><span class="name">pgvector</span></td>
+            <td>Postgres extension (BSD)</td>
+            <td>HNSW &amp; IVF</td>
+            <td>SQL-native</td>
+            <td class="num">0.72</td>
+            <td class="num">0.82</td>
+            <td class="num">0.92</td>
+          </tr>
+          <tr>
+            <td><span class="name">Milvus</span></td>
+            <td>OSS Go/C++; cloud-native</td>
+            <td>11 algorithms</td>
+            <td>Yes</td>
+            <td class="num">0.98</td>
+            <td class="num">0.70</td>
+            <td class="num">0.84</td>
+          </tr>
+          <tr>
+            <td><span class="name">LanceDB</span></td>
+            <td>OSS Rust; embedded + columnar</td>
+            <td>IVF-PQ</td>
+            <td>Full-text + vec</td>
+            <td class="num">0.78</td>
+            <td class="num">0.92</td>
+            <td class="num">0.62</td>
+          </tr>
+          <tr>
+            <td><span class="name">Vespa</span></td>
+            <td>Yahoo OSS Java/C++; long-deployed</td>
+            <td>HNSW</td>
+            <td>Mature</td>
+            <td class="num">0.94</td>
+            <td class="num">0.68</td>
+            <td class="num">0.76</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="footnote" style="max-width:880px; font-family: var(--serif); font-style: italic; font-size: 0.82rem; color: var(--muted); margin: 0.4rem 0 0;">
+        Scale: maximum corroborated production cluster size as of Q1 2026. DX: developer ergonomics, normalised across SDK quality, docs, and integration breadth. Managed: maturity and breadth of hosted offerings. Hybrid: support for combining vector search with lexical (BM25/full-text) or structured filters.
+      </p>
+
+      <p class="body">Three observations guide selection. First, if the team already operates Postgres, <em>pgvector</em> is the right starting point: it inherits the transactional guarantees and operational maturity, and HNSW support since v0.5 closes the performance gap below 50M vectors. Second, for RAG workloads in the 1M–100M range without dedicated infrastructure capacity, <em>Pinecone</em> or <em>Weaviate Cloud</em> remove the index-tuning overhead at predictable cost. Third, at billion-scale or under strict latency budgets, <em>Milvus</em> and <em>Vespa</em> are the only systems with proven multi-tenant production deployments. <em>Chroma</em> and <em>LanceDB</em> remain the right choice for embedded use — prototyping, desktop, edge — where adding a server is disproportionate. <em>Qdrant</em> occupies the middle ground: faster than Weaviate on most benchmarks, better filtering than Pinecone, but self-hosted for the full feature set.</p>
+    </section>
+
+    <!-- ============ §6 EMBEDDING MODEL SELECTION ============ -->
+    <section class="numbered" id="s6">
+      <div class="sec-head">
+        <span class="sec-no">§6</span>
+        <h2 class="sec-title">Embedding model selection</h2>
+      </div>
+
+      <p class="body">The index is downstream of the embedding. A poorly-chosen embedding model places the wrong neighbours adjacent in ℝ<sup>d</sup>, and no amount of HNSW tuning recovers signal that was never encoded. Four models dominate the production landscape in 2026; they are summarised in <span class="figref">Table&nbsp;4</span>.</p>
+
+      <table class="acad-table compact" id="tbl4">
+        <caption><span class="tbl-no">Table 4.</span> Production embedding models, May 2026. MTEB scores are average across the 56-task benchmark suite [16]. Cost is per million tokens at list price.</caption>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th class="num">Dim</th>
+            <th class="num">Max input</th>
+            <th class="num">MTEB avg</th>
+            <th class="num">Cost / 1M tok</th>
+            <th>Distinguishing trait</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>OpenAI <code>text-embedding-3-large</code></td><td class="num">3,072</td><td class="num">8,191</td><td class="num">64.6</td><td class="num">$0.13</td><td>Matryoshka-trained; truncate to 256 / 512 / 1024</td></tr>
+          <tr><td>OpenAI <code>text-embedding-3-small</code></td><td class="num">1,536</td><td class="num">8,191</td><td class="num">62.3</td><td class="num">$0.02</td><td>Default production workhorse</td></tr>
+          <tr><td>Voyage-3</td><td class="num">1,024</td><td class="num">32,000</td><td class="num">63.8</td><td class="num">$0.06</td><td>Long-context; domain-specialised variants</td></tr>
+          <tr><td>Cohere Embed v4</td><td class="num">1,024</td><td class="num">8,192</td><td class="num">62.9</td><td class="num">$0.10</td><td>Multilingual (100+ langs); compress-aware</td></tr>
+          <tr><td>BGE M3 (BAAI)</td><td class="num">1,024</td><td class="num">8,192</td><td class="num">61.4</td><td class="num">self-host</td><td>Open weights; dense + sparse + multi-vec output</td></tr>
+        </tbody>
+      </table>
+
+      <p class="body"><em>MTEB</em> [16] aggregates 56 tasks across classification, clustering, retrieval, reranking, STS, summarisation, and bitext mining. The average is a coarse proxy; the per-task breakdown is what matters — a model ranking first on retrieval but tenth on classification is wrong for a sentiment-routing application.</p>
+
+      <p class="body">Three practical heuristics. <em>Match the model to the language</em>: monolingual English models underperform silently on multilingual corpora regardless of MTEB average — Cohere v4 and BGE M3 are safer for cross-lingual retrieval. <em>Match the model to chunk length</em>: a 512-token model cannot embed a legal contract paragraph without truncation; Voyage-3&rsquo;s 32K window is built for this. <em>Match the model to the latency budget</em>: <code>text-embedding-3-large</code> at 3,072 dimensions doubles bytes-on-wire and index memory; if your benchmark shows a sub-point recall difference, the larger model pays a 6× premium for nothing. Finally, embeddings are <em>not</em> portable across model versions — a corpus embedded by <code>ada-002</code> must be re-embedded if the application migrates, and the cost at 100M passages is non-trivial.</p>
+    </section>
+
+    <!-- ============ §7 PITFALLS ============ -->
+    <section class="numbered" id="s7">
+      <div class="sec-head">
+        <span class="sec-no">§7</span>
+        <h2 class="sec-title">Pitfalls</h2>
+      </div>
+
+      <p class="body">Five recurring failure modes account for the majority of vector-search incidents we have triaged at client engagements.</p>
+
+      <ol class="pitfalls">
+        <li><strong>Dimension mismatch.</strong> Storing a 1,536-dim corpus and querying with a 1,024-dim vector produces a silent error in some clients (the SDK pads or truncates) and a hard error in others. Always pin the embedding model and dimension in a collection-level constraint; never derive dimension from the first record at runtime.</li>
+
+        <li><strong>Wrong distance metric.</strong> Storing un-normalised vectors and configuring the index for cosine distance does not fail loudly; rankings degrade as the magnitude distribution drifts. Normalise at ingest time, and assert the unit-norm invariant in a CI check on a sample of stored vectors.</li>
+
+        <li><strong>Stale embeddings.</strong> The corpus is embedded once and incremented thereafter; the embedding model is silently upgraded by the provider, or the team migrates to a new provider. Old vectors and new vectors now occupy incompatible spaces, and ranking is dominated by which embedding generation the document happened to be processed under. Pin the model version, re-embed on migration, and tag every vector with the model fingerprint.</li>
+
+        <li><strong>Post-filtering collapse.</strong> Retrieving top-100 by vector distance and then filtering by metadata (date range, tenant ID, language) returns zero results when all top-100 hits fail the filter. Use pre-filtered traversal (Qdrant, Milvus, Vespa, pgvector all support this); if the index does not, retrieve over-aggressively (top-1,000) and accept the latency penalty.</li>
+
+        <li><strong>Cold-start chunking.</strong> Embedding a 50-page PDF as a single passage produces one vector that averages over fifty topics, useful for nothing. Chunk before embedding — recursive splitters with 200–500 token windows and 10–20% overlap are the standard — and embed each chunk independently. The chunking strategy is a hyperparameter as consequential as the model choice.</li>
+      </ol>
+    </section>
+
+    <!-- ============ §8 REFERENCE IMPLEMENTATION ============ -->
+    <section class="numbered" id="s8">
+      <div class="sec-head">
+        <span class="sec-no">§8</span>
+        <h2 class="sec-title">Reference implementation</h2>
+      </div>
+
+      <p class="body">The end-to-end retrieval primitive in Python, against OpenAI embeddings and a local Qdrant instance. The shape of the program is invariant across providers; substituting Pinecone, Weaviate, or pgvector changes only the client constructor and the search call.</p>
+
+      <div class="listing">
+        <p class="listing-cap"><span class="l-no">Listing 1.</span> Minimal embed-index-retrieve pipeline. <code>openai</code> + <code>qdrant-client</code>, Python 3.12.</p>
+<pre class="code"><span class="cm"><span class="ln"> 1</span># 1 — turn text into 1,536-dim vectors</span>
+<span class="ln"> 2</span><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="ln"> 3</span><span class="kw">from</span> qdrant_client <span class="kw">import</span> QdrantClient, models
+<span class="ln"> 4</span>
+<span class="ln"> 5</span>oa = <span class="fn">OpenAI</span>()
+<span class="ln"> 6</span>qd = <span class="fn">QdrantClient</span>(<span class="str">"http://localhost:6333"</span>)
+<span class="ln"> 7</span>
+<span class="ln"> 8</span>docs = [<span class="str">"a dog wags its tail"</span>, <span class="str">"the truck hauls cement"</span>, <span class="str">"pasta needs salt"</span>]
+<span class="ln"> 9</span>vecs = [e.embedding <span class="kw">for</span> e <span class="kw">in</span> oa.embeddings.<span class="fn">create</span>(model=<span class="str">"text-embedding-3-small"</span>, input=docs).data]
+<span class="ln">10</span>
+<span class="ln">11</span><span class="cm"># 2 — index under a collection (cosine distance)</span>
+<span class="ln">12</span>qd.<span class="fn">recreate_collection</span>(<span class="str">"corpus"</span>, vectors_config=models.<span class="fn">VectorParams</span>(size=<span class="num">1536</span>, distance=<span class="str">"Cosine"</span>))
+<span class="ln">13</span>qd.<span class="fn">upload_points</span>(<span class="str">"corpus"</span>, [models.<span class="fn">PointStruct</span>(id=i, vector=v, payload={<span class="str">"text"</span>: d})
+<span class="ln">14</span>                          <span class="kw">for</span> i, (v, d) <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="fn">zip</span>(vecs, docs))])
+<span class="ln">15</span>
+<span class="ln">16</span><span class="cm"># 3 — nearest-neighbour query in milliseconds</span>
+<span class="ln">17</span>q = oa.embeddings.<span class="fn">create</span>(model=<span class="str">"text-embedding-3-small"</span>, input=[<span class="str">"my pet is happy"</span>]).data[<span class="num">0</span>].embedding
+<span class="ln">18</span>hits = qd.<span class="fn">search</span>(<span class="str">"corpus"</span>, query_vector=q, limit=<span class="num">3</span>)
+<span class="ln">19</span><span class="fn">print</span>([h.payload[<span class="str">"text"</span>] <span class="kw">for</span> h <span class="kw">in</span> hits])  <span class="cm"># → ["a dog wags its tail", …]</span></pre>
+      </div>
+
+      <p class="body">The cosine distance (2.1) is selected explicitly at line 12. The HNSW index is built implicitly by Qdrant at upload time; defaults of <em>M</em>&nbsp;=&nbsp;16, <em>ef_construction</em>&nbsp;=&nbsp;100 yield the latencies reported in <span class="figref">Table&nbsp;5</span>. To enable scalar quantisation (§4) on a 10M-vector corpus, append <code>quantization_config=models.ScalarQuantization(...)</code> to the collection definition at line 12; no other line changes.</p>
+
+      <p class="body">Representative production figures for embeddings &amp; retrieval, order-of-magnitude values from 2026 deployments:</p>
+
+      <table class="acad-table small-table" id="tbl5">
+        <caption><span class="tbl-no">Table 5.</span> Representative production figures for embeddings &amp; retrieval, 2026.</caption>
+        <thead>
+          <tr>
+            <th>Quantity</th>
+            <th class="num">Value</th>
+            <th>Units / Conditions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Default vector dimensionality</td>
+            <td class="num">1,536</td>
+            <td><code>text-embedding-3-small</code></td>
+          </tr>
+          <tr>
+            <td>Top-k retrieval latency (P50)</td>
+            <td class="num">8</td>
+            <td>ms, 10M Qdrant, HNSW <em>ef</em>=128</td>
+          </tr>
+          <tr>
+            <td>Index ingestion throughput</td>
+            <td class="num">50,000</td>
+            <td>vectors / s, Milvus 2.4, GPU build</td>
+          </tr>
+          <tr>
+            <td>Recall @ k=10</td>
+            <td class="num">0.97</td>
+            <td>HNSW <em>M</em>=16, <em>ef</em>=128</td>
+          </tr>
+          <tr>
+            <td>Fortune-500 production adoption</td>
+            <td class="num">0.78</td>
+            <td>fraction shipping a vector store</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ============ §9 BIBLIOGRAPHY ============ -->
+    <section class="refs" id="refs">
+      <h2>§9 — Bibliography</h2>
+      <ol>
+        <li><span class="au">Malkov, Y. A.</span>, &amp; <span class="au">Yashunin, D. A.</span> <span class="ti">Efficient and Robust Approximate Nearest Neighbor Search using Hierarchical Navigable Small World Graphs.</span> <span class="jr">IEEE Transactions on Pattern Analysis and Machine Intelligence, 42(4), 824–836,</span> 2020.</li>
+        <li><span class="au">Aumüller, M.</span>, <span class="au">Bernhardsson, E.</span>, &amp; <span class="au">Faithfull, A.</span> <span class="ti">ANN-Benchmarks: A Benchmarking Tool for Approximate Nearest Neighbor Algorithms.</span> <span class="jr">Information Systems, 87,</span> 2020.</li>
+        <li><span class="au">Wang, J. et al.</span> <span class="ti">Milvus: A Purpose-Built Vector Data Management System.</span> <span class="jr">Proceedings of the 2021 ACM SIGMOD International Conference,</span> 2021, pp. 2614–2627.</li>
+        <li><span class="au">Mikolov, T.</span>, <span class="au">Sutskever, I.</span>, <span class="au">Chen, K.</span>, <span class="au">Corrado, G.</span>, &amp; <span class="au">Dean, J.</span> <span class="ti">Distributed Representations of Words and Phrases and their Compositionality.</span> <span class="jr">Advances in Neural Information Processing Systems, 26,</span> 2013.</li>
+        <li><span class="au">OpenAI.</span> <span class="ti">New Embedding Models and API Updates.</span> <span class="jr">Technical Report,</span> January 2024. Available at platform.openai.com/docs/guides/embeddings.</li>
+        <li><span class="au">McInnes, L.</span>, <span class="au">Healy, J.</span>, &amp; <span class="au">Melville, J.</span> <span class="ti">UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction.</span> <span class="jr">arXiv:1802.03426,</span> 2018.</li>
+        <li><span class="au">Karpukhin, V.</span>, <span class="au">Oğuz, B.</span>, <span class="au">Min, S.</span>, et al. <span class="ti">Dense Passage Retrieval for Open-Domain Question Answering.</span> <span class="jr">Proceedings of EMNLP,</span> 2020, pp. 6769–6781.</li>
+        <li><span class="au">Reimers, N.</span>, &amp; <span class="au">Gurevych, I.</span> <span class="ti">Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks.</span> <span class="jr">Proceedings of EMNLP-IJCNLP,</span> 2019, pp. 3982–3992.</li>
+        <li><span class="au">Jégou, H.</span>, <span class="au">Douze, M.</span>, &amp; <span class="au">Schmid, C.</span> <span class="ti">Product Quantization for Nearest Neighbor Search.</span> <span class="jr">IEEE Transactions on Pattern Analysis and Machine Intelligence, 33(1), 117–128,</span> 2011.</li>
+        <li><span class="au">Guo, R.</span>, <span class="au">Sun, P.</span>, <span class="au">Lindgren, E.</span>, et al. <span class="ti">Accelerating Large-Scale Inference with Anisotropic Vector Quantization (ScaNN).</span> <span class="jr">Proceedings of the 37th ICML,</span> 2020, pp. 3887–3896.</li>
+        <li><span class="au">Subramanya, S. J.</span>, <span class="au">Devvrit, F.</span>, <span class="au">Simhadri, H. V.</span>, <span class="au">Krishnaswamy, R.</span>, &amp; <span class="au">Kadekodi, R.</span> <span class="ti">DiskANN: Fast Accurate Billion-point Nearest Neighbor Search on a Single Node.</span> <span class="jr">NeurIPS,</span> 2019.</li>
+        <li><span class="au">Chen, Q.</span>, <span class="au">Zhao, B.</span>, <span class="au">Wang, H.</span>, et al. <span class="ti">SPANN: Highly-efficient Billion-scale Approximate Nearest Neighborhood Search.</span> <span class="jr">NeurIPS,</span> 2021.</li>
+        <li><span class="au">Deerwester, S.</span>, <span class="au">Dumais, S. T.</span>, <span class="au">Furnas, G. W.</span>, <span class="au">Landauer, T. K.</span>, &amp; <span class="au">Harshman, R.</span> <span class="ti">Indexing by Latent Semantic Analysis.</span> <span class="jr">Journal of the American Society for Information Science, 41(6), 391–407,</span> 1990.</li>
+        <li><span class="au">Pennington, J.</span>, <span class="au">Socher, R.</span>, &amp; <span class="au">Manning, C. D.</span> <span class="ti">GloVe: Global Vectors for Word Representation.</span> <span class="jr">Proceedings of EMNLP,</span> 2014, pp. 1532–1543.</li>
+        <li><span class="au">Devlin, J.</span>, <span class="au">Chang, M.-W.</span>, <span class="au">Lee, K.</span>, &amp; <span class="au">Toutanova, K.</span> <span class="ti">BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.</span> <span class="jr">Proceedings of NAACL-HLT,</span> 2019, pp. 4171–4186.</li>
+        <li><span class="au">Muennighoff, N.</span>, <span class="au">Tazi, N.</span>, <span class="au">Magne, L.</span>, &amp; <span class="au">Reimers, N.</span> <span class="ti">MTEB: Massive Text Embedding Benchmark.</span> <span class="jr">Proceedings of EACL,</span> 2023, pp. 2014–2037.</li>
+        <li><span class="au">Kusupati, A.</span>, <span class="au">Bhatt, G.</span>, <span class="au">Rege, A.</span>, et al. <span class="ti">Matryoshka Representation Learning.</span> <span class="jr">NeurIPS,</span> 2022.</li>
+        <li><span class="au">Johnson, J.</span>, <span class="au">Douze, M.</span>, &amp; <span class="au">Jégou, H.</span> <span class="ti">Billion-scale Similarity Search with GPUs.</span> <span class="jr">IEEE Transactions on Big Data, 7(3), 535–547,</span> 2021.</li>
+        <li><span class="au">Sivic, J.</span>, &amp; <span class="au">Zisserman, A.</span> <span class="ti">Video Google: A Text Retrieval Approach to Object Matching in Videos.</span> <span class="jr">Proceedings of ICCV,</span> 2003, pp. 1470–1477. <span class="jr">[Origin of the inverted-file index for visual descriptors.]</span></li>
+      </ol>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="doc-footer">
+      <span>10/18 · CETI Lookbook · Technical Notes</span>
+      <span>cetiai.co</span>
+    </footer>
+
+  </main>
+
   <script src="../shared/nav.js" defer></script>
 </body>
 </html>

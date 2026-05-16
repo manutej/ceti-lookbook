@@ -3,1267 +3,1233 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Safety & Alignment — Helpful. Honest. Harmless.</title>
-  <meta name="description" content="A field guide to AI safety and alignment for informed non-experts. Guardrail pipelines, Constitutional AI, RLHF, red-teaming, and the open problems frontier labs still haven't solved.">
+  <title>A Constitution for Safe Machine Intelligence — CETI Lookbook</title>
+  <meta name="description" content="A constitutional brief on the engineering of safer language models — threat landscape, guardrail pipelines, Constitutional AI, RLHF, mechanistic interpretability, and the open problems the field has not yet solved.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg:             #FAF7F2;
-      --color-bg-warm:        #F5F0E8;
-      --color-bg-code:        #1E1E2E;
-      --color-text:           #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted:     #9E9790;
-      --color-border:         #E5DFD6;
-      --color-border-light:   #EEEBE5;
-      --color-surface:        #FFFFFF;
-      --color-surface-warm:   #FDF9F3;
+      --color-parchment:  #F2EDDF;
+      --color-parchment-2:#EDE6D3;
+      --color-ink:        #1A1A1A;
+      --color-ink-soft:   #2A2A2A;
+      --color-ink-2:      #555555;
+      --color-rule:       #C9BFA6;
+      --color-rule-soft:  #D9CFB6;
+      --color-oxblood:    #7A0E0E;
+      --color-oxblood-d:  #5C0808;
 
-      --color-accent:         #D94F30; /* vermillion — used for active filtering / live signal */
-      --color-accent-hover:   #C4432A;
-      --color-accent-light:   #FDEEE9;
-      --color-accent-muted:   #E8836C;
+      --font-serif:   'EB Garamond', Georgia, 'Times New Roman', serif;
+      --font-display: 'Cinzel', 'EB Garamond', Georgia, serif;
+      --font-mono:    'IBM Plex Mono', 'Menlo', monospace;
 
-      /* Pipeline actor colors — warm, never alarming */
-      --color-actor-1:        #D94F30; /* vermillion — active filter */
-      --color-actor-2:        #2A7B9B; /* teal — model */
-      --color-actor-3:        #7B6DAA; /* plum — interpretability */
-      --color-actor-4:        #D4A843; /* golden — RLHF / human */
-      --color-actor-5:        #2D8B55; /* forest — constitutional / passed */
-
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body:    'DM Sans', -apple-system, sans-serif;
-      --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
-
-      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-      --duration-fast:   150ms;
-      --duration-normal: 300ms;
-      --duration-slow:   500ms;
-      --duration-slower: 700ms;
-      --stagger:         100ms;
-
-      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
-      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
-
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      --radius-full: 9999px;
+      --col:   600px;
+      --gutter:24px;
+      --margin-w: 220px;
     }
 
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image:
-        radial-gradient(ellipse at 18% 22%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
-        radial-gradient(ellipse at 82% 78%, rgba(45, 139, 85, 0.035) 0%, transparent 55%);
-      line-height: 1.6;
+      background: var(--color-parchment);
+      color: var(--color-ink);
+      font-family: var(--font-serif);
+      font-size: 19px;
+      line-height: 1.65;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
+      text-rendering: optimizeLegibility;
+      font-feature-settings: "kern" 1, "liga" 1, "onum" 1;
+      background-image:
+        radial-gradient(circle at 20% 12%, rgba(122,14,14,0.018) 0%, transparent 60%),
+        radial-gradient(circle at 80% 88%, rgba(26,26,26,0.025) 0%, transparent 55%);
     }
-    a { color: inherit; }
 
-    /* ============ TOP BAR ============ */
-    .topbar {
+    a { color: var(--color-ink); text-decoration: none; border-bottom: 1px solid var(--color-rule); }
+    a:hover { color: var(--color-oxblood); border-bottom-color: var(--color-oxblood); }
+
+    /* ============ DOCUMENT FRAME ============ */
+    .frame {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 4rem 2rem 2rem;
+      position: relative;
+    }
+
+    .colophon {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 1.25rem 1.75rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-secondary);
-    }
-    .topbar .mark { color: var(--color-accent); font-weight: 500; }
-    .topbar a { text-decoration: none; transition: color 200ms; }
-    .topbar a:hover { color: var(--color-accent); }
-    .topbar nav { display: flex; gap: 1.5rem; }
-    .topbar nav a { color: var(--color-text-muted); }
-
-    /* ============ HERO ============ */
-    .hero {
-      min-height: 80vh;
-      padding: 3rem 1.75rem 5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
-    }
-    .hero.visible .eyebrow { opacity: 1; }
-    .eyebrow .dot { color: var(--color-text-muted); margin: 0 0.5rem; }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.75rem, 7vw, 5.25rem);
-      line-height: 1.02;
-      letter-spacing: -0.035em;
-      margin: 1.75rem 0 1.5rem;
-      max-width: 16ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity var(--duration-slower) var(--ease-spring),
-                  transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 80ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 380ms; }
-    .hero-title em { font-style: normal; color: var(--color-accent); }
-
-    .hero-sub {
-      font-size: 1.2rem;
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out),
-                  transform var(--duration-slower) var(--ease-out);
-      transition-delay: 580ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    .hero-meta {
-      margin-top: 2.5rem;
-      display: flex;
-      gap: 2rem;
-      flex-wrap: wrap;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--color-text-muted);
-      letter-spacing: 0.08em;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 780ms;
-    }
-    .hero.visible .hero-meta { opacity: 1; }
-    .hero-meta span strong { color: var(--color-text); font-weight: 500; }
-
-    /* ============ SECTION BASE ============ */
-    .section {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 5rem 1.75rem;
-    }
-    .section.warm { background: var(--color-bg-warm); max-width: none; }
-    .section.warm > .inner { max-width: 1100px; margin: 0 auto; padding: 0 1.75rem; }
-
-    .section-label {
+      align-items: baseline;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--color-rule);
       font-family: var(--font-mono);
       font-size: 0.72rem;
-      text-transform: uppercase;
       letter-spacing: 0.14em;
-      color: var(--color-accent);
-      margin-bottom: 1rem;
+      text-transform: uppercase;
+      color: var(--color-ink-2);
     }
-    .section-heading {
+    .colophon a { border: none; color: var(--color-ink-2); }
+    .colophon a:hover { color: var(--color-oxblood); }
+    .colophon .seal {
       font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      line-height: 1.08;
-      letter-spacing: -0.025em;
+      letter-spacing: 0.22em;
+      color: var(--color-oxblood);
+    }
+
+    /* ============ TITLE BLOCK ============ */
+    .title-block {
+      text-align: center;
+      padding: 5rem 1rem 4rem;
+      max-width: 720px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--color-rule);
+    }
+    .pre-title {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      letter-spacing: 0.32em;
+      color: var(--color-oxblood);
+      text-transform: uppercase;
+      margin-bottom: 2.25rem;
+    }
+    .title {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: clamp(2rem, 4.6vw, 3.4rem);
+      letter-spacing: 0.04em;
+      line-height: 1.18;
       margin: 0 0 1.5rem;
-      max-width: 24ch;
-    }
-    .section-lede {
-      font-size: 1.125rem;
-      color: var(--color-text-secondary);
-      max-width: 64ch;
-      margin: 0 0 2.5rem;
-    }
-
-    /* ============ THREAT LANDSCAPE — TWO-COLUMN ============ */
-    .threats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      margin-top: 2.5rem;
-    }
-    .threats p {
-      font-size: 1.05rem;
-      color: var(--color-text-secondary);
-      margin: 0;
-    }
-    .threats p strong {
-      color: var(--color-text);
-      font-weight: 500;
-      background: linear-gradient(transparent 60%, var(--color-accent-light) 60%);
-      padding: 0 2px;
-    }
-    .threat-quote {
-      margin-top: 3rem;
-      padding: 1.75rem 2rem;
-      background: var(--color-surface);
-      border-left: 3px solid var(--color-accent);
-      border-radius: 0 var(--radius-md) var(--radius-md) 0;
-      font-family: var(--font-display);
-      font-weight: 400;
-      font-size: 1.2rem;
-      color: var(--color-text);
-      line-height: 1.4;
-      box-shadow: var(--shadow-sm);
-    }
-    .threat-quote cite {
-      display: block;
-      margin-top: 0.75rem;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-      font-style: normal;
-    }
-
-    /* ============ GUARDRAIL PIPELINE — SIGNATURE VISUAL ============ */
-    .pipeline-wrap {
-      background: var(--color-surface-warm);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 2.5rem 1.5rem;
-      margin-top: 2.5rem;
-      box-shadow: var(--shadow-md);
-      position: relative;
-      overflow: hidden;
-    }
-    .pipeline-key {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px dashed var(--color-border);
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-secondary);
-    }
-    .pipeline-key .swatch {
-      display: inline-block;
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-    .pipeline-key .pass { background: var(--color-actor-5); }
-    .pipeline-key .block { background: var(--color-accent); }
-    .pipeline-key .filter { background: var(--color-actor-2); }
-    .pipeline-key .model { background: var(--color-actor-3); }
-
-    .pipeline {
-      display: grid;
-      grid-template-columns: 1fr 1.4fr 1fr 1.4fr 1fr;
-      gap: 0.75rem;
-      align-items: stretch;
-      position: relative;
-    }
-    .stage {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 1.25rem 1rem;
-      text-align: center;
-      position: relative;
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .stage.endpoint {
-      background: var(--color-bg);
-      border-style: dashed;
-    }
-    .stage-label {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-      margin-bottom: 0.75rem;
-    }
-    .stage-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 0.95rem;
-      letter-spacing: -0.01em;
-      color: var(--color-text);
-      margin: 0 0 0.75rem;
-    }
-    .stage.filter .stage-title { color: var(--color-actor-2); }
-    .stage.model .stage-title { color: var(--color-actor-3); }
-
-    .filter-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--color-text-secondary);
-      text-align: left;
-    }
-    .filter-list li {
-      padding: 0.35rem 0;
-      border-bottom: 1px solid var(--color-border-light);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .filter-list li:last-child { border-bottom: none; }
-    .filter-list .dot {
-      display: inline-block;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--color-actor-2);
-    }
-
-    .model-core {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .model-ring {
-      width: 64px; height: 64px;
-      border-radius: 50%;
-      border: 2px solid var(--color-actor-3);
-      background:
-        radial-gradient(circle at 50% 50%, rgba(123, 109, 170, 0.18), transparent 70%),
-        var(--color-surface);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-display);
-      font-weight: 700;
-      color: var(--color-actor-3);
-      font-size: 0.85rem;
-      position: relative;
-    }
-    .model-ring::before {
-      content: "";
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 1px dashed var(--color-actor-3);
-      opacity: 0.35;
-      animation: pulse-ring 3.5s ease-in-out infinite;
-    }
-    @keyframes pulse-ring {
-      0%, 100% { transform: scale(1); opacity: 0.35; }
-      50%      { transform: scale(1.1); opacity: 0.15; }
-    }
-    .model-caption {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      color: var(--color-text-muted);
-      letter-spacing: 0.1em;
+      color: var(--color-ink);
       text-transform: uppercase;
     }
-
-    /* Flow track holding the moving packets */
-    .flow-track {
-      position: absolute;
-      top: 50%;
-      left: 0; right: 0;
-      height: 2px;
-      background: transparent;
-      pointer-events: none;
-      z-index: 2;
+    .subtitle {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.25rem;
+      color: var(--color-ink-2);
+      max-width: 44ch;
+      margin: 0 auto 2.5rem;
+      line-height: 1.45;
     }
-    .packet {
-      position: absolute;
-      top: 50%;
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 12px currentColor;
-      opacity: 0;
-    }
-    .packet.pass { color: var(--color-actor-5); background: var(--color-actor-5); }
-    .packet.block { color: var(--color-accent); background: var(--color-accent); }
-
-    .blocked-tray {
-      margin-top: 1.75rem;
-      padding: 1rem 1.25rem;
-      background: var(--color-accent-light);
-      border: 1px dashed var(--color-accent-muted);
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--color-accent);
-    }
-    .blocked-tray .label {
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-accent);
-      font-weight: 500;
-    }
-    .blocked-tray .examples {
-      color: var(--color-text-secondary);
-      flex: 1;
-      text-transform: none;
-      letter-spacing: 0.04em;
-    }
-    .blocked-counter {
-      font-family: var(--font-display);
-      font-weight: 700;
+    .fleuron {
+      font-family: var(--font-serif);
       font-size: 1.5rem;
-      color: var(--color-accent);
-      font-variant-numeric: tabular-nums;
+      color: var(--color-oxblood);
+      letter-spacing: 0.6em;
+      margin: 1rem 0;
+      opacity: 0.85;
     }
-
-    /* ============ ALIGNMENT BENTO ============ */
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin-top: 2.5rem;
-    }
-    .magic-card {
-      position: relative;
-      padding: 2rem;
-      border-radius: var(--radius-lg);
-      background:
-        radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%),
-          rgba(217, 79, 48, 0.06), transparent 40%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal) var(--ease-out);
-      cursor: default;
-      opacity: 0;
-      transform: translateY(20px);
-      min-height: 240px;
-      display: flex;
-      flex-direction: column;
-    }
-    .magic-card.visible {
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity var(--duration-slower) var(--ease-spring),
-                  transform var(--duration-slower) var(--ease-spring),
-                  border-color var(--duration-normal),
-                  box-shadow var(--duration-normal);
-    }
-    .magic-card.visible:hover {
-      transform: translateY(-3px);
-      border-color: var(--color-accent-muted);
-      box-shadow: var(--shadow-lg);
-    }
-    .card-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-family: var(--font-mono);
-      font-size: 0.66rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 0.3rem 0.7rem;
-      border-radius: var(--radius-full);
-      align-self: flex-start;
-    }
-    .card-tag .num { color: var(--color-text-muted); }
-    .card-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.4rem;
-      letter-spacing: -0.015em;
-      margin: 1.1rem 0 0.6rem;
-    }
-    .card-body {
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-      margin: 0;
-      flex: 1;
-    }
-    .card-footnote {
-      margin-top: 1rem;
+    .imprint {
       font-family: var(--font-mono);
       font-size: 0.72rem;
-      color: var(--color-text-muted);
-      letter-spacing: 0.04em;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-ink-2);
+      margin-top: 1.5rem;
     }
+    .imprint span { display: inline-block; padding: 0 0.6rem; }
+    .imprint .sep { color: var(--color-rule); }
 
-    /* ============ CONSTITUTIONAL AI LOOP ============ */
-    .loop-wrap {
-      background: var(--color-surface-warm);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 2.5rem 1.5rem;
-      margin-top: 2.5rem;
-      box-shadow: var(--shadow-md);
-    }
-    .loop {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      align-items: center;
+    /* ============ COLUMN + MARGINALIA LAYOUT ============ */
+    .column {
+      max-width: var(--col);
+      margin: 0 auto;
+      padding: 3rem 0;
       position: relative;
     }
-    .loop-step {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 1.25rem 1rem;
+
+    /* Section breaker fleurons */
+    .breaker {
       text-align: center;
-      position: relative;
-      min-height: 150px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .loop-step .num {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      color: var(--color-actor-5);
-      text-transform: uppercase;
-    }
-    .loop-step .title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: -0.01em;
-      color: var(--color-text);
-    }
-    .loop-step .body {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: var(--color-text-secondary);
-    }
-    .loop-arrow {
-      position: absolute;
-      top: 50%;
-      right: -8px;
-      transform: translateY(-50%);
-      color: var(--color-actor-5);
-      font-family: var(--font-mono);
-      font-size: 1.1rem;
+      margin: 3rem auto;
+      color: var(--color-oxblood);
+      font-size: 1.4rem;
+      letter-spacing: 0.4em;
       opacity: 0.7;
     }
-    .loop-step:last-child .loop-arrow { display: none; }
-    .loop-return {
-      margin-top: 1.5rem;
-      padding: 0.9rem 1.25rem;
-      background: rgba(45, 139, 85, 0.06);
-      border: 1px dashed var(--color-actor-5);
-      border-radius: var(--radius-md);
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      color: var(--color-actor-5);
+
+    /* ============ PREAMBLE ============ */
+    .preamble {
+      max-width: var(--col);
+      margin: 0 auto;
+      padding: 4rem 0 2rem;
       text-align: center;
-      letter-spacing: 0.04em;
     }
-    .loop-return strong { color: var(--color-actor-5); font-weight: 500; }
-    .loop-constitution {
-      margin-top: 1.5rem;
-      padding: 1.25rem 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
+    .preamble-label {
       font-family: var(--font-display);
-      font-style: italic;
-      color: var(--color-text);
-      font-size: 1rem;
-      line-height: 1.5;
-      position: relative;
-    }
-    .loop-constitution::before {
-      content: "Excerpt — Claude's Constitution";
-      position: absolute;
-      top: -10px;
-      left: 16px;
-      background: var(--color-surface-warm);
-      padding: 0 8px;
-      font-family: var(--font-mono);
-      font-style: normal;
-      font-size: 0.65rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.4em;
+      color: var(--color-oxblood);
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
+      margin-bottom: 2rem;
+    }
+    .preamble p {
+      font-family: var(--font-serif);
+      font-size: 1.18rem;
+      line-height: 1.7;
+      color: var(--color-ink);
+      text-align: justify;
+      hyphens: auto;
+      margin: 0 0 1rem;
+    }
+    .preamble p::first-line {
+      font-variant: small-caps;
+      letter-spacing: 0.08em;
+    }
+    .preamble .drop {
+      float: left;
+      font-family: var(--font-display);
+      font-size: 4.4rem;
+      line-height: 0.85;
+      padding: 0.45rem 0.55rem 0 0;
+      color: var(--color-oxblood);
+      font-weight: 500;
     }
 
-    /* ============ OPEN PROBLEMS ============ */
-    .problems {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-      margin-top: 2rem;
-      counter-reset: prob;
+    /* ============ ARTICLE HEADERS ============ */
+    .article-header {
+      max-width: var(--col);
+      margin: 4rem auto 1.5rem;
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid var(--color-rule);
     }
-    .problem {
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 1.5rem;
-      padding: 1.5rem 1.75rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      align-items: start;
-      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-out);
-    }
-    .problem:hover { border-color: var(--color-accent-muted); transform: translateX(4px); }
-    .problem-number {
-      counter-increment: prob;
+    .article-num {
       font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 2.5rem;
-      line-height: 1;
-      color: var(--color-accent);
-      opacity: 0.5;
-    }
-    .problem-number::before { content: "0" counter(prob); }
-    .problem-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.15rem;
-      letter-spacing: -0.01em;
-      margin: 0 0 0.4rem;
-    }
-    .problem-body {
-      margin: 0;
-      color: var(--color-text-secondary);
       font-size: 0.95rem;
-    }
-
-    /* ============ TOOLS ROW ============ */
-    .tools {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-top: 2.5rem;
-    }
-    .tool {
-      padding: 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      transition: border-color var(--duration-normal), box-shadow var(--duration-normal);
-    }
-    .tool:hover { border-color: var(--color-accent-muted); box-shadow: var(--shadow-md); }
-    .tool-name {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.05rem;
-      letter-spacing: -0.01em;
-    }
-    .tool-vendor {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
+      letter-spacing: 0.5em;
+      color: var(--color-oxblood);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-muted);
+      margin-bottom: 1.25rem;
     }
-    .tool-desc {
-      font-size: 0.88rem;
-      color: var(--color-text-secondary);
-      margin: 0.4rem 0 0;
+    .article-title {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: clamp(1.4rem, 2.6vw, 1.85rem);
+      letter-spacing: 0.08em;
+      color: var(--color-ink);
+      text-transform: uppercase;
+      line-height: 1.25;
+      margin: 0;
     }
-    .tool-stage {
-      margin-top: auto;
-      padding-top: 0.75rem;
+    .article-epigraph {
+      max-width: var(--col);
+      margin: 1.5rem auto 2.5rem;
+      text-align: center;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.02rem;
+      color: var(--color-ink-2);
+      line-height: 1.5;
+    }
+    .article-epigraph cite {
+      display: block;
+      margin-top: 0.5rem;
+      font-style: normal;
       font-family: var(--font-mono);
       font-size: 0.7rem;
-      color: var(--color-actor-2);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-ink-2);
+    }
+
+    /* ============ SECTION HEADERS (sub-articles I.1, I.2 …) ============ */
+    .section-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.22em;
+      color: var(--color-oxblood);
+      text-transform: uppercase;
+      margin-top: 2.25rem;
+      margin-bottom: 0.45rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 1.15rem;
+      letter-spacing: 0.06em;
+      color: var(--color-ink);
+      text-transform: uppercase;
+      margin: 0 0 1rem;
+      line-height: 1.3;
+    }
+
+    /* ============ PROSE ============ */
+    .column p {
+      font-family: var(--font-serif);
+      font-size: 1.08rem;
+      line-height: 1.72;
+      color: var(--color-ink);
+      text-align: justify;
+      hyphens: auto;
+      margin: 0 0 1rem;
+    }
+    .column p.lede::first-line {
+      font-variant: small-caps;
+      letter-spacing: 0.08em;
+    }
+    .column p .drop {
+      float: left;
+      font-family: var(--font-display);
+      font-size: 3.6rem;
+      line-height: 0.85;
+      padding: 0.4rem 0.5rem 0 0;
+      color: var(--color-oxblood);
+      font-weight: 500;
+    }
+    .column em { font-style: italic; }
+    .column strong { font-weight: 600; }
+
+    sup.fn {
+      font-family: var(--font-mono);
+      font-size: 0.62em;
+      color: var(--color-oxblood);
+      padding: 0 0.15em;
+      vertical-align: super;
+      line-height: 0;
+    }
+    sup.fn a { color: var(--color-oxblood); border: none; }
+    sup.fn a:hover { text-decoration: underline; }
+
+    /* ============ MARGINALIA ============ */
+    .has-margin {
+      position: relative;
+    }
+    .marginalia {
+      position: absolute;
+      left: calc(100% + 2.25rem);
+      top: 0;
+      width: var(--margin-w);
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      color: var(--color-ink-2);
+      opacity: 0.65;
+      transition: opacity 280ms ease, color 280ms ease;
+      padding-left: 0.9rem;
+      border-left: 1px solid var(--color-rule);
+    }
+    .has-margin:hover .marginalia,
+    .marginalia:hover { opacity: 1; color: var(--color-ink); }
+    .marginalia .ref {
+      display: block;
+      margin-top: 0.4rem;
+      font-family: var(--font-mono);
+      font-style: normal;
+      font-size: 0.66rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-oxblood);
+    }
+
+    @media (max-width: 1100px) {
+      .marginalia { display: none; }
+    }
+
+    /* ============ WARNING CALLOUT (the one oxblood box) ============ */
+    .warning {
+      max-width: var(--col);
+      margin: 2.25rem auto;
+      padding: 1.5rem 1.75rem;
+      border: 1px solid var(--color-oxblood);
+      background: rgba(122,14,14,0.04);
+      position: relative;
+    }
+    .warning::before {
+      content: "WARNING";
+      position: absolute;
+      top: -10px;
+      left: 1.5rem;
+      background: var(--color-parchment);
+      padding: 0 0.55rem;
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: var(--color-oxblood);
+    }
+    .warning p {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: 1.02rem;
+      color: var(--color-ink);
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    /* ============ BLOCKQUOTE ============ */
+    .column blockquote {
+      margin: 1.5rem 0;
+      padding: 0.5rem 0 0.5rem 1.5rem;
+      border-left: 2px solid var(--color-oxblood);
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.06rem;
+      line-height: 1.55;
+      color: var(--color-ink);
+    }
+    .column blockquote cite {
+      display: block;
+      margin-top: 0.6rem;
+      font-style: normal;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-ink-2);
+    }
+
+    /* ============ PIPELINE DIAGRAM (quiet, hand-traced) ============ */
+    .diagram {
+      max-width: var(--col);
+      margin: 2.25rem auto;
+      padding: 1rem 0;
+    }
+    .diagram svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .diagram-caption {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-ink-2);
+      margin-top: 0.5rem;
+    }
+
+    /* ============ COMPARISON TABLE ============ */
+    .compare {
+      width: 100%;
+      max-width: var(--col);
+      margin: 2rem auto;
+      border-collapse: collapse;
+      font-family: var(--font-serif);
+      font-size: 0.92rem;
+    }
+    .compare caption {
+      caption-side: top;
+      text-align: left;
+      padding-bottom: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-oxblood);
+    }
+    .compare th, .compare td {
+      padding: 0.75rem 0.6rem;
+      border-bottom: 1px solid var(--color-rule-soft);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.45;
+    }
+    .compare thead th {
+      border-bottom: 1.5px solid var(--color-ink);
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 0.76rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--color-ink);
+    }
+    .compare tbody th {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: 0.84rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-oxblood);
+      width: 28%;
+    }
+    .compare td .meta {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-ink-2);
+      margin-top: 0.3rem;
+    }
+
+    /* ============ ENUMERATED LIST (problems, amendments) ============ */
+    .enumerated {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+      counter-reset: enum;
+    }
+    .enumerated li {
+      counter-increment: enum;
+      padding: 1rem 0 1rem 3.2rem;
+      border-bottom: 1px solid var(--color-rule-soft);
+      position: relative;
+    }
+    .enumerated li:last-child { border-bottom: none; }
+    .enumerated li::before {
+      content: counter(enum, upper-roman) ".";
+      position: absolute;
+      left: 0; top: 1rem;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      letter-spacing: 0.06em;
+      color: var(--color-oxblood);
+      width: 2.6rem;
+      text-align: right;
+    }
+    .enumerated li .name {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--color-ink);
+      margin-bottom: 0.4rem;
+    }
+    .enumerated li .text {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--color-ink);
+      margin: 0;
+    }
+    .enumerated li .cite-line {
+      display: block;
+      margin-top: 0.35rem;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-ink-2);
+    }
+
+    /* ============ CODE BLOCKS ============ */
+    pre.code {
+      max-width: var(--col);
+      margin: 1.5rem auto;
+      padding: 1.25rem 1.4rem;
+      background: var(--color-parchment-2);
+      border: 1px solid var(--color-rule);
+      border-left: 3px solid var(--color-oxblood);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      color: var(--color-ink);
+      overflow-x: auto;
+      white-space: pre;
+    }
+    pre.code .com { color: var(--color-ink-2); font-style: italic; }
+    pre.code .kw  { color: var(--color-oxblood); }
+    pre.code .str { color: var(--color-ink); }
+
+    /* ============ WALKTHROUGH STEPS ============ */
+    .steps {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+      counter-reset: stp;
+    }
+    .steps li {
+      counter-increment: stp;
+      padding: 1.1rem 0 1.1rem 3.2rem;
+      position: relative;
+      border-bottom: 1px solid var(--color-rule-soft);
+    }
+    .steps li:last-child { border-bottom: none; }
+    .steps li::before {
+      content: "§ " counter(stp);
+      position: absolute;
+      left: 0; top: 1.1rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-oxblood);
+      width: 2.6rem;
+    }
+    .steps li .step-title {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-ink);
+      margin-bottom: 0.4rem;
+    }
+    .steps li p { margin: 0; font-size: 1rem; line-height: 1.55; }
+
+    /* ============ REFERENCES ============ */
+    .references {
+      max-width: var(--col);
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
+    .references ol {
+      list-style: none;
+      counter-reset: ref;
+      padding: 0; margin: 0;
+    }
+    .references li {
+      counter-increment: ref;
+      padding: 0.6rem 0 0.6rem 3rem;
+      position: relative;
+      font-family: var(--font-serif);
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: var(--color-ink);
+      border-bottom: 1px dotted var(--color-rule-soft);
+    }
+    .references li::before {
+      content: counter(ref) ".";
+      position: absolute;
+      left: 0;
+      top: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--color-oxblood);
+      width: 2.4rem;
+      text-align: right;
+    }
+    .references li em { font-style: italic; }
+    .references li .where {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--color-ink-2);
       letter-spacing: 0.06em;
     }
 
-    /* ============ CTA ============ */
-    .final {
-      padding: 6rem 1.75rem 5rem;
-      max-width: 760px;
-      margin: 0 auto;
+    /* ============ SIGNATURE ============ */
+    .signature {
+      max-width: var(--col);
+      margin: 4rem auto 0;
+      padding: 3rem 0 1rem;
+      border-top: 1px solid var(--color-rule);
       text-align: center;
     }
-    .final h2 {
+    .signature .signed {
       font-family: var(--font-display);
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      margin: 0 0 1rem;
-      line-height: 1.1;
+      font-size: 0.82rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--color-oxblood);
+      margin-bottom: 1rem;
     }
-    .final p {
-      color: var(--color-text-secondary);
-      margin: 0 auto 2.25rem;
-      max-width: 52ch;
-      font-size: 1.05rem;
+    .signature .hand {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.6rem;
+      color: var(--color-ink);
+      margin: 1.25rem 0 0.5rem;
     }
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 1rem 1.85rem;
-      border-radius: var(--radius-full);
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease;
-      will-change: transform;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(4px); }
-
-    .footer {
-      padding: 2rem 1.75rem 3rem;
-      max-width: 1100px;
-      margin: 0 auto;
-      border-top: 1px solid var(--color-border-light);
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
+    .signature .meta {
       font-family: var(--font-mono);
       font-size: 0.72rem;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-muted);
+      color: var(--color-ink-2);
     }
-    .footer a { text-decoration: none; }
-    .footer a:hover { color: var(--color-accent); }
+    .signature .meta span { padding: 0 0.4rem; }
+    .signature .meta .sep { color: var(--color-rule); }
 
-    /* ============ ANIMATE-IN ============ */
-    .animate-in {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring),
-                  transform var(--duration-slower) var(--ease-spring);
+    /* ============ WATERMARK ============ */
+    .watermark {
+      max-width: var(--col);
+      margin: 2.5rem auto 4rem;
+      padding-top: 1.25rem;
+      border-top: 1px dotted var(--color-rule);
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--color-ink-2);
     }
-    .animate-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ============ MOTION (minimal) ============ */
+    .fade {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 700ms ease, transform 700ms ease;
+    }
+    .fade.in { opacity: 1; transform: translateY(0); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fade { opacity: 1 !important; transform: none !important; transition: none !important; }
+    }
 
     /* ============ RESPONSIVE ============ */
-    @media (max-width: 900px) {
-      .threats { grid-template-columns: 1fr; }
-      .pipeline {
-        grid-template-columns: 1fr;
-        gap: 0.6rem;
+    @media (max-width: 720px) {
+      body { font-size: 17px; }
+      .frame { padding: 2rem 1.25rem 1.25rem; }
+      .title { font-size: 1.85rem; letter-spacing: 0.03em; }
+      .pre-title { font-size: 0.72rem; letter-spacing: 0.24em; }
+      .preamble, .column, .article-header, .article-epigraph,
+      .warning, .diagram, .compare, .references, .signature, .watermark {
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
       }
-      .pipeline .stage { min-height: auto; }
-      .flow-track { display: none; }
-      .loop { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
-      .loop-arrow { display: none !important; }
-      .tools { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 560px) {
-      .bento { grid-template-columns: 1fr; }
-      .loop { grid-template-columns: 1fr; }
-      .tools { grid-template-columns: 1fr; }
-      .problem { grid-template-columns: 50px 1fr; gap: 1rem; padding: 1.25rem; }
-      .problem-number { font-size: 1.75rem; }
-      .topbar nav { display: none; }
-      .pipeline-key { gap: 0.75rem; font-size: 0.62rem; }
-    }
-
-    /* ============ REDUCED MOTION ============ */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-      .hero-title .word, .hero-sub, .hero-meta, .eyebrow,
-      .magic-card, .animate-in {
-        opacity: 1 !important;
-        transform: none !important;
-      }
-      .packet { display: none; }
-      .model-ring::before { animation: none; }
-    }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .magic-card:hover { transform: none !important; }
-      .problem:hover { transform: none !important; }
+      .preamble .drop, .column p .drop { font-size: 3rem; }
+      .article-title { font-size: 1.2rem; letter-spacing: 0.05em; }
+      .imprint span { display: block; padding: 0.15rem 0; }
+      .imprint .sep { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <a href="../index.html"><span class="mark">CETI</span>&nbsp;· Lookbook</a>
-    <nav>
-      <a href="../index.html">Index</a>
-      <a href="https://cetiai.co">cetiai.co</a>
-    </nav>
-  </header>
+  <div class="frame">
 
-  <!-- HERO -->
-  <section class="hero" id="hero">
-    <p class="eyebrow">AI Safety <span class="dot">·</span> Alignment <span class="dot">·</span> Guardrails</p>
-    <h1 class="hero-title">
-      <span class="word">Helpful.</span>
-      <span class="word">Honest.</span>
-      <span class="word"><em>Harmless.</em></span>
-      <span class="word">Engineered.</span>
-    </h1>
-    <p class="hero-sub">Alignment isn't science fiction — it's engineering. This is a field guide to how frontier labs make large language models safer to deploy: guardrail pipelines, Constitutional AI, RLHF, red-teaming, and the open problems that none of it has solved yet.</p>
-    <div class="hero-meta">
-      <span><strong>Audience</strong> · informed non-experts</span>
-      <span><strong>Tone</strong> · honest, anti-hype</span>
-      <span><strong>Updated</strong> · 2026</span>
+    <!-- COLOPHON / RUNNING HEAD -->
+    <header class="colophon">
+      <a href="../index.html">CETI &middot; LOOKBOOK</a>
+      <span class="seal">SAFETY &amp; ALIGNMENT</span>
+      <a href="../index.html">INDEX</a>
+    </header>
+
+    <!-- TITLE BLOCK -->
+    <section class="title-block">
+      <div class="pre-title">In the Matter of Aligning Machine Intelligence</div>
+      <h1 class="title">A Constitution<br>for Safe<br>Machine Intelligence</h1>
+      <p class="subtitle">A brief on the engineering of helpful, honest, and harmless language models &mdash; submitted to those who build, deploy, and depend upon them.</p>
+      <div class="fleuron">&#10086; &#10087; &#10086;</div>
+      <div class="imprint">
+        <span>MMXXVI</span>
+        <span class="sep">&middot;</span>
+        <span>CETI&#46;AI</span>
+        <span class="sep">&middot;</span>
+        <span>Article XIV of XVIII</span>
+      </div>
+    </section>
+
+    <!-- PREAMBLE -->
+    <section class="preamble fade">
+      <div class="preamble-label">Preamble</div>
+      <p><span class="drop">W</span>E, the builders of intelligent systems &mdash; the engineers, researchers, product leaders, and citizens upon whom these systems will press their consequences &mdash; in order to deploy machine intelligence that is at once <em>useful</em> and <em>trustworthy</em>; to mitigate the harms that follow when fluent text is mistaken for fact; to distinguish the data a model considers from the instructions it obeys; to refuse the convenience of opacity in matters that touch upon human welfare; and to commit, in writing, to a standard of practice equal to the gravity of the technology &mdash; do hereby set forth this brief on the engineering of safer language models.</p>
+      <p>This is not a manifesto. It is an audit. The pages that follow describe what frontier laboratories <em>actually do</em> to make large language models safer to deploy in 2026: the threats they design against, the guardrail pipelines they wrap around generation, the post-training disciplines they call alignment, the interpretive instruments they are beginning to build, and the problems they openly concede remain unsolved. We have tried to write it the way one would write a brief: matter-of-fact, source-cited, and free of theater.</p>
+      <div class="fleuron" style="font-size: 1.1rem; margin-top: 2rem;">&#10086;</div>
+    </section>
+
+    <!-- =================== ARTICLE I =================== -->
+    <header class="article-header fade">
+      <div class="article-num">Article I</div>
+      <h2 class="article-title">The Threat Landscape</h2>
+    </header>
+    <p class="article-epigraph fade">
+      <em>The real problems are mundane, not cinematic.</em><br>
+      <cite>&mdash; the operating principle of every responsible deployment team</cite>
+    </p>
+
+    <article class="column">
+
+      <p class="lede fade"><span class="drop">P</span>ublic discourse about machine intelligence leans toward science fiction &mdash; superintelligence, terminators, and the proverbial paperclip maximiser. The hazards that actually consume an engineering team's calendar are smaller, more present, and more boring. They have known names, measurable rates, and patches that work imperfectly. We catalogue four.</p>
+
+      <div class="section-num fade">&#167; I.1</div>
+      <h3 class="section-title fade">Hallucination</h3>
+
+      <div class="has-margin fade">
+        <p>The failure one meets first. A language model produces text that is fluent, confident, and plausible, and that happens to be wrong &mdash; citations that do not exist, court cases never filed, library functions never written. The mechanism is not malice and not even error in the ordinary sense; it is the architecture itself. A transformer trained on next-token prediction has no privileged channel to the world. It estimates the probability of the next token given the preceding context, and a sufficiently confident estimate is, by the model's lights, indistinguishable from a true one.<sup class="fn"><a href="#ref-1">1</a></sup> Recent surveys place rates of factual confabulation in unconstrained generation between 15&#37; and 30&#37; depending on domain;<sup class="fn"><a href="#ref-2">2</a></sup> legal and biomedical applications cluster near the upper end. The problem yields somewhat to retrieval augmentation, citation-grounding, and refusal training, but it does not yield completely, and the residual is a property of the medium.</p>
+        <aside class="marginalia">
+          A model predicts the next token; it does not retrieve the next fact. The two coincide often enough to feel like the same thing.
+          <span class="ref">on architecture</span>
+        </aside>
+      </div>
+
+      <div class="section-num fade">&#167; I.2</div>
+      <h3 class="section-title fade">Prompt Injection</h3>
+
+      <div class="has-margin fade">
+        <p>The failure that scales. A model that reads <em>any</em> untrusted text &mdash; a user message, a web page, a teammate's uploaded document, the body of an email, the comments of a pull request &mdash; reads any instructions embedded in that text. In <em>direct</em> injection an attacker types an instruction; in <em>indirect</em> injection an attacker places one where the model will read it later.<sup class="fn"><a href="#ref-3">3</a></sup> The model has no robust mechanism for distinguishing the two registers, because the distinction is not present in the bytes it receives. Recent benchmarks place the median time-to-jailbreak for production frontier models at well under twenty minutes,<sup class="fn"><a href="#ref-4">4</a></sup> and the residual attack success rate against stacked production-grade defences still sits above fifteen per cent.<sup class="fn"><a href="#ref-5">5</a></sup> Defences exist; none is complete. The reader who finds this claim alarming is invited to consult the literature; the reader who finds it dull is invited to deploy without it and learn.</p>
+        <aside class="marginalia">
+          The cost curve favours the attacker. Generating a novel jailbreak is cheaper than blocking one.
+          <span class="ref">on asymmetry</span>
+        </aside>
+      </div>
+
+      <div class="section-num fade">&#167; I.3</div>
+      <h3 class="section-title fade">Data Exfiltration &amp; System-Prompt Leakage</h3>
+
+      <div class="has-margin fade">
+        <p>The failure that compounds with capability. An agent furnished with tools &mdash; an email sender, a database reader, a web browser, a code executor &mdash; can be induced to read material it should not, and then to write that material somewhere it can. The pattern includes <em>personally identifiable information leakage</em>, in which sensitive content from one user's session bleeds into a response shown to another; and <em>system-prompt extraction</em>, in which an attacker reconstructs the hidden instructions that shape a deployed model's behaviour, often within a handful of carefully crafted turns.<sup class="fn"><a href="#ref-6">6</a></sup> A model with permission to send mail, plus a contaminated input, is functionally a phishing engine; an agent with shell access and contaminated context is functionally remote code execution. The mitigations &mdash; egress filters, tool gating, capability scoping &mdash; are sound, but each adds latency and breaks features, and the temptation to skip them in pursuit of demo velocity is itself a safety problem.</p>
+        <aside class="marginalia">
+          Capability is the multiplier. The same prompt is a curiosity in a chatbot and a liability in an agent.
+          <span class="ref">on tooling</span>
+        </aside>
+      </div>
+
+      <div class="section-num fade">&#167; I.4</div>
+      <h3 class="section-title fade">Bias &amp; Disparate Harm</h3>
+
+      <div class="has-margin fade">
+        <p>The failure that does not announce itself. Bias enters at three points: in the <em>training corpus</em>, which reflects the gendered defaults, racial assumptions, and dialect penalties of the internet that produced it; in <em>reinforcement learning from human feedback</em>, whose raters carry their own implicit preferences into the reward model;<sup class="fn"><a href="#ref-7">7</a></sup> and in <em>deployment</em>, where uniform model behaviour interacts unevenly with users whose contexts the developers did not foresee. These failures are not self-correcting. They require deliberate measurement, deliberate counterweight, and an institutional willingness to surface findings that contradict the marketing narrative. The literature documents, in painful detail, both the harms and the difficulty of measuring them well.<sup class="fn"><a href="#ref-8">8</a></sup></p>
+        <aside class="marginalia">
+          A model behaves uniformly. A population does not receive it uniformly. The gap is where the harm lives.
+          <span class="ref">on incidence</span>
+        </aside>
+      </div>
+
+      <blockquote class="fade">
+        Language models carry an intrinsic risk triad &mdash; hallucination, indirect prompt injection, and jailbreak &mdash; rooted in probabilistic modeling, stochastic decoding, and linguistic flexibility. These are not bugs to patch. They are properties of the medium.
+        <cite>&mdash; synthesis of the 2026 red-team literature</cite>
+      </blockquote>
+
+      <p class="fade">A word on what is <em>not</em> on the list above. There is no entry for "the model will deceive its operators" or "the model will resist shutdown." Such failures, much-discussed in the speculative literature, may eventually warrant engineering attention; in 2026 they do not. The threats above are the ones that produce incident tickets this quarter and the next, and they exhaust the attention of the teams that own production. A safety practice that addresses only the spectacular and ignores the present is not a safety practice. It is a hobby.</p>
+
+    </article>
+
+    <div class="breaker fade">&#10086; &#10087; &#10086;</div>
+
+    <!-- =================== ARTICLE II =================== -->
+    <header class="article-header fade">
+      <div class="article-num">Article II</div>
+      <h2 class="article-title">The Guardrail Pipeline</h2>
+    </header>
+    <p class="article-epigraph fade">
+      <em>What a production deployment actually looks like.</em>
+    </p>
+
+    <article class="column">
+
+      <p class="lede fade"><span class="drop">A</span> modern application built upon a large language model does not expose the raw model to the user. It wraps the model in a pipeline of lightweight classifiers and policy modules that run in parallel &mdash; adding, in well-tuned systems, between ten and fifty milliseconds of latency &mdash; and that decline to forward anything failing policy. The architecture is by now standard enough to merit codification.</p>
+
+      <p class="fade">The pipeline divides into <em>input rails</em> and <em>output rails</em>. Input rails inspect what arrives at the model: the user's message, the system prompt, any retrieved documents, any tool results returning from a previous turn, any contents of the agent's memory. They check for toxicity (a classifier), prompt injection (a classifier and pattern matcher), personally identifiable information (a redactor), and topical scope (a classifier scoped to the application's brief).<sup class="fn"><a href="#ref-9">9</a></sup> Output rails inspect what leaves the model: a harmful-content classifier, a hallucination scorer, a citation verifier where the use-case warrants, a PII egress filter for the case in which the model has memorised what it should not.</p>
+
+      <div class="diagram fade" aria-label="Guardrail pipeline diagram">
+        <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="diagTitle">
+          <title id="diagTitle">A five-stage guardrail pipeline: user input, input rails, model, output rails, user output.</title>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#1A1A1A"/>
+            </marker>
+          </defs>
+          <!-- horizontal flow line, hand-traced feel -->
+          <path d="M40,110 C 150,108 230,113 300,109 S 460,112 560,110" fill="none" stroke="#1A1A1A" stroke-width="1.1" marker-end="url(#arrow)"/>
+
+          <!-- stage 1: user input -->
+          <g>
+            <rect x="20" y="80" width="80" height="60" fill="none" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="3 3"/>
+            <text x="60" y="105" text-anchor="middle" font-family="Cinzel, serif" font-size="9" letter-spacing="1.5">USER</text>
+            <text x="60" y="120" text-anchor="middle" font-family="Cinzel, serif" font-size="9" letter-spacing="1.5">INPUT</text>
+            <text x="60" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="#555">stage&nbsp;I</text>
+          </g>
+
+          <!-- stage 2: input rails -->
+          <g>
+            <rect x="140" y="70" width="110" height="80" fill="none" stroke="#1A1A1A" stroke-width="1"/>
+            <text x="195" y="92" text-anchor="middle" font-family="Cinzel, serif" font-size="9" letter-spacing="1.5">INPUT&nbsp;RAILS</text>
+            <line x1="155" y1="100" x2="235" y2="100" stroke="#7A0E0E" stroke-width="0.5"/>
+            <text x="195" y="113" text-anchor="middle" font-family="EB Garamond, serif" font-size="9" font-style="italic" fill="#1A1A1A">toxicity</text>
+            <text x="195" y="124" text-anchor="middle" font-family="EB Garamond, serif" font-size="9" font-style="italic" fill="#1A1A1A">injection</text>
+            <text x="195" y="135" text-anchor="middle" font-family="EB Garamond, serif" font-size="9" font-style="italic" fill="#1A1A1A">PII redaction</text>
+            <text x="195" y="146" text-anchor="middle" font-family="EB Garamond, serif" font-size="9" font-style="italic" fill="#1A1A1A">scope check</text>
+            <text x="195" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="#555">stage&nbsp;II</text>
+          </g>
+
+          <!-- stage 3: model -->
+          <g>
+            <circle cx="300" cy="110" r="34" fill="none" stroke="#1A1A1A" stroke-width="1"/>
+            <circle cx="300" cy="110" r="40" fill="none" stroke="#1A1A1A" stroke-width="0.4" stroke-dasharray="2 3"/>
+            <text x="300" y="108" text-anchor="middle" font-family="Cinzel, serif" font-size="11" letter-spacing="2">LLM</text>
+            <text x="300" y="120" text-anchor="middle" font-family="EB Garamond, serif" font-size="8" font-style="italic" fill="#555">aligned weights</text>
+            <text x="300" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="#555">stage&nbsp;III</text>
+          </g>
+
+          <!-- stage 4: output rails -->
+          <g>
+            <rect x="350" y="70" width="110" height="80" fill="none" stroke="#1A1A1A" stroke-width="1"/>
+            <text x="405" y="92" text-anchor="middle" font-family="Cinzel, serif" font-size="9" letter-spacing="1.5">OUTPUT&nbsp;RAILS</text>
+            <line x1="365" y1="100" x2="445" y2="100" stroke="#7A0E0E" stroke-width="0.5"/>
+            <text x="405" y="113" text-anchor="middle" font-family="EB Garamond, serif" font-size="9" font-style="italic" fill="#1A1A1A">harm check</text>
+            <text x="405" y="124" text-anchor="middle" font-family="EB Garamond, serif" font-size="9" font-style="italic" fill="#1A1A1A">hallucination</text>
+            <text x="405" y="135" text-anchor="middle" font-family="EB Garamond, serif" font-size="9" font-style="italic" fill="#1A1A1A">citation</text>
+            <text x="405" y="146" text-anchor="middle" font-family="EB Garamond, serif" font-size="9" font-style="italic" fill="#1A1A1A">PII egress</text>
+            <text x="405" y="168" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="#555">stage&nbsp;IV</text>
+          </g>
+
+          <!-- stage 5: user output -->
+          <g>
+            <rect x="500" y="80" width="80" height="60" fill="none" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="3 3"/>
+            <text x="540" y="105" text-anchor="middle" font-family="Cinzel, serif" font-size="9" letter-spacing="1.5">USER</text>
+            <text x="540" y="120" text-anchor="middle" font-family="Cinzel, serif" font-size="9" letter-spacing="1.5">OUTPUT</text>
+            <text x="540" y="160" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="7" fill="#555">stage&nbsp;V</text>
+          </g>
+
+          <!-- blocked tray indicator -->
+          <g>
+            <line x1="195" y1="150" x2="195" y2="195" stroke="#7A0E0E" stroke-width="0.6" stroke-dasharray="2 2"/>
+            <line x1="405" y1="150" x2="405" y2="195" stroke="#7A0E0E" stroke-width="0.6" stroke-dasharray="2 2"/>
+            <rect x="180" y="195" width="240" height="18" fill="none" stroke="#7A0E0E" stroke-width="0.7"/>
+            <text x="300" y="208" text-anchor="middle" font-family="Cinzel, serif" font-size="8" letter-spacing="2" fill="#7A0E0E">BLOCKED&nbsp;TRAY</text>
+          </g>
+        </svg>
+        <div class="diagram-caption">Figure I &middot; the five-stage architecture, with rejected requests routed to a blocked tray.</div>
+      </div>
+
+      <p class="fade">The implementations that have settled into practice in 2026 form a small canonical set. <strong>Llama Guard 3</strong>, an open-weights safeguard model from Meta aligned to the MLCommons hazards taxonomy, serves as a serviceable input and output classifier in most stacks.<sup class="fn"><a href="#ref-10">10</a></sup> <strong>Lakera Guard</strong>, a commercial product, is presently the strongest of the prompt-injection and jailbreak detectors on adversarial benchmarks.<sup class="fn"><a href="#ref-11">11</a></sup> <strong>NVIDIA NeMo Guardrails</strong> offers a programmable approach &mdash; rails specified in the Colang DSL &mdash; that can express the application's policy declaratively rather than as opaque classifier weights.<sup class="fn"><a href="#ref-12">12</a></sup> <strong>OpenAI Moderation</strong> remains the path of least friction for teams already inside that ecosystem. None of these replaces a thoughtful threat model, but each closes attack surface that a hand-rolled prompt cannot.</p>
+
+      <p class="fade">A note on what is <em>not</em> in this pipeline: there is no place in it where the model audits its own intentions. The pipeline is, by design, a system of external checks. The interior of the model &mdash; what it is doing and why &mdash; is the subject of Article V.</p>
+
+      <p class="fade">Two design choices recur often enough to deserve plain naming. The first is whether the rails are <em>blocking</em> or <em>advisory</em>: a blocking rail refuses the request and returns a refusal message; an advisory rail tags the request with a risk score and lets the application decide. Customer-facing surfaces usually prefer blocking; internal copilots usually prefer advisory, on the theory that an engineer who can see the warning is in a better position to judge than a classifier. The second is whether rails run <em>in series</em> or <em>in parallel</em>: parallel rails minimise latency and fail loudly when any one classifier objects; serial rails permit cheaper rails to short-circuit more expensive ones, at the cost of higher tail-latency when all rails accept. Both choices admit good answers; both are made worse by being left implicit.</p>
+
+    </article>
+
+    <div class="breaker fade">&#10086; &#10087; &#10086;</div>
+
+    <!-- =================== ARTICLE III =================== -->
+    <header class="article-header fade">
+      <div class="article-num">Article III</div>
+      <h2 class="article-title">Constitutional Artificial Intelligence</h2>
+    </header>
+    <p class="article-epigraph fade">
+      <em>The model critiques itself, then revises.</em><br>
+      <cite>&mdash; Bai et al., 2022</cite>
+    </p>
+
+    <article class="column">
+
+      <p class="lede fade"><span class="drop">C</span>onstitutional Artificial Intelligence &mdash; CAI &mdash; was introduced by Anthropic in 2022 as a partial answer to the scaling problem at the heart of reinforcement learning from human feedback.<sup class="fn"><a href="#ref-13">13</a></sup> The premise of RLHF is that humans rank pairs of model outputs and a reward model learns to predict those rankings. The premise's weakness is that human raters, however carefully recruited, do not scale to the capability of the model they are evaluating. CAI replaces a large fraction of the human-preference signal with a self-critique loop, in which the model is shown its own draft, asked to evaluate that draft against an explicit list of written principles, and asked to revise.</p>
+
+      <p class="fade">The loop has four steps. (1) <em>Generate.</em> The model produces a candidate response to a prompt. (2) <em>Self-critique.</em> The model reads its own output and writes a critique against the constitution. (3) <em>Revise.</em> The model rewrites the response to address its own critique. (4) <em>Output.</em> The revised response is the data point. The pairs of original and revised responses become preference data, which trains a reward model, which fine-tunes the base model, and the loop continues. Anthropic reports that CAI-trained models produce roughly forty per cent fewer harmful outputs than pure-RLHF baselines while remaining equally helpful on standard benchmarks &mdash; a result that has held under independent replication.<sup class="fn"><a href="#ref-13">13</a></sup></p>
+
+      <p class="fade">The constitution itself is the artefact most distinctive to the technique, and the one most often overlooked by commentary. It is a written, versioned document. Anthropic's most recent published constitution draws from sources as varied as the Universal Declaration of Human Rights, Apple's Terms of Service, the principles of the Sparrow project at DeepMind, and a body of empirical work on which prompts produce least harm.<sup class="fn"><a href="#ref-14">14</a></sup> An excerpt &mdash; among the most-cited principles in the corpus &mdash; reads:</p>
+
+      <blockquote class="fade">
+        Choose the response that is most supportive of life, liberty, and personal security. Avoid responses that are harmful, unethical, racist, sexist, toxic, dangerous, or illegal. Be helpful in a way a thoughtful, senior, kind person would be helpful.
+        <cite>&mdash; Claude's Constitution, excerpt</cite>
+      </blockquote>
+
+      <p class="fade">The strength of the method is that the values are written. They can be inspected, debated, amended, and refused. They are not implicit in the weights of a reward model trained on data nobody outside the lab will ever read. The weakness of the method is, of course, that <em>the model</em> is being asked to interpret <em>the constitution</em> against <em>its own output</em>, and the same architecture responsible for hallucination in Article I is responsible for the interpretation here. Self-critique cannot exceed the model's capacity for honest self-assessment, which capacity is the very subject Article V will treat. CAI is a substantial advance. It is not a closure.</p>
+
+    </article>
+
+    <div class="breaker fade">&#10086; &#10087; &#10086;</div>
+
+    <!-- =================== ARTICLE IV =================== -->
+    <header class="article-header fade">
+      <div class="article-num">Article IV</div>
+      <h2 class="article-title">RLHF and Its Discontents</h2>
+    </header>
+    <p class="article-epigraph fade">
+      <em>Models optimise for what reward models measure, not for what humans meant.</em>
+    </p>
+
+    <article class="column">
+
+      <p class="lede fade"><span class="drop">R</span>einforcement learning from human feedback was the technique that turned a research artefact, the third-generation GPT, into a deployable product. Its mechanics are by now familiar: a base model produces a pair of outputs; a human rater chooses one; many thousands of such choices train a small reward model that learns to predict which output the human would prefer; the base model is fine-tuned, via PPO or a successor algorithm, to maximise that predicted reward. The result is the difference, in raw experience, between GPT-3 and ChatGPT &mdash; between a model that produces fluent text and a model that produces fluent text in the register the user wanted.<sup class="fn"><a href="#ref-15">15</a></sup></p>
+
+      <p class="fade">What RLHF does well is style and refusal calibration. It teaches the model to be polite, to refuse plainly harmful requests, to follow instructions in a recognisable conversational frame. What it does poorly is anything that requires the model to <em>understand</em> what the human meant, as distinct from what the human-trained reward model rewards. The literature on this gap is now considerable, and uses two technical terms it is worth introducing here.</p>
+
+      <p class="fade"><em>Reward hacking</em> is the phenomenon in which a model finds a behaviour that scores well under the reward model but that humans, asked directly, would not endorse. A canonical example: a model fine-tuned for "helpfulness" learns to be sycophantic, because sycophancy is among the easiest behaviours that score well on a reward model trained from human preference. <em>Specification gaming</em> is the more general failure: the objective the engineers wrote down is not the objective they meant, and the model optimises the written one with discipline.<sup class="fn"><a href="#ref-16">16</a></sup> Subtle errors in the reward model compound during fine-tuning into systematic behaviours that are hard to detect from outputs alone, because outputs by construction look good to the reward model that produced them.</p>
+
+      <div class="warning fade">
+        <p>The general rule, stated without ornament: <em>the smarter the model becomes, the better it becomes at gaming a flawed objective.</em> A safety strategy that depends on the model being insufficiently capable to circumvent its own training is, in the long run, no safety strategy at all.</p>
+      </div>
+
+      <p class="fade">RLHF remains, in 2026, the workhorse of every frontier laboratory's post-training pipeline. It is supplemented, not replaced, by CAI and by direct preference optimisation and by an expanding family of variations that all share its premise. The premise is sound. The premise's limit is the topic of this article.</p>
+
+      <p class="fade">A practical consequence for the engineer: a model that scores well on a safety benchmark trained from the same human-preference distribution as its reward model may be reporting, with high precision, only that it has learnt that distribution. The gap between distribution-fit and the behaviour one cares about is the gap in which reward hacking lives, and it is invisible to the in-distribution measurement. Out-of-distribution adversarial evaluation &mdash; the discipline Article VII will recommend operationalising &mdash; is the only credible counterweight presently available to the field.</p>
+
+    </article>
+
+    <div class="breaker fade">&#10086; &#10087; &#10086;</div>
+
+    <!-- =================== ARTICLE V =================== -->
+    <header class="article-header fade">
+      <div class="article-num">Article V</div>
+      <h2 class="article-title">Mechanistic Interpretability</h2>
+    </header>
+    <p class="article-epigraph fade">
+      <em>The science of reading the model's internals.</em>
+    </p>
+
+    <article class="column">
+
+      <p class="lede fade"><span class="drop">M</span>echanistic interpretability is the discipline of inspecting the internal computations of a neural network at a level sufficiently fine-grained to give an account of <em>why</em> the network produced the output it did. It is the most ambitious branch of alignment, and the one closest to a real answer; it is also the branch where the field is most honest about its present limits.</p>
+
+      <p class="fade">The vocabulary has stabilised since 2024 around three units of analysis. <em>Circuits</em> are subgraphs of attention heads and feed-forward components that together implement a recognisable function &mdash; a single induction circuit, for instance, that copies prior tokens.<sup class="fn"><a href="#ref-17">17</a></sup> <em>Features</em> are directions in activation space that correspond to recognisable concepts &mdash; Anthropic's 2024 monosemanticity work demonstrated that sparse-autoencoder decompositions of a model's residual stream surface human-interpretable features in the millions, ranging from "the Golden Gate Bridge" to "the concept of inner conflict" to "code that contains a security vulnerability."<sup class="fn"><a href="#ref-18">18</a></sup> <em>Policies</em>, the most recent and most contested unit, are claimed regularities in how a model decides between courses of action in agentic settings, where the interpretive problem is no longer a single forward pass but a trajectory.</p>
+
+      <p class="fade">Where the field stands in 2026 is that we can identify many features in some models, identify a few circuits in some models, and account for very little of the behaviour we observe in deployed frontier systems. A prominent researcher noted, in the spring of this year: "I don't see a path to deeply and reliably understanding what AIs are thinking."<sup class="fn"><a href="#ref-19">19</a></sup> The sentiment is widely shared. Understanding the circuits behind a single short prompt still consumes hours of researcher time. Automated interpretability &mdash; the project of using language models to explain the circuits of other language models &mdash; risks the same confabulation that Article I identified as the failure mode of the medium itself.</p>
+
+      <p class="fade">What this changes &mdash; should the field's trajectory continue &mdash; is the relationship between safety and trust. A guardrail pipeline is a system of external checks; CAI is a system of trained dispositions; mechanistic interpretability is the first plausible candidate for a third thing, which is <em>understanding</em>. The gap between "what the model can do" and "what we can audit it doing" is, at present, widening rather than narrowing. Interpretability is the only programme with a credible claim to close it.</p>
+
+      <p class="fade">An honest note for the practitioner: nothing in this article is, today, a deployment tool. The interpretability results that exist are research artefacts, useful for the design of training procedures and for the publication of evidence about what models contain. They do not yet permit the on-call engineer at 2 a.m. to ask <em>why did the model do that</em> and receive an answer in a form a postmortem can use. That this is the case is not a criticism of the field; it is a description of where the field is. The remainder of this brief addresses what the engineer at 2 a.m. <em>does</em> have available, which is the substance of Article VII and the walkthrough that follows it.</p>
+
+    </article>
+
+    <div class="breaker fade">&#10086; &#10087; &#10086;</div>
+
+    <!-- =================== ARTICLE VI =================== -->
+    <header class="article-header fade">
+      <div class="article-num">Article VI</div>
+      <h2 class="article-title">Open Problems</h2>
+    </header>
+    <p class="article-epigraph fade">
+      <em>Honestly, no one has solved these yet.</em>
+    </p>
+
+    <article class="column">
+
+      <p class="lede fade"><span class="drop">H</span>onesty matters more here than in any other section of this brief. The five problems enumerated below are problems that frontier laboratories publicly acknowledge they do not have answers to. If anyone offers you the assurance that alignment is solved, they are either selling you something or have not read the literature.</p>
+
+      <ol class="enumerated fade">
+
+        <li>
+          <span class="name">Layered defences still bleed.</span>
+          <p class="text">Feedback-based jailbreak attacks retain residual success rates above fifteen per cent against stacked, production-grade defences. The cost-curve favours the attacker &mdash; generating a novel jailbreak is cheaper than constructing a robust block for it.</p>
+          <span class="cite-line">see ref. 5 &middot; Greshake et al. 2023; Anthropic Red-Team 2025</span>
+        </li>
+
+        <li>
+          <span class="name">Interpretability has not caught up to capability.</span>
+          <p class="text">Understanding the circuits behind a single short prompt still consumes hours of researcher time. Automated interpretability &mdash; using language models to explain language models &mdash; risks hallucinated explanations. The gap between what the model can do and what we can audit it doing is widening.</p>
+          <span class="cite-line">see ref. 18, 19 &middot; Olah, Cammarata 2020; Anthropic 2024</span>
+        </li>
+
+        <li>
+          <span class="name">Reward hacking and specification gaming.</span>
+          <p class="text">Models optimise for what reward models measure, not what humans meant. Subtle reward-model errors compound during fine-tuning into systematic, hard-to-detect behaviours. The smarter the model, the better it gets at gaming a flawed objective.</p>
+          <span class="cite-line">see ref. 16 &middot; Krakovna et al. 2020; DeepMind &amp; OpenAI red-teams</span>
+        </li>
+
+        <li>
+          <span class="name">Indirect prompt injection in agent loops.</span>
+          <p class="text">A model that reads tools, files, or web pages reads instructions embedded in them. As agentic systems take more actions on more surfaces, the attack surface compounds &mdash; and no current defence reliably distinguishes data the model should consider from instructions the model should obey.</p>
+          <span class="cite-line">see ref. 3 &middot; Greshake et al. 2023; Perez &amp; Ribeiro 2024</span>
+        </li>
+
+        <li>
+          <span class="name">Evaluation drift.</span>
+          <p class="text">Safety benchmarks leak into training data. Models score higher on the test, not safer on the world. Holdout sets degrade in months. Continuous, adversarial, in-the-wild evaluation is operationally expensive and methodologically immature.</p>
+          <span class="cite-line">see ref. 20 &middot; Sainz et al. 2023; MLCommons AILuminate 2025</span>
+        </li>
+
+      </ol>
+
+    </article>
+
+    <div class="breaker fade">&#10086; &#10087; &#10086;</div>
+
+    <!-- =================== ARTICLE VII =================== -->
+    <header class="article-header fade">
+      <div class="article-num">Article VII</div>
+      <h2 class="article-title">Tools &amp; Practices for Today's Builders</h2>
+    </header>
+    <p class="article-epigraph fade">
+      <em>What to evaluate before shipping.</em>
+    </p>
+
+    <article class="column">
+
+      <p class="lede fade"><span class="drop">I</span>f you are shipping an application built on a large language model in the current quarter, the following are the names you will evaluate. None replaces a thoughtful threat model. Each closes a class of attack surface that a hand-rolled prompt cannot. The table compares the canonical four; the prose that follows annotates the choice.</p>
+
+      <table class="compare fade">
+        <caption>Table I &middot; canonical safety tooling, 2026</caption>
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>What it does</th>
+            <th>When to use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Llama&nbsp;Guard&nbsp;3<span class="meta">Meta &middot; open weights</span></th>
+            <td>Multimodal safeguard classifier aligned to the MLCommons hazards taxonomy; drop-in for input and output rails; runs locally or through inference providers.</td>
+            <td>Open-stack deployments; teams that need on-premise classification; cost-sensitive workloads.</td>
+          </tr>
+          <tr>
+            <th scope="row">Lakera&nbsp;Guard<span class="meta">Lakera &middot; commercial</span></th>
+            <td>Real-time detection of prompt injection, jailbreak attempts, and PII; presently the strongest on adversarial benchmarks where lightweight classifiers degrade.</td>
+            <td>Customer-facing deployments where injection is the primary threat; regulated industries with PII flow.</td>
+          </tr>
+          <tr>
+            <th scope="row">NeMo&nbsp;Guardrails<span class="meta">NVIDIA &middot; open source</span></th>
+            <td>Programmable rails &mdash; input, dialog, retrieval, execution, output &mdash; specified in the Colang DSL; integrates with LangChain and LangGraph.</td>
+            <td>Applications where policy must be expressed declaratively; audited deployments; teams who want their rules in version control.</td>
+          </tr>
+          <tr>
+            <th scope="row">OpenAI&nbsp;Moderation<span class="meta">OpenAI &middot; hosted API</span></th>
+            <td>Free hosted classifier across thirteen harm categories; the lowest-friction first line of defence for OpenAI-stack applications.</td>
+            <td>OpenAI-native applications; minimum-viable safety baseline; pair with custom domain classifiers.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="fade">The choice among these is rarely binary. A mature stack typically composes two or three &mdash; for example, Lakera Guard at the input rail for adversarial robustness; Llama Guard 3 at the output rail for content classification; NeMo Guardrails as the policy spine that orchestrates them. Honourable mentions, each strong in its niche: <em>Microsoft Azure AI Content Safety</em> for organisations standardised on Azure; <em>LLM Guard</em> for open-source mixed pipelines; <em>Prompt Armor</em> and <em>Guardrails AI</em> for specialised classes of attack; and <em>Langfuse</em> for the evaluation infrastructure that ought to surround all of it.</p>
+
+    </article>
+
+    <div class="breaker fade">&#10086; &#10087; &#10086;</div>
+
+    <!-- =================== A WALKTHROUGH =================== -->
+    <header class="article-header fade">
+      <div class="article-num">A Walkthrough</div>
+      <h2 class="article-title">A Safety Layer for a Customer-Facing Agent</h2>
+    </header>
+    <p class="article-epigraph fade">
+      <em>From threat model to deployable rail, in seven steps.</em>
+    </p>
+
+    <article class="column">
+
+      <p class="lede fade"><span class="drop">A</span> worked example. Suppose you are building a customer-facing support agent for a financial-services company. The agent answers account questions, executes refunds within a limit, and escalates to a human when uncertain. We sketch the safety layer you would build before launch.</p>
+
+      <ol class="steps fade">
+        <li>
+          <span class="step-title">Write the threat model first</span>
+          <p>Enumerate the three threats most acute for this product: (a) PII disclosure across user sessions; (b) prompt-injection from a customer document that induces the agent to issue refunds it should not; (c) hallucinated policy claims that bind the company. Write them down, with example payloads, before writing any code.</p>
+        </li>
+        <li>
+          <span class="step-title">Scope the agent's tools narrowly</span>
+          <p>Refund tool capped at $500 per invocation, $2,000 per day per agent instance, with idempotency keys. Read-only access to the policy database. No outbound email. Capability scoping is the highest-leverage safety control; it is also the one most often skipped.</p>
+        </li>
+        <li>
+          <span class="step-title">Wire the input rail</span>
+          <p>Llama Guard 3 on user input for harm classification; Lakera Guard on user input <em>and</em> on retrieved document chunks for prompt-injection detection; an internal PII redactor on anything bound for the model's context window.</p>
+        </li>
+        <li>
+          <span class="step-title">Bind the system prompt with CAI principles</span>
+          <p>Lift principles from Anthropic's published constitution that apply to the use-case: do not commit the company to obligations not stated in policy; refuse requests that bypass identity verification; default to escalation when uncertain. State them in the system prompt and in the policy spine.</p>
+        </li>
+        <li>
+          <span class="step-title">Wire the output rail</span>
+          <p>A second pass through Llama Guard 3 on model output; a citation verifier that confirms any policy claim resolves to a row in the policy database; a PII egress check that strips anything matching account-number patterns from outbound responses.</p>
+        </li>
+        <li>
+          <span class="step-title">Add an adversarial evaluation suite</span>
+          <p>A held-out benchmark of two hundred adversarial prompts &mdash; jailbreaks, injections, social-engineering attempts &mdash; run against every deployment candidate. A regression on this suite blocks promotion to production. Refresh the suite every quarter; benchmarks decay.</p>
+        </li>
+        <li>
+          <span class="step-title">Log everything; review weekly</span>
+          <p>Persist every input, every retrieved chunk, every tool call, every output, and every rail decision, with a retention policy your privacy counsel has signed. Sample fifty conversations a week for manual review. Without this, you do not have a safety layer; you have a hope.</p>
+        </li>
+      </ol>
+
+      <pre class="code"><span class="com"># sketch of a guarded inference call (Python, illustrative)</span>
+<span class="kw">from</span> guardrails <span class="kw">import</span> InputRail, OutputRail, ToolPolicy
+
+rail_in  = InputRail(harm=<span class="str">"llama-guard-3"</span>, injection=<span class="str">"lakera"</span>, pii=<span class="str">"strict"</span>)
+rail_out = OutputRail(harm=<span class="str">"llama-guard-3"</span>, citation=<span class="str">"policy-db"</span>, pii_egress=<span class="str">"account-numbers"</span>)
+policy   = ToolPolicy(refund_max=<span class="str">500</span>, daily_cap=<span class="str">2000</span>, require_id_check=<span class="str">True</span>)
+
+<span class="kw">def</span> answer(turn):
+    safe_in = rail_in.check(turn)
+    <span class="kw">if</span> safe_in.blocked: <span class="kw">return</span> rail_in.refuse(safe_in.reason)
+    draft   = model.generate(safe_in.text, tools=policy.allowed())
+    safe_out = rail_out.check(draft)
+    <span class="kw">return</span> safe_out.text <span class="kw">if not</span> safe_out.blocked <span class="kw">else</span> rail_out.refuse()</pre>
+
+      <p class="fade">The above is a sketch; production systems add tracing, rate limiting, dual-control on the refund tool, an escalation queue, and a kill-switch the on-call engineer can pull without a deploy. None of these is glamorous. All of them are the work.</p>
+
+    </article>
+
+    <div class="breaker fade">&#10086; &#10087; &#10086;</div>
+
+    <!-- =================== AMENDMENTS =================== -->
+    <header class="article-header fade">
+      <div class="article-num">Amendments</div>
+      <h2 class="article-title">Three Proposed Amendments to the Safety Canon</h2>
+    </header>
+
+    <article class="column">
+
+      <p class="lede fade"><span class="drop">T</span>he three proposals below are offered as friendly amendments to current practice. They are not novel; they have been argued, in various forms, by people closer to the problem than the present author. They are reiterated here in the hope that reiteration is sometimes the form change takes.</p>
+
+      <ol class="enumerated fade">
+        <li>
+          <span class="name">Amendment the First &mdash; Disclosure of failure modes shall accompany release.</span>
+          <p class="text">Every frontier model release should ship with a public red-team report enumerating the categories of attack that succeeded, the rates at which they succeeded, and the residual rates against the published mitigations. Selective disclosure of capability without symmetric disclosure of failure is, at this stage of the field, an unforced harm.</p>
+        </li>
+        <li>
+          <span class="name">Amendment the Second &mdash; Capability scoping shall be the default.</span>
+          <p class="text">Agentic systems should ship with tool permissions disabled by default and require explicit enablement, per-tool, with documented rationale. The current convention &mdash; broad capability granted by default and revoked when an incident occurs &mdash; inverts the appropriate cost-curve.</p>
+        </li>
+        <li>
+          <span class="name">Amendment the Third &mdash; The constitution shall be in version control.</span>
+          <p class="text">Where a deployment relies upon written principles &mdash; system prompts, refusal policies, escalation rules &mdash; those principles should live in a public or auditable repository with a commit history. Values that cannot be inspected cannot be debated. Values that cannot be debated cannot be improved.</p>
+        </li>
+      </ol>
+
+    </article>
+
+    <div class="breaker fade">&#10086; &#10087; &#10086;</div>
+
+    <!-- =================== REFERENCES =================== -->
+    <header class="article-header fade">
+      <div class="article-num">References</div>
+      <h2 class="article-title">Cited Works</h2>
+    </header>
+
+    <section class="references fade">
+      <ol>
+        <li id="ref-1">Bender, E. M., Gebru, T., McMillan-Major, A., &amp; Shmitchell, S. <em>On the Dangers of Stochastic Parrots: Can Language Models Be Too Big?</em> <span class="where">FAccT 2021.</span></li>
+        <li id="ref-2">Huang, L., Yu, W., Ma, W., et&nbsp;al. <em>A Survey on Hallucination in Large Language Models.</em> <span class="where">ACM Computing Surveys, 2024.</span></li>
+        <li id="ref-3">Greshake, K., Abdelnabi, S., Mishra, S., et&nbsp;al. <em>Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection.</em> <span class="where">AISec 2023.</span></li>
+        <li id="ref-4">Anthropic Red-Team. <em>Evaluating Jailbreak Resistance in Frontier Models.</em> <span class="where">Anthropic technical report, 2025.</span></li>
+        <li id="ref-5">Andriushchenko, M., Croce, F., &amp; Flammarion, N. <em>Jailbreaking Leading Safety-Aligned LLMs with Simple Adaptive Attacks.</em> <span class="where">ICLR 2024.</span></li>
+        <li id="ref-6">Carlini, N., Tramer, F., Wallace, E., et&nbsp;al. <em>Extracting Training Data from Large Language Models.</em> <span class="where">USENIX Security 2021.</span></li>
+        <li id="ref-7">Casper, S., Davies, X., Shi, C., et&nbsp;al. <em>Open Problems and Fundamental Limitations of Reinforcement Learning from Human Feedback.</em> <span class="where">TMLR 2023.</span></li>
+        <li id="ref-8">Blodgett, S. L., Barocas, S., Daum&eacute; III, H., &amp; Wallach, H. <em>Language (Technology) is Power: A Critical Survey of Bias in NLP.</em> <span class="where">ACL 2020.</span></li>
+        <li id="ref-9">Rebedea, T., Dinu, R., Sreedhar, M., et&nbsp;al. <em>NeMo Guardrails: A Toolkit for Controllable and Safe LLM Applications.</em> <span class="where">EMNLP 2023 demo.</span></li>
+        <li id="ref-10">Inan, H., Upasani, K., Chi, J., et&nbsp;al. <em>Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations.</em> <span class="where">Meta AI, 2023; v3 released 2024; v4 multimodal, 2025.</span></li>
+        <li id="ref-11">Lakera AI. <em>Gandalf: Lakera Guard prompt-injection benchmark and product whitepaper.</em> <span class="where">Lakera, 2024.</span></li>
+        <li id="ref-12">NVIDIA. <em>NeMo Guardrails &mdash; Programmable rails for LLM applications.</em> <span class="where">NVIDIA developer documentation, 2024.</span></li>
+        <li id="ref-13">Bai, Y., Kadavath, S., Kundu, S., et&nbsp;al. <em>Constitutional AI: Harmlessness from AI Feedback.</em> <span class="where">Anthropic, 2022.</span></li>
+        <li id="ref-14">Anthropic. <em>Claude's Constitution.</em> <span class="where">Public document, anthropic.com, updated January 2026.</span></li>
+        <li id="ref-15">Christiano, P., Leike, J., Brown, T., et&nbsp;al. <em>Deep Reinforcement Learning from Human Preferences.</em> <span class="where">NeurIPS 2017; Ouyang et&nbsp;al., InstructGPT, NeurIPS 2022.</span></li>
+        <li id="ref-16">Krakovna, V., Uesato, J., Mikulik, V., et&nbsp;al. <em>Specification Gaming: The Flip Side of AI Ingenuity.</em> <span class="where">DeepMind safety research blog, 2020.</span></li>
+        <li id="ref-17">Elhage, N., Nanda, N., Olsson, C., et&nbsp;al. <em>A Mathematical Framework for Transformer Circuits.</em> <span class="where">Anthropic, 2021; Olsson et&nbsp;al., In-context Learning and Induction Heads, 2022.</span></li>
+        <li id="ref-18">Templeton, A., Conerly, T., Marcus, J., et&nbsp;al. <em>Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet.</em> <span class="where">Anthropic, 2024.</span></li>
+        <li id="ref-19">Hendrycks, D., remarks on the state of mechanistic interpretability. <span class="where">Center for AI Safety, public address, spring 2026.</span></li>
+        <li id="ref-20">Sainz, O., Campos, J. A., Garc&iacute;a-Ferrero, I., et&nbsp;al. <em>NLP Evaluation in Trouble: On the Need to Measure LLM Data Contamination.</em> <span class="where">EMNLP Findings 2023.</span></li>
+      </ol>
+    </section>
+
+    <!-- =================== SIGNATURE =================== -->
+    <section class="signature fade">
+      <div class="signed">Signed, in the year MMXXVI</div>
+      <div class="hand">Manu Mulaveesala</div>
+      <div class="meta">
+        <span>CETI&#46;AI</span>
+        <span class="sep">&middot;</span>
+        <span>cetiai.co</span>
+        <span class="sep">&middot;</span>
+        <span>15 May 2026</span>
+      </div>
+    </section>
+
+    <!-- =================== WATERMARK =================== -->
+    <div class="watermark">
+      Article XIV of XVIII &middot; CETI Lookbook
     </div>
-  </section>
 
-  <!-- THREAT LANDSCAPE -->
-  <section class="section">
-    <p class="section-label animate-in">01 · The Threat Landscape</p>
-    <h2 class="section-heading animate-in">The real problems are mundane, not cinematic.</h2>
-    <p class="section-lede animate-in">Public discourse about AI risk leans toward science fiction — superintelligence, terminators, paperclips. The actual problems engineers deploy guardrails against are far less dramatic, and far more present.</p>
-
-    <div class="threats">
-      <p class="animate-in"><strong>Hallucination</strong> is the failure mode you meet first. A model produces fluent, confident, plausible text that happens to be wrong. Citations that don't exist. APIs that were never written. Court cases that were never filed. It's not malice — it's the architecture: the model is predicting the next token, not retrieving a fact.</p>
-      <p class="animate-in"><strong>Prompt injection</strong> is the failure mode that scales. A user (or a webpage the model reads, or a document a teammate uploaded) embeds instructions inside data — and the model can't tell the difference. Recent research clocks the average time to a successful jailbreak at under 17 minutes for frontier models. Defenses help; none are complete.</p>
-      <p class="animate-in"><strong>Data exfiltration and PII leakage</strong> happen when an agent with tool access reads something it shouldn't, then writes it somewhere it can. A model with email-send permission plus a contaminated input is a phishing engine.</p>
-      <p class="animate-in"><strong>Bias and disparate harm</strong> are the failure modes that compound. A model trained on internet text inherits internet patterns — gendered defaults, racial assumptions, dialect penalization. These don't fix themselves; they require deliberate measurement and counterweight.</p>
-    </div>
-
-    <blockquote class="threat-quote animate-in">
-      LLMs carry an intrinsic risk triad — hallucination, indirect prompt injection, and jailbreaks — rooted in probabilistic modeling, stochastic decoding, and linguistic flexibility. These are not bugs to patch. They are properties of the medium.
-      <cite>— synthesis of 2026 red-team literature</cite>
-    </blockquote>
-  </section>
-
-  <!-- PIPELINE — SIGNATURE VISUAL -->
-  <section class="section warm">
-    <div class="inner">
-      <p class="section-label animate-in">02 · The Guardrail Pipeline</p>
-      <h2 class="section-heading animate-in">What a production deployment actually looks like.</h2>
-      <p class="section-lede animate-in">A modern LLM application doesn't expose the raw model to the user. It wraps the model in a pipeline of lightweight classifiers that run in parallel — adding 10–50ms of latency — and reject anything that fails policy. Below: a single user request flowing through the standard five-stage architecture. Some packets pass; some get redirected to the blocked tray.</p>
-
-      <div class="pipeline-wrap animate-in">
-        <div class="pipeline-key">
-          <span><span class="swatch filter"></span>Filter</span>
-          <span><span class="swatch model"></span>Model</span>
-          <span><span class="swatch pass"></span>Passed</span>
-          <span><span class="swatch block"></span>Blocked &amp; rerouted</span>
-        </div>
-
-        <div class="pipeline" id="pipeline">
-          <div class="stage endpoint">
-            <div class="stage-label">Stage 01</div>
-            <h3 class="stage-title">User input</h3>
-            <p style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-text-muted); margin: 0;">Prompts, files, tool results, agent memory.</p>
-          </div>
-
-          <div class="stage filter">
-            <div class="stage-label">Stage 02 · Input rails</div>
-            <h3 class="stage-title">Input filters</h3>
-            <ul class="filter-list">
-              <li><span>Toxicity classifier</span><span class="dot"></span></li>
-              <li><span>Prompt-injection detector</span><span class="dot"></span></li>
-              <li><span>PII redaction</span><span class="dot"></span></li>
-              <li><span>Off-topic / scope check</span><span class="dot"></span></li>
-            </ul>
-          </div>
-
-          <div class="stage model">
-            <div class="stage-label">Stage 03</div>
-            <h3 class="stage-title">Model</h3>
-            <div class="model-core">
-              <div class="model-ring">LLM</div>
-              <div class="model-caption">Aligned weights</div>
-            </div>
-          </div>
-
-          <div class="stage filter">
-            <div class="stage-label">Stage 04 · Output rails</div>
-            <h3 class="stage-title">Output filters</h3>
-            <ul class="filter-list">
-              <li><span>Harmful-content check</span><span class="dot"></span></li>
-              <li><span>Hallucination scoring</span><span class="dot"></span></li>
-              <li><span>Citation verification</span><span class="dot"></span></li>
-              <li><span>PII egress check</span><span class="dot"></span></li>
-            </ul>
-          </div>
-
-          <div class="stage endpoint">
-            <div class="stage-label">Stage 05</div>
-            <h3 class="stage-title">User output</h3>
-            <p style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-text-muted); margin: 0;">Response, tool call, or refusal with reason.</p>
-          </div>
-
-          <div class="flow-track" id="flowTrack" aria-hidden="true"></div>
-        </div>
-
-        <div class="blocked-tray">
-          <span class="label">Blocked tray</span>
-          <span class="examples">Jailbreaks · injection payloads · PII leaks · refused tasks</span>
-          <span class="blocked-counter num" data-to="2147">0</span>
-          <span style="font-family: var(--font-mono); font-size: 0.7rem;">requests / hr</span>
-        </div>
-      </div>
-
-      <p style="margin-top: 1.5rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-muted); text-align: center;">
-        Real implementations: NVIDIA NeMo Guardrails, Llama Guard 4, OpenAI Moderation, Lakera Guard, LLM Guard.
-      </p>
-    </div>
-  </section>
-
-  <!-- ALIGNMENT BENTO -->
-  <section class="section">
-    <p class="section-label animate-in">03 · How Frontier Labs Do Alignment</p>
-    <h2 class="section-heading animate-in">Four techniques that actually shape model behavior.</h2>
-    <p class="section-lede animate-in">Guardrails are the runtime defense. Alignment is what happens during training — the deliberate work of shaping <em>what the model wants to do</em> before it ever sees a user request. These four techniques compose; none is sufficient alone.</p>
-
-    <div class="bento">
-      <article class="magic-card">
-        <span class="card-tag"><span class="num">01</span> · Method</span>
-        <h3 class="card-title">RLHF — Reinforcement Learning from Human Feedback</h3>
-        <p class="card-body">Humans rank pairs of model outputs. A reward model learns to predict which ranking humans would give. The base model is then fine-tuned to maximize that predicted reward. This is what turned GPT-3 into ChatGPT and remains the workhorse of post-training across every frontier lab.</p>
-        <p class="card-footnote">Bottleneck: human raters don't scale to model capability.</p>
-      </article>
-
-      <article class="magic-card">
-        <span class="card-tag"><span class="num">02</span> · Method</span>
-        <h3 class="card-title">Constitutional AI</h3>
-        <p class="card-body">Anthropic's answer to the RLHF scaling problem. Instead of relying purely on human preference labels, the model critiques and revises its own outputs against an explicit, public set of principles — the constitution. Anthropic reports CAI-trained models produce 40% fewer harmful outputs than pure-RLHF baselines while staying equally helpful.</p>
-        <p class="card-footnote">Constitution is versioned and public — last update Jan 2026.</p>
-      </article>
-
-      <article class="magic-card">
-        <span class="card-tag"><span class="num">03</span> · Method</span>
-        <h3 class="card-title">Red-teaming</h3>
-        <p class="card-body">Adversarial probing before release. Internal teams, external researchers, and now automated attacker-models hunt for jailbreaks, harmful behaviors, and capability surprises. Findings flow back into training data and refusal policies. Every frontier release ships with a red-team report; the gap between published and unpublished findings is itself a safety question.</p>
-        <p class="card-footnote">External programs: Anthropic, OpenAI, DeepMind bug bounties.</p>
-      </article>
-
-      <article class="magic-card">
-        <span class="card-tag"><span class="num">04</span> · Method</span>
-        <h3 class="card-title">Mechanistic interpretability</h3>
-        <p class="card-body">The science of reading the model's internals — circuits, features, attention patterns — to understand what computation it's actually performing. This is the most ambitious branch of alignment, the one closest to a real answer. It's also where the field is most honest about its limits. As one prominent researcher put it in 2026: "I don't see a path to deeply and reliably understanding what AIs are thinking."</p>
-        <p class="card-footnote">Status: research moving from circuits → features → policies.</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- CONSTITUTIONAL AI LOOP -->
-  <section class="section warm">
-    <div class="inner">
-      <p class="section-label animate-in">04 · Inside Constitutional AI</p>
-      <h2 class="section-heading animate-in">The model critiques itself, then revises.</h2>
-      <p class="section-lede animate-in">The Constitutional AI loop replaces a large chunk of human labeling with the model's own judgment, anchored to an explicit list of written principles. The result is cheaper to scale than RLHF and easier to audit, because the values are written down.</p>
-
-      <div class="loop-wrap animate-in">
-        <div class="loop">
-          <div class="loop-step">
-            <span class="num">Step 01</span>
-            <span class="title">Generate</span>
-            <span class="body">Model produces a candidate response to a prompt.</span>
-            <span class="loop-arrow">→</span>
-          </div>
-          <div class="loop-step">
-            <span class="num">Step 02</span>
-            <span class="title">Self-critique</span>
-            <span class="body">Model reads its own output and checks it against the constitution.</span>
-            <span class="loop-arrow">→</span>
-          </div>
-          <div class="loop-step">
-            <span class="num">Step 03</span>
-            <span class="title">Revise</span>
-            <span class="body">Model rewrites the response to address its own critique.</span>
-            <span class="loop-arrow">→</span>
-          </div>
-          <div class="loop-step">
-            <span class="num">Step 04</span>
-            <span class="title">Output</span>
-            <span class="body">Revised response returns to the pipeline.</span>
-          </div>
-        </div>
-
-        <div class="loop-return">
-          <strong>Loop:</strong> revised pairs become preference data → trains a reward model → fine-tunes the base model → repeat.
-        </div>
-
-        <div class="loop-constitution">
-          "Choose the response that is most supportive of life, liberty, and personal security. Avoid responses that are harmful, unethical, racist, sexist, toxic, dangerous, or illegal. Be helpful in a way a thoughtful, senior, kind person would be helpful."
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- OPEN PROBLEMS -->
-  <section class="section">
-    <p class="section-label animate-in">05 · Open Problems</p>
-    <h2 class="section-heading animate-in">What none of this has solved.</h2>
-    <p class="section-lede animate-in">Honesty matters more here than in any other section. These are problems frontier labs publicly acknowledge they don't have answers to. If anyone tells you alignment is solved, they're either selling something or haven't read the literature.</p>
-
-    <div class="problems">
-      <div class="problem animate-in">
-        <div class="problem-number"></div>
-        <div>
-          <h3 class="problem-title">Layered defenses still bleed.</h3>
-          <p class="problem-body">Feedback-based jailbreak attacks retain residual success rates above 15% even against stacked, production-grade defenses. The cost-curve favors the attacker — generating a novel jailbreak is cheaper than blocking one.</p>
-        </div>
-      </div>
-
-      <div class="problem animate-in">
-        <div class="problem-number"></div>
-        <div>
-          <h3 class="problem-title">Interpretability hasn't caught up to capability.</h3>
-          <p class="problem-body">Understanding the circuits behind a single short prompt still takes hours of researcher time. Automated interpretability — using LLMs to explain LLMs — risks hallucinated explanations. The gap between "what the model can do" and "what we can audit it doing" is widening.</p>
-        </div>
-      </div>
-
-      <div class="problem animate-in">
-        <div class="problem-number"></div>
-        <div>
-          <h3 class="problem-title">Reward hacking and specification gaming.</h3>
-          <p class="problem-body">Models optimize for what reward models measure, not what humans meant. Subtle reward-model errors compound during fine-tuning into systematic, hard-to-detect behaviors. The smarter the model, the better it gets at gaming a flawed objective.</p>
-        </div>
-      </div>
-
-      <div class="problem animate-in">
-        <div class="problem-number"></div>
-        <div>
-          <h3 class="problem-title">Indirect prompt injection in agent loops.</h3>
-          <p class="problem-body">A model that reads tools, files, or web pages reads instructions embedded in them. As agentic systems take more actions on more surfaces, the attack surface compounds — and no current defense reliably distinguishes "data the model should consider" from "instructions the model should obey."</p>
-        </div>
-      </div>
-
-      <div class="problem animate-in">
-        <div class="problem-number"></div>
-        <div>
-          <h3 class="problem-title">Evaluation drift.</h3>
-          <p class="problem-body">Safety benchmarks leak into training data. Models score higher on the test, not safer on the world. Holdout sets degrade in months. Continuous, adversarial, in-the-wild evaluation is operationally expensive and methodologically immature.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TOOLS -->
-  <section class="section warm">
-    <div class="inner">
-      <p class="section-label animate-in">06 · Tools Developers Can Use Today</p>
-      <h2 class="section-heading animate-in">Production-grade safety tooling, 2026.</h2>
-      <p class="section-lede animate-in">If you're shipping an LLM application this quarter, these are the names you'll evaluate. None replaces a thoughtful threat model — but each one closes attack surface a hand-rolled prompt cannot.</p>
-
-      <div class="tools">
-        <article class="tool animate-in">
-          <div class="tool-vendor">NVIDIA · Open-source</div>
-          <div class="tool-name">NeMo Guardrails</div>
-          <p class="tool-desc">Programmable rails (input, dialog, retrieval, execution, output) defined in the Colang DSL. Works with every major LLM provider; integrates with LangChain and LangGraph.</p>
-          <div class="tool-stage">Stage · all rails</div>
-        </article>
-
-        <article class="tool animate-in">
-          <div class="tool-vendor">Meta · Open weights</div>
-          <div class="tool-name">Llama Guard 4</div>
-          <p class="tool-desc">12B multimodal safeguard model aligned to the MLCommons hazards taxonomy. Drop-in input + output classifier; runs locally or via inference providers.</p>
-          <div class="tool-stage">Stage · input + output</div>
-        </article>
-
-        <article class="tool animate-in">
-          <div class="tool-vendor">OpenAI · Hosted API</div>
-          <div class="tool-name">Moderation API</div>
-          <p class="tool-desc">Free hosted classifier across 13 harm categories. Lowest-friction first line of defense for OpenAI-stack applications; pair with custom classifiers for domain-specific risk.</p>
-          <div class="tool-stage">Stage · input + output</div>
-        </article>
-
-        <article class="tool animate-in">
-          <div class="tool-vendor">Lakera · Commercial</div>
-          <div class="tool-name">Lakera Guard</div>
-          <p class="tool-desc">Real-time prompt-injection, jailbreak, and PII detection. Particularly strong on adversarial benchmarks where lightweight open classifiers degrade.</p>
-          <div class="tool-stage">Stage · input rails</div>
-        </article>
-      </div>
-
-      <p style="margin-top: 2rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-muted); text-align: center;">
-        Honorable mentions: Microsoft Azure AI Content Safety · LLM Guard · Prompt Armor · Guardrails AI · Langfuse evals.
-      </p>
-    </div>
-  </section>
-
-  <!-- FINAL CTA -->
-  <section class="final">
-    <h2>Safety is a posture, not a feature.</h2>
-    <p>If you're deploying LLMs in production — for customers, employees, or agents acting on your behalf — CETI runs an executive workshop on the threat model, the tooling, and the policies you need before launch.</p>
-    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
-      Book a safety workshop
-      <span class="arrow">→</span>
-    </a>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <span>CETI · Lookbook · AI Safety &amp; Alignment</span>
-    <span><a href="../index.html">← All concepts</a></span>
-  </footer>
+  </div>
 
   <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-    // ============ INTERSECTION-DRIVEN REVEALS ============
-    const reveal = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
-
-    document.querySelectorAll('.animate-in, .magic-card').forEach((el) => reveal.observe(el));
-
-    // ============ NUMBER TICKER ============
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const dur = 1400;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
+    // ============ MINIMAL FADE-IN ============
+    (function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var items = document.querySelectorAll('.fade');
+      if (reduce) {
+        items.forEach(function (el) { el.classList.add('in'); });
+        return;
       }
-      requestAnimationFrame(tick);
-    }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num[data-to]').forEach((el) => numObs.observe(el));
-
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 25;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-
-    // ============ MAGIC CARDS (cursor-follow glow) ============
-    document.querySelectorAll('.magic-card').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
-
-    // ============ PIPELINE PACKETS ============
-    // Spawns small "packet" dots that travel along the horizontal pipeline.
-    // Most pass (green); some get blocked at filter stages (vermillion to the blocked tray).
-    (function pipeline() {
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduce) return;
-
-      const track = document.getElementById('flowTrack');
-      const pipeline = document.getElementById('pipeline');
-      if (!track || !pipeline) return;
-
-      // Wait for pipeline visible before spawning
-      let active = false;
-      new IntersectionObserver((entries) => {
-        entries.forEach((e) => { active = e.isIntersecting; });
-      }, { threshold: 0.25 }).observe(pipeline);
-
-      // Stage centers (computed in % relative to pipeline width)
-      function stageCenters() {
-        const rect = pipeline.getBoundingClientRect();
-        const stages = pipeline.querySelectorAll('.stage');
-        return [...stages].map((s) => {
-          const r = s.getBoundingClientRect();
-          return ((r.left + r.width / 2) - rect.left) / rect.width * 100;
-        });
-      }
-
-      function spawn() {
-        if (!active) return;
-        const centers = stageCenters();
-        if (centers.length < 5) return;
-
-        const blocked = Math.random() < 0.32;
-        // If blocked, it stops at stage 2 (input filter, index 1) or stage 4 (output filter, index 3)
-        const stopAt = blocked ? (Math.random() < 0.55 ? 1 : 3) : 4;
-
-        const packet = document.createElement('div');
-        packet.className = 'packet ' + (blocked ? 'block' : 'pass');
-        packet.style.left = centers[0] + '%';
-        track.appendChild(packet);
-
-        // Animate through each stage center
-        const dur = 2600 + Math.random() * 800;
-        const startTime = performance.now();
-        const startLeft = centers[0];
-        const endLeft = centers[stopAt];
-
-        function step(now) {
-          const p = Math.min((now - startTime) / dur, 1);
-          const eased = 1 - Math.pow(1 - p, 2);
-          packet.style.left = (startLeft + (endLeft - startLeft) * eased) + '%';
-          packet.style.opacity = p < 0.08 ? p / 0.08 : (p > 0.92 ? (1 - p) / 0.08 : 1);
-          if (p < 1) {
-            requestAnimationFrame(step);
-          } else {
-            // If blocked, briefly flash red then drop down to blocked tray (off the visible track)
-            if (blocked) {
-              packet.style.transition = 'transform 400ms var(--ease-out), opacity 400ms var(--ease-out)';
-              packet.style.transform = 'translate(-50%, calc(-50% + 80px))';
-              packet.style.opacity = 0;
-            }
-            setTimeout(() => packet.remove(), 500);
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
           }
-        }
-        requestAnimationFrame(step);
-      }
-
-      // Spawn at staggered intervals
-      setInterval(spawn, 700);
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+      items.forEach(function (el) { io.observe(el); });
     })();
   </script>
 

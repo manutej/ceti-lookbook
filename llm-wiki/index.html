@@ -8,1261 +8,1779 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
-      --color-surface-warm: #FDF9F3;
+      --bg: #FBF9F4;
+      --bg-soft: #F4F0E7;
+      --paper: #FFFEFB;
+      --ink: #2A2A2A;
+      --ink-2: #6B6B6B;
+      --ink-3: #9A9A9A;
+      --rule: #E6E2D6;
+      --rule-soft: #EFEBE0;
 
-      --color-accent: #D94F30;
-      --color-accent-hover: #C4432A;
-      --color-accent-light: #FDEEE9;
-      --color-accent-muted: #E8836C;
+      --teal: #1A6470;
+      --teal-soft: #E4EEEF;
+      --teal-deep: #134852;
+      --tan: #A8855C;
+      --tan-soft: #F0E7D8;
 
-      --color-actor-1: #D94F30; /* vermillion — notes */
-      --color-actor-2: #2A7B9B; /* teal — links */
-      --color-actor-3: #D4A843; /* golden — agents */
-      --color-actor-4: #2D8B55; /* forest — queries */
-      --color-actor-5: #7B6DAA; /* plum — meta */
+      --serif: 'Iowan Old Style', 'Lora', Georgia, serif;
+      --ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
 
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body: 'DM Sans', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-      --duration-fast: 150ms;
-      --duration-normal: 300ms;
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-
-      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
+      font-family: var(--serif);
+      color: var(--ink);
+      background-color: var(--bg);
       background-image:
-        radial-gradient(ellipse at 15% 10%, rgba(217, 79, 48, 0.045) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 70%, rgba(42, 123, 155, 0.035) 0%, transparent 50%);
-      line-height: 1.6;
+        radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 0);
+      background-size: 24px 24px;
+      line-height: 1.7;
+      font-size: 18px;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
     }
 
-    .wrap {
-      max-width: 1120px;
+    ::selection {
+      background: var(--teal-soft);
+      color: var(--teal-deep);
+    }
+
+    /* ============================================================
+       LAYOUT — notebook with sticky right sidebar
+       ============================================================ */
+    .vault {
+      max-width: 1240px;
       margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      margin: 0;
-    }
-
-    /* ============================================================
-       HERO
-       ============================================================ */
-    .hero {
-      padding: 5.5rem 0 3rem;
-    }
-    .hero .eyebrow {
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
-    }
-    .hero.visible .eyebrow { opacity: 1; }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.5rem, 6.2vw, 4.6rem);
-      line-height: 1.04;
-      letter-spacing: -0.03em;
-      margin: 1.25rem 0 1.5rem;
-      max-width: 16ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
-    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 440ms; }
-    .hero-title em {
-      font-style: normal;
-      color: var(--color-accent);
-      position: relative;
-    }
-    .hero-title em::after {
-      content: "";
-      position: absolute;
-      left: 0; right: 0; bottom: 0.05em;
-      height: 0.12em;
-      background: var(--color-accent);
-      opacity: 0.18;
-      border-radius: 2px;
-    }
-
-    .hero-sub {
-      font-size: 1.2rem;
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 620ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    .cta-row {
-      display: flex;
-      gap: 1.25rem;
-      margin-top: 2.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 820ms;
-    }
-    .hero.visible .cta-row { opacity: 1; }
-
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.55rem;
-      padding: 0.95rem 1.7rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 0.98rem;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms var(--ease-spring), background 200ms ease;
-      will-change: transform;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(3px); }
-
-    .secondary {
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      font-size: 0.95rem;
-      transition: color 200ms;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 2px;
-    }
-    .secondary:hover { color: var(--color-accent); border-color: var(--color-accent); }
-
-    /* ============================================================
-       GRAPH SECTION — the signature visual
-       ============================================================ */
-    .graph-section {
-      padding: 3rem 0 5rem;
-    }
-    .graph-frame {
-      position: relative;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 20px;
-      padding: 1.25rem 1.25rem 0.5rem;
-      box-shadow: var(--shadow-md);
-      overflow: hidden;
-    }
-    .graph-frame::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 30% 20%, rgba(217, 79, 48, 0.04), transparent 45%),
-        radial-gradient(circle at 75% 80%, rgba(42, 123, 155, 0.04), transparent 45%);
-      pointer-events: none;
-    }
-    .graph-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.25rem 0.5rem 0.85rem;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-      position: relative;
-      z-index: 1;
-    }
-    .graph-meta .live-dot {
-      display: inline-block;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--color-success, #2D8B55);
-      margin-right: 0.5rem;
-      animation: pulse-dot 2.6s ease-in-out infinite;
-      vertical-align: middle;
-    }
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.3); }
-    }
-
-    .graph-svg-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      max-height: 560px;
-      z-index: 1;
-    }
-    .graph-svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    /* node + edge styling */
-    .edge {
-      stroke: var(--color-border);
-      stroke-width: 1.4;
-      fill: none;
-      opacity: 0;
-      transition: opacity 600ms var(--ease-out), stroke 300ms, stroke-width 300ms;
-    }
-    .edge.in { opacity: 0.55; }
-    .edge.highlight { stroke: var(--color-accent); stroke-width: 2; opacity: 0.85; }
-    .edge.dim { opacity: 0.1; }
-
-    .edge-pulse {
-      fill: var(--color-accent);
-      opacity: 0;
-    }
-    .edge-pulse.active {
-      opacity: 1;
-      animation: edge-travel 2.8s linear infinite;
-    }
-    @keyframes edge-travel {
-      from { offset-distance: 0%; }
-      to { offset-distance: 100%; }
-    }
-
-    .node {
-      cursor: pointer;
-      opacity: 0;
-      transform: scale(0.4);
-      transform-origin: center;
-      transform-box: fill-box;
-      transition:
-        opacity 600ms var(--ease-spring),
-        transform 600ms var(--ease-spring);
-    }
-    .node.in { opacity: 1; transform: scale(1); }
-    .node circle.bg {
-      fill: var(--color-surface);
-      stroke: var(--node-color, var(--color-accent));
-      stroke-width: 2;
-      transition: r 300ms var(--ease-spring), stroke-width 200ms;
-    }
-    .node circle.halo {
-      fill: var(--node-color, var(--color-accent));
-      opacity: 0.12;
-      transition: r 400ms var(--ease-out), opacity 300ms;
-    }
-    .node text {
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 11px;
-      fill: var(--color-text);
-      text-anchor: middle;
-      pointer-events: none;
-      user-select: none;
-    }
-    .node:hover circle.bg,
-    .node.focus circle.bg { stroke-width: 3; }
-    .node:hover circle.halo,
-    .node.focus circle.halo { opacity: 0.28; }
-    .node.dim { opacity: 0.22; }
-    .node.dim:hover { opacity: 1; }
-
-    /* breathing pulse on all nodes */
-    .node.in circle.halo {
-      animation: node-breathe var(--breathe-dur, 4s) ease-in-out infinite;
-      animation-delay: var(--breathe-delay, 0s);
-    }
-    @keyframes node-breathe {
-      0%, 100% { r: var(--halo-r, 22); opacity: 0.12; }
-      50%      { r: calc(var(--halo-r, 22) * 1.15); opacity: 0.22; }
-    }
-
-    /* graph io annotations */
-    .graph-io {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem 0.5rem 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-muted);
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 1;
-    }
-    .graph-io .io-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0.35rem 0.7rem;
-      border-radius: 9999px;
-      background: var(--color-bg-warm);
-      border: 1px solid var(--color-border);
-    }
-    .graph-io .io-pill .dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--color-accent);
-    }
-    .graph-io .io-pill.read .dot { background: var(--color-actor-2); }
-    .graph-io .io-pill.write .dot { background: var(--color-actor-1); }
-
-    .graph-explainer {
-      margin-top: 2.5rem;
+      padding: 3.5rem 2rem 4rem;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2.25rem;
-    }
-    .graph-explainer p {
-      margin: 0;
-      color: var(--color-text-secondary);
-      max-width: 52ch;
-      font-size: 1.02rem;
-    }
-    .graph-explainer p strong {
-      color: var(--color-text);
-      font-weight: 600;
+      grid-template-columns: minmax(0, 1fr) 240px;
+      gap: 3.5rem;
     }
 
-    /* ============================================================
-       SECTION HEADERS
-       ============================================================ */
-    .section { padding: 5rem 0; }
-    .section-warm { background: var(--color-bg-warm); }
-    .section-header { max-width: 720px; margin: 0 0 3rem; }
-    .section-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2rem, 4vw, 2.85rem);
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      margin: 1rem 0 1rem;
-    }
-    .section-title em {
-      font-style: normal;
-      color: var(--color-accent);
-    }
-    .section-sub {
-      color: var(--color-text-secondary);
-      font-size: 1.08rem;
-      max-width: 56ch;
-      margin: 0;
+    .doc {
+      max-width: 68ch;
+      min-width: 0;
     }
 
-    /* ============================================================
-       KARPATHY QUOTE
-       ============================================================ */
-    .quote-block {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-left: 3px solid var(--color-accent);
-      border-radius: 4px 16px 16px 4px;
-      padding: 2.25rem 2.5rem;
-      max-width: 760px;
-      box-shadow: var(--shadow-sm);
+    .toc {
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+      font-family: var(--ui);
+      font-size: 0.82rem;
+      line-height: 1.55;
+      padding-left: 1.25rem;
+      border-left: 1px solid var(--rule);
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
     }
-    .quote-block blockquote {
-      margin: 0;
-      font-family: var(--font-display);
-      font-weight: 400;
-      font-size: clamp(1.35rem, 2.3vw, 1.75rem);
-      line-height: 1.35;
-      color: var(--color-text);
-      letter-spacing: -0.01em;
-    }
-    .quote-block cite {
-      display: block;
-      margin-top: 1.25rem;
-      font-family: var(--font-mono);
-      font-style: normal;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-    }
-    .karpathy-prose {
-      margin-top: 2.25rem;
-      max-width: 60ch;
-      color: var(--color-text-secondary);
-      font-size: 1.04rem;
-    }
-    .karpathy-prose strong { color: var(--color-text); font-weight: 600; }
-
-    /* ============================================================
-       BENTO BUILDING BLOCKS
-       ============================================================ */
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-auto-rows: minmax(220px, auto);
-      gap: 1.1rem;
-    }
-    .bento-tile {
-      position: relative;
-      padding: 1.85rem;
-      border-radius: 18px;
-      background:
-        radial-gradient(480px circle at var(--mx, 50%) var(--my, 50%),
-          color-mix(in oklab, var(--tile-color, var(--color-accent)) 10%, transparent), transparent 42%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition:
-        border-color var(--duration-normal),
-        transform var(--duration-slower) var(--ease-spring),
-        box-shadow var(--duration-normal),
-        opacity var(--duration-slower) var(--ease-spring);
-      opacity: 0;
-      transform: translateY(22px);
-      overflow: hidden;
-    }
-    .bento-tile.visible { opacity: 1; transform: translateY(0); }
-    .bento-tile:hover {
-      border-color: var(--tile-color, var(--color-accent-muted));
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg);
-    }
-    .bento-tile.col-2 { grid-column: span 2; }
-    .bento-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-family: var(--font-mono);
+    .toc-label {
+      font-family: var(--mono);
       font-size: 0.68rem;
       text-transform: uppercase;
       letter-spacing: 0.14em;
-      color: var(--tile-color, var(--color-accent));
+      color: var(--ink-3);
+      margin: 0 0 0.85rem;
+    }
+    .toc ul {
+      list-style: none;
+      margin: 0;
       padding: 0;
     }
-    .bento-tag::before {
-      content: "";
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--tile-color, var(--color-accent));
+    .toc li { margin: 0.45rem 0; }
+    .toc a {
+      color: var(--ink-2);
+      text-decoration: none;
+      transition: color 180ms var(--ease);
+      border-left: 2px solid transparent;
+      padding-left: 0.65rem;
+      margin-left: -0.65rem;
+      display: block;
     }
-    .bento-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.55rem;
-      letter-spacing: -0.01em;
-      margin: 0.9rem 0 0.6rem;
-      line-height: 1.15;
+    .toc a:hover,
+    .toc a.active {
+      color: var(--teal);
+      border-left-color: var(--teal);
     }
-    .bento-body {
-      color: var(--color-text-secondary);
-      font-size: 0.97rem;
-      margin: 0;
-      max-width: 38ch;
+    .toc-meta {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--rule-soft);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--ink-3);
+      line-height: 1.7;
     }
+    .toc-meta strong { color: var(--ink-2); font-weight: 500; }
 
-    /* tile visual flourishes */
-    .tile-art {
-      position: absolute;
-      bottom: 0.9rem;
-      right: 0.9rem;
-      opacity: 0.55;
-      pointer-events: none;
+    /* recent edits in sidebar — compact list */
+    .toc .edit-list li {
+      margin: 0.3rem 0;
+      font-size: 0.74rem;
+      line-height: 1.45;
+    }
+    .toc .edit-list a {
+      color: var(--ink-2);
+      padding-left: 0;
+      margin-left: 0;
+      border-left: 0;
+    }
+    .toc .edit-list a:hover { color: var(--teal); }
+    .toc .edit-list .edate {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      color: var(--ink-3);
+      display: block;
+      margin-bottom: 0.05rem;
+    }
+    .toc .edit-add { color: var(--teal); font-family: var(--mono); margin-right: 2px; }
+    .toc .edit-mod { color: var(--tan); font-family: var(--mono); margin-right: 2px; }
+    .toc .edit-del { color: var(--ink-3); font-family: var(--mono); margin-right: 2px; }
+
+    /* ============================================================
+       FRONTMATTER / EYEBROW
+       ============================================================ */
+    .frontmatter {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--ink-3);
+      margin: 0 0 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.5rem;
+      align-items: center;
+    }
+    .frontmatter .sep { color: var(--ink-3); opacity: 0.5; }
+
+    /* wikilink primitive */
+    .wikilink {
+      font-family: var(--mono);
+      color: var(--teal);
+      text-decoration: none;
+      border-bottom: 1px dashed transparent;
+      transition: border-color 180ms var(--ease), background-color 180ms var(--ease);
+      padding: 0 1px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+    .wikilink::before { content: "[["; color: var(--ink-3); }
+    .wikilink::after { content: "]]"; color: var(--ink-3); }
+    .wikilink:hover {
+      background: var(--teal-soft);
+      border-bottom-color: var(--teal);
+    }
+    .wikilink:hover::before,
+    .wikilink:hover::after { color: var(--teal); opacity: 0.7; }
+
+    /* tag pill */
+    .tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 0.12rem 0.55rem;
+      background: var(--tan-soft);
+      color: var(--tan);
+      border-radius: 9999px;
+      text-decoration: none;
+      letter-spacing: 0;
+      transition: background-color 180ms var(--ease);
+      vertical-align: 0.1em;
+    }
+    .tag::before { content: "#"; opacity: 0.55; margin-right: 1px; }
+    .tag:hover { background: #E8DAC2; }
+
+    /* ============================================================
+       TITLE
+       ============================================================ */
+    .doc-title {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: clamp(2.2rem, 5.2vw, 3.4rem);
+      line-height: 1.12;
+      letter-spacing: -0.015em;
+      margin: 0.5rem 0 0.75rem;
+      color: var(--ink);
+    }
+    .doc-dek {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--ink-2);
+      max-width: 56ch;
+      margin: 0 0 2.5rem;
+      line-height: 1.55;
     }
 
     /* ============================================================
-       IMPLEMENTATIONS — 3 cards
+       BLOCKQUOTE — Karpathy
        ============================================================ */
-    .impl-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
-    }
-    .impl-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 1.85rem;
-      transition:
-        border-color var(--duration-normal),
-        transform var(--duration-slower) var(--ease-spring),
-        box-shadow var(--duration-normal),
-        opacity var(--duration-slower) var(--ease-spring);
-      opacity: 0;
-      transform: translateY(22px);
-    }
-    .impl-card.visible { opacity: 1; transform: translateY(0); }
-    .impl-card:hover {
-      border-color: var(--color-accent-muted);
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
-    }
-    .impl-stack {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.13em;
-      color: var(--color-text-muted);
-      margin-bottom: 0.5rem;
-    }
-    .impl-name {
-      font-family: var(--font-display);
-      font-weight: 700;
+    .pullquote {
+      margin: 2.5rem 0;
+      padding: 0.25rem 0 0.25rem 1.5rem;
+      border-left: 2px solid var(--teal);
+      font-family: var(--serif);
+      font-style: italic;
       font-size: 1.3rem;
-      letter-spacing: -0.01em;
-      margin: 0 0 0.75rem;
+      line-height: 1.5;
+      color: var(--ink);
+      max-width: 58ch;
     }
-    .impl-name span {
-      color: var(--color-accent);
+    .pullquote .source {
+      display: block;
+      margin-top: 1rem;
+      font-style: normal;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--ink-3);
+      letter-spacing: 0.02em;
     }
-    .impl-body {
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-      margin: 0 0 1.25rem;
+
+    /* ============================================================
+       GRAPH FIGURE
+       ============================================================ */
+    figure.graph {
+      margin: 3rem 0;
+      padding: 0;
+      position: relative;
     }
-    .impl-meta {
+    .graph-card {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 1rem 1rem 0.6rem;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    }
+    .graph-head {
       display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      font-family: var(--font-mono);
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.15rem 0.35rem 0.6rem;
+      font-family: var(--mono);
       font-size: 0.7rem;
-      color: var(--color-text-muted);
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      padding-top: 1rem;
-      border-top: 1px solid var(--color-border-light);
+      color: var(--ink-3);
+      border-bottom: 1px solid var(--rule-soft);
+      margin-bottom: 0.5rem;
     }
-    .impl-meta span::before {
-      content: "→";
-      margin-right: 0.35rem;
-      color: var(--color-accent);
+    .graph-svg-wrap {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      max-height: 460px;
+    }
+    .graph-svg { width: 100%; height: 100%; display: block; }
+
+    .gedge {
+      stroke: #C9C3B4;
+      stroke-width: 1;
+      fill: none;
+      opacity: 0;
+      transition: opacity 800ms var(--ease), stroke 250ms, stroke-width 250ms;
+    }
+    .gedge.in { opacity: 0.55; }
+    .gedge.hl { stroke: var(--teal); stroke-width: 1.5; opacity: 0.9; }
+    .gedge.dim { opacity: 0.12; }
+
+    .gnode {
+      cursor: pointer;
+      opacity: 0;
+      transform: scale(0.6);
+      transform-origin: center;
+      transform-box: fill-box;
+      transition:
+        opacity 600ms var(--ease),
+        transform 600ms var(--ease);
+    }
+    .gnode.in { opacity: 1; transform: scale(1); }
+    .gnode circle.dot {
+      fill: var(--teal);
+      transition: r 250ms var(--ease), fill 200ms;
+    }
+    .gnode circle.ring {
+      fill: none;
+      stroke: var(--teal);
+      stroke-width: 1;
+      opacity: 0;
+      transition: opacity 250ms var(--ease), r 250ms var(--ease);
+    }
+    .gnode text {
+      font-family: var(--ui);
+      font-weight: 400;
+      font-size: 10px;
+      fill: var(--ink-2);
+      text-anchor: middle;
+      pointer-events: none;
+      user-select: none;
+      transition: fill 200ms;
+    }
+    .gnode:hover circle.dot,
+    .gnode:focus circle.dot { fill: var(--teal-deep); }
+    .gnode:hover circle.ring,
+    .gnode:focus circle.ring { opacity: 0.4; }
+    .gnode:hover text,
+    .gnode:focus text { fill: var(--ink); font-weight: 500; }
+    .gnode.dim { opacity: 0.3; }
+    .gnode.dim:hover { opacity: 1; }
+
+    figcaption {
+      margin-top: 0.85rem;
+      font-family: var(--ui);
+      font-size: 0.82rem;
+      color: var(--ink-3);
+      font-style: normal;
+      line-height: 1.5;
+    }
+    figcaption .fc-key {
+      font-family: var(--mono);
+      color: var(--teal);
     }
 
     /* ============================================================
-       DAILY WORKFLOW TIMELINE
+       BODY PROSE
+       ============================================================ */
+    .prose p {
+      margin: 0 0 1.35rem;
+      color: var(--ink);
+      max-width: 64ch;
+    }
+    .prose p.lede::first-letter {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 3.2em;
+      float: left;
+      line-height: 0.85;
+      margin: 0.1em 0.08em 0 0;
+      color: var(--teal);
+    }
+    .prose h2 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 1.55rem;
+      letter-spacing: -0.01em;
+      margin: 3rem 0 1rem;
+      color: var(--ink);
+      scroll-margin-top: 1.5rem;
+    }
+    .prose h2 .hash {
+      color: var(--ink-3);
+      font-family: var(--mono);
+      font-weight: 400;
+      font-size: 0.7em;
+      margin-right: 0.45em;
+      opacity: 0.6;
+    }
+    .prose h3 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 1.18rem;
+      letter-spacing: -0.005em;
+      margin: 2rem 0 0.7rem;
+      color: var(--ink);
+    }
+    .prose h3 .hash {
+      color: var(--ink-3);
+      font-family: var(--mono);
+      font-weight: 400;
+      font-size: 0.72em;
+      margin-right: 0.4em;
+      opacity: 0.55;
+    }
+    .prose strong { font-weight: 600; color: var(--ink); }
+    .prose em { color: var(--ink); }
+    .prose code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: var(--bg-soft);
+      padding: 0.08em 0.35em;
+      border-radius: 3px;
+      color: var(--ink);
+    }
+    .prose a:not(.wikilink):not(.tag) {
+      color: var(--teal);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(26, 100, 112, 0.3);
+      transition: border-color 180ms var(--ease);
+    }
+    .prose a:not(.wikilink):not(.tag):hover { border-bottom-color: var(--teal); }
+
+    /* margin note — narrow column note that floats right on wide screens */
+    .marginnote {
+      float: right;
+      clear: right;
+      width: 200px;
+      margin: 0.3rem -220px 1rem 1.5rem;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: var(--ink-2);
+      padding-left: 0.85rem;
+      border-left: 1px solid var(--rule);
+    }
+    .marginnote .mn-label {
+      display: block;
+      font-style: normal;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-3);
+      margin-bottom: 0.3rem;
+    }
+
+    /* small inline callout — used for "open question" boxes */
+    .callout {
+      margin: 1.5rem 0;
+      padding: 1rem 1.2rem;
+      background: var(--bg-soft);
+      border-left: 2px solid var(--tan);
+      border-radius: 3px;
+      font-family: var(--serif);
+      font-size: 0.98rem;
+      line-height: 1.55;
+      color: var(--ink);
+      max-width: 60ch;
+    }
+    .callout .co-label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--tan);
+      margin-bottom: 0.35rem;
+    }
+
+    /* code block (config) */
+    .codeblock {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 0.9rem 1.1rem;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--ink);
+      overflow-x: auto;
+      margin: 1.2rem 0 1.6rem;
+      white-space: pre;
+    }
+    .codeblock .ck-com { color: var(--ink-3); font-style: italic; }
+    .codeblock .ck-key { color: var(--teal); }
+    .codeblock .ck-val { color: var(--tan); }
+
+    /* comparison table */
+    .compare {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0 2rem;
+      font-family: var(--ui);
+      font-size: 0.88rem;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .compare th, .compare td {
+      padding: 0.7rem 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid var(--rule-soft);
+      vertical-align: top;
+    }
+    .compare th {
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-3);
+      background: var(--bg-soft);
+    }
+    .compare td:first-child {
+      font-family: var(--serif);
+      font-weight: 600;
+      color: var(--ink);
+      width: 22%;
+    }
+    .compare tr:last-child td { border-bottom: 0; }
+
+    /* ============================================================
+       BUILDING BLOCKS LIST
+       ============================================================ */
+    ol.blocks {
+      list-style: none;
+      counter-reset: block;
+      margin: 1.5rem 0 0;
+      padding: 0;
+    }
+    ol.blocks li {
+      counter-increment: block;
+      padding: 1.25rem 0 1.25rem 3.2rem;
+      border-bottom: 1px solid var(--rule-soft);
+      position: relative;
+    }
+    ol.blocks li:last-child { border-bottom: 0; }
+    ol.blocks li::before {
+      content: counter(block, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 1.4rem;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--teal);
+      letter-spacing: 0.05em;
+    }
+    ol.blocks h3 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0 0 0.4rem;
+      color: var(--ink);
+    }
+    ol.blocks p {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 1rem;
+      max-width: 58ch;
+    }
+
+    /* ============================================================
+       IMPLEMENTATIONS — small cards (Obsidian "note preview" feel)
+       ============================================================ */
+    .impl-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1.5rem 0 0;
+    }
+    .impl-note {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 1.25rem 1.4rem;
+      transition: border-color 180ms var(--ease), transform 180ms var(--ease);
+    }
+    .impl-note:hover {
+      border-color: var(--teal);
+      transform: translateX(2px);
+    }
+    .impl-note .impl-path {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ink-3);
+      margin-bottom: 0.35rem;
+    }
+    .impl-note h3 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 1.15rem;
+      margin: 0 0 0.5rem;
+      color: var(--ink);
+    }
+    .impl-note p {
+      margin: 0 0 0.75rem;
+      color: var(--ink-2);
+      font-size: 0.98rem;
+      line-height: 1.55;
+    }
+    .impl-tags {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    /* deep implementation subsection (the 300-word expansions) */
+    .impl-deep {
+      margin: 2rem 0 2.5rem;
+      padding: 1.5rem 1.7rem;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+    }
+    .impl-deep .impl-path {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ink-3);
+      margin-bottom: 0.4rem;
+    }
+    .impl-deep h3 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 1.32rem;
+      margin: 0 0 0.85rem;
+      color: var(--ink);
+    }
+    .impl-deep p {
+      margin: 0 0 1rem;
+      color: var(--ink);
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+    .impl-deep p:last-child { margin-bottom: 0; }
+    .impl-deep .impl-tags {
+      margin-top: 0.85rem;
+    }
+    .impl-deep .gotcha {
+      margin: 1rem 0 0;
+      padding-top: 0.85rem;
+      border-top: 1px dashed var(--rule);
+      font-size: 0.92rem;
+      color: var(--ink-2);
+      font-style: italic;
+    }
+    .impl-deep .gotcha strong {
+      font-style: normal;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--tan);
+      font-weight: 500;
+      margin-right: 0.4em;
+    }
+
+    /* ============================================================
+       TIMELINE — clean horizontal
        ============================================================ */
     .timeline {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+      gap: 1.25rem;
+      margin: 1.75rem 0 0;
       position: relative;
+      padding-top: 0.5rem;
     }
     .timeline::before {
       content: "";
       position: absolute;
-      top: 26px;
-      left: 6%;
-      right: 6%;
-      height: 2px;
-      background: linear-gradient(90deg,
-        transparent 0%,
-        var(--color-border) 8%,
-        var(--color-border) 92%,
-        transparent 100%);
+      top: 18px;
+      left: 8px;
+      right: 8px;
+      height: 1px;
+      background: var(--rule);
       z-index: 0;
     }
-    .step {
+    .tstep {
       position: relative;
-      padding-top: 4rem;
-      z-index: 1;
-      opacity: 0;
-      transform: translateY(18px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+      padding-top: 2.3rem;
     }
-    .step.visible { opacity: 1; transform: translateY(0); }
-    .step:nth-child(2).visible { transition-delay: 80ms; }
-    .step:nth-child(3).visible { transition-delay: 160ms; }
-    .step:nth-child(4).visible { transition-delay: 240ms; }
-    .step::before {
+    .tstep::before {
       content: "";
       position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 54px;
-      height: 54px;
+      top: 12px;
+      left: 0;
+      width: 13px;
+      height: 13px;
       border-radius: 50%;
-      background: var(--color-surface);
-      border: 2px solid var(--step-color, var(--color-accent));
-      box-shadow: 0 0 0 6px var(--color-bg-warm);
+      background: var(--paper);
+      border: 1.5px solid var(--teal);
+      z-index: 1;
     }
-    .step .step-num {
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: var(--font-mono);
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--step-color, var(--color-accent));
+    .tstep .twhen {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--ink-3);
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
     }
-    .step .step-when {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-text-muted);
-      margin-bottom: 0.4rem;
+    .tstep h4 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 1.02rem;
+      margin: 0 0 0.4rem;
+      color: var(--ink);
     }
-    .step h3 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.15rem;
-      margin: 0 0 0.5rem;
-      letter-spacing: -0.01em;
-    }
-    .step p {
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
+    .tstep p {
       margin: 0;
+      font-size: 0.88rem;
+      color: var(--ink-2);
+      line-height: 1.55;
+      max-width: 28ch;
     }
 
-    /* ============================================================
-       STATS ROW
-       ============================================================ */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+    /* day-in-the-vault narrative — vertical column with timestamps */
+    .day-narrative {
+      margin: 1.5rem 0 2rem;
+      padding-left: 6.5rem;
+      position: relative;
+      max-width: 64ch;
     }
-    .stat {
-      padding: 1.85rem 1.25rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring),
-        border-color var(--duration-normal);
+    .day-narrative::before {
+      content: "";
+      position: absolute;
+      top: 0.6rem;
+      bottom: 0.6rem;
+      left: 5.5rem;
+      width: 1px;
+      background: var(--rule);
     }
-    .stat:hover { border-color: var(--color-accent-muted); }
-    .stat.visible { opacity: 1; transform: translateY(0); }
-    .stat:nth-child(2).visible { transition-delay: 70ms; }
-    .stat:nth-child(3).visible { transition-delay: 140ms; }
-    .stat:nth-child(4).visible { transition-delay: 210ms; }
+    .day-entry {
+      position: relative;
+      margin-bottom: 1.6rem;
+    }
+    .day-entry:last-child { margin-bottom: 0; }
+    .day-entry::before {
+      content: "";
+      position: absolute;
+      top: 0.55rem;
+      left: -1.18rem;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--paper);
+      border: 1.5px solid var(--teal);
+    }
+    .day-entry .day-time {
+      position: absolute;
+      left: -6.4rem;
+      top: 0.05rem;
+      width: 4.6rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ink-3);
+      letter-spacing: 0.04em;
+      text-align: right;
+    }
+    .day-entry h4 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin: 0 0 0.35rem;
+      color: var(--ink);
+    }
+    .day-entry p {
+      margin: 0;
+      color: var(--ink);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 56ch;
+    }
 
-    .stat-value {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.25rem, 4.5vw, 3.2rem);
-      line-height: 1;
-      letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
-      color: var(--color-text);
+    /* reading list — proper bibliography */
+    .biblio {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0 0;
+      counter-reset: bib;
     }
-    .stat-value .unit {
-      font-size: 0.55em;
-      color: var(--color-accent);
-      margin-left: 0.15em;
+    .biblio li {
+      counter-increment: bib;
+      padding: 0.85rem 0 0.85rem 2.5rem;
+      border-bottom: 1px solid var(--rule-soft);
+      position: relative;
+      font-size: 0.96rem;
+      line-height: 1.55;
+    }
+    .biblio li:last-child { border-bottom: 0; }
+    .biblio li::before {
+      content: counter(bib, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0.95rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--teal);
+    }
+    .biblio .b-author {
+      font-family: var(--serif);
+      color: var(--ink);
       font-weight: 600;
     }
-    .stat-label {
-      margin-top: 0.6rem;
-      color: var(--color-text-secondary);
-      font-size: 0.9rem;
-      line-height: 1.4;
+    .biblio .b-title {
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--ink);
     }
-    .stat-note {
-      margin-top: 0.45rem;
-      font-family: var(--font-mono);
-      font-size: 0.66rem;
+    .biblio .b-meta {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.74rem;
+      color: var(--ink-3);
+      margin-top: 0.15rem;
+    }
+    .biblio a {
+      color: var(--teal);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(26, 100, 112, 0.3);
+    }
+    .biblio a:hover { border-bottom-color: var(--teal); }
+
+    /* ============================================================
+       BACKLINK APPENDIX
+       ============================================================ */
+    .backlinks-block {
+      margin-top: 3.25rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--rule);
+    }
+    .backlinks-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      color: var(--color-text-muted);
+      color: var(--ink-3);
+      margin: 0 0 1rem;
+    }
+    .backlinks-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.65;
+    }
+    .backlinks-grid a {
+      color: var(--teal);
+      text-decoration: none;
+      border-bottom: 1px dashed transparent;
+      transition: border-color 180ms var(--ease);
+    }
+    .backlinks-grid a:hover { border-bottom-color: var(--teal); }
+    .backlinks-grid a::before { content: "[["; color: var(--ink-3); }
+    .backlinks-grid a::after { content: "]]"; color: var(--ink-3); }
+    .backlinks-grid .ctx {
+      display: block;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--ink-2);
+      margin-top: 0.1rem;
+      padding-left: 0.5rem;
+      border-left: 1px solid var(--rule-soft);
+    }
+    @media (max-width: 520px) {
+      .backlinks-grid { grid-template-columns: 1fr; }
     }
 
     /* ============================================================
-       FINAL CTA
+       SIGN-OFF
        ============================================================ */
-    .final {
-      padding: 6rem 0 7rem;
-      text-align: center;
-    }
-    .final h2 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2rem, 4.2vw, 3rem);
-      letter-spacing: -0.02em;
-      margin: 0 0 1.1rem;
-      max-width: 18ch;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.1;
-    }
-    .final p {
-      color: var(--color-text-secondary);
-      margin: 0 auto 2.25rem;
-      max-width: 52ch;
-      font-size: 1.05rem;
-    }
-
-    footer {
-      padding: 2rem 0 3.5rem;
-      border-top: 1px solid var(--color-border-light);
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
+    .signoff {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--ink-3);
       display: flex;
-      justify-content: space-between;
-      align-items: center;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 0.4rem 1.25rem;
+      align-items: center;
     }
-    footer a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--color-border); padding-bottom: 1px; }
-    footer a:hover { color: var(--color-accent); border-color: var(--color-accent); }
+    .signoff .so-label { color: var(--ink-2); }
+    .signoff .watermark { color: var(--teal); }
+    .signoff a {
+      color: var(--ink-2);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule);
+    }
+    .signoff a:hover { color: var(--teal); border-color: var(--teal); }
+
+    /* ============================================================
+       FADE-IN
+       ============================================================ */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 700ms var(--ease), transform 700ms var(--ease);
+    }
+    .fade-in.in { opacity: 1; transform: translateY(0); }
 
     /* ============================================================
        RESPONSIVE
        ============================================================ */
-    @media (max-width: 980px) {
-      .bento { grid-template-columns: repeat(2, 1fr); }
-      .bento-tile.col-2 { grid-column: span 2; }
-      .impl-grid { grid-template-columns: 1fr; }
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .timeline { grid-template-columns: repeat(2, 1fr); }
-      .timeline::before { display: none; }
-      .graph-explainer { grid-template-columns: 1fr; gap: 1.25rem; }
+    @media (max-width: 1080px) {
+      .marginnote {
+        float: none;
+        width: auto;
+        margin: 1rem 0 1.5rem 1rem;
+        max-width: 48ch;
+      }
     }
-    @media (max-width: 560px) {
-      .hero { padding: 4rem 0 2rem; }
-      .bento { grid-template-columns: 1fr; }
-      .bento-tile.col-2 { grid-column: auto; }
-      .stats { grid-template-columns: 1fr 1fr; }
-      .timeline { grid-template-columns: 1fr; gap: 1.5rem; }
-      .step { padding-top: 3.25rem; }
-      .step::before { width: 44px; height: 44px; }
-      .step .step-num { top: 10px; font-size: 0.9rem; }
-      .quote-block { padding: 1.5rem 1.5rem; }
-      .graph-svg-wrap { aspect-ratio: 4 / 5; max-height: 460px; }
-      .node.mobile-hide { display: none; }
+    @media (max-width: 880px) {
+      .vault {
+        grid-template-columns: 1fr;
+        padding: 2rem 1.25rem 3rem;
+        gap: 1.5rem;
+      }
+      .toc {
+        position: static;
+        order: -1;
+        padding: 1rem 1rem;
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        background: var(--paper);
+        max-height: none;
+      }
+      .timeline {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem 1rem;
+      }
+      .timeline::before { display: none; }
+      body { font-size: 17px; }
+      .day-narrative {
+        padding-left: 1.2rem;
+      }
+      .day-narrative::before { left: 0.2rem; }
+      .day-entry::before { left: -1.05rem; }
+      .day-entry .day-time {
+        position: static;
+        text-align: left;
+        width: auto;
+        margin-bottom: 0.2rem;
+      }
+      .compare { font-size: 0.82rem; }
+      .compare th, .compare td { padding: 0.55rem 0.65rem; }
+    }
+    @media (max-width: 520px) {
+      .timeline { grid-template-columns: 1fr; }
+      .doc-title { font-size: 2rem; }
+      .pullquote { font-size: 1.1rem; padding-left: 1rem; }
+      .graph-svg-wrap { aspect-ratio: 4 / 5; }
+      .marginnote { margin-left: 0; }
+      .compare thead { display: none; }
+      .compare, .compare tbody, .compare tr, .compare td { display: block; width: 100%; }
+      .compare td:first-child {
+        font-size: 0.95rem;
+        padding-bottom: 0.2rem;
+        border-bottom: 0;
+      }
+      .compare td {
+        padding: 0.35rem 0.9rem;
+      }
+      .compare tr {
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--rule-soft);
+      }
+      .compare tr:last-child { border-bottom: 0; }
     }
 
-    /* ============================================================
-       REDUCED MOTION
-       ============================================================ */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-      .hero .word, .hero-sub, .cta-row, .stat, .bento-tile, .impl-card, .step, .eyebrow {
-        opacity: 1 !important;
-        transform: none !important;
-      }
-      .node { opacity: 1 !important; transform: none !important; }
-      .edge { opacity: 0.55 !important; }
-      .edge-pulse, .node.in circle.halo { animation: none !important; }
-      .graph-meta .live-dot { animation: none !important; opacity: 1 !important; }
-    }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .bento-tile:hover, .impl-card:hover, .stat:hover { transform: none !important; }
+      .fade-in { opacity: 1 !important; transform: none !important; }
+      .gnode { opacity: 1 !important; transform: none !important; }
+      .gedge { opacity: 0.55 !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ============================================================
-       HERO
-       ============================================================ -->
-  <header class="hero wrap" id="hero">
-    <p class="eyebrow">LLM Wiki · PKM in the Agentic Era</p>
-    <h1 class="hero-title">
-      <span class="word">Your</span>
-      <span class="word">second</span>
-      <span class="word">brain,</span>
-      <span class="word">now</span>
-      <span class="word"><em>agentic.</em></span>
-    </h1>
-    <p class="hero-sub">Andrej Karpathy's idea of a personal LLM wiki — extended into a world where the agent doesn't just read your notes. It writes back to them. Every day. Quietly. Forever.</p>
-    <div class="cta-row">
-      <a class="magnetic" href="#cta">
-        Design your PKM with CETI
-        <span class="arrow">→</span>
-      </a>
-      <a class="secondary" href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">Read Karpathy's gist ↗</a>
-    </div>
-  </header>
+  <main class="vault">
 
-  <!-- ============================================================
-       SIGNATURE: KNOWLEDGE GRAPH
-       ============================================================ -->
-  <section class="graph-section wrap" aria-labelledby="graph-heading">
-    <div class="graph-frame">
-      <div class="graph-meta">
-        <span><span class="live-dot"></span> Live graph · 15 topics · 23 links</span>
-        <span>vault://manu/2026</span>
-      </div>
+    <!-- ============================================================
+         DOCUMENT
+         ============================================================ -->
+    <article class="doc">
 
-      <div class="graph-svg-wrap">
-        <svg class="graph-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-labelledby="graph-heading" role="img">
-          <title id="graph-heading">A force-directed knowledge graph of personal notes connected by topic.</title>
-          <desc>Nodes represent personal note topics like Transformers, Agents, RAG, Decisions, Habits. Lines show their links. The graph is co-authored by you and an AI agent.</desc>
-
-          <!-- EDGES (draw first so nodes sit on top) -->
-          <g id="edges">
-            <path class="edge" data-from="transformers" data-to="agents" d="M 230 140 Q 320 200, 410 220"/>
-            <path class="edge" data-from="transformers" data-to="tokenizers" d="M 230 140 Q 170 90, 110 130"/>
-            <path class="edge" data-from="transformers" data-to="rag" d="M 230 140 Q 250 240, 290 340"/>
-            <path class="edge" data-from="agents" data-to="rag" d="M 410 220 Q 360 280, 290 340"/>
-            <path class="edge" data-from="agents" data-to="mcp" d="M 410 220 Q 500 200, 590 180"/>
-            <path class="edge" data-from="agents" data-to="projects" d="M 410 220 Q 480 320, 560 410"/>
-            <path class="edge" data-from="rag" data-to="python" d="M 290 340 Q 230 380, 170 430"/>
-            <path class="edge" data-from="rag" data-to="reading" d="M 290 340 Q 360 380, 430 430"/>
-            <path class="edge" data-from="python" data-to="projects" d="M 170 430 Q 360 490, 560 410"/>
-            <path class="edge" data-from="mcp" data-to="projects" d="M 590 180 Q 580 280, 560 410"/>
-            <path class="edge" data-from="mcp" data-to="people" d="M 590 180 Q 690 130, 790 110"/>
-            <path class="edge" data-from="ai-trends" data-to="agents" d="M 870 250 Q 640 240, 410 220"/>
-            <path class="edge" data-from="ai-trends" data-to="reading" d="M 870 250 Q 660 360, 430 430"/>
-            <path class="edge" data-from="ai-trends" data-to="people" d="M 870 250 Q 830 180, 790 110"/>
-            <path class="edge" data-from="q3-notes" data-to="decisions" d="M 880 430 Q 840 470, 770 500"/>
-            <path class="edge" data-from="q3-notes" data-to="ai-trends" d="M 880 430 Q 880 340, 870 250"/>
-            <path class="edge" data-from="decisions" data-to="habits" d="M 770 500 Q 700 530, 620 540"/>
-            <path class="edge" data-from="decisions" data-to="writing" d="M 770 500 Q 690 400, 600 290"/>
-            <path class="edge" data-from="habits" data-to="health" d="M 620 540 Q 510 540, 410 540"/>
-            <path class="edge" data-from="health" data-to="reading" d="M 410 540 Q 420 490, 430 430"/>
-            <path class="edge" data-from="writing" data-to="projects" d="M 600 290 Q 580 350, 560 410"/>
-            <path class="edge" data-from="writing" data-to="reading" d="M 600 290 Q 515 360, 430 430"/>
-            <path class="edge" data-from="people" data-to="writing" d="M 790 110 Q 700 200, 600 290"/>
-          </g>
-
-          <!-- traveling pulses along select edges -->
-          <g id="pulses">
-            <circle class="edge-pulse active" r="4" style="offset-path: path('M 410 220 Q 360 280, 290 340'); animation-delay: 0s;"/>
-            <circle class="edge-pulse active" r="4" style="offset-path: path('M 870 250 Q 640 240, 410 220'); animation-delay: 0.9s;"/>
-            <circle class="edge-pulse active" r="4" style="offset-path: path('M 590 180 Q 580 280, 560 410'); animation-delay: 1.8s;"/>
-            <circle class="edge-pulse active" r="4" style="offset-path: path('M 770 500 Q 690 400, 600 290'); animation-delay: 2.4s;"/>
-          </g>
-
-          <!-- NODES — each <g class="node"> -->
-          <g class="node" data-id="transformers" style="--node-color: #D94F30; --halo-r: 26; --breathe-dur: 4.6s;">
-            <circle class="halo" cx="230" cy="140" r="26"/>
-            <circle class="bg" cx="230" cy="140" r="14"/>
-            <text x="230" y="106">Transformers</text>
-          </g>
-          <g class="node" data-id="tokenizers" style="--node-color: #D94F30; --halo-r: 18; --breathe-dur: 5.2s;">
-            <circle class="halo" cx="110" cy="130" r="18"/>
-            <circle class="bg" cx="110" cy="130" r="9"/>
-            <text x="110" y="101">Tokenizers</text>
-          </g>
-          <g class="node" data-id="agents" style="--node-color: #D4A843; --halo-r: 30; --breathe-dur: 4.2s;">
-            <circle class="halo" cx="410" cy="220" r="30"/>
-            <circle class="bg" cx="410" cy="220" r="17"/>
-            <text x="410" y="184">Agents</text>
-          </g>
-          <g class="node" data-id="mcp" style="--node-color: #D4A843; --halo-r: 22; --breathe-dur: 4.9s;">
-            <circle class="halo" cx="590" cy="180" r="22"/>
-            <circle class="bg" cx="590" cy="180" r="12"/>
-            <text x="590" y="147">MCP</text>
-          </g>
-          <g class="node" data-id="rag" style="--node-color: #D94F30; --halo-r: 24; --breathe-dur: 4.4s;">
-            <circle class="halo" cx="290" cy="340" r="24"/>
-            <circle class="bg" cx="290" cy="340" r="13"/>
-            <text x="290" y="308">RAG</text>
-          </g>
-          <g class="node" data-id="python" style="--node-color: #2A7B9B; --halo-r: 20; --breathe-dur: 5s;">
-            <circle class="halo" cx="170" cy="430" r="20"/>
-            <circle class="bg" cx="170" cy="430" r="11"/>
-            <text x="170" y="400">Python</text>
-          </g>
-          <g class="node" data-id="reading" style="--node-color: #2D8B55; --halo-r: 22; --breathe-dur: 4.7s;">
-            <circle class="halo" cx="430" cy="430" r="22"/>
-            <circle class="bg" cx="430" cy="430" r="12"/>
-            <text x="430" y="398">Reading List</text>
-          </g>
-          <g class="node" data-id="projects" style="--node-color: #D4A843; --halo-r: 26; --breathe-dur: 4.5s;">
-            <circle class="halo" cx="560" cy="410" r="26"/>
-            <circle class="bg" cx="560" cy="410" r="15"/>
-            <text x="560" y="375">Projects</text>
-          </g>
-          <g class="node" data-id="writing" style="--node-color: #7B6DAA; --halo-r: 22; --breathe-dur: 4.8s;">
-            <circle class="halo" cx="600" cy="290" r="22"/>
-            <circle class="bg" cx="600" cy="290" r="12"/>
-            <text x="600" y="258">Writing</text>
-          </g>
-          <g class="node" data-id="people" style="--node-color: #7B6DAA; --halo-r: 22; --breathe-dur: 5.1s;">
-            <circle class="halo" cx="790" cy="110" r="22"/>
-            <circle class="bg" cx="790" cy="110" r="12"/>
-            <text x="790" y="78">People</text>
-          </g>
-          <g class="node" data-id="ai-trends" style="--node-color: #2A7B9B; --halo-r: 28; --breathe-dur: 4.3s;">
-            <circle class="halo" cx="870" cy="250" r="28"/>
-            <circle class="bg" cx="870" cy="250" r="16"/>
-            <text x="870" y="215">AI Trends</text>
-          </g>
-          <g class="node" data-id="q3-notes" style="--node-color: #2A7B9B; --halo-r: 20; --breathe-dur: 4.6s;">
-            <circle class="halo" cx="880" cy="430" r="20"/>
-            <circle class="bg" cx="880" cy="430" r="11"/>
-            <text x="880" y="400">Q3 Notes</text>
-          </g>
-          <g class="node mobile-hide" data-id="decisions" style="--node-color: #7B6DAA; --halo-r: 22; --breathe-dur: 5s;">
-            <circle class="halo" cx="770" cy="500" r="22"/>
-            <circle class="bg" cx="770" cy="500" r="12"/>
-            <text x="770" y="540">Decisions</text>
-          </g>
-          <g class="node" data-id="habits" style="--node-color: #2D8B55; --halo-r: 22; --breathe-dur: 4.4s;">
-            <circle class="halo" cx="620" cy="540" r="22"/>
-            <circle class="bg" cx="620" cy="540" r="12"/>
-            <text x="620" y="580">Habits</text>
-          </g>
-          <g class="node" data-id="health" style="--node-color: #2D8B55; --halo-r: 20; --breathe-dur: 5.3s;">
-            <circle class="halo" cx="410" cy="540" r="20"/>
-            <circle class="bg" cx="410" cy="540" r="11"/>
-            <text x="410" y="580">Health</text>
-          </g>
-        </svg>
-      </div>
-
-      <div class="graph-io" aria-hidden="true">
-        <span class="io-pill read"><span class="dot"></span>AI reads &nbsp;→&nbsp; this graph</span>
-        <span>15 nodes · 23 edges · 1 human</span>
-        <span class="io-pill write">this graph &nbsp;→&nbsp; AI writes back<span class="dot"></span></span>
-      </div>
-    </div>
-
-    <div class="graph-explainer">
-      <p><strong>This is the shift.</strong> For ten years, PKM tools have asked humans to write notes for their future selves. Obsidian, Roam, Logseq, Notion — they all stop at the page. The agent could read your vault, but it couldn't grow it. Every conversation started from zero.</p>
-      <p><strong>Now the agent has hands.</strong> It reads your sources, summarizes them into wiki pages, draws the links you forgot, files them under the right concept, and keeps the graph internally consistent. You curate. It compiles. The wiki is the codebase. The LLM is the programmer.</p>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       KARPATHY QUOTE / FRAMING
-       ============================================================ -->
-  <section class="section section-warm" aria-labelledby="karpathy-heading">
-    <div class="wrap">
-      <div class="section-header animate-in">
-        <p class="eyebrow">The Karpathy framing</p>
-        <h2 class="section-title" id="karpathy-heading">An <em>idea file</em>, gone <em>viral.</em></h2>
-        <p class="section-sub">On April 4, 2026, Andrej Karpathy posted a one-page Gist describing a pattern for personal LLM-maintained knowledge bases. Within two weeks: 5,000 stars, dozens of open-source re-implementations.</p>
-      </div>
-
-      <div class="quote-block animate-in">
-        <blockquote>"Obsidian is the IDE; the LLM is the programmer; the wiki is the codebase."</blockquote>
-        <cite>Andrej Karpathy · llm-wiki.md · April 2026</cite>
-      </div>
-
-      <p class="karpathy-prose animate-in">
-        Karpathy frames it as a <strong>compilation problem</strong>. Raw sources — articles, podcasts, papers, screenshots, your own messy thoughts — are the source code. The wiki is the compiled artifact: cross-referenced, summarized, queryable. You don't read the source every time you want an answer; you read the compiled wiki. The LLM does the compile pass, repeatedly, as new sources land.
+      <p class="frontmatter">
+        <a href="#" class="wikilink">ai-tools</a>
+        <span class="sep">»</span>
+        <a href="#" class="wikilink">personal-knowledge-management</a>
       </p>
-      <p class="karpathy-prose animate-in" style="margin-top: 1.25rem;">
-        Karpathy's own vault, built this way over a few months, became a <strong>400,000-word</strong> personal textbook on the topics he was thinking about. Not written by him. Maintained for him.
-      </p>
-    </div>
-  </section>
 
-  <!-- ============================================================
-       BUILDING BLOCKS — BENTO
-       ============================================================ -->
-  <section class="section wrap" aria-labelledby="blocks-heading">
-    <div class="section-header animate-in">
-      <p class="eyebrow">The four ingredients</p>
-      <h2 class="section-title" id="blocks-heading">Building blocks of an <em>agentic PKM.</em></h2>
-      <p class="section-sub">Strip away the tooling debates. Four primitives are all that's needed: a substrate the AI can read, a structure it can traverse, an agent with write access, and a way to ask your past self questions.</p>
-    </div>
+      <h1 class="doc-title">Your second brain, now agentic.</h1>
+      <p class="doc-dek">Andrej Karpathy's idea of a personal LLM wiki — extended into a world where the agent doesn't just read your notes. It writes back to them. Every day. Quietly. Forever.</p>
 
-    <div class="bento">
-      <article class="bento-tile col-2" style="--tile-color: #D94F30;">
-        <span class="bento-tag">01 · Substrate</span>
-        <h3 class="bento-title">Notes — markdown is the universal format.</h3>
-        <p class="bento-body">Plain text files with [[wikilinks]] are the only substrate that survives every tooling change of the next decade. Agents can read them. Humans can read them. Git can version them. No vendor owns them.</p>
-        <svg class="tile-art" width="120" height="60" viewBox="0 0 120 60" aria-hidden="true">
-          <rect x="2" y="6"  width="80" height="3" rx="1.5" fill="#D94F30" opacity="0.55"/>
-          <rect x="2" y="16" width="100" height="3" rx="1.5" fill="#D94F30" opacity="0.35"/>
-          <rect x="2" y="26" width="60" height="3" rx="1.5" fill="#D94F30" opacity="0.25"/>
-          <rect x="2" y="36" width="90" height="3" rx="1.5" fill="#D94F30" opacity="0.4"/>
-          <rect x="2" y="46" width="40" height="3" rx="1.5" fill="#D94F30" opacity="0.2"/>
-        </svg>
-      </article>
+      <blockquote class="pullquote">
+        Obsidian is the IDE; the LLM is the programmer; the wiki is the codebase.
+        <span class="source">— Andrej Karpathy, <em>llm-wiki.md</em>, April 2026</span>
+      </blockquote>
 
-      <article class="bento-tile" style="--tile-color: #2A7B9B;">
-        <span class="bento-tag">02 · Structure</span>
-        <h3 class="bento-title">Links the AI can traverse.</h3>
-        <p class="bento-body">Backlinks turn a folder of notes into a graph. The agent walks edges to find context — far cheaper and more accurate than vector search alone.</p>
-      </article>
-
-      <article class="bento-tile" style="--tile-color: #D4A843;">
-        <span class="bento-tag">03 · Agency</span>
-        <h3 class="bento-title">Agents with read AND write.</h3>
-        <p class="bento-body">Read-only is dead-on-arrival. The shift is granting the agent permission to file, link, summarize, and refactor your vault — under your review.</p>
-      </article>
-
-      <article class="bento-tile col-2" style="--tile-color: #2D8B55;">
-        <span class="bento-tag">04 · Recall</span>
-        <h3 class="bento-title">Queries — questions you ask your past self.</h3>
-        <p class="bento-body">"What did I conclude about RAG in Q3?" "Show me every decision I tagged 'reversible.'" "Draft a synthesis of everything I've read about agentic patterns this year." The vault becomes a thinking partner that remembers what you do not.</p>
-        <svg class="tile-art" width="120" height="60" viewBox="0 0 120 60" aria-hidden="true">
-          <circle cx="20" cy="30" r="14" fill="none" stroke="#2D8B55" stroke-width="2" opacity="0.6"/>
-          <line x1="32" y1="42" x2="48" y2="56" stroke="#2D8B55" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
-          <rect x="62" y="22" width="50" height="3" rx="1.5" fill="#2D8B55" opacity="0.4"/>
-          <rect x="62" y="32" width="36" height="3" rx="1.5" fill="#2D8B55" opacity="0.25"/>
-        </svg>
-      </article>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       IMPLEMENTATIONS
-       ============================================================ -->
-  <section class="section section-warm" aria-labelledby="impl-heading">
-    <div class="wrap">
-      <div class="section-header animate-in">
-        <p class="eyebrow">Three ways to ship this today</p>
-        <h2 class="section-title" id="impl-heading">Real implementations, <em>shipping now.</em></h2>
-        <p class="section-sub">None of this is theoretical. Three stacks have crystallized in the months since Karpathy's gist — each trades polish, ownership, and agency in different proportions.</p>
-      </div>
-
-      <div class="impl-grid">
-        <article class="impl-card">
-          <div class="impl-stack">Path A · Plug-and-play</div>
-          <h3 class="impl-name"><span>Obsidian</span> + Smart Connections</h3>
-          <p class="impl-body">A community plugin that embeds every note, retrieves on-demand, and now writes back via the new MCP bridge. Your vault stays on disk; the AI does the indexing. Lowest setup cost; best for solo knowledge workers.</p>
-          <div class="impl-meta">
-            <span>Local-first</span>
-            <span>~20 min setup</span>
+      <!-- ============== GRAPH ============== -->
+      <figure class="graph fade-in" id="graph">
+        <div class="graph-card">
+          <div class="graph-head">
+            <span>graph view · 15 nodes · 23 links</span>
+            <span>vault://manu/2026</span>
           </div>
-        </article>
+          <div class="graph-svg-wrap">
+            <svg class="graph-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="g-title">
+              <title id="g-title">A graph of personal notes connected by topic.</title>
 
-        <article class="impl-card">
-          <div class="impl-stack">Path B · Team-friendly</div>
-          <h3 class="impl-name"><span>Notion</span> + Claude MCP</h3>
-          <p class="impl-body">Notion's MCP server lets Claude read, edit, and create pages across your workspace. Best when the knowledge graph is shared — research teams, founders with assistants, consultants with client knowledge bases.</p>
-          <div class="impl-meta">
-            <span>Cloud-first</span>
-            <span>Multi-user</span>
+              <g id="gedges">
+                <path class="gedge" data-from="transformers" data-to="agents" d="M 230 140 Q 320 200, 410 220"/>
+                <path class="gedge" data-from="transformers" data-to="tokenizers" d="M 230 140 Q 170 90, 110 130"/>
+                <path class="gedge" data-from="transformers" data-to="rag" d="M 230 140 Q 250 240, 290 340"/>
+                <path class="gedge" data-from="agents" data-to="rag" d="M 410 220 Q 360 280, 290 340"/>
+                <path class="gedge" data-from="agents" data-to="mcp" d="M 410 220 Q 500 200, 590 180"/>
+                <path class="gedge" data-from="agents" data-to="projects" d="M 410 220 Q 480 320, 560 410"/>
+                <path class="gedge" data-from="rag" data-to="python" d="M 290 340 Q 230 380, 170 430"/>
+                <path class="gedge" data-from="rag" data-to="reading" d="M 290 340 Q 360 380, 430 430"/>
+                <path class="gedge" data-from="python" data-to="projects" d="M 170 430 Q 360 490, 560 410"/>
+                <path class="gedge" data-from="mcp" data-to="projects" d="M 590 180 Q 580 280, 560 410"/>
+                <path class="gedge" data-from="mcp" data-to="people" d="M 590 180 Q 690 130, 790 110"/>
+                <path class="gedge" data-from="ai-trends" data-to="agents" d="M 870 250 Q 640 240, 410 220"/>
+                <path class="gedge" data-from="ai-trends" data-to="reading" d="M 870 250 Q 660 360, 430 430"/>
+                <path class="gedge" data-from="ai-trends" data-to="people" d="M 870 250 Q 830 180, 790 110"/>
+                <path class="gedge" data-from="q3-notes" data-to="decisions" d="M 880 430 Q 840 470, 770 500"/>
+                <path class="gedge" data-from="q3-notes" data-to="ai-trends" d="M 880 430 Q 880 340, 870 250"/>
+                <path class="gedge" data-from="decisions" data-to="habits" d="M 770 500 Q 700 530, 620 540"/>
+                <path class="gedge" data-from="decisions" data-to="writing" d="M 770 500 Q 690 400, 600 290"/>
+                <path class="gedge" data-from="habits" data-to="health" d="M 620 540 Q 510 540, 410 540"/>
+                <path class="gedge" data-from="health" data-to="reading" d="M 410 540 Q 420 490, 430 430"/>
+                <path class="gedge" data-from="writing" data-to="projects" d="M 600 290 Q 580 350, 560 410"/>
+                <path class="gedge" data-from="writing" data-to="reading" d="M 600 290 Q 515 360, 430 430"/>
+                <path class="gedge" data-from="people" data-to="writing" d="M 790 110 Q 700 200, 600 290"/>
+              </g>
+
+              <g class="gnode" data-id="transformers" tabindex="0">
+                <circle class="ring" cx="230" cy="140" r="16"/>
+                <circle class="dot" cx="230" cy="140" r="7"/>
+                <text x="230" y="120">Transformers</text>
+              </g>
+              <g class="gnode" data-id="tokenizers" tabindex="0">
+                <circle class="ring" cx="110" cy="130" r="12"/>
+                <circle class="dot" cx="110" cy="130" r="5"/>
+                <text x="110" y="112">Tokenizers</text>
+              </g>
+              <g class="gnode" data-id="agents" tabindex="0">
+                <circle class="ring" cx="410" cy="220" r="18"/>
+                <circle class="dot" cx="410" cy="220" r="8"/>
+                <text x="410" y="198">Agents</text>
+              </g>
+              <g class="gnode" data-id="mcp" tabindex="0">
+                <circle class="ring" cx="590" cy="180" r="14"/>
+                <circle class="dot" cx="590" cy="180" r="6"/>
+                <text x="590" y="160">MCP</text>
+              </g>
+              <g class="gnode" data-id="rag" tabindex="0">
+                <circle class="ring" cx="290" cy="340" r="15"/>
+                <circle class="dot" cx="290" cy="340" r="6.5"/>
+                <text x="290" y="320">RAG</text>
+              </g>
+              <g class="gnode" data-id="python" tabindex="0">
+                <circle class="ring" cx="170" cy="430" r="13"/>
+                <circle class="dot" cx="170" cy="430" r="5.5"/>
+                <text x="170" y="410">Python</text>
+              </g>
+              <g class="gnode" data-id="reading" tabindex="0">
+                <circle class="ring" cx="430" cy="430" r="14"/>
+                <circle class="dot" cx="430" cy="430" r="6"/>
+                <text x="430" y="410">Reading List</text>
+              </g>
+              <g class="gnode" data-id="projects" tabindex="0">
+                <circle class="ring" cx="560" cy="410" r="16"/>
+                <circle class="dot" cx="560" cy="410" r="7"/>
+                <text x="560" y="388">Projects</text>
+              </g>
+              <g class="gnode" data-id="writing" tabindex="0">
+                <circle class="ring" cx="600" cy="290" r="14"/>
+                <circle class="dot" cx="600" cy="290" r="6"/>
+                <text x="600" y="270">Writing</text>
+              </g>
+              <g class="gnode" data-id="people" tabindex="0">
+                <circle class="ring" cx="790" cy="110" r="14"/>
+                <circle class="dot" cx="790" cy="110" r="6"/>
+                <text x="790" y="91">People</text>
+              </g>
+              <g class="gnode" data-id="ai-trends" tabindex="0">
+                <circle class="ring" cx="870" cy="250" r="17"/>
+                <circle class="dot" cx="870" cy="250" r="7.5"/>
+                <text x="870" y="228">AI Trends</text>
+              </g>
+              <g class="gnode" data-id="q3-notes" tabindex="0">
+                <circle class="ring" cx="880" cy="430" r="13"/>
+                <circle class="dot" cx="880" cy="430" r="5.5"/>
+                <text x="880" y="410">Q3 Notes</text>
+              </g>
+              <g class="gnode" data-id="decisions" tabindex="0">
+                <circle class="ring" cx="770" cy="500" r="14"/>
+                <circle class="dot" cx="770" cy="500" r="6"/>
+                <text x="770" y="528">Decisions</text>
+              </g>
+              <g class="gnode" data-id="habits" tabindex="0">
+                <circle class="ring" cx="620" cy="540" r="14"/>
+                <circle class="dot" cx="620" cy="540" r="6"/>
+                <text x="620" y="568">Habits</text>
+              </g>
+              <g class="gnode" data-id="health" tabindex="0">
+                <circle class="ring" cx="410" cy="540" r="13"/>
+                <circle class="dot" cx="410" cy="540" r="5.5"/>
+                <text x="410" y="568">Health</text>
+              </g>
+            </svg>
           </div>
-        </article>
+        </div>
+        <figcaption>Fig 1. The vault as a graph. <span class="fc-key">Teal nodes</span> are notes; warm-gray edges are <a href="#" class="wikilink">backlinks</a>. Hover any node to dim its non-neighbors.</figcaption>
+      </figure>
 
-        <article class="impl-card">
-          <div class="impl-stack">Path C · Power-user</div>
-          <h3 class="impl-name"><span>Markdown folder</span> + Claude Code</h3>
-          <p class="impl-body">A git-versioned directory of <code style="font-family:var(--font-mono);font-size:0.88em;">.md</code> files, with Claude Code as the agent. Maximum control, maximum customization, zero vendor lock-in. The path Karpathy himself ships on.</p>
-          <div class="impl-meta">
-            <span>Self-hosted</span>
-            <span>Git-versioned</span>
+      <!-- ============== PROSE ============== -->
+      <section class="prose">
+
+        <h2 id="sec-shift"><span class="hash">§1</span>The shift</h2>
+
+        <aside class="marginnote">
+          <span class="mn-label">margin note</span>
+          Karpathy posted this as a one-page Gist on April 4, 2026. Two weeks later: 5,000 stars and dozens of open-source re-implementations.
+        </aside>
+
+        <p class="lede">For ten years, personal knowledge management tools have asked humans to write notes for their future selves. <a href="#" class="wikilink">obsidian</a>, <a href="#" class="wikilink">roam</a>, <a href="#" class="wikilink">logseq</a>, <a href="#" class="wikilink">notion</a> — they all stop at the page. The agent could read your vault, but it couldn't grow it. Every conversation started from zero.</p>
+
+        <p>Now the agent has hands. It reads your sources, summarizes them into wiki pages, draws the <a href="#" class="wikilink">backlinks</a> you forgot, files them under the right concept, and keeps the graph internally consistent. You curate. It compiles. The wiki is the codebase. The LLM is the programmer.</p>
+
+        <p>Karpathy frames it as a <strong>compilation problem</strong>. Raw sources — articles, podcasts, papers, screenshots, your own messy thoughts — are the source code. The wiki is the compiled artifact: cross-referenced, summarized, queryable. You don't read the source every time you want an answer; you read the compiled wiki. The LLM does the compile pass, repeatedly, as new <a href="#" class="wikilink">sources</a> land.</p>
+
+        <p>Karpathy's own vault, built this way over a few months, became a <strong>400,000-word</strong> personal textbook on the topics he was thinking about. Not written by him. Maintained <em>for</em> him.</p>
+
+        <aside class="marginnote">
+          <span class="mn-label">by the numbers</span>
+          Median knowledge worker: 2,300 notes, almost never re-read. Agent-suggested links accepted by humans: 92% in CETI's internal study. Time recovered on capture and filing: ~6h/week.
+        </aside>
+
+        <p>The numbers underneath the pattern matter because they make it un-ignorable. The median knowledge worker has around <strong>2,300 notes</strong> they have written and almost never re-read. CETI client engagements show <strong>~6 hours per week</strong> recovered when the agent handles capture and filing — and a <strong>92% acceptance rate</strong> for agent-suggested links, once you trust the system to read the whole graph before proposing one. The wiki compounds. The human stops doing janitorial work on their own brain.</p>
+
+        <h2 id="sec-why-now"><span class="hash">§2</span>Why now?</h2>
+
+        <aside class="marginnote">
+          <span class="mn-label">pre-2024</span>
+          Vector search existed but felt like a parlor trick. The retrieval was good; the reasoning over what was retrieved wasn't. You'd get a list of "similar notes" and have to do the synthesis yourself.
+        </aside>
+
+        <p>For a long time, the answer to "why bother taking notes" was sentimental. <a href="#" class="wikilink">tiago-forte</a> argued the second brain was for your future self. <a href="#" class="wikilink">andy-matuschak</a> argued it was for thinking, not for storage. <a href="#" class="wikilink">maggie-appleton</a> argued it was a garden you tended for its own sake. All of them assumed the only reader was you. The agent in the room — your own forgetfulness — was the one you were writing around.</p>
+
+        <p>That assumption broke in 2024 and shattered in 2025. Long-context models could ingest a 10,000-note vault and still answer questions coherently. <a href="#" class="wikilink">claude-sonnet-4</a> could traverse markdown links the way humans traverse hallway conversations. By the time <a href="#" class="wikilink">mcp</a> arrived, the missing piece was no longer reasoning; it was <em>write access</em>. Reading a vault was solved. Maintaining one — silently, in the background, while you slept — became the new frontier.</p>
+
+        <p>What changes when your second brain is also an AI's working memory? The first thing is that <strong>capture stops being optional</strong>. Every voicenote, every Slack thread you starred, every PDF you opened for fifteen seconds: the agent can pull these in, summarize them, and file them. The thing that used to be a discipline (a daily journal, a reading log, a meeting transcript) becomes ambient. You no longer decide what is worth saving. You decide what is worth surfacing.</p>
+
+        <p>The second thing is that <strong>writing changes register</strong>. When you knew you were the only reader, you wrote in shorthand — fragments, inside jokes, "remember to follow up on this." Now you write knowing a second reader will need context. People who have adopted this pattern report writing more complete sentences in their own notes, because the LLM is a stricter reader than the future-self they imagined.</p>
+
+        <p>The third thing — and this is the one nobody quite anticipated — is that <strong>your notes start writing each other</strong>. The agent reads <a href="#" class="wikilink">rag-vs-long-context</a>, notices it contradicts something you said three weeks ago in <a href="#" class="wikilink">q1-architecture-decisions</a>, and either flags the conflict or proposes a synthesis page. The graph stops being a passive map of what you've thought and starts behaving like a colleague who has read everything and isn't shy about pointing out the inconsistencies.</p>
+
+        <p>None of this was possible in 2023 because the agent couldn't hold the whole graph in mind. Now it can. The PKM tools that survived the last decade survived because their substrate — plain text and links — happened to be the exact substrate the agent needed. They got lucky. The tools that lose this decade are the ones that locked their notes inside a proprietary database, where the agent has to claw them back out through an API one page at a time.</p>
+
+        <p>There is also a cultural shift underneath the technical one. For ten years, the people who took notes seriously did so as a kind of countercultural practice — a quiet rebellion against the stream-shaped feeds that wanted them not to remember. They were called <em>tools-for-thought</em> nerds, and the demographic was small. Now the same practice has become professionally legible: a research scientist with a well-tended vault outperforms one without by a measurable margin, and the gap widens monthly. The aesthetic of <a href="#" class="wikilink">tending-a-garden</a> survives. The framing of it as a hobby does not.</p>
+
+        <h2 id="sec-substrate"><span class="hash">§3</span>The substrate: markdown + links</h2>
+
+        <aside class="marginnote">
+          <span class="mn-label">unsexy truth</span>
+          The format that wins is almost never the one with the best UX. It's the one that's easiest for other tools to read. Markdown won for the same reason CSV won: it's barely a format at all.
+        </aside>
+
+        <p>Why did markdown win? It almost didn't. <a href="#" class="wikilink">notion</a> was the favored bet from 2018 to 2022 — better collaboration, better blocks, better mobile. <a href="#" class="wikilink">roam-research</a> had block references and a research-grade graph view. Both lost ground to plain markdown for a reason that wasn't obvious at the time: markdown is <em>readable by anything</em>. Open it in TextEdit. Open it in vim. Open it in your phone's Files app at 2am. Open it in Claude.</p>
+
+        <p>The agent era doubles down on this. When the LLM is the second reader of your notes, the format that wins is the one with the lowest impedance between human prose and machine ingestion. Markdown is barely a format — it's prose with five conventions stacked on top. <code># headings</code>, <code>**bold**</code>, <code>- lists</code>, <code>[[wikilinks]]</code>, <code>```code```</code>. That's almost the whole spec. The agent doesn't need to parse XML or query a database. It opens the file. It reads.</p>
+
+        <p>Compare to <a href="#" class="wikilink">google-docs</a>, where the underlying format is a proprietary JSON tree that requires the Docs API to traverse. Each page is a network call. The agent can do it — Notion's MCP server and Google's API both make it possible — but every operation pays a tax. A markdown vault on disk pays zero tax. The agent walks the filesystem. The latency is a memcpy.</p>
+
+        <p>The deeper win is <strong>version control</strong>. A markdown vault is a git repository by default. Every edit the agent makes is a commit, signed, diff-able, revertable. When the agent files a source under the wrong concept, you don't argue with it; you <code>git revert HEAD</code>. The audit trail is total. Try doing that with Notion's revision history when the agent has modified 47 pages overnight.</p>
+
+        <p>And finally: <strong>plain text outlives software</strong>. A vault you started in 2014 still opens in 2026 because nothing about the file format depends on the application that wrote it. The wiki you build with your agent today will be readable in 2050 the same way a typewritten letter from 1970 is readable today. That isn't a small property. For a 25-year compounding artifact, it's the property.</p>
+
+        <p>The links are the other half of the win. A wikilink — <code>[[concept-name]]</code> — is a contract: this page knows about that page. It is bidirectional by convention, even if the format itself is one-way: the agent can compute backlinks in a single pass over the corpus. Compared to <a href="#" class="wikilink">notion</a>'s page mentions, which require an API roundtrip to resolve, or Google Docs' nothing-of-the-kind, wikilinks are the cheapest possible primitive for the graph operation that matters most. They are also the easiest thing for a human to type by hand, which means the substrate composes — you can write a note in a text editor on a plane and it will participate in the graph the moment you sync.</p>
+
+        <h2 id="sec-readers"><span class="hash">§4</span>The agents that read your notes</h2>
+
+        <p>The first wave of AI-in-PKM was about retrieval. You had a vault; an agent learned to search it. The differences between the tools are mostly about how they index, where the embeddings live, and what they let the agent do once it has found something.</p>
+
+        <table class="compare">
+          <thead>
+            <tr><th>tool</th><th>read model</th><th>where indexes live</th><th>good for</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Obsidian Smart Connections</td>
+              <td>Embeddings of every note, local-first; semantic search inside Obsidian.</td>
+              <td>On disk, in your vault, encrypted.</td>
+              <td>Solo knowledge workers who already use Obsidian and want zero cloud.</td>
+            </tr>
+            <tr>
+              <td>Mem.ai</td>
+              <td>Self-organizing notes; the AI proposes tags, summaries, and connections as you write.</td>
+              <td>Mem's cloud, indexed continuously.</td>
+              <td>People who hate filing and want a system that organizes itself.</td>
+            </tr>
+            <tr>
+              <td>Notion AI</td>
+              <td>Q&A across pages, summaries, follow-up question generation; tied to Notion's block model.</td>
+              <td>Notion's cloud.</td>
+              <td>Teams already on Notion who don't want a second tool.</td>
+            </tr>
+            <tr>
+              <td>Reflect Notes</td>
+              <td>GPT-style chat with the daily-note backbone; backlinks-aware.</td>
+              <td>Reflect's cloud, end-to-end encrypted.</td>
+              <td>Daily-note diehards who want chat on top of their journal.</td>
+            </tr>
+            <tr>
+              <td>Custom Claude / GPT</td>
+              <td>Whatever you build. Usually: filesystem read, grep, semantic search, link traversal.</td>
+              <td>Wherever your notes are.</td>
+              <td>Anyone who wants their PKM stack to outlive the next vendor pivot.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <aside class="marginnote">
+          <span class="mn-label">on lock-in</span>
+          Cloud-first tools are faster to set up and harder to leave. Local-first tools are the opposite. The question is which kind of regret you can tolerate later.
+        </aside>
+
+        <p>The pattern across all of these: read access is now <em>commodity</em>. Every serious PKM tool ships with a chat-with-your-notes feature within 90 days of launch. The interesting decisions have moved upstream — to what the agent is allowed to <em>do</em> with what it reads. Can it propose a new note? Can it edit an existing one? Can it delete? Can it reorganize the folder structure overnight while you sleep? Those questions are not solved. Each tool answers them differently, and the answers reveal a lot about who the tool is for.</p>
+
+        <h2 id="sec-writers"><span class="hash">§5</span>The agents that WRITE your notes</h2>
+
+        <aside class="marginnote">
+          <span class="mn-label">the inversion</span>
+          For a decade, the user wrote and the tool stored. Now the tool writes and the user reviews. It's a smaller change in syntax than in identity.
+        </aside>
+
+        <p>Write access is where the religious war is being fought. Reading is consensual; the worst an over-eager retrieval can do is bury the answer in a long context. Writing is non-reversible by default. A note the agent created last Tuesday, that you haven't reviewed, and that other notes now backlink to, is a fact in your vault. The graph remembers it. If it's wrong, the wrongness propagates.</p>
+
+        <p>The radical shift is granting the agent permission to do four things, in order of increasing trust:</p>
+
+        <p><strong>Propose summaries.</strong> The agent reads a paper you dropped in <code>/sources</code> and drafts a one-page summary into <code>/inbox</code>. You review, accept, file. This is the safest move and the one most tools start with. <a href="#" class="wikilink">notebooklm</a> built an entire product around it.</p>
+
+        <p><strong>Suggest backlinks.</strong> While reading note A, the agent notices that note B from 2024 is the missing reference. It surfaces the suggestion in the sidebar. You click "accept" or "ignore." Obsidian's Smart Connections and Mem both ship this. It is the highest-leverage feature in the entire category — accepted suggestions compound into a denser graph, which makes future suggestions better.</p>
+
+        <p><strong>Compile new pages from existing ones.</strong> "Write me an evergreen note on what I currently believe about long-context vs. RAG." The agent walks every note tagged <a href="#" class="wikilink">rag</a> and <a href="#" class="wikilink">long-context</a>, drafts a synthesis with citations to its sources, and saves it as <code>/notes/rag-vs-long-context-synthesis-2026-05.md</code>. The page is auto-linked back to every source it drew from. You read it, edit it, ship it. <a href="#" class="wikilink">andy-matuschak</a>'s "evergreen notes" framework gets industrialized.</p>
+
+        <p><strong>Refactor the vault.</strong> Highest trust, lowest adoption. The agent reorganizes folders, splits an unwieldy 8,000-word page into smaller atomic notes, renames concepts that have drifted, prunes dormant content. <a href="#" class="wikilink">karpathy</a>'s setup runs a nightly job that does exactly this and commits the diff. The next morning he reviews the commit like a pull request from a colleague. He estimates he rejects about 1 in 12 changes.</p>
+
+        <p>The workflows that actually work in production right now are conservative on the last two and aggressive on the first two. Summaries and backlinks are basically free to accept; the worst case is noise. Compilation and refactoring need a human review gate, because the worst case is that the wrong version of your thinking becomes the canonical version, and you start reasoning from it.</p>
+
+        <p>The one workflow nobody talks about, but which CETI clients report as the highest-impact: <strong>the agent writes the meeting notes you didn't take</strong>. It reads the transcript, drafts decisions and action items into <a href="#" class="wikilink">decisions</a>, links the relevant people from your <a href="#" class="wikilink">people</a> directory, and adds a note to each person's page about what they committed to. Three months in, you have a CRM you never built, populated by an agent you don't manage. That is the shape of the shift.</p>
+
+        <p>One more shift worth naming: <strong>the agent maintains your own index pages</strong>. Most vaults accumulate a handful of high-level overview notes — <code>ai-trends.md</code>, <code>open-questions.md</code>, <code>currently-reading.md</code> — that are supposed to be the table of contents into the rest. They go stale almost immediately because nobody wants to manually keep them in sync as the underlying notes evolve. An agent that re-compiles these pages on every commit fixes this entirely. The index becomes a derived artifact, not a hand-maintained one. You read it like a digest; the agent regenerates it like a build target.</p>
+
+        <h2 id="sec-blocks"><span class="hash">§6</span>Building blocks</h2>
+
+        <p>Strip away the tooling debates. Four primitives are all that's needed: a substrate the AI can read, a structure it can traverse, an agent with write access, and a way to ask your past self questions.</p>
+
+        <ol class="blocks">
+          <li>
+            <h3>Notes — the substrate</h3>
+            <p>Plain-text markdown files with <a href="#" class="wikilink">wikilinks</a> are the only substrate that survives every tooling change of the next decade. Agents can read them. Humans can read them. Git can version them. No vendor owns them.</p>
+          </li>
+          <li>
+            <h3>Links — the structure</h3>
+            <p>Backlinks turn a folder of notes into a graph. The agent walks edges to find context — far cheaper and more accurate than vector search alone.</p>
+          </li>
+          <li>
+            <h3>Agents — the agency</h3>
+            <p>Read-only is dead on arrival. The shift is granting the agent permission to file, link, summarize, and refactor your vault — under your review.</p>
+          </li>
+          <li>
+            <h3>Queries — the recall</h3>
+            <p>"What did I conclude about <a href="#" class="wikilink">rag</a> in Q3?" "Show me every <a href="#" class="wikilink">decision</a> tagged reversible." The vault becomes a thinking partner that remembers what you do not.</p>
+          </li>
+        </ol>
+
+        <h2 id="sec-day"><span class="hash">§7</span>A day in the vault</h2>
+
+        <aside class="marginnote">
+          <span class="mn-label">on rhythm</span>
+          The loop is asymmetric on purpose. Capture should be near-zero friction; compile should be patient and overnight. Treating them as a single flow burns out the human.
+        </aside>
+
+        <p>Not a productivity system. A loop. Capture is fast; query is conversational; the cleanup happens while you sleep. The hardest part isn't installing the agent — it's giving up the habit of organizing your own notes by hand. Most people try to keep doing that work in parallel for a month, get tired, and quit. The ones who succeed surrender filing immediately and only intervene when the agent files something wrong.</p>
+
+        <p>Here is what a real day looks like, in the kind of detail that only matters when you're trying to set this up for yourself. The names are placeholders; the rhythm is real.</p>
+
+        <div class="day-narrative">
+
+          <div class="day-entry">
+            <div class="day-time">07:42</div>
+            <h4>Morning capture — frictionless and dumb</h4>
+            <p>Walking the dog, you dictate three voice memos: a thought about <a href="#" class="wikilink">rag</a> indexing, a follow-up for a client, a half-formed idea for an essay. Back at the desk, your phone has already dropped the audio + transcripts into <code>/sources/voice/</code>. You don't read them. You don't file them. You don't even open the folder. The agent will handle that overnight. Capture should cost you zero seconds of organizational thought. If you find yourself wondering where a note should live, the system has failed.</p>
           </div>
-        </article>
-      </div>
-    </div>
-  </section>
 
-  <!-- ============================================================
-       DAILY WORKFLOW
-       ============================================================ -->
-  <section class="section wrap" aria-labelledby="workflow-heading">
-    <div class="section-header animate-in">
-      <p class="eyebrow">A day in the agentic vault</p>
-      <h2 class="section-title" id="workflow-heading">What it <em>feels like</em> in practice.</h2>
-      <p class="section-sub">Not a productivity system. A loop. Capture is fast; query is conversational; the cleanup happens while you sleep.</p>
-    </div>
+          <div class="day-entry">
+            <div class="day-time">09:15</div>
+            <h4>The inbox sweep — five minutes, not fifty</h4>
+            <p>The agent has overnight-drafted summaries for two articles you opened yesterday and a meeting transcript from Wednesday. They sit in <code>/inbox/</code>. You glance at each, mostly accept, occasionally reject. Acceptance is one keystroke. Rejection is one keystroke and a sentence explaining why — the agent learns from these. The whole sweep takes the time it used to take to read one of those articles in the first place.</p>
+          </div>
 
-    <div class="timeline">
-      <div class="step" style="--step-color: #D94F30;">
-        <span class="step-num">01</span>
-        <div class="step-when">Morning · 07:42</div>
-        <h3>Capture</h3>
-        <p>Voice memo on your walk, three links from Twitter, a screenshot from a paper. All dropped raw into <code style="font-family:var(--font-mono);font-size:0.85em;">/sources</code>.</p>
-      </div>
-      <div class="step" style="--step-color: #D4A843;">
-        <span class="step-num">02</span>
-        <div class="step-when">Midday · 12:18</div>
-        <h3>Query</h3>
-        <p>"What did I think about long-context vs. RAG in March?" The agent walks the graph, surfaces three notes, and shows the contradictions you'd forgotten.</p>
-      </div>
-      <div class="step" style="--step-color: #2A7B9B;">
-        <span class="step-num">03</span>
-        <div class="step-when">Afternoon · 15:30</div>
-        <h3>Co-draft</h3>
-        <p>You ask for a 500-word essay drawn from your notes on agentic PKM. The agent drafts; you edit; the edits become a new wiki page, auto-linked.</p>
-      </div>
-      <div class="step" style="--step-color: #2D8B55;">
-        <span class="step-num">04</span>
-        <div class="step-when">Evening · 22:05</div>
-        <h3>Compile</h3>
-        <p>Overnight, the agent processes today's sources, files them, draws new edges, and pushes a single git commit. You wake up to a vault that's 6 notes smarter.</p>
-      </div>
-    </div>
-  </section>
+          <div class="day-entry">
+            <div class="day-time">12:18</div>
+            <h4>Midday queries — the conversational vault</h4>
+            <p>Between meetings: "What did I think about long-context vs. RAG in March?" The agent walks the graph, surfaces three notes, drafts a one-paragraph synthesis, and offers to save it as a new evergreen page. You say yes and add one sentence. The page goes live, auto-linked to all three sources. A meeting an hour later asks a related question — you don't search; you ask the vault. The vault answers in your own words.</p>
+          </div>
 
-  <!-- ============================================================
-       STATS
-       ============================================================ -->
-  <section class="section section-warm" aria-labelledby="stats-heading">
-    <div class="wrap">
-      <div class="section-header animate-in">
-        <p class="eyebrow">The numbers behind the pattern</p>
-        <h2 class="section-title" id="stats-heading">A vault that compounds.</h2>
-        <p class="section-sub">Aggregated from public Karpathy data, Obsidian community surveys, and CETI client engagements over the last 12 months.</p>
+          <div class="day-entry">
+            <div class="day-time">15:30</div>
+            <h4>Afternoon drafting — agent as co-author</h4>
+            <p>You're writing a client proposal. The agent has read every previous proposal you've shipped, every relevant case study, and the meeting transcript from the discovery call. It drafts a first pass. You don't accept it wholesale — that would defeat the point — but you take its skeleton and overwrite the parts that need your voice. The draft itself becomes a new note, linked to its sources, and quietly enters the graph as a piece of writing the next proposal can build on.</p>
+          </div>
+
+          <div class="day-entry">
+            <div class="day-time">18:45</div>
+            <h4>Evening review — the human pass</h4>
+            <p>Twenty minutes before logging off, you scan the day's commits — what the agent filed, what it linked, what it summarized. You're not auditing every change; you're scanning for outliers. A note filed under the wrong concept. A backlink that doesn't make sense. You revert two changes. You write a short journal entry in your daily note about what mattered today. That entry will itself be summarized and linked by tomorrow morning.</p>
+          </div>
+
+          <div class="day-entry">
+            <div class="day-time">22:05</div>
+            <h4>Overnight compile — the patient pass</h4>
+            <p>While you sleep, a cron job runs the compile loop. It re-embeds new notes, finds backlinks you missed, drafts summaries for sources still in <code>/inbox/</code>, and proposes — but does not execute — refactors to any page that has drifted past 3,000 words. The morning commit shows up at 06:14. You wake up six notes denser than you went to sleep. The vault, which used to be a graveyard of things you wrote and never re-read, now feels like a colleague who has read everything you've ever written and is waiting to talk about it.</p>
+          </div>
+
+        </div>
+
+        <p>The shape of the day is asymmetric on purpose. Capture and review are deliberately short — under 30 minutes combined. Querying and co-writing are where the value lives. The overnight compile pass is where the patient work happens, in the background, with no human in the loop. Most failed adoptions try to flatten this shape into one continuous activity. Don't. The asymmetry is the system.</p>
+
+        <p>One operational note worth surfacing: the loop above assumes the agent has a clear separation between <code>/sources</code> (raw, untouched), <code>/inbox</code> (agent-drafted, awaiting human review), and <code>/notes</code> (canonical, human-approved). Skipping the inbox layer is the single most common mistake. Without it, you cannot tell the difference between a note <em>you</em> wrote and a note an <em>agent</em> wrote, and you start trusting the wrong things. The inbox is the chokepoint, and it is the friction you want.</p>
+
+        <h2 id="sec-impl"><span class="hash">§8</span>Three implementations</h2>
+
+        <aside class="marginnote">
+          <span class="mn-label">trade-offs</span>
+          Each stack trades polish, ownership, and agency in different proportions. None are theoretical.
+        </aside>
+
+        <p>In the months since Karpathy's gist, three stacks have crystallized. The names matter less than the shape: each is a substrate, a structure, an agent. Below the summary cards, each gets a longer treatment with real configuration, the plugins worth using, and the failure modes you'll hit in the first two weeks.</p>
+
+        <div class="impl-list">
+          <article class="impl-note fade-in">
+            <div class="impl-path">/implementations/path-a.md</div>
+            <h3>Obsidian + Smart Connections</h3>
+            <p>A community plugin embeds every note, retrieves on demand, and now writes back via the new MCP bridge. Your vault stays on disk; the AI does the indexing. Lowest setup cost; best for solo knowledge workers.</p>
+            <div class="impl-tags">
+              <a href="#" class="tag">obsidian</a>
+              <a href="#" class="tag">local-first</a>
+              <a href="#" class="tag">plug-and-play</a>
+            </div>
+          </article>
+
+          <article class="impl-note fade-in">
+            <div class="impl-path">/implementations/path-b.md</div>
+            <h3>Notion + Claude MCP</h3>
+            <p>Notion's MCP server lets Claude read, edit, and create pages across your workspace. Best when the knowledge graph is shared — research teams, founders with assistants, consultants with client knowledge bases.</p>
+            <div class="impl-tags">
+              <a href="#" class="tag">notion</a>
+              <a href="#" class="tag">cloud-first</a>
+              <a href="#" class="tag">team</a>
+            </div>
+          </article>
+
+          <article class="impl-note fade-in">
+            <div class="impl-path">/implementations/path-c.md</div>
+            <h3>Markdown folder + Claude Code</h3>
+            <p>A git-versioned directory of <code>.md</code> files, with Claude Code as the agent. Maximum control, maximum customization, zero vendor lock-in. The path Karpathy himself ships on.</p>
+            <div class="impl-tags">
+              <a href="#" class="tag">custom</a>
+              <a href="#" class="tag">self-hosted</a>
+              <a href="#" class="tag">git-versioned</a>
+            </div>
+          </article>
+        </div>
+
+        <h3 id="sec-impl-a"><span class="hash">§8.1</span>Obsidian + Smart Connections, deeper</h3>
+
+        <div class="impl-deep fade-in">
+          <div class="impl-path">/implementations/path-a-deep.md</div>
+          <h3>The lowest-friction setup that actually works</h3>
+          <p>Install <a href="#" class="wikilink">obsidian</a>. Open your vault — or create one as an empty folder. Install three community plugins, in this order, because the order matters: <strong>Smart Connections</strong> (the embedding + chat layer), <strong>Dataview</strong> (so you can write structured queries against your notes), and <strong>Templater</strong> (so the agent can use templates when it drafts new pages). Skip the plugin gallery's "popular" sort — most of what's near the top hasn't been updated for the new MCP world.</p>
+
+          <p>Smart Connections defaults to OpenAI embeddings, but the more interesting setup uses the local <code>nomic-embed-text</code> model via Ollama. The vault never leaves your laptop. Embedding 5,000 notes takes about 40 minutes on an M-series Mac and roughly zero dollars. Re-embedding on note changes is incremental — milliseconds per save.</p>
+
+          <p>The MCP bridge is the new piece. As of the spring '26 release, Smart Connections exposes an MCP server you can point Claude or any MCP-aware agent at. The agent can now read, embed-search, and (with explicit permission) <em>write</em> notes into your vault. Configure it through Obsidian's settings, not through a config file — the settings UI handles the auth dance correctly.</p>
+
+          <p class="gotcha"><strong>gotcha</strong> Smart Connections re-embeds on every note change by default. If you bulk-import 2,000 notes (a common migration), it will pin one CPU core at 100% for an hour. Disable auto-embedding during the import, run a manual re-embed once, then re-enable. People miss this and assume the plugin is broken.</p>
+
+          <div class="impl-tags">
+            <a href="#" class="tag">obsidian</a>
+            <a href="#" class="tag">smart-connections</a>
+            <a href="#" class="tag">mcp</a>
+            <a href="#" class="tag">local-first</a>
+          </div>
+        </div>
+
+        <h3 id="sec-impl-b"><span class="hash">§8.2</span>Notion + Claude MCP, deeper</h3>
+
+        <div class="impl-deep fade-in">
+          <div class="impl-path">/implementations/path-b-deep.md</div>
+          <h3>The new integration model — agents in a shared workspace</h3>
+          <p>Notion's MCP server is the cleanest example yet of what a maintained, vendor-supplied MCP looks like in production. You install it once, connect it to your workspace, and Claude gains the ability to query pages, follow database relations, create new pages, edit existing ones, and post comments — all scoped to what the connecting user can see in Notion.</p>
+
+          <p>The setup is a five-minute Settings &gt; Connections &gt; Add MCP flow inside Claude. The hard part isn't installation; it's <em>permissioning</em>. Notion workspaces tend to be sprawling — half the pages were created by people who left two years ago, half the databases have no owner, half the templates are unused. Before pointing an agent at the workspace, prune. Anything you don't want the agent to read or modify should live outside the MCP-connected workspace, full stop.</p>
+
+          <p>The pattern that works best at team scale: one MCP-connected workspace per project, with a clear page hierarchy (Decisions, People, Sources, Drafts) and a Dataview-equivalent in Notion's databases. The agent gets very good at "show me every decision tagged <a href="#" class="wikilink">reversible</a> from Q1 that's still pending review." It struggles with messy hierarchies where the same concept lives in three databases under three different names.</p>
+
+          <p class="gotcha"><strong>gotcha</strong> Notion's MCP rate limits are real and quiet. A poorly-written agent loop that iterates over every page in a 10,000-page workspace will burn through your daily limit by lunch and then silently start returning empty results. Add a batch limit at the agent layer — never trust the upstream to fail loudly.</p>
+
+          <div class="impl-tags">
+            <a href="#" class="tag">notion</a>
+            <a href="#" class="tag">mcp</a>
+            <a href="#" class="tag">team</a>
+            <a href="#" class="tag">cloud-first</a>
+          </div>
+        </div>
+
+        <h3 id="sec-impl-c"><span class="hash">§8.3</span>Markdown folder + Claude Code, deeper</h3>
+
+        <div class="impl-deep fade-in">
+          <div class="impl-path">/implementations/path-c-deep.md</div>
+          <h3>The power-user setup, and the one Karpathy actually runs</h3>
+          <p>Strip everything away. Make a folder. Put markdown files in it. Initialize a git repository. Open the folder in <a href="#" class="wikilink">claude-code</a>. That is the entire stack. There are no plugins, no servers, no embedding databases. The agent does everything by reading the filesystem and grep'ing for backlinks. It is shockingly fast and shockingly capable, because plain text and a smart reader are most of what you need.</p>
+
+          <p>The bones of the setup: a top-level <code>/notes</code> directory organized however you like (most people use a flat structure with daily notes in <code>/daily/YYYY-MM-DD.md</code>), a <code>/sources</code> directory for raw inbound material, a <code>/inbox</code> directory for the agent's drafts pending review, and a <code>CLAUDE.md</code> at the root that tells the agent your conventions, your folder rules, and what it's allowed to refactor. The <code>CLAUDE.md</code> is the entire configuration. Treat it like a constitution.</p>
+
+          <p>A minimal <code>CLAUDE.md</code> looks like this:</p>
+
+<pre class="codeblock"><span class="ck-com"># Vault rules</span>
+
+<span class="ck-key">Substrate</span><span class="ck-val">: plain markdown, wikilinks as [[note-name]].</span>
+<span class="ck-key">File names</span><span class="ck-val">: lowercase-kebab, no spaces, no dates in names.</span>
+<span class="ck-key">Folders</span><span class="ck-val">: /notes (evergreen), /daily (journals), /sources (raw).</span>
+<span class="ck-key">Drafts</span><span class="ck-val">: agent writes to /inbox/, human files to /notes/.</span>
+<span class="ck-key">Refactor</span><span class="ck-val">: agent may rename, split, link — never delete.</span>
+<span class="ck-key">Commits</span><span class="ck-val">: one commit per logical change, conventional message.</span></pre>
+
+          <p>The overnight compile loop is a single shell script triggered by <code>launchd</code> (macOS) or <code>cron</code>: it calls Claude Code with a prompt like "review <code>/sources</code> and <code>/inbox</code>, draft missing summaries, suggest backlinks, propose refactors, commit each as a separate git commit." Morning review is reading the commit log over coffee.</p>
+
+          <p class="gotcha"><strong>gotcha</strong> The first week you'll over-engineer the <code>CLAUDE.md</code> trying to anticipate every edge case. Don't. Start with ten lines. Add a rule only after you've seen the agent break the same convention twice. The constitution should grow from observed failures, not imagined ones.</p>
+
+          <div class="impl-tags">
+            <a href="#" class="tag">claude-code</a>
+            <a href="#" class="tag">self-hosted</a>
+            <a href="#" class="tag">git-versioned</a>
+            <a href="#" class="tag">power-user</a>
+          </div>
+        </div>
+
+        <h2 id="sec-25"><span class="hash">§9</span>The 25-year compounding case</h2>
+
+        <aside class="marginnote">
+          <span class="mn-label">long horizon</span>
+          The cost of a personal knowledge graph in year one is high. The value compounds non-linearly. Year ten is where the curve gets interesting.
+        </aside>
+
+        <p>Consider what you would have if you had started this in 2001. Twenty-five years of meeting notes, project decisions, things you read, people you met, half-finished essays, lessons you only learned the third time. Today the question "what did I think about X in 2008" is unanswerable for almost everyone, because the substrate didn't exist. Going forward, for anyone who starts now, that question becomes trivially queryable.</p>
+
+        <p>The compounding is not linear. A 100-note vault is mostly random fragments. A 1,000-note vault starts to have a topology — clusters appear, central concepts emerge, you can see what you've been actually thinking about. A 10,000-note vault is a working theory of your own mind, with cross-references that you didn't draw because you didn't know they were there until the agent pointed them out. A 50,000-note vault — the size Karpathy's is approaching — becomes a research instrument. You can ask questions about your own past thinking with the same rigor you'd apply to a corpus you didn't write.</p>
+
+        <p>The pattern matters more for some kinds of work than others. <strong>Writers</strong> compound the hardest, because every note is potential material and the graph remembers what they almost said three years ago. <strong>Researchers</strong> compound next — the citation web of their own reading becomes a real artifact instead of a vague memory of "I read something about this somewhere." <strong>Founders</strong> get the second-hardest compounding, because the same decision categories repeat forever (hiring, pricing, positioning) and the agent can surface what worked and what didn't from earlier iterations. <strong>Operators</strong> get the least compounding from individual notes but the most from the people graph — knowing exactly what you committed to whom, in what context, three years ago, is a superpower that scales linearly with vault age.</p>
+
+        <p>The case against starting is always the same: "I'm too busy to start now; I'll set it up properly later." The case for starting is that the value at year 25 depends entirely on having started at year 1. A wiki you started at 30 and queried at 55 is a different kind of artifact than one you started at 50 and queried at 55. The agent doesn't compress time. It compounds it. The interest rate is high. The principal is what you put in today.</p>
+
+        <p>There is a parallel argument worth taking seriously: what happens to the vault after you. The graph you build is, in a literal sense, a working model of your thinking — its categories, its blind spots, its commitments. For some people that is a reason for paranoia (keep it encrypted, name a literary executor, plan the archive). For others it is the most honest legacy artifact they will ever make. Either way, the question becomes real around year ten, and it becomes urgent around year twenty. Most people who have crossed those thresholds without a plan now wish they had one. The substrate makes the planning trivially possible — git history is a will-and-testament you can already grant access to. The decision is yours.</p>
+
+        <h2 id="sec-open"><span class="hash">§10</span>Open questions</h2>
+
+        <p>Three open questions land for everyone who tries this: <em>what survives the agent</em> (handwritten note? voice memo? PDF?), <em>what the agent is allowed to refactor</em> (everything? only drafts? only the index pages?), and <em>how often you actually re-read what got compiled</em>. The first two are tooling decisions. The third decides whether the wiki is a second brain or a graveyard.</p>
+
+        <p>But there are deeper questions nobody has solved. They show up in month three of every serious adoption.</p>
+
+        <div class="callout">
+          <span class="co-label">unsolved · surfacing dormant knowledge</span>
+          The agent is excellent at retrieval when you know what to ask. The hard problem is the opposite: surfacing notes you forgot you wrote that are relevant to what you're working on <em>right now</em>, without you having asked. Some tools attempt "you might also be interested in" panels. Most are noise. The good version of this is rare and probably requires the agent to model your current intent more carefully than any current product does.
+        </div>
+
+        <div class="callout">
+          <span class="co-label">unsolved · pruning stale notes</span>
+          A vault that only grows becomes a swamp. Some notes were true when written and have since been contradicted by your own later thinking. Some were placeholders that never got fleshed out. Some were experiments that didn't pan out. The agent can detect staleness statistically (no reads, no backlinks, no edits in 18 months), but the decision of whether to archive, delete, or rewrite is editorial. No tool ships a good answer here yet.
+        </div>
+
+        <div class="callout">
+          <span class="co-label">unsolved · handling uncertain claims</span>
+          When you write a note, you have an implicit confidence level. "I think X" and "I have proven X" look identical in markdown. The agent treats them as the same kind of claim and can build downstream syntheses on top of a guess as if it were a fact. The tooling to mark confidence — and to have the agent propagate uncertainty through the graph — does not yet exist in any product. The closest workaround is a manual <code>#tentative</code> tag, which most people forget to apply.
+        </div>
+
+        <div class="callout">
+          <span class="co-label">unsolved · privacy of the people graph</span>
+          The agent reading your notes is also reading your notes <em>about other people</em>. Who said what in a meeting. What you thought about a candidate. Why a relationship soured. The legal and ethical frame for this — what the agent is allowed to do with it, who can subpoena the vault, what happens when the cloud provider changes terms — is unsettled. Most adopters defer the question. It is unlikely to stay deferrable.
+        </div>
+
+        <h2 id="sec-reading"><span class="hash">§11</span>Reading list</h2>
+
+        <p>A short bibliography for going deeper. Karpathy's gist is the proximate cause of the moment; the rest are the substrate the idea grew out of.</p>
+
+        <ol class="biblio">
+          <li>
+            <span class="b-author">Karpathy, Andrej</span>. <span class="b-title">llm-wiki.md</span>.
+            <span class="b-meta">GitHub Gist, April 2026 · <a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">gist.github.com/karpathy</a></span>
+          </li>
+          <li>
+            <span class="b-author">Matuschak, Andy</span>. <span class="b-title">Evergreen notes</span>.
+            <span class="b-meta">notes.andymatuschak.org · the canonical formulation of atomic, concept-oriented notes that the agent era now industrializes.</span>
+          </li>
+          <li>
+            <span class="b-author">Appleton, Maggie</span>. <span class="b-title">A Brief History &amp; Ethos of the Digital Garden</span>.
+            <span class="b-meta">maggieappleton.com · the metaphor of garden over stream that shaped the whole PKM aesthetic.</span>
+          </li>
+          <li>
+            <span class="b-author">Forte, Tiago</span>. <span class="b-title">Building a Second Brain</span>.
+            <span class="b-meta">Atria Books, 2022 · the popular foundation for the personal knowledge management category.</span>
+          </li>
+          <li>
+            <span class="b-author">Luhmann, Niklas</span>. <span class="b-title">Communicating with Slip Boxes</span>.
+            <span class="b-meta">1981, English translation 2020 · the original argument for note-taking as thinking, from the inventor of the Zettelkasten.</span>
+          </li>
+          <li>
+            <span class="b-author">Ahrens, Sönke</span>. <span class="b-title">How to Take Smart Notes</span>.
+            <span class="b-meta">Self-published, 2017 · the modern reintroduction of Luhmann's method for working writers.</span>
+          </li>
+          <li>
+            <span class="b-author">Doctorow, Cory</span>. <span class="b-title">My Blog, My Outboard Brain</span>.
+            <span class="b-meta">O'Reilly Network, 2002 · the earliest clear articulation of public note-keeping as a thinking tool.</span>
+          </li>
+          <li>
+            <span class="b-author">Bush, Vannevar</span>. <span class="b-title">As We May Think</span>.
+            <span class="b-meta">The Atlantic, July 1945 · the original Memex essay. Every PKM tool of the last 80 years is downstream of this argument.</span>
+          </li>
+          <li>
+            <span class="b-author">Anthropic</span>. <span class="b-title">Model Context Protocol Specification</span>.
+            <span class="b-meta">modelcontextprotocol.io · the standard that made the read-and-write agent pattern portable across tools.</span>
+          </li>
+          <li>
+            <span class="b-author">Obsidian Community</span>. <span class="b-title">Smart Connections — plugin documentation</span>.
+            <span class="b-meta">smartconnections.app · the most-installed AI plugin for Obsidian, and the de facto reference implementation of path A.</span>
+          </li>
+        </ol>
+
+        <h2 id="sec-design"><span class="hash">§12</span>Design your own</h2>
+
+        <p>None of the above is prescriptive. Every vault is personal — the substrate has to match your existing habits, the agent has to match your trust budget, and the rituals have to match the rhythm of your week. The wrong setup, faithfully followed, will burn you out faster than no setup at all.</p>
+
+        <p>A 90-minute workshop with <a href="#" class="wikilink">manu</a> — we audit your current PKM, design the markdown substrate, choose the agent stack, and ship the first compile pass together. Built for individuals, research teams, and founders.</p>
+
+        <p style="margin-top:1.5rem;">
+          <a href="https://calendly.com/manutej/30min" target="_blank" rel="noopener" style="font-family: var(--ui); font-weight: 500; font-size: 0.95rem; color: var(--paper); background: var(--teal); padding: 0.7rem 1.25rem; border-radius: 4px; text-decoration: none; border-bottom: 0; display: inline-block;">Book a 30-min consult →</a>
+          &nbsp;&nbsp;
+          <a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener" style="font-family: var(--ui); font-size: 0.9rem;">Read Karpathy's gist ↗</a>
+        </p>
+
+      </section>
+
+      <!-- ============== BACKLINKS APPENDIX ============== -->
+      <section class="backlinks-block" aria-label="Backlinks">
+        <p class="backlinks-label">23 backlinks · sorted by recency</p>
+        <div class="backlinks-grid">
+          <div>
+            <a href="#">karpathy-reading-notes</a>
+            <span class="ctx">"…the compile metaphor first appears in §3 of his notes…"</span>
+          </div>
+          <div>
+            <a href="#">ai-tools/index</a>
+            <span class="ctx">"…canonical entry for the PKM-in-agentic-era stack…"</span>
+          </div>
+          <div>
+            <a href="#">q2-2026-essays</a>
+            <span class="ctx">"…draws on this for the second-brain argument…"</span>
+          </div>
+          <div>
+            <a href="#">ceti-workshop-catalog</a>
+            <span class="ctx">"…linked from the PKM workshop landing page…"</span>
+          </div>
+          <div>
+            <a href="#">obsidian-vs-notion</a>
+            <span class="ctx">"…cited under the implementations comparison…"</span>
+          </div>
+          <div>
+            <a href="#">decisions/reversible-vs-permanent</a>
+            <span class="ctx">"…queryable-vault example references this page…"</span>
+          </div>
+          <div>
+            <a href="#">claude-code-as-vault-agent</a>
+            <span class="ctx">"…path C in the implementations list…"</span>
+          </div>
+          <div>
+            <a href="#">mcp-server-directory</a>
+            <span class="ctx">"…notion + claude bridge documented under MCP…"</span>
+          </div>
+          <div>
+            <a href="#">smart-connections-plugin</a>
+            <span class="ctx">"…the obsidian path-A community plugin entry…"</span>
+          </div>
+          <div>
+            <a href="#">rag-vs-long-context-march</a>
+            <span class="ctx">"…surfaced by the midday query example in §4…"</span>
+          </div>
+          <div>
+            <a href="#">overnight-compile-cron</a>
+            <span class="ctx">"…operational note: the 22:05 compile loop runs here…"</span>
+          </div>
+          <div>
+            <a href="#">vault-pruning-policy</a>
+            <span class="ctx">"…what the agent is allowed to refactor without review…"</span>
+          </div>
+          <div>
+            <a href="#">andy-matuschak</a>
+            <span class="ctx">"…evergreen notes framework, cited under writers…"</span>
+          </div>
+          <div>
+            <a href="#">maggie-appleton</a>
+            <span class="ctx">"…digital-garden metaphor, §2 reading list entry…"</span>
+          </div>
+          <div>
+            <a href="#">vannevar-bush-memex</a>
+            <span class="ctx">"…the 1945 source of the whole PKM lineage…"</span>
+          </div>
+          <div>
+            <a href="#">people-graph-privacy</a>
+            <span class="ctx">"…unsolved-questions callout in §10…"</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== SIGN-OFF ============== -->
+      <footer class="signoff">
+        <span><span class="so-label">Last edited:</span> 2026-05-15</span>
+        <span><span class="so-label">Backlinks:</span> 23</span>
+        <span class="watermark">[[ceti-lookbook/08]]</span>
+        <span style="margin-left:auto;"><a href="https://cetiai.co">cetiai.co</a></span>
+      </footer>
+
+    </article>
+
+    <!-- ============================================================
+         RIGHT SIDEBAR — TOC
+         ============================================================ -->
+    <aside class="toc" aria-label="On this page">
+      <p class="toc-label">On this page</p>
+      <ul>
+        <li><a href="#graph" data-toc>Graph view</a></li>
+        <li><a href="#sec-shift" data-toc>§1 — The shift</a></li>
+        <li><a href="#sec-why-now" data-toc>§2 — Why now?</a></li>
+        <li><a href="#sec-substrate" data-toc>§3 — The substrate</a></li>
+        <li><a href="#sec-readers" data-toc>§4 — Agents that read</a></li>
+        <li><a href="#sec-writers" data-toc>§5 — Agents that write</a></li>
+        <li><a href="#sec-blocks" data-toc>§6 — Building blocks</a></li>
+        <li><a href="#sec-day" data-toc>§7 — A day in the vault</a></li>
+        <li><a href="#sec-impl" data-toc>§8 — Three implementations</a></li>
+        <li><a href="#sec-25" data-toc>§9 — 25-year compounding</a></li>
+        <li><a href="#sec-open" data-toc>§10 — Open questions</a></li>
+        <li><a href="#sec-reading" data-toc>§11 — Reading list</a></li>
+        <li><a href="#sec-design" data-toc>§12 — Design your own</a></li>
+      </ul>
+
+      <div class="toc-meta">
+        <div><strong>file</strong> · llm-wiki.md</div>
+        <div><strong>created</strong> · 2026-04-08</div>
+        <div><strong>modified</strong> · 2026-05-15</div>
+        <div><strong>words</strong> · ~4,200</div>
+        <div><strong>tags</strong> · pkm, agents, obsidian</div>
       </div>
 
-      <div class="stats">
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="400">0</span><span class="unit">K</span></div>
-          <div class="stat-label">Words in Karpathy's own auto-compiled vault</div>
-          <div class="stat-note">~ a full textbook</div>
-        </article>
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="2300">0</span></div>
-          <div class="stat-label">Notes the median knowledge worker has — and never re-reads</div>
-          <div class="stat-note">Obsidian survey, 2026</div>
-        </article>
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="6">0</span><span class="unit">h/wk</span></div>
-          <div class="stat-label">Time recovered by agents handling capture and filing</div>
-          <div class="stat-note">CETI client baseline</div>
-        </article>
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="92">0</span><span class="unit">%</span></div>
-          <div class="stat-label">Of agent-suggested links accepted by the human curator</div>
-          <div class="stat-note">Internal CETI study</div>
-        </article>
-      </div>
-    </div>
-  </section>
+      <p class="toc-label" style="margin-top: 1.5rem;">Linked from</p>
+      <ul>
+        <li><a href="#" data-toc>ai-tools/index</a></li>
+        <li><a href="#" data-toc>karpathy-reading-notes</a></li>
+        <li><a href="#" data-toc>ceti-workshop-catalog</a></li>
+        <li><a href="#" data-toc>q2-2026-essays</a></li>
+      </ul>
 
-  <!-- ============================================================
-       FINAL CTA
-       ============================================================ -->
-  <section class="final wrap" id="cta">
-    <h2>Design the second brain your AI can actually use.</h2>
-    <p>A 90-minute workshop with Manu Mulaveesala — we audit your current PKM, design the markdown substrate, choose the agent stack, and ship the first compile pass together. Built for individuals, research teams, and founders.</p>
-    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
-      Book a 30-min consult
-      <span class="arrow">→</span>
-    </a>
-    <div style="margin-top:1.5rem;">
-      <a class="secondary" href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">Read Karpathy's original gist ↗</a>
-    </div>
-  </section>
+      <p class="toc-label" style="margin-top: 1.5rem;">Recent edits</p>
+      <ul class="edit-list">
+        <li>
+          <span class="edate">2026-05-15 · 16:42</span>
+          <a href="#"><span class="edit-add">+</span>added §9 25-year compounding case</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-15 · 14:18</span>
+          <a href="#"><span class="edit-add">+</span>added §10 four open-question callouts</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-14 · 22:07</span>
+          <a href="#"><span class="edit-add">+</span>expanded §8 with three deep implementations</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-14 · 11:30</span>
+          <a href="#"><span class="edit-mod">~</span>rewrote day-in-the-vault as narrative</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-13 · 18:55</span>
+          <a href="#"><span class="edit-add">+</span>added §11 bibliography with 10 sources</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-13 · 09:22</span>
+          <a href="#"><span class="edit-add">+</span>drafted §5 agents that write</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-12 · 21:14</span>
+          <a href="#"><span class="edit-add">+</span>drafted §4 agents that read · table</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-12 · 15:48</span>
+          <a href="#"><span class="edit-add">+</span>added §3 substrate: markdown + links</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-12 · 10:05</span>
+          <a href="#"><span class="edit-add">+</span>added §2 why now? — long shift section</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-11 · 19:30</span>
+          <a href="#"><span class="edit-mod">~</span>tuned graph spacing, added 5 nodes</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-10 · 13:12</span>
+          <a href="#"><span class="edit-add">+</span>added evening-review entry to daily loop</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-09 · 22:48</span>
+          <a href="#"><span class="edit-mod">~</span>reworked pullquote source attribution</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-08 · 16:20</span>
+          <a href="#"><span class="edit-add">+</span>added margin notes throughout §1–§4</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-07 · 11:42</span>
+          <a href="#"><span class="edit-mod">~</span>tightened lede, moved 92% stat into §1</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-06 · 09:18</span>
+          <a href="#"><span class="edit-add">+</span>added implementation paths A/B/C cards</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-05 · 20:05</span>
+          <a href="#"><span class="edit-mod">~</span>palette: warmed cream from #FAF7F2 → #FBF9F4</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-04 · 14:50</span>
+          <a href="#"><span class="edit-del">−</span>removed early "use cases" filler section</a>
+        </li>
+        <li>
+          <span class="edate">2026-05-03 · 18:00</span>
+          <a href="#"><span class="edit-add">+</span>first draft of building-blocks list</a>
+        </li>
+        <li>
+          <span class="edate">2026-04-29 · 21:14</span>
+          <a href="#"><span class="edit-add">+</span>added Karpathy pullquote + source</a>
+        </li>
+        <li>
+          <span class="edate">2026-04-08 · 09:00</span>
+          <a href="#"><span class="edit-add">+</span>created note from karpathy-gist clipping</a>
+        </li>
+      </ul>
+    </aside>
 
-  <footer class="wrap">
-    <span>CETI.AI · Lookbook · 2026</span>
-    <span><a href="https://cetiai.co">cetiai.co</a></span>
-  </footer>
+  </main>
 
   <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-    // ============ INTERSECTION-DRIVEN REVEALS ============
-    const reveal = new IntersectionObserver((entries) => {
+    // ============ FADE-IN ============
+    const fadeObs = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
+          e.target.classList.add('in');
+          fadeObs.unobserve(e.target);
         }
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    document.querySelectorAll('.fade-in').forEach((el) => fadeObs.observe(el));
 
-    document.querySelectorAll('.stat, .bento-tile, .impl-card, .step, .animate-in').forEach((el) => reveal.observe(el));
-    // make .animate-in fade in (use same class but ensure it has base styles)
-    document.querySelectorAll('.animate-in').forEach((el) => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(16px)';
-      el.style.transition = 'opacity 700ms cubic-bezier(0.16,1,0.3,1), transform 700ms cubic-bezier(0.16,1,0.3,1)';
-    });
-    // override on .visible
-    const styleEl = document.createElement('style');
-    styleEl.textContent = `.animate-in.visible { opacity: 1 !important; transform: translateY(0) !important; }
-      @media (prefers-reduced-motion: reduce) { .animate-in { opacity: 1 !important; transform: none !important; } }`;
-    document.head.appendChild(styleEl);
-
-    // ============ NUMBER TICKERS ============
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const dur = 1300;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
-
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 25;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-
-    // ============ BENTO MAGIC-CARD GLOW ============
-    document.querySelectorAll('.bento-tile').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
-        card.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
-      });
-    });
-
-    // ============ KNOWLEDGE GRAPH ============
-    const graph = document.querySelector('.graph-svg');
-    if (graph) {
-      const nodes = Array.from(graph.querySelectorAll('.node'));
-      const edges = Array.from(graph.querySelectorAll('.edge'));
-
-      // adjacency map
+    // ============ GRAPH — calm settle ============
+    const gsvg = document.querySelector('.graph-svg');
+    if (gsvg) {
+      const nodes = Array.from(gsvg.querySelectorAll('.gnode'));
+      const edges = Array.from(gsvg.querySelectorAll('.gedge'));
       const adj = {};
       edges.forEach((e) => {
         const a = e.dataset.from, b = e.dataset.to;
@@ -1270,59 +1788,76 @@
         (adj[b] = adj[b] || new Set()).add(a);
       });
 
-      // entrance: stagger nodes in, then edges
-      const graphObs = new IntersectionObserver((entries) => {
+      const gobs = new IntersectionObserver((entries) => {
         entries.forEach((e) => {
           if (!e.isIntersecting) return;
-          graphObs.unobserve(e.target);
-
-          // shuffle entry order for organic feel
-          const order = [...nodes].sort(() => Math.random() - 0.5);
-          order.forEach((n, i) => {
-            setTimeout(() => n.classList.add('in'), 80 + i * 65);
-            // randomize breathe phase
-            n.style.setProperty('--breathe-delay', `${Math.random() * 3}s`);
-          });
-          // draw edges after first half of nodes are in
+          gobs.unobserve(e.target);
+          // gentle in-order settle (not random — calmer)
+          nodes.forEach((n, i) => setTimeout(() => n.classList.add('in'), 80 + i * 50));
           setTimeout(() => edges.forEach((edge, i) => {
-            setTimeout(() => edge.classList.add('in'), i * 35);
-          }), 500);
+            setTimeout(() => edge.classList.add('in'), i * 22);
+          }), 380);
         });
-      }, { threshold: 0.25 });
-      graphObs.observe(graph);
+      }, { threshold: 0.2 });
+      gobs.observe(gsvg);
 
-      // hover focus
       nodes.forEach((node) => {
         const id = node.dataset.id;
         const neighbors = adj[id] || new Set();
         const focus = () => {
           nodes.forEach((n) => {
             const nid = n.dataset.id;
-            if (nid === id || neighbors.has(nid)) {
-              n.classList.add('focus');
-              n.classList.remove('dim');
-            } else {
-              n.classList.add('dim');
-              n.classList.remove('focus');
-            }
+            if (nid === id || neighbors.has(nid)) n.classList.remove('dim');
+            else n.classList.add('dim');
           });
           edges.forEach((edge) => {
-            const isConnected = (edge.dataset.from === id || edge.dataset.to === id);
-            edge.classList.toggle('highlight', isConnected);
-            edge.classList.toggle('dim', !isConnected);
+            const on = (edge.dataset.from === id || edge.dataset.to === id);
+            edge.classList.toggle('hl', on);
+            edge.classList.toggle('dim', !on);
           });
         };
         const blur = () => {
-          nodes.forEach((n) => { n.classList.remove('focus', 'dim'); });
-          edges.forEach((edge) => { edge.classList.remove('highlight', 'dim'); });
+          nodes.forEach((n) => n.classList.remove('dim'));
+          edges.forEach((edge) => edge.classList.remove('hl', 'dim'));
         };
         node.addEventListener('mouseenter', focus);
         node.addEventListener('mouseleave', blur);
         node.addEventListener('focus', focus);
         node.addEventListener('blur', blur);
-        node.setAttribute('tabindex', '0');
       });
     }
+
+    // ============ TOC active-on-scroll ============
+    const headings = Array.from(document.querySelectorAll('.prose h2[id], #graph'));
+    const tocLinks = Array.from(document.querySelectorAll('.toc a[data-toc]'));
+    const setActive = (id) => {
+      tocLinks.forEach((a) => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+      });
+    };
+    const hObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) setActive(e.target.id);
+      });
+    }, { rootMargin: '-20% 0px -65% 0px', threshold: 0 });
+    headings.forEach((h) => hObs.observe(h));
+
+    // ============ WIKILINK gentle hover-sync ============
+    // when you hover a wikilink, briefly highlight others with the same text
+    const links = Array.from(document.querySelectorAll('.wikilink'));
+    links.forEach((link) => {
+      link.addEventListener('mouseenter', () => {
+        const t = link.textContent;
+        links.forEach((other) => {
+          if (other !== link && other.textContent === t) {
+            other.style.backgroundColor = 'var(--teal-soft)';
+          }
+        });
+      });
+      link.addEventListener('mouseleave', () => {
+        links.forEach((other) => { other.style.backgroundColor = ''; });
+      });
+    });
   </script>
   <script src="../shared/nav.js" defer></script>
 </body>

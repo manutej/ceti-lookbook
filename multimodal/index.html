@@ -3,1278 +3,1555 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multimodal AI — Pixels, text, sound, one model · CETI.AI Lookbook</title>
-  <meta name="description" content="Vision, audio, video — how multimodal frontier models (GPT-4o, Claude 4, Gemini 3, Llama 3.2 Vision) fuse separate input streams into a single embedding space and reason across them.">
+  <title>Multimodal AI — One model, many eyes · CETI.AI Lookbook</title>
+  <meta name="description" content="A polyglot tour of multimodal AI in 2026 — vision tokenizers, text as universal interface, real-time audio, long-context video, and unified cross-modal reasoning. Each section in its own visual dialect.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Special+Elite&family=VT323&family=Inter:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Space+Mono:wght@400;700&family=Archivo+Black&display=swap" rel="stylesheet">
 
   <style>
+    /* ============================================================
+       POLYGLOT — One page, five aesthetic dialects.
+       The only shared layer: the strip nav at top and the footer nav.
+       ============================================================ */
+
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-bg-code: #1E1E2E;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
+      /* Per-section accents */
+      --pixel-bg:    #1a1a2e;
+      --pixel-fg:    #f5f5f0;
+      --pixel-red:   #e74c3c;
+      --pixel-yellow:#f1c40f;
+      --pixel-cyan:  #00d4ff;
+      --pixel-green: #2ecc71;
+      --pixel-pink:  #ff69b4;
 
-      /* Accent rotation — vision / text / audio / unified */
-      --color-accent:        #D94F30;   /* vermillion — unified / hero */
-      --color-accent-hover:  #C4432A;
-      --color-accent-light:  #FDEEE9;
-      --color-accent-muted:  #E8836C;
+      --paper-bg:    #f4ede0;
+      --paper-fg:    #2b2520;
+      --paper-stain: #c9b896;
+      --paper-red:   #8b2c1e;
 
-      --color-vision:        #2A7B9B;   /* teal — image */
-      --color-vision-light:  #E4F2F7;
-      --color-text-stream:   #D4A843;   /* golden — text */
-      --color-text-light:    #FAEFD2;
-      --color-audio:         #7B6DAA;   /* plum — audio */
-      --color-audio-light:   #ECE7F4;
-      --color-output:        #2D8B55;   /* forest — output */
-      --color-output-light:  #DDEEE4;
+      --osc-bg:      #0a0e0a;
+      --osc-fg:      #39ff14;
+      --osc-dim:     #1a4a1a;
+      --osc-amber:   #ffb000;
 
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body:    'DM Sans', -apple-system, sans-serif;
-      --font-mono:    'JetBrains Mono', monospace;
+      --cine-bg:     #0c0c0d;
+      --cine-mid:    #1a1a1c;
+      --cine-fg:     #f5f5f5;
+      --cine-dim:    #888;
+      --cine-accent: #d4af37;
 
-      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-      --duration-fast:   150ms;
-      --duration-normal: 300ms;
-      --duration-slow:   500ms;
-      --duration-slower: 700ms;
-      --stagger:         100ms;
-
-      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+      --brut-bg:     #ffffff;
+      --brut-fg:     #000000;
+      --brut-grid:   #f0f0f0;
+      --brut-red:    #ff3333;
+      --brut-blue:   #1a4dff;
+      --brut-yellow: #ffd400;
+      --brut-green:  #00aa44;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image:
-        radial-gradient(ellipse at 12% 18%, rgba(42, 123, 155, 0.05) 0%, transparent 55%),
-        radial-gradient(ellipse at 88% 8%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
-        radial-gradient(ellipse at 65% 92%, rgba(123, 109, 170, 0.04) 0%, transparent 55%);
-      line-height: 1.6;
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: #111;
+      background: #000;
+      line-height: 1.55;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ============ LAYOUT ============ */
-    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 1.5rem; }
-
-    /* ============ NAV ============ */
-    .topnav {
-      position: sticky; top: 0; z-index: 50;
-      backdrop-filter: blur(10px);
-      background: rgba(250, 247, 242, 0.85);
-      border-bottom: 1px solid var(--color-border-light);
-    }
-    .topnav-inner {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.75rem 1.5rem; max-width: 1120px; margin: 0 auto;
-    }
-    .topnav-brand {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-secondary);
-      text-decoration: none;
-    }
-    .topnav-brand strong { color: var(--color-accent); }
-    .topnav-links { display: flex; gap: 1.25rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
-    .topnav-links a { color: var(--color-text-muted); text-decoration: none; transition: color 200ms; }
-    .topnav-links a:hover { color: var(--color-accent); }
-
-    /* ============ HERO ============ */
-    .hero {
-      padding: 5rem 1.5rem 3rem;
-      max-width: 1120px;
-      margin: 0 auto;
-    }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
-    }
-    .eyebrow .dot { color: var(--color-text-muted); margin: 0 0.4rem; }
-    .hero.visible .eyebrow { opacity: 1; }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: clamp(2.4rem, 6.5vw, 4.8rem);
-      line-height: 1.02;
-      letter-spacing: -0.035em;
-      margin: 1.5rem 0 1.5rem;
-      max-width: 16ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(24px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay:  80ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 160ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 240ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 320ms; }
-    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 400ms; }
-    .hero.visible .hero-title .word:nth-child(6) { transition-delay: 480ms; }
-
-    .ink-vision { color: var(--color-vision); }
-    .ink-text   { color: var(--color-text-stream); }
-    .ink-audio  { color: var(--color-audio); }
-    .ink-unify  { color: var(--color-accent); }
-
-    .hero-sub {
-      font-size: 1.2rem;
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 620ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    .hero-meta {
-      display: flex; gap: 2rem; margin-top: 2.5rem; flex-wrap: wrap;
-      font-family: var(--font-mono); font-size: 0.78rem;
-      opacity: 0; transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 780ms;
-    }
-    .hero.visible .hero-meta { opacity: 1; }
-    .meta-cell { color: var(--color-text-muted); }
-    .meta-cell strong { display:block; color: var(--color-text); font-size: 1rem; margin-top: 0.15rem; font-weight: 500; }
-
-    /* ============ FUSION (THE SIGNATURE VISUAL) ============ */
-    .fusion-section {
-      padding: 3rem 1.5rem 6rem;
-      max-width: 1120px; margin: 0 auto;
-    }
-    .fusion-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em;
-      color: var(--color-text-muted); margin-bottom: 0.5rem;
-    }
-    .fusion-heading {
-      font-family: var(--font-display); font-weight: 700;
-      font-size: clamp(1.6rem, 3.4vw, 2.4rem);
-      letter-spacing: -0.02em; margin: 0 0 0.6rem;
-    }
-    .fusion-sub {
-      color: var(--color-text-secondary);
-      max-width: 56ch; margin: 0 0 2.5rem;
-    }
-
-    .fusion {
-      position: relative;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 20px;
-      padding: 2rem 1.5rem 2.5rem;
-      box-shadow: var(--shadow-md);
-      overflow: hidden;
-    }
-
-    .fusion-inputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 0;
-    }
-    .input-col {
-      background: var(--color-bg);
-      border: 1px solid var(--color-border-light);
-      border-radius: 14px;
-      padding: 1.25rem 1rem;
-      min-height: 200px;
-      display: flex; flex-direction: column;
-      position: relative;
-    }
-    .input-tag {
-      font-family: var(--font-mono); font-size: 0.65rem;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      padding: 0.2rem 0.55rem; border-radius: 999px;
-      align-self: flex-start;
-      margin-bottom: 0.85rem;
-    }
-    .col-vision .input-tag { color: var(--color-vision); background: var(--color-vision-light); }
-    .col-text   .input-tag { color: var(--color-text-stream); background: var(--color-text-light); }
-    .col-audio  .input-tag { color: var(--color-audio); background: var(--color-audio-light); }
-
-    .input-canvas {
-      flex: 1; display: flex; align-items: center; justify-content: center;
-    }
-
-    /* Vision: morphing geometric SVG */
-    .shape-stage {
-      width: 100%; max-width: 120px; aspect-ratio: 1;
-      position: relative;
-    }
-    .shape-stage svg {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      opacity: 0;
-      transition: opacity 600ms var(--ease-out);
-    }
-    .shape-stage svg.on { opacity: 1; }
-
-    /* Text: typing snippet */
-    .text-snippet {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--color-text);
-      line-height: 1.55;
-      width: 100%;
-      min-height: 90px;
-    }
-    .text-snippet .prompt { color: var(--color-text-stream); }
-    .text-cursor {
-      display: inline-block; width: 7px; height: 1em;
-      background: var(--color-text-stream); vertical-align: -2px;
-      animation: blink 1s steps(2, end) infinite;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
-
-    /* Audio: waveform bars */
-    .wave {
-      display: flex; align-items: flex-end;
-      gap: 4px; height: 90px;
-      width: 100%; justify-content: center;
-    }
-    .wave .bar {
-      width: 5px;
-      background: var(--color-audio);
-      border-radius: 3px;
-      transform-origin: bottom;
-      animation: wavebar 1.2s ease-in-out infinite;
-    }
-    .wave .bar:nth-child(1)  { animation-delay: 0.00s; height: 30%; }
-    .wave .bar:nth-child(2)  { animation-delay: 0.08s; height: 55%; }
-    .wave .bar:nth-child(3)  { animation-delay: 0.16s; height: 80%; }
-    .wave .bar:nth-child(4)  { animation-delay: 0.24s; height: 45%; }
-    .wave .bar:nth-child(5)  { animation-delay: 0.32s; height: 70%; }
-    .wave .bar:nth-child(6)  { animation-delay: 0.40s; height: 35%; }
-    .wave .bar:nth-child(7)  { animation-delay: 0.48s; height: 60%; }
-    .wave .bar:nth-child(8)  { animation-delay: 0.20s; height: 85%; }
-    .wave .bar:nth-child(9)  { animation-delay: 0.10s; height: 40%; }
-    .wave .bar:nth-child(10) { animation-delay: 0.30s; height: 65%; }
-    .wave .bar:nth-child(11) { animation-delay: 0.05s; height: 50%; }
-    .wave .bar:nth-child(12) { animation-delay: 0.36s; height: 75%; }
-    @keyframes wavebar {
-      0%, 100% { transform: scaleY(0.55); opacity: 0.75; }
-      50%      { transform: scaleY(1.05); opacity: 1; }
-    }
-
-    .input-caption {
-      font-family: var(--font-mono); font-size: 0.68rem;
-      color: var(--color-text-muted);
-      text-align: center; margin-top: 0.75rem;
-      letter-spacing: 0.04em;
-    }
-
-    /* The token-stream pipe */
-    .fusion-pipe {
-      position: relative;
-      margin-top: 1.75rem;
-      height: 64px;
-    }
-    .pipe-track {
-      position: absolute;
-      left: 8%; right: 8%;
-      top: 50%; transform: translateY(-50%);
-      height: 2px;
-      background: linear-gradient(90deg,
-        var(--color-vision) 0%, var(--color-vision) 18%,
-        var(--color-text-stream) 22%, var(--color-text-stream) 48%,
-        var(--color-audio) 52%, var(--color-audio) 78%,
-        var(--color-accent) 82%, var(--color-accent) 100%);
-      border-radius: 1px;
-      opacity: 0.35;
-    }
-    .pipe-token {
-      position: absolute;
-      top: 50%;
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 12px currentColor;
-      opacity: 0;
-      animation: token-flow 3.2s linear infinite;
-    }
-    .pipe-token.t1 { color: var(--color-vision); background: var(--color-vision); animation-delay: 0s; }
-    .pipe-token.t2 { color: var(--color-vision); background: var(--color-vision); animation-delay: 0.4s; }
-    .pipe-token.t3 { color: var(--color-text-stream); background: var(--color-text-stream); animation-delay: 0.8s; }
-    .pipe-token.t4 { color: var(--color-text-stream); background: var(--color-text-stream); animation-delay: 1.2s; }
-    .pipe-token.t5 { color: var(--color-audio); background: var(--color-audio); animation-delay: 1.6s; }
-    .pipe-token.t6 { color: var(--color-audio); background: var(--color-audio); animation-delay: 2.0s; }
-    .pipe-token.t7 { color: var(--color-accent); background: var(--color-accent); animation-delay: 2.4s; }
-    @keyframes token-flow {
-      0%   { left: 8%;  opacity: 0; }
-      10%  { opacity: 1; }
-      80%  { left: 78%; opacity: 1; }
-      92%  { left: 88%; opacity: 0; }
-      100% { left: 92%; opacity: 0; }
-    }
-
-    /* Unified model box + output */
-    .fusion-model-row {
-      display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 1rem;
-      margin-top: 0.5rem;
-      align-items: stretch;
-    }
-    .model-box {
-      background: var(--color-accent);
-      color: white;
-      border-radius: 14px;
-      padding: 1.5rem 1.25rem;
-      position: relative;
-      overflow: hidden;
-      display: flex; flex-direction: column; justify-content: center;
-    }
-    .model-box::before {
-      content: "";
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(circle at 30% 20%, rgba(255,255,255,0.18), transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.12), transparent 50%);
-      pointer-events: none;
-    }
-    .model-tag {
-      font-family: var(--font-mono); font-size: 0.65rem;
-      text-transform: uppercase; letter-spacing: 0.14em;
-      opacity: 0.82; margin-bottom: 0.5rem;
-      position: relative;
-    }
-    .model-name {
-      font-family: var(--font-display); font-weight: 700;
-      font-size: 1.5rem; letter-spacing: -0.02em;
-      line-height: 1.1; position: relative;
-    }
-    .model-name small {
-      display: block;
-      font-family: var(--font-mono); font-weight: 400;
-      font-size: 0.7rem; letter-spacing: 0.1em;
-      opacity: 0.78; margin-top: 0.6rem; text-transform: uppercase;
-    }
-
-    .output-box {
-      background: var(--color-bg);
-      border: 1px solid var(--color-border-light);
-      border-radius: 14px;
-      padding: 1.25rem 1.1rem;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      line-height: 1.55;
-      color: var(--color-text);
-      position: relative;
-    }
-    .output-tag {
-      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
-      color: var(--color-output);
-      background: var(--color-output-light);
-      padding: 0.2rem 0.55rem; border-radius: 999px;
-      display: inline-block; margin-bottom: 0.65rem;
-    }
-    .output-box .key { color: var(--color-output); }
-    .output-box .str { color: var(--color-text-stream); }
-    .output-box .num { color: var(--color-accent); }
-    .output-box .punc { color: var(--color-text-muted); }
-
-    /* ============ BENTO ============ */
-    .section {
-      padding: 4rem 1.5rem;
-      max-width: 1120px; margin: 0 auto;
-    }
-    .section-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em;
-      color: var(--color-text-muted);
-    }
-    .section-heading {
-      font-family: var(--font-display); font-weight: 700;
-      font-size: clamp(1.7rem, 3.6vw, 2.4rem);
-      letter-spacing: -0.02em; margin: 0.5rem 0 0.6rem;
-    }
-    .section-sub {
-      color: var(--color-text-secondary);
-      max-width: 56ch; margin: 0 0 2.5rem;
-    }
-
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-auto-rows: minmax(190px, auto);
-      gap: 1rem;
-    }
-    .tile {
-      position: relative;
-      padding: 1.5rem;
-      border-radius: 16px;
-      background:
-        radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
-          rgba(217, 79, 48, 0.06), transparent 40%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal);
-      opacity: 0; transform: translateY(20px);
-    }
-    .tile.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring); }
-    .tile.visible:hover { border-color: var(--color-accent-muted); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-
-    .tile.span-2 { grid-column: span 2; }
-
-    .tile-tag {
-      font-family: var(--font-mono);
-      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
-      padding: 0.22rem 0.6rem; border-radius: 999px;
-      display: inline-block;
-    }
-    .tag-vision { color: var(--color-vision); background: var(--color-vision-light); }
-    .tag-text   { color: var(--color-text-stream); background: var(--color-text-light); }
-    .tag-audio  { color: var(--color-audio); background: var(--color-audio-light); }
-    .tag-unify  { color: var(--color-accent); background: var(--color-accent-light); }
-
-    .tile-title {
-      font-family: var(--font-display); font-weight: 700;
-      font-size: 1.3rem; letter-spacing: -0.01em;
-      margin: 0.85rem 0 0.5rem;
-    }
-    .tile-body {
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
-      margin: 0;
-    }
-    .tile-foot {
-      margin-top: 1rem;
-      font-family: var(--font-mono);
+    /* ============ SHARED CONNECTING STRIP ============ */
+    .strip {
+      position: sticky; top: 0; z-index: 100;
+      background: #000; color: #fff;
+      border-bottom: 2px solid #fff;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.7rem;
-      color: var(--color-text-muted);
-      letter-spacing: 0.04em;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .strip-inner {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0.65rem 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem;
+    }
+    .strip-brand { color: #fff; text-decoration: none; }
+    .strip-brand b { color: var(--brut-yellow); }
+    .strip-meta { color: #999; font-size: 0.62rem; }
+    .strip-meta span { color: var(--pixel-cyan); }
+    @media (max-width: 640px) {
+      .strip-meta { display: none; }
     }
 
-    /* Mini diagrams inside tiles */
-    .mini-stage {
-      margin-top: 1rem; height: 56px; position: relative;
-    }
-    .mini-doc {
-      position: absolute; left: 0; top: 0;
-      width: 42px; height: 54px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-vision);
-      border-radius: 4px;
-      box-shadow: var(--shadow-sm);
-    }
-    .mini-doc::before, .mini-doc::after {
-      content: ""; position: absolute; left: 6px; right: 6px; height: 2px;
-      background: var(--color-vision); opacity: 0.6; border-radius: 1px;
-    }
-    .mini-doc::before { top: 10px; }
-    .mini-doc::after  { top: 18px; right: 14px; }
-    .mini-doc-lines {
-      position: absolute; left: 6px; right: 6px; top: 24px;
-      display: flex; flex-direction: column; gap: 3px;
-    }
-    .mini-doc-lines span {
-      height: 2px; background: var(--color-vision); opacity: 0.35; border-radius: 1px;
-    }
-    .mini-arrow {
-      position: absolute; left: 52px; top: 50%; transform: translateY(-50%);
-      width: 30px; height: 1px; background: var(--color-text-muted);
-    }
-    .mini-arrow::after {
-      content: ""; position: absolute; right: 0; top: -3px;
-      width: 0; height: 0;
-      border-left: 6px solid var(--color-text-muted);
-      border-top: 3px solid transparent; border-bottom: 3px solid transparent;
-    }
-    .mini-text-out {
-      position: absolute; left: 90px; top: 50%; transform: translateY(-50%);
-      font-family: var(--font-mono); font-size: 0.7rem;
-      color: var(--color-text);
-      line-height: 1.4;
-    }
-    .mini-text-out span { color: var(--color-vision); }
+    /* Universal section padding */
+    .container { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem; }
 
-    .mini-wave {
-      display: flex; align-items: flex-end; gap: 3px;
-      height: 36px; margin-top: 0.5rem;
-    }
-    .mini-wave .b {
-      width: 3px; background: var(--color-audio);
-      border-radius: 2px;
-      animation: wavebar 1.3s ease-in-out infinite;
-    }
-    .mini-wave .b:nth-child(odd)  { height: 80%; animation-delay: 0.1s; }
-    .mini-wave .b:nth-child(even) { height: 50%; animation-delay: 0.3s; }
-    .mini-wave .b:nth-child(3n)   { height: 95%; animation-delay: 0.0s; }
-    .mini-wave .b:nth-child(5n)   { height: 35%; animation-delay: 0.45s; }
-
-    .mini-video {
-      margin-top: 0.75rem;
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 4px; height: 44px;
-    }
-    .mini-video .frame {
-      background: linear-gradient(135deg, rgba(123, 109, 170, 0.18), rgba(217, 79, 48, 0.12));
-      border: 1px solid var(--color-border);
-      border-radius: 4px;
+    /* ============================================================
+       HERO — convergence of geometric shapes (transitional, all 5 palettes peek through)
+       ============================================================ */
+    .hero {
+      background: #fafafa;
+      padding: 5rem 1.5rem 4rem;
+      border-bottom: 8px solid #000;
+      text-align: center;
       position: relative;
       overflow: hidden;
     }
-    .mini-video .frame::before {
-      content: "";
-      position: absolute; inset: 30% 35% 30% 35%;
-      background: var(--color-text-secondary);
-      opacity: 0.4;
-      border-radius: 50%;
-    }
-    .mini-video .frame:nth-child(2)::before { inset: 25% 30% 35% 40%; }
-    .mini-video .frame:nth-child(3)::before { inset: 35% 40% 25% 30%; }
-    .mini-video .frame:nth-child(4)::before { inset: 30% 25% 30% 45%; }
-
-    .mini-unify {
-      margin-top: 0.75rem;
-      display: flex; align-items: center; gap: 0.5rem;
-      height: 50px;
-    }
-    .uni-node {
-      width: 26px; height: 26px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
-      flex-shrink: 0;
-    }
-    .uni-v { background: var(--color-vision-light); color: var(--color-vision); border: 1px solid var(--color-vision); }
-    .uni-t { background: var(--color-text-light); color: var(--color-text-stream); border: 1px solid var(--color-text-stream); }
-    .uni-a { background: var(--color-audio-light); color: var(--color-audio); border: 1px solid var(--color-audio); }
-    .uni-arrow { flex: 1; height: 1px; background: var(--color-border); position: relative; }
-    .uni-arrow::after {
-      content: ""; position: absolute; right: 0; top: -3px;
-      border-left: 5px solid var(--color-border);
-      border-top: 3px solid transparent; border-bottom: 3px solid transparent;
-    }
-    .uni-out {
-      padding: 0.25rem 0.6rem;
-      background: var(--color-accent); color: white;
-      font-family: var(--font-mono); font-size: 0.62rem;
-      text-transform: uppercase; letter-spacing: 0.08em;
-      border-radius: 999px; font-weight: 500;
-    }
-
-    /* ============ MODEL MATRIX ============ */
-    .matrix-wrap {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: var(--shadow-md);
-    }
-    .matrix {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-    .matrix th, .matrix td {
-      padding: 0.95rem 1rem;
-      text-align: left;
-      border-bottom: 1px solid var(--color-border-light);
-    }
-    .matrix thead th {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.3em;
+      color: #666; margin: 0 0 1rem;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-      background: var(--color-bg-warm);
-      font-weight: 500;
     }
-    .matrix tbody tr:last-child td { border-bottom: none; }
-    .matrix tbody tr { transition: background 200ms; }
-    .matrix tbody tr:hover { background: var(--color-bg-warm); }
+    .hero h1 {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: clamp(2.4rem, 7vw, 5.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      margin: 0 auto 1.5rem;
+      max-width: 900px;
+      color: #000;
+    }
+    .hero h1 .pix  { color: var(--pixel-red); }
+    .hero h1 .typ  { color: var(--paper-red); font-family: 'Special Elite', serif; font-size: 0.9em; }
+    .hero h1 .osc  { color: var(--osc-fg); background: #000; padding: 0 0.15em; font-family: 'VT323', monospace; }
+    .hero h1 .cin  { color: var(--cine-accent); font-style: italic; }
+    .hero p.lede {
+      max-width: 640px; margin: 0 auto 2rem;
+      font-size: 1.1rem; color: #333; line-height: 1.55;
+    }
+    .hero-shapes {
+      display: flex; justify-content: center; align-items: center;
+      gap: 1rem; margin: 2.5rem auto 0; flex-wrap: wrap;
+      max-width: 800px;
+    }
+    .hero-shapes svg { width: 80px; height: 80px; }
+    @keyframes converge { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    .hero-shapes svg { animation: converge 4s ease-in-out infinite; }
+    .hero-shapes svg:nth-child(2) { animation-delay: 0.3s; }
+    .hero-shapes svg:nth-child(3) { animation-delay: 0.6s; }
+    .hero-shapes svg:nth-child(4) { animation-delay: 0.9s; }
+    .hero-shapes svg:nth-child(5) { animation-delay: 1.2s; }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-shapes svg { animation: none; }
+    }
+    .hero-meta {
+      display: flex; justify-content: center; gap: 2.5rem; margin-top: 2.5rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      color: #666; text-transform: uppercase; letter-spacing: 0.1em;
+      flex-wrap: wrap;
+    }
+    .hero-meta span b { display: block; color: #000; font-size: 0.85rem; margin-top: 0.25rem; }
 
-    .model-cell strong {
-      display: block;
-      font-family: var(--font-display); font-size: 1.05rem; font-weight: 700;
+    /* ============================================================
+       §1 VISION — pixel-art / 8-bit aesthetic
+       ============================================================ */
+    .sec-vision {
+      background: var(--pixel-bg);
+      color: var(--pixel-fg);
+      font-family: 'VT323', monospace;
+      position: relative;
+      padding: 0;
+      border-bottom: 8px solid var(--pixel-yellow);
+      image-rendering: pixelated;
+    }
+    .sec-vision::before {
+      /* pixel scanline texture */
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: repeating-linear-gradient(
+        0deg, rgba(0,0,0,0.18) 0, rgba(0,0,0,0.18) 2px,
+        transparent 2px, transparent 4px);
+      opacity: 0.4;
+    }
+    .pix-container { max-width: 1000px; margin: 0 auto; padding: 4rem 1.5rem; position: relative; }
+    .pix-tag {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.6rem; color: var(--pixel-yellow);
+      letter-spacing: 0.1em;
+      display: inline-block;
+      padding: 0.5rem 0.75rem;
+      border: 3px solid var(--pixel-yellow);
+      background: var(--pixel-bg);
+      margin-bottom: 1.5rem;
+      image-rendering: pixelated;
+    }
+    .pix-h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(1.1rem, 3.4vw, 1.9rem);
+      line-height: 1.5;
+      color: var(--pixel-pink);
+      text-shadow: 4px 4px 0 var(--pixel-cyan);
+      margin: 0 0 2rem;
+    }
+    .pix-body {
+      font-family: 'VT323', monospace;
+      font-size: 1.35rem;
+      color: var(--pixel-fg);
+      line-height: 1.55;
+    }
+    .pix-body p { margin: 0 0 1.25rem; }
+    .pix-body strong { color: var(--pixel-yellow); }
+    .pix-body em { color: var(--pixel-cyan); font-style: normal; }
+    .pix-body code {
+      background: #000;
+      color: var(--pixel-green);
+      padding: 0.1em 0.4em;
+      font-family: 'VT323', monospace;
+      border: 2px solid var(--pixel-green);
+    }
+
+    .pix-grid-demo {
+      display: grid;
+      grid-template-columns: repeat(14, 1fr);
+      gap: 2px;
+      width: 280px; height: 280px;
+      margin: 2rem auto;
+      background: #000;
+      padding: 4px;
+      border: 4px solid var(--pixel-cyan);
+    }
+    .pix-grid-demo div {
+      background: var(--pixel-bg);
+      transition: background 200ms;
+    }
+    .pix-grid-demo div.on { background: var(--pixel-pink); }
+    .pix-grid-demo div.h  { background: var(--pixel-yellow); }
+    .pix-grid-demo div.g  { background: var(--pixel-green); }
+    .pix-grid-demo div.c  { background: var(--pixel-cyan); }
+
+    .pix-card {
+      border: 4px solid var(--pixel-yellow);
+      background: #000;
+      padding: 1.25rem;
+      margin: 2rem 0;
+      box-shadow: 8px 8px 0 var(--pixel-red);
+    }
+    .pix-card-head {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.65rem;
+      color: var(--pixel-yellow);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+    .pix-code {
+      font-family: 'VT323', monospace;
+      font-size: 1.15rem;
+      color: var(--pixel-green);
+      white-space: pre;
+      overflow-x: auto;
+      padding: 0.5rem 0;
+    }
+    .pix-code .key  { color: var(--pixel-cyan); }
+    .pix-code .str  { color: var(--pixel-pink); }
+    .pix-code .num  { color: var(--pixel-yellow); }
+    .pix-code .com  { color: #888; }
+
+    .pix-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 2rem 0;
+      font-family: 'VT323', monospace;
+      font-size: 1.1rem;
+      border: 3px solid var(--pixel-cyan);
+    }
+    .pix-table th, .pix-table td {
+      padding: 0.5rem 0.75rem;
+      border-right: 2px solid var(--pixel-cyan);
+      border-bottom: 2px solid var(--pixel-cyan);
+      text-align: left;
+    }
+    .pix-table th {
+      background: var(--pixel-cyan);
+      color: var(--pixel-bg);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.05em;
+    }
+    .pix-table td:last-child, .pix-table th:last-child { border-right: 0; }
+    .pix-table tr:last-child td { border-bottom: 0; }
+    .pix-table strong { color: var(--pixel-yellow); }
+
+    .pix-foot {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      color: var(--pixel-green);
+      letter-spacing: 0.1em;
+      text-align: right;
+      margin-top: 3rem;
+      border-top: 2px dashed var(--pixel-green);
+      padding-top: 1rem;
+    }
+
+    /* ============================================================
+       §2 TEXT — typewriter / paper aesthetic
+       ============================================================ */
+    .sec-text {
+      background: var(--paper-bg);
+      color: var(--paper-fg);
+      font-family: 'Special Elite', 'Courier New', monospace;
+      padding: 0;
+      border-bottom: 1px solid var(--paper-stain);
+      position: relative;
+    }
+    .sec-text::before {
+      /* coffee stain / paper texture */
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        radial-gradient(ellipse 240px 180px at 88% 12%, rgba(139, 90, 60, 0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 320px 220px at 8% 88%, rgba(139, 90, 60, 0.08) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent 0, transparent 27px, rgba(43, 37, 32, 0.04) 28px);
+    }
+    .typ-container { max-width: 720px; margin: 0 auto; padding: 4rem 1.5rem; position: relative; }
+    .typ-stamp {
+      display: inline-block;
+      border: 3px double var(--paper-red);
+      color: var(--paper-red);
+      padding: 0.35rem 0.85rem;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      transform: rotate(-2deg);
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+    }
+    .typ-h2 {
+      font-family: 'Special Elite', monospace;
+      font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+      line-height: 1.25;
+      color: var(--paper-fg);
+      margin: 0 0 0.5rem;
       letter-spacing: -0.01em;
     }
-    .model-cell small {
-      font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-text-muted);
-      letter-spacing: 0.04em;
+    .typ-byline {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.85rem;
+      color: var(--paper-stain);
+      margin: 0 0 2rem;
+      border-bottom: 1px dashed var(--paper-stain);
+      padding-bottom: 0.75rem;
     }
-    .cap {
-      display: inline-block;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      padding: 0.18rem 0.5rem;
-      border-radius: 999px;
-      letter-spacing: 0.04em;
+    .typ-body {
+      font-family: 'Special Elite', 'Courier New', monospace;
+      font-size: 1.05rem;
+      color: var(--paper-fg);
+      line-height: 1.75;
     }
-    .cap.yes   { color: var(--color-output); background: var(--color-output-light); }
-    .cap.text  { color: var(--color-text-stream); background: var(--color-text-light); }
-    .cap.in    { color: var(--color-vision); background: var(--color-vision-light); }
-    .cap.no    { color: var(--color-text-muted); background: var(--color-border-light); }
+    .typ-body p { margin: 0 0 1.25rem; text-indent: 2em; }
+    .typ-body p:first-of-type { text-indent: 0; }
+    .typ-body p:first-of-type::first-letter {
+      font-size: 3.2rem; float: left; line-height: 0.9;
+      padding: 0.15rem 0.4rem 0 0; color: var(--paper-red); font-weight: bold;
+    }
+    .typ-body strong { font-weight: normal; background: rgba(241, 196, 15, 0.35); padding: 0 0.15em; }
+    .typ-body em { font-style: italic; color: var(--paper-red); }
+    .typ-cursor {
+      display: inline-block; width: 9px; height: 1.05rem;
+      background: var(--paper-fg);
+      margin-left: 2px; vertical-align: middle;
+      animation: blink 1.1s steps(2) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .typ-cursor { animation: none; opacity: 1; }
+    }
+    .typ-example {
+      border-left: 4px solid var(--paper-red);
+      padding: 0.75rem 1rem 0.75rem 1.25rem;
+      background: rgba(255, 255, 255, 0.4);
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    .typ-example .lbl {
+      font-size: 0.7rem; letter-spacing: 0.2em; color: var(--paper-red);
+      text-transform: uppercase; display: block; margin-bottom: 0.4rem;
+    }
+    .typ-foot {
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      color: var(--paper-stain);
+      text-align: right;
+      margin-top: 3rem;
+      border-top: 1px solid var(--paper-stain);
+      padding-top: 1rem;
+      letter-spacing: 0.05em;
+    }
 
-    .ctx { font-family: var(--font-mono); font-size: 0.82rem; color: var(--color-text); }
-    .ctx small { color: var(--color-text-muted); }
-
-    /* ============ CODE ============ */
-    .code-section .codeframe {
-      background: var(--color-bg-code);
-      border-radius: 16px;
-      padding: 1.5rem;
+    /* ============================================================
+       §3 AUDIO — oscilloscope / scientific phosphor display
+       ============================================================ */
+    .sec-audio {
+      background: var(--osc-bg);
+      color: var(--osc-fg);
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0;
+      border-bottom: 4px solid var(--osc-fg);
+      position: relative;
       overflow: hidden;
-      box-shadow: var(--shadow-lg);
+    }
+    .sec-audio::before {
+      /* CRT scanlines */
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: repeating-linear-gradient(
+        0deg, rgba(57, 255, 20, 0.04) 0, rgba(57, 255, 20, 0.04) 1px,
+        transparent 1px, transparent 3px);
+      opacity: 0.7;
+    }
+    .sec-audio::after {
+      /* phosphor glow */
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.55) 100%);
+    }
+    .osc-container { max-width: 1000px; margin: 0 auto; padding: 4rem 1.5rem; position: relative; z-index: 2; }
+    .osc-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      border: 1px solid var(--osc-fg);
+      padding: 0.4rem 0.75rem;
+      font-size: 0.65rem; letter-spacing: 0.15em;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+    }
+    .osc-bar .led {
+      display: inline-block; width: 8px; height: 8px;
+      background: var(--osc-amber); border-radius: 50%;
+      margin-right: 0.4em;
+      box-shadow: 0 0 6px var(--osc-amber);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 50% { opacity: 0.3; } }
+    @media (prefers-reduced-motion: reduce) {
+      .osc-bar .led { animation: none; }
+    }
+    .osc-h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(1.5rem, 4vw, 2.4rem);
+      font-weight: 700;
+      color: var(--osc-fg);
+      text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+      margin: 0 0 2rem;
+      line-height: 1.25;
+    }
+    .osc-body {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      color: var(--osc-fg);
+      line-height: 1.7;
+    }
+    .osc-body p { margin: 0 0 1.25rem; }
+    .osc-body strong { color: var(--osc-amber); }
+    .osc-body em { color: #fff; font-style: normal; text-decoration: underline; text-underline-offset: 3px; }
+    .osc-body code { color: var(--osc-amber); background: rgba(255, 176, 0, 0.08); padding: 0.05em 0.3em; }
+
+    .scope {
+      background: #000;
+      border: 1px solid var(--osc-fg);
+      padding: 1rem;
+      margin: 2rem 0;
+      position: relative;
+      height: 220px;
+      overflow: hidden;
+    }
+    .scope-grid {
+      position: absolute; inset: 1rem;
+      background-image:
+        linear-gradient(to right, rgba(57, 255, 20, 0.18) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(57, 255, 20, 0.18) 1px, transparent 1px);
+      background-size: 10% 25%;
+    }
+    .scope-trace {
+      position: absolute; inset: 1rem;
+      display: block;
+    }
+    .scope-label {
+      position: absolute; bottom: 0.4rem; left: 1.2rem;
+      font-size: 0.6rem; color: var(--osc-fg); opacity: 0.7;
+      letter-spacing: 0.1em;
+    }
+    .scope-axis-y {
+      position: absolute; top: 1rem; left: 0.2rem;
+      font-size: 0.55rem; color: var(--osc-fg); opacity: 0.6;
+      display: flex; flex-direction: column; justify-content: space-between;
+      height: calc(100% - 2rem);
+    }
+
+    .osc-stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem; margin: 2rem 0;
+    }
+    .osc-stat {
+      border: 1px solid var(--osc-fg);
+      padding: 1rem;
+      background: rgba(57, 255, 20, 0.04);
+    }
+    .osc-stat .v {
+      font-size: 1.8rem; color: var(--osc-amber); font-weight: 700;
+      display: block; line-height: 1;
+      text-shadow: 0 0 8px rgba(255, 176, 0, 0.5);
+    }
+    .osc-stat .l {
+      font-size: 0.65rem; color: var(--osc-fg); letter-spacing: 0.1em;
+      margin-top: 0.5rem; text-transform: uppercase;
+    }
+
+    .osc-code {
+      background: #000;
+      border: 1px solid var(--osc-fg);
+      padding: 1rem 1.25rem;
+      margin: 2rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      color: var(--osc-fg);
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .osc-code .k { color: var(--osc-amber); }
+    .osc-code .s { color: #fff; }
+    .osc-code .c { color: #4a8a4a; }
+    .osc-code .n { color: var(--osc-amber); }
+
+    .osc-foot {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--osc-fg);
+      letter-spacing: 0.2em;
+      text-align: right;
+      margin-top: 3rem;
+      border-top: 1px solid var(--osc-fg);
+      padding-top: 1rem;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       §4 VIDEO — cinema-scope letterbox
+       ============================================================ */
+    .sec-video {
+      background: var(--cine-bg);
+      color: var(--cine-fg);
+      font-family: 'Inter', sans-serif;
+      padding: 0;
+      border-bottom: 8px solid var(--cine-mid);
       position: relative;
     }
-    .code-tag {
-      position: absolute; top: 1rem; right: 1rem;
-      font-family: var(--font-mono); font-size: 0.65rem;
-      text-transform: uppercase; letter-spacing: 0.1em;
-      color: #6C7086;
+    .cine-letterbox-t, .cine-letterbox-b {
+      height: 28px; background: #000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem; color: #666;
+      letter-spacing: 0.2em; text-transform: uppercase;
     }
-    .code-section pre {
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      line-height: 1.6;
-      color: #CDD6F4;
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
+    .cine-letterbox-t .marks, .cine-letterbox-b .marks {
+      display: flex; gap: 0.4rem;
     }
-    .ck { color: #CBA6F7; }   /* keyword */
-    .cs { color: #A6E3A1; }   /* string */
-    .cf { color: #89B4FA; }   /* function */
-    .cc { color: #6C7086; }   /* comment */
-    .cp { color: #F9E2AF; }   /* property */
-    .cn { color: #FAB387; }   /* number */
+    .cine-letterbox-t .marks span, .cine-letterbox-b .marks span {
+      display: block; width: 4px; height: 8px; background: #333;
+    }
+    .cine-letterbox-t .marks span:nth-child(5n) { background: var(--cine-accent); }
+    .cine-container { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem; position: relative; }
+    .cine-tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.25em;
+      color: var(--cine-accent);
+      border: 1px solid var(--cine-accent);
+      padding: 0.35rem 0.8rem;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .cine-h2 {
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      font-size: clamp(1.9rem, 5vw, 3.2rem);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--cine-fg);
+      margin: 0 0 0.5rem;
+      max-width: 800px;
+    }
+    .cine-h2 em { font-style: italic; color: var(--cine-accent); font-weight: 300; }
+    .cine-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem; letter-spacing: 0.18em;
+      color: var(--cine-dim); text-transform: uppercase;
+      margin: 0 0 2.5rem;
+    }
+    .cine-body {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem; font-weight: 400;
+      color: #c8c8c8; line-height: 1.75;
+      max-width: 760px;
+    }
+    .cine-body p { margin: 0 0 1.3rem; }
+    .cine-body strong { color: var(--cine-fg); font-weight: 500; }
+    .cine-body em { color: var(--cine-accent); font-style: italic; }
+    .cine-body code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      background: var(--cine-mid); color: var(--cine-accent);
+      padding: 0.1em 0.4em;
+    }
 
-    /* ============ STATS ============ */
-    .stats {
+    .cine-filmstrip {
+      display: flex; gap: 4px;
+      margin: 2.5rem 0;
+      padding: 8px;
+      background: #000;
+      border: 1px solid #222;
+      overflow-x: auto;
+    }
+    .cine-frame {
+      flex: 0 0 auto;
+      width: 130px; height: 75px;
+      background: linear-gradient(135deg, #1a1a1c 0%, #2a2a2c 100%);
+      border: 1px solid #333;
+      position: relative;
+      display: flex; align-items: flex-end; justify-content: flex-start;
+      padding: 0.3rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem; color: var(--cine-dim);
+    }
+    .cine-frame::before {
+      content: ''; position: absolute; top: 4px; left: 4px; right: 4px;
+      height: 4px; border-top: 1px dashed #444;
+    }
+    .cine-frame .ts { z-index: 2; }
+
+    .cine-code {
+      background: #000;
+      border: 1px solid #333;
+      border-left: 3px solid var(--cine-accent);
+      padding: 1.25rem;
+      margin: 2rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #c8c8c8;
+      line-height: 1.6;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .cine-code .k { color: var(--cine-accent); }
+    .cine-code .s { color: #c4d8a8; }
+    .cine-code .c { color: #555; font-style: italic; }
+    .cine-code .n { color: #d4af37; }
+
+    .cine-foot {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--cine-dim);
+      letter-spacing: 0.25em;
+      text-align: right;
+      margin-top: 3rem;
+      border-top: 1px solid #333;
+      padding-top: 1rem;
+      text-transform: uppercase;
+    }
+    .cine-foot span { color: var(--cine-accent); }
+
+    /* ============================================================
+       §5 UNIFIED — brutalist convergence (all four palettes appear)
+       ============================================================ */
+    .sec-unified {
+      background: var(--brut-bg);
+      color: var(--brut-fg);
+      font-family: 'Inter', sans-serif;
+      border-bottom: 8px solid var(--brut-fg);
+    }
+    .brut-container { max-width: 1200px; margin: 0 auto; padding: 4rem 1.5rem; }
+    .brut-tag {
+      display: inline-block;
+      background: var(--brut-fg); color: var(--brut-yellow);
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.7rem; letter-spacing: 0.2em;
+      padding: 0.5rem 0.85rem;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+    }
+    .brut-h2 {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: clamp(2rem, 6vw, 4rem);
+      line-height: 0.95;
+      letter-spacing: -0.025em;
+      color: var(--brut-fg);
+      margin: 0 0 1rem;
+      text-transform: uppercase;
+    }
+    .brut-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem; line-height: 1.55;
+      color: var(--brut-fg);
+      max-width: 600px;
+      margin: 0 0 2.5rem;
+      border-left: 4px solid var(--brut-fg);
+      padding-left: 1rem;
+    }
+
+    .brut-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-top: 1.5rem;
+      gap: 4px;
+      background: var(--brut-fg);
+      border: 4px solid var(--brut-fg);
+      margin: 2rem 0;
     }
-    .stat {
-      padding: 1.5rem 1.25rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      opacity: 0; transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    .brut-cell {
+      background: var(--brut-bg);
+      padding: 1.25rem;
+      min-height: 200px;
+      position: relative;
     }
-    .stat.visible { opacity: 1; transform: translateY(0); }
-    .stat:nth-child(2).visible { transition-delay:  80ms; }
-    .stat:nth-child(3).visible { transition-delay: 160ms; }
-    .stat:nth-child(4).visible { transition-delay: 240ms; }
+    .brut-cell.v { background: var(--pixel-bg); color: var(--pixel-cyan); }
+    .brut-cell.t { background: var(--paper-bg); color: var(--paper-fg); }
+    .brut-cell.a { background: var(--osc-bg); color: var(--osc-fg); }
+    .brut-cell.c { background: var(--cine-bg); color: var(--cine-accent); }
+    .brut-cell h4 {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.85rem; letter-spacing: 0.1em;
+      margin: 0 0 0.75rem; text-transform: uppercase;
+    }
+    .brut-cell.v h4 { font-family: 'Press Start 2P', monospace; font-size: 0.55rem; color: var(--pixel-yellow); }
+    .brut-cell.t h4 { font-family: 'Special Elite', monospace; color: var(--paper-red); }
+    .brut-cell.a h4 { font-family: 'JetBrains Mono', monospace; color: var(--osc-amber); }
+    .brut-cell.c h4 { font-family: 'Inter', sans-serif; font-weight: 300; font-size: 1.1rem; letter-spacing: 0; color: var(--cine-accent); text-transform: none; font-style: italic; }
+    .brut-cell p {
+      font-size: 0.78rem; line-height: 1.5;
+      margin: 0;
+    }
+    .brut-cell.v p { font-family: 'VT323', monospace; font-size: 1rem; }
+    .brut-cell.t p { font-family: 'Special Elite', monospace; }
+    .brut-cell.a p { font-family: 'JetBrains Mono', monospace; }
+    .brut-cell.c p { font-family: 'Inter', sans-serif; color: #aaa; }
+    .brut-cell .num {
+      position: absolute; top: 0.5rem; right: 0.75rem;
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.7rem; opacity: 0.4;
+    }
 
-    .stat-val {
-      font-family: var(--font-display);
-      font-size: clamp(1.8rem, 3.6vw, 2.4rem);
-      font-weight: 700; line-height: 1;
-      letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
+    .brut-arch {
+      border: 4px solid var(--brut-fg);
+      padding: 2rem;
+      margin: 2.5rem 0;
+      background: var(--brut-bg);
     }
-    .stat-val .unit { color: var(--color-accent); font-size: 0.65em; margin-left: 0.1rem; }
-    .stat-label {
-      margin-top: 0.6rem;
+    .brut-arch-head {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.7rem; letter-spacing: 0.2em;
+      color: var(--brut-fg); text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--brut-fg);
+      padding-bottom: 0.5rem;
+    }
+    .brut-arch svg { width: 100%; height: auto; max-height: 340px; }
+
+    .brut-body {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: var(--brut-fg);
+      line-height: 1.7;
+      max-width: 760px;
+    }
+    .brut-body p { margin: 0 0 1.25rem; }
+    .brut-body strong { font-family: 'Archivo Black', sans-serif; font-weight: normal; }
+    .brut-body em { font-style: normal; background: var(--brut-yellow); padding: 0 0.2em; }
+    .brut-body code {
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.85rem;
-      color: var(--color-text-secondary);
-      line-height: 1.4;
+      background: var(--brut-fg); color: var(--brut-bg);
+      padding: 0.1em 0.4em;
     }
 
-    /* ============ CTA ============ */
-    .final {
-      padding: 5rem 1.5rem 7rem;
-      max-width: 720px;
-      margin: 0 auto;
-      text-align: center;
+    .brut-foot {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-align: right;
+      margin-top: 3rem;
+      border-top: 4px solid var(--brut-fg);
+      padding-top: 1rem;
+      text-transform: uppercase;
     }
-    .final h2 {
-      font-family: var(--font-display);
-      font-size: clamp(1.9rem, 4vw, 2.8rem);
-      font-weight: 700;
+
+    /* ============================================================
+       COMPARISON TABLE — straightforward brutalist
+       ============================================================ */
+    .sec-compare {
+      background: #fafafa;
+      padding: 5rem 1.5rem;
+      border-bottom: 4px solid #000;
+    }
+    .compare-container { max-width: 1200px; margin: 0 auto; }
+    .compare-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.25em;
+      color: #666; text-transform: uppercase;
+      margin: 0 0 0.5rem;
+    }
+    .compare-h2 {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: clamp(1.7rem, 4.5vw, 2.8rem);
       letter-spacing: -0.02em;
-      margin: 0 0 1rem;
+      margin: 0 0 0.5rem;
+      text-transform: uppercase;
+      line-height: 1;
     }
-    .final p { color: var(--color-text-secondary); margin-bottom: 2rem; }
+    .compare-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      color: #555;
+      max-width: 700px;
+      margin: 0 0 2.5rem;
+    }
+    .compare-wrap { overflow-x: auto; }
+    .compare {
+      width: 100%; border-collapse: collapse; min-width: 700px;
+      font-family: 'Inter', sans-serif;
+      border: 3px solid #000;
+      background: #fff;
+    }
+    .compare th, .compare td {
+      padding: 0.85rem 0.9rem;
+      border-bottom: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.85rem;
+    }
+    .compare th {
+      background: #000; color: #fff;
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.7rem; letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-right: 1px solid #333;
+    }
+    .compare td:last-child, .compare th:last-child { border-right: 0; }
+    .compare tr:last-child td { border-bottom: 0; }
+    .compare .model-name {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.95rem;
+      display: block;
+    }
+    .compare .model-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: #777; letter-spacing: 0.1em; text-transform: uppercase;
+      display: block; margin-top: 0.15rem;
+    }
+    .compare .yes { color: var(--brut-green); font-weight: 600; }
+    .compare .partial { color: #d4861a; }
+    .compare .no { color: #999; }
+    .compare .price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
 
-    .magnetic {
-      display: inline-flex; align-items: center; gap: 0.55rem;
-      padding: 1rem 1.85rem;
-      border-radius: 9999px;
-      background: var(--color-accent); color: white;
-      font-family: var(--font-body); font-weight: 500; font-size: 1rem;
-      border: none; cursor: pointer; text-decoration: none;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms var(--ease-spring), background 200ms;
-      will-change: transform;
+    /* ============================================================
+       DECISION MATRIX — when to use what
+       ============================================================ */
+    .sec-decide {
+      background: #000; color: #fff;
+      padding: 5rem 1.5rem;
+      border-bottom: 4px solid #fff;
     }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(3px); }
+    .decide-container { max-width: 1100px; margin: 0 auto; }
+    .decide-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.25em;
+      color: var(--brut-yellow); text-transform: uppercase;
+      margin: 0 0 0.5rem;
+    }
+    .decide-h2 {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: clamp(1.7rem, 4.5vw, 2.8rem);
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin: 0 0 2.5rem;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .decide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .decide-card {
+      background: #111;
+      border: 1px solid #333;
+      border-left: 4px solid var(--brut-yellow);
+      padding: 1.25rem;
+    }
+    .decide-card.v { border-left-color: var(--pixel-cyan); }
+    .decide-card.t { border-left-color: var(--paper-red); }
+    .decide-card.a { border-left-color: var(--osc-fg); }
+    .decide-card.c { border-left-color: var(--cine-accent); }
+    .decide-card h4 {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.75rem; letter-spacing: 0.1em;
+      color: #fff; text-transform: uppercase;
+      margin: 0 0 0.5rem;
+    }
+    .decide-card .use {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      color: #ddd; line-height: 1.5;
+      margin-bottom: 0.75rem;
+    }
+    .decide-card .pick {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--brut-yellow);
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
 
-    .secondary {
-      display: inline-block; margin-left: 1.25rem;
-      color: var(--color-text-secondary);
-      text-decoration: none; font-size: 0.95rem;
-      transition: color 200ms;
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .pageFoot {
+      background: #fff; color: #555;
+      padding: 3rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      border-bottom: 80px solid #fff; /* spacer for nav.js floating bar */
     }
-    .secondary:hover { color: var(--color-accent); }
-
-    /* Footer */
-    .foot {
-      padding: 2rem 1.5rem 3rem;
-      max-width: 1120px; margin: 0 auto;
-      border-top: 1px solid var(--color-border-light);
-      font-family: var(--font-mono); font-size: 0.72rem;
-      color: var(--color-text-muted);
-      letter-spacing: 0.05em;
-      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    .pageFoot-inner { max-width: 1100px; margin: 0 auto; }
+    .pageFoot h5 {
+      font-family: 'Archivo Black', sans-serif;
+      font-size: 0.7rem; letter-spacing: 0.2em;
+      color: #000; text-transform: uppercase;
+      margin: 0 0 0.75rem;
     }
-    .foot a { color: var(--color-text-muted); text-decoration: none; }
-    .foot a:hover { color: var(--color-accent); }
+    .pageFoot ul { list-style: none; padding: 0; margin: 0 0 1.5rem; line-height: 1.7; }
+    .pageFoot a { color: #555; text-decoration: underline; text-decoration-color: #ccc; }
+    .pageFoot a:hover { color: #000; text-decoration-color: #000; }
+    .pageFoot-meta {
+      margin-top: 2rem;
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+      display: flex; justify-content: space-between; gap: 1rem;
+      flex-wrap: wrap; color: #888;
+      font-size: 0.7rem;
+    }
 
     /* ============ RESPONSIVE ============ */
-    @media (max-width: 880px) {
-      .bento { grid-template-columns: 1fr 1fr; }
-      .tile.span-2 { grid-column: span 2; }
-      .stats { grid-template-columns: 1fr 1fr; }
-      .fusion-model-row { grid-template-columns: 1fr; }
-      .matrix { font-size: 0.82rem; }
-      .matrix th, .matrix td { padding: 0.7rem 0.6rem; }
-      .topnav-links { display: none; }
+    @media (max-width: 900px) {
+      .brut-grid { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 640px) {
-      .fusion-inputs { grid-template-columns: 1fr; }
-      .fusion-pipe {
-        height: 80px; margin: 1.5rem 0;
-      }
-      .pipe-track {
-        left: 50%; top: 8%; bottom: 8%;
-        width: 2px; height: auto;
-        transform: translateX(-50%);
-        background: linear-gradient(180deg,
-          var(--color-vision) 0%, var(--color-vision) 18%,
-          var(--color-text-stream) 22%, var(--color-text-stream) 48%,
-          var(--color-audio) 52%, var(--color-audio) 78%,
-          var(--color-accent) 82%, var(--color-accent) 100%);
-      }
-      .pipe-token { animation: token-flow-v 3.2s linear infinite; left: 50% !important; }
-      @keyframes token-flow-v {
-        0%   { top: 8%;  opacity: 0; }
-        10%  { opacity: 1; }
-        80%  { top: 80%; opacity: 1; }
-        92%  { top: 92%; opacity: 0; }
-        100% { top: 100%; opacity: 0; }
-      }
-      .input-col { min-height: 170px; }
-      .hero-title { max-width: 100%; }
+    @media (max-width: 720px) {
+      .pix-grid-demo { width: 240px; height: 240px; }
+      .scope { height: 180px; }
+      .typ-container { padding: 3rem 1.25rem; }
+      .pix-h2 { font-size: 1.1rem; line-height: 1.4; }
     }
     @media (max-width: 520px) {
-      .bento { grid-template-columns: 1fr; }
-      .tile.span-2 { grid-column: auto; }
-      .stats { grid-template-columns: 1fr 1fr; }
-      .matrix thead { display: none; }
-      .matrix, .matrix tbody, .matrix tr, .matrix td { display: block; width: 100%; }
-      .matrix tr { padding: 0.85rem; border-bottom: 1px solid var(--color-border-light); }
-      .matrix td { padding: 0.25rem 0; border: none; }
-      .matrix td::before {
-        content: attr(data-label);
-        font-family: var(--font-mono); font-size: 0.65rem;
-        color: var(--color-text-muted); text-transform: uppercase;
-        letter-spacing: 0.1em; display: block; margin-bottom: 0.15rem;
-      }
-    }
-
-    /* ============ REDUCED MOTION ============ */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-      .hero .word, .hero-sub, .hero-meta, .eyebrow,
-      .stat, .tile { opacity: 1 !important; transform: none !important; }
-      .pipe-token { display: none; }
-      .wave .bar, .mini-wave .b { animation: none; transform: scaleY(0.75); }
-      .text-cursor { animation: none; }
-      .shape-stage svg.on { opacity: 1; }
-    }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .tile:hover { transform: none !important; }
+      .brut-grid { grid-template-columns: 1fr; }
+      .container, .pix-container, .typ-container, .osc-container, .cine-container, .brut-container { padding: 3rem 1.25rem; }
+      .hero { padding: 4rem 1.25rem 3rem; }
+      .hero-meta { gap: 1.25rem; font-size: 0.6rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav class="topnav">
-    <div class="topnav-inner">
-      <a class="topnav-brand" href="../">CETI <strong>·</strong> Lookbook</a>
-      <div class="topnav-links">
-        <a href="#fusion">Fusion</a>
-        <a href="#unlocks">Unlocks</a>
-        <a href="#models">Models</a>
-        <a href="#code">Code</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- HERO -->
-  <header class="hero" id="hero">
-    <p class="eyebrow">MULTIMODAL <span class="dot">·</span> VISION <span class="dot">·</span> AUDIO <span class="dot">·</span> VIDEO</p>
-    <h1 class="hero-title">
-      <span class="word"><span class="ink-vision">Pixels,</span></span>
-      <span class="word"><span class="ink-text">text,</span></span>
-      <span class="word"><span class="ink-audio">sound</span></span>
-      <span class="word">—</span>
-      <span class="word">one</span>
-      <span class="word"><span class="ink-unify">model.</span></span>
-    </h1>
-    <p class="hero-sub">
-      The frontier of 2026: image, text, and audio streams pass through modality-specific encoders, then meet in a shared embedding space. The model reasons across them as if they were one substance. This is what makes a screenshot "readable," a podcast "summarisable," and a video "queryable."
-    </p>
-    <div class="hero-meta">
-      <div class="meta-cell">Audience<strong>Mid-level</strong></div>
-      <div class="meta-cell">Frontier models<strong>GPT-4o · Claude 4 · Gemini 3 · Llama 3.2-V</strong></div>
-      <div class="meta-cell">Reading time<strong>9 min</strong></div>
+  <!-- ============ SHARED STRIP (the only connecting thread) ============ -->
+  <header class="strip">
+    <div class="strip-inner">
+      <a class="strip-brand" href="../">CETI <b>·</b> LOOKBOOK</a>
+      <div class="strip-meta">MULTIMODAL AI <span>·</span> ONE MODEL, MANY EYES</div>
     </div>
   </header>
 
-  <!-- SIGNATURE FUSION VISUAL -->
-  <section class="fusion-section" id="fusion">
-    <p class="fusion-eyebrow">01 · The signature insight</p>
-    <h2 class="fusion-heading">Three streams. One embedding space. One reasoning loop.</h2>
-    <p class="fusion-sub">
-      Each modality has its own encoder — a vision transformer for image patches, a tokeniser for text, a Whisper-style encoder for audio frames. Their outputs land in the same vector space, where the language model treats them as just more tokens to attend to.
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <p class="hero-eyebrow">13 / 18 · LOOKBOOK · CETI.AI</p>
+    <h1>
+      A <span class="pix">pixel</span>, a <span class="typ">word</span>,<br>
+      a <span class="osc">wave</span>, a <span class="cin">frame</span> —<br>
+      one model.
+    </h1>
+    <p class="lede">
+      The frontier multimodal models of 2026 don&rsquo;t bolt vision onto language. They tokenise <em>every</em> input into the same shared embedding space and let a single transformer reason across all of it. This page is a polyglot — each section speaks the visual dialect of the modality it describes, because the medium really is part of the message.
     </p>
 
-    <div class="fusion">
-      <div class="fusion-inputs">
+    <div class="hero-shapes" aria-hidden="true">
+      <!-- pixel block -->
+      <svg viewBox="0 0 40 40"><rect x="4" y="4" width="8" height="8" fill="#e74c3c"/><rect x="14" y="4" width="8" height="8" fill="#f1c40f"/><rect x="24" y="4" width="8" height="8" fill="#00d4ff"/><rect x="4" y="14" width="8" height="8" fill="#2ecc71"/><rect x="14" y="14" width="8" height="8" fill="#ff69b4"/></svg>
+      <!-- typewriter key -->
+      <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="#8b2c1e" stroke-width="2"/><text x="20" y="26" text-anchor="middle" font-family="Special Elite, serif" font-size="14" fill="#8b2c1e">A</text></svg>
+      <!-- waveform -->
+      <svg viewBox="0 0 40 40"><polyline points="2,20 7,8 12,32 17,14 22,26 27,10 32,30 37,20" fill="none" stroke="#39ff14" stroke-width="2"/></svg>
+      <!-- film frame -->
+      <svg viewBox="0 0 40 40"><rect x="6" y="10" width="28" height="20" fill="none" stroke="#d4af37" stroke-width="2"/><rect x="3" y="13" width="2" height="3" fill="#d4af37"/><rect x="3" y="19" width="2" height="3" fill="#d4af37"/><rect x="3" y="25" width="2" height="3" fill="#d4af37"/><rect x="35" y="13" width="2" height="3" fill="#d4af37"/><rect x="35" y="19" width="2" height="3" fill="#d4af37"/><rect x="35" y="25" width="2" height="3" fill="#d4af37"/></svg>
+      <!-- unified square -->
+      <svg viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" fill="#000"/><rect x="8" y="8" width="10" height="10" fill="#e74c3c"/><rect x="22" y="8" width="10" height="10" fill="#39ff14"/><rect x="8" y="22" width="10" height="10" fill="#d4af37"/><rect x="22" y="22" width="10" height="10" fill="#fff"/></svg>
+    </div>
 
-        <!-- VISION COLUMN -->
-        <div class="input-col col-vision">
-          <span class="input-tag">Vision · image patches</span>
-          <div class="input-canvas">
-            <div class="shape-stage" id="shape-stage" aria-hidden="true">
-              <svg viewBox="0 0 100 100" class="on" data-i="0">
-                <rect x="18" y="18" width="64" height="64" rx="8" fill="none" stroke="#2A7B9B" stroke-width="3"/>
-                <circle cx="50" cy="50" r="14" fill="#2A7B9B" opacity="0.55"/>
-              </svg>
-              <svg viewBox="0 0 100 100" data-i="1">
-                <polygon points="50,14 86,50 50,86 14,50" fill="none" stroke="#2A7B9B" stroke-width="3"/>
-                <polygon points="50,32 68,50 50,68 32,50" fill="#2A7B9B" opacity="0.55"/>
-              </svg>
-              <svg viewBox="0 0 100 100" data-i="2">
-                <circle cx="50" cy="50" r="34" fill="none" stroke="#2A7B9B" stroke-width="3"/>
-                <rect x="34" y="34" width="32" height="32" rx="2" fill="#2A7B9B" opacity="0.55"/>
-              </svg>
-              <svg viewBox="0 0 100 100" data-i="3">
-                <polygon points="50,16 84,82 16,82" fill="none" stroke="#2A7B9B" stroke-width="3"/>
-                <circle cx="50" cy="60" r="12" fill="#2A7B9B" opacity="0.55"/>
-              </svg>
-            </div>
-          </div>
-          <div class="input-caption">→ patch tokens · 14×14 grid</div>
-        </div>
-
-        <!-- TEXT COLUMN -->
-        <div class="input-col col-text">
-          <span class="input-tag">Text · BPE tokens</span>
-          <div class="input-canvas">
-            <div class="text-snippet">
-              <div class="prompt">user&gt;</div>
-              <div><span id="typed">describe what you see and hear</span><span class="text-cursor"></span></div>
-            </div>
-          </div>
-          <div class="input-caption">→ ~6 tokens · 24 bytes</div>
-        </div>
-
-        <!-- AUDIO COLUMN -->
-        <div class="input-col col-audio">
-          <span class="input-tag">Audio · mel spectrogram</span>
-          <div class="input-canvas">
-            <div class="wave" aria-hidden="true">
-              <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-              <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-              <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-              <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-            </div>
-          </div>
-          <div class="input-caption">→ frame tokens · 25ms windows</div>
-        </div>
-      </div>
-
-      <!-- TOKEN PIPE -->
-      <div class="fusion-pipe" aria-hidden="true">
-        <div class="pipe-track"></div>
-        <div class="pipe-token t1"></div>
-        <div class="pipe-token t2"></div>
-        <div class="pipe-token t3"></div>
-        <div class="pipe-token t4"></div>
-        <div class="pipe-token t5"></div>
-        <div class="pipe-token t6"></div>
-        <div class="pipe-token t7"></div>
-      </div>
-
-      <!-- MODEL + OUTPUT -->
-      <div class="fusion-model-row">
-        <div class="model-box">
-          <div class="model-tag">Shared embedding space</div>
-          <div class="model-name">Unified transformer
-            <small>cross-modal attention</small>
-          </div>
-        </div>
-        <div class="output-box">
-          <span class="output-tag">Structured output</span>
-<pre style="margin:0; font-family:inherit; font-size:inherit; line-height:inherit;">{
-  <span class="key">"scene"</span><span class="punc">:</span> <span class="str">"a kitchen, two people talking"</span><span class="punc">,</span>
-  <span class="key">"objects"</span><span class="punc">:</span> [<span class="str">"kettle"</span><span class="punc">,</span> <span class="str">"mug"</span>]<span class="punc">,</span>
-  <span class="key">"speech"</span><span class="punc">:</span> <span class="str">"morning, want tea?"</span><span class="punc">,</span>
-  <span class="key">"sentiment"</span><span class="punc">:</span> <span class="str">"warm"</span><span class="punc">,</span>
-  <span class="key">"confidence"</span><span class="punc">:</span> <span class="num">0.94</span>
-}</pre>
-        </div>
-      </div>
+    <div class="hero-meta">
+      <span>Reading <b>14 min</b></span>
+      <span>Level <b>Intermediate</b></span>
+      <span>Models <b>4.7 · 4o · 3 Pro · 3.2-V</b></span>
+      <span>Updated <b>2026-05-15</b></span>
     </div>
   </section>
 
-  <!-- WHAT EACH MODALITY UNLOCKS -->
-  <section class="section" id="unlocks">
-    <p class="section-eyebrow">02 · What each modality unlocks</p>
-    <h2 class="section-heading">Four superpowers, one model.</h2>
-    <p class="section-sub">
-      Each modality changes the shape of problems the model can attack. The point isn't novelty — it's that the cost of switching tools (transcribe → summarise → caption → reason) drops to zero.
-    </p>
+  <!-- ============================================================
+       §1 VISION — pixel-art aesthetic
+       ============================================================ -->
+  <section class="sec-vision" id="vision">
+    <div class="pix-container">
+      <div class="pix-tag">&gt; SECTION 01 // VISION</div>
+      <h2 class="pix-h2">PRESS START<br>TO SEE.</h2>
 
-    <div class="bento">
-      <article class="tile">
-        <span class="tile-tag tag-vision">VISION</span>
-        <h3 class="tile-title">Read documents and screenshots.</h3>
-        <p class="tile-body">Extract structured data from PDFs, parse UI screenshots, OCR receipts, understand charts. Image input ≈ <code style="font-family:var(--font-mono);">width × height ÷ 750</code> tokens on Claude.</p>
-        <div class="mini-stage" aria-hidden="true">
-          <div class="mini-doc">
-            <div class="mini-doc-lines"><span></span><span></span><span></span><span></span></div>
-          </div>
-          <div class="mini-arrow"></div>
-          <div class="mini-text-out">{ <span>total</span>: 42.50,<br>&nbsp;&nbsp;<span>tax</span>: 3.50 }</div>
-        </div>
-        <div class="tile-foot">~1334 tokens · 1000×1000 px</div>
-      </article>
+      <div class="pix-body">
+        <p>Vision models don&rsquo;t see <em>images</em>. They see <strong>patches</strong>. A Vision Transformer (ViT) chops the input picture into a fixed grid of small squares &mdash; usually <code>14&times;14</code> or <code>16&times;16</code> pixels &mdash; then flattens each square into a vector and treats the whole sequence exactly like a sequence of word tokens. The transformer doesn&rsquo;t care whether token 47 is the word <em>kettle</em> or a 14&times;14 pixel patch of a kettle&rsquo;s spout. It just attends.</p>
 
-      <article class="tile">
-        <span class="tile-tag tag-audio">AUDIO</span>
-        <h3 class="tile-title">Transcribe and respond in voice.</h3>
-        <p class="tile-body">Native audio in/out enables voice agents that hear tone, accent, and pauses — and reply with prosody. Latency drops from 2.8s (chained pipeline) to ~320ms.</p>
-        <div class="mini-wave" aria-hidden="true">
-          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
-          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
-          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
-          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
-          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
-        </div>
-        <div class="tile-foot">25ms frames · prosody preserved</div>
-      </article>
+        <p>This is why the math is so blunt. For Claude Opus 4.7, a <strong>1000&times;1000</strong> pixel image costs roughly <code>(width &times; height) / 750</code> tokens &mdash; about <strong>1,334 tokens</strong>. A <strong>1024&times;1024</strong> image at a <strong>32-pixel patch size</strong> is exactly <code>1024 tokens</code> (32&times;32 grid). Bigger image &rarr; more patches &rarr; more tokens &rarr; more cost. The model sees in a literal mosaic, and you pay per tile.</p>
 
-      <article class="tile">
-        <span class="tile-tag tag-unify">VIDEO</span>
-        <h3 class="tile-title">Summarise and search across frames.</h3>
-        <p class="tile-body">Gemini 3 samples up to 10 FPS to catch fast actions; Claude 4 reads keyframes for narrative. Ask "where does the chart go up?" and get a timestamp.</p>
-        <div class="mini-video" aria-hidden="true">
-          <div class="frame"></div><div class="frame"></div><div class="frame"></div><div class="frame"></div>
-        </div>
-        <div class="tile-foot">10 FPS · multi-clip reasoning</div>
-      </article>
+        <p>The original ViT paper (<em>An Image is Worth 16x16 Words</em>, Dosovitskiy 2021) was startling because it took something the CV community had spent a decade tuning &mdash; convolutional inductive biases, spatial pooling, multi-scale pyramids &mdash; and showed that none of it was load-bearing at scale. Slice the image, project each slice with a single linear layer, add a positional embedding, and feed the result into the same transformer architecture you&rsquo;d use for text. With enough data, it wins. Every modern vision encoder &mdash; CLIP, SigLIP, the proprietary stacks inside GPT-4o, Claude, and Gemini &mdash; is a variation on this recipe.</p>
 
-      <article class="tile span-2">
-        <span class="tile-tag tag-unify">UNIFIED REASONING</span>
-        <h3 class="tile-title">Cross the streams.</h3>
-        <p class="tile-body">The real unlock isn't "vision OR audio OR text" — it's reasoning across them in the same prompt. Watch a tutorial video, listen to a customer call, paste a dashboard screenshot — and ask one question about all three. The model attends to every modality through the same self-attention layer.</p>
-        <div class="mini-unify" aria-hidden="true">
-          <div class="uni-node uni-v">V</div>
-          <div class="uni-node uni-t">T</div>
-          <div class="uni-node uni-a">A</div>
-          <div class="uni-arrow"></div>
-          <div class="uni-out">answer</div>
-        </div>
-        <div class="tile-foot">single forward pass · one context window</div>
-      </article>
+        <p>The pixel grid below is a toy 14&times;14 patch map. Each lit cell is a patch the model has &ldquo;attended to&rdquo; while answering. The actual attention weights look very similar &mdash; sparse, regional, focused on the parts of the image that carry signal for the current question. The bright cluster in the middle is the foreground object; the dimmer band lower down is the &ldquo;totals&rdquo; row of a receipt. Background patches contribute almost nothing.</p>
+      </div>
 
-      <article class="tile">
-        <span class="tile-tag tag-text">TEXT</span>
-        <h3 class="tile-title">Still the glue.</h3>
-        <p class="tile-body">Text remains the cheapest modality and the lingua franca. Multimodal prompts almost always include a text instruction telling the model <em>what</em> to do with the other inputs.</p>
-        <div class="tile-foot">~$0.000003 / token in · always grounding</div>
-      </article>
-    </div>
-  </section>
+      <div class="pix-grid-demo" aria-hidden="true" id="pixGrid"></div>
 
-  <!-- MODEL LANDSCAPE -->
-  <section class="section" id="models">
-    <p class="section-eyebrow">03 · The 2026 landscape</p>
-    <h2 class="section-heading">Four frontier models, picked per modality.</h2>
-    <p class="section-sub">
-      Most production deployments now route by modality — the leader on video isn't the leader on real-time audio. Multi-model routing is cheap; the quality lift per modality is large.
-    </p>
+      <div class="pix-card">
+        <div class="pix-card-head">&gt; CLAUDE_VISION.PY</div>
+<div class="pix-code"><span class="com"># Send an image to Claude Opus 4.7 for OCR + reasoning</span>
+<span class="key">import</span> anthropic, base64, httpx
 
-    <div class="matrix-wrap">
-      <table class="matrix">
+img = base64.standard_b64encode(
+    httpx.get(<span class="str">"https://example.com/receipt.png"</span>).content
+).decode()
+
+msg = anthropic.<span class="key">Anthropic</span>().messages.create(
+    model=<span class="str">"claude-opus-4-7"</span>,
+    max_tokens=<span class="num">1024</span>,
+    messages=[{<span class="key">"role"</span>: <span class="str">"user"</span>, <span class="key">"content"</span>: [
+        {<span class="key">"type"</span>: <span class="str">"image"</span>, <span class="key">"source"</span>: {
+            <span class="key">"type"</span>: <span class="str">"base64"</span>,
+            <span class="key">"media_type"</span>: <span class="str">"image/png"</span>,
+            <span class="key">"data"</span>: img,
+        }},
+        {<span class="key">"type"</span>: <span class="str">"text"</span>, <span class="key">"text"</span>: <span class="str">"Extract total, tax, date as JSON."</span>},
+    ]}],
+)
+<span class="com"># &rarr; {"total": 42.50, "tax": 3.50, "date": "2026-05-15"}</span></div>
+      </div>
+
+      <div class="pix-body">
+        <p><strong>OCR walkthrough.</strong> Imagine a coffee-shop receipt at 1024&times;1024px. The image becomes 1,024 patch tokens. The text prompt adds another 14 tokens. The model attends across all 1,038 tokens at once &mdash; finding that the cluster of patches around row 18-21 (the totals line) co-activates with the text tokens for <em>total</em>, <em>tax</em>, and <em>JSON</em>. It returns structured output in ~200 output tokens. End-to-end cost on Opus 4.7 at <code>$15/M</code> in: about <strong>$0.016</strong>. Tesseract OCR + a separate LLM cleanup pass would have been cheaper in dollars but slower in latency, brittler on rotated text, and worse at the harder half of the problem: the <em>reasoning</em> step that decides which line is the &ldquo;total&rdquo; in the first place.</p>
+
+        <p>What native vision changes is the surface area of feasible products. A &ldquo;scan your receipt&rdquo; app in 2021 took a six-person ML team eight months &mdash; bounding boxes, layout-aware OCR, brittle field extraction rules, and a long tail of edge cases per merchant. The same product in 2026 is a 12-line script and a <code>describe this receipt as JSON</code> prompt. The unlock isn&rsquo;t accuracy &mdash; classical OCR has been near human-parity on clean text for years. It&rsquo;s that the model also understands what <em>kind</em> of document it&rsquo;s looking at, what fields you probably want, and how to format the answer.</p>
+      </div>
+
+      <table class="pix-table">
         <thead>
-          <tr>
-            <th>Model</th>
-            <th>Vision</th>
-            <th>Audio</th>
-            <th>Video</th>
-            <th>Context</th>
-          </tr>
+          <tr><th>MODEL</th><th>MAX RES</th><th>$/IMAGE @1K&sup2;</th><th>STRENGTH</th></tr>
         </thead>
         <tbody>
-          <tr>
-            <td class="model-cell" data-label="Model"><strong>Claude Opus 4.7</strong><small>Anthropic</small></td>
-            <td data-label="Vision"><span class="cap yes">In · hi-res 2576px</span></td>
-            <td data-label="Audio"><span class="cap no">— not yet</span></td>
-            <td data-label="Video"><span class="cap in">Keyframes</span></td>
-            <td data-label="Context" class="ctx">200K <small>· 1M beta</small></td>
-          </tr>
-          <tr>
-            <td class="model-cell" data-label="Model"><strong>GPT-4o / GPT-5</strong><small>OpenAI</small></td>
-            <td data-label="Vision"><span class="cap yes">In · structured</span></td>
-            <td data-label="Audio"><span class="cap yes">In + out · realtime</span></td>
-            <td data-label="Video"><span class="cap in">Frames + audio</span></td>
-            <td data-label="Context" class="ctx">128K <small>· 256K turbo</small></td>
-          </tr>
-          <tr>
-            <td class="model-cell" data-label="Model"><strong>Gemini 3 Pro</strong><small>Google DeepMind</small></td>
-            <td data-label="Vision"><span class="cap yes">In · charts/spatial</span></td>
-            <td data-label="Audio"><span class="cap yes">In + out · live API</span></td>
-            <td data-label="Video"><span class="cap yes">Native · 10 FPS</span></td>
-            <td data-label="Context" class="ctx">1M <small>· 2M preview</small></td>
-          </tr>
-          <tr>
-            <td class="model-cell" data-label="Model"><strong>Llama 3.2 Vision</strong><small>Meta · open weights</small></td>
-            <td data-label="Vision"><span class="cap yes">In · fine-tunable</span></td>
-            <td data-label="Audio"><span class="cap no">— separate model</span></td>
-            <td data-label="Video"><span class="cap no">— frame loop</span></td>
-            <td data-label="Context" class="ctx">128K <small>· self-hosted</small></td>
-          </tr>
+          <tr><td><strong>Claude Opus 4.7</strong></td><td>2576px</td><td>$0.016</td><td>OCR · charts</td></tr>
+          <tr><td><strong>GPT-4o</strong></td><td>2048px</td><td>$0.013</td><td>Structured</td></tr>
+          <tr><td><strong>Gemini 3 Pro</strong></td><td>3072px</td><td>$0.010</td><td>Spatial · plots</td></tr>
         </tbody>
       </table>
+
+      <div class="pix-foot">&gt; 13/18 // CETI // PRESS [&rarr;] TO CONTINUE</div>
     </div>
   </section>
 
-  <!-- CODE -->
-  <section class="section code-section" id="code">
-    <p class="section-eyebrow">04 · The shape of a multimodal call</p>
-    <h2 class="section-heading">One request. Two modalities. Same response shape.</h2>
-    <p class="section-sub">
-      The API surface is almost boring — and that's the point. An image is just another content block alongside text.
-    </p>
+  <!-- ============================================================
+       §2 TEXT — typewriter aesthetic
+       ============================================================ -->
+  <section class="sec-text" id="text">
+    <div class="typ-container">
+      <div class="typ-stamp">Section II &middot; Text</div>
+      <h2 class="typ-h2">Text is the universal interface.</h2>
+      <p class="typ-byline">Filed under: <em>tokenisation</em>, BPE, the boring layer that holds everything together. &mdash; CETI bureau, 15 May 2026.</p>
 
-    <div class="codeframe">
-      <span class="code-tag">python · anthropic SDK</span>
-<pre><span class="ck">import</span> anthropic, base64, httpx
+      <div class="typ-body">
+        <p>Long before a vision encoder learned to chop pictures into patches, language models had already solved the harder problem: how to turn an essentially infinite vocabulary of human language into a finite, attendable sequence. The answer was <strong>Byte-Pair Encoding</strong> &mdash; a greedy compression scheme that starts with raw bytes and iteratively merges the most-frequent adjacent pairs into a single token. The word <em>multimodal</em> becomes two tokens. The word <em>antidisestablishmentarianism</em> becomes six. The word <em>cat</em> becomes one. Every modern model still tokenises text this way.<span class="typ-cursor"></span></p>
 
-<span class="cc"># Load an image as base64 — could equally be a local file</span>
-img_url = <span class="cs">"https://example.com/receipt.png"</span>
-img_b64 = base64.standard_b64encode(httpx.get(img_url).content).decode(<span class="cs">"utf-8"</span>)
+        <p>This matters for multimodal systems because text remains the <strong>connective tissue</strong>. An image arrives as 1,334 patch tokens. An audio clip arrives as a sequence of mel-spectrogram tokens. A video arrives as ten frames per second of vision tokens interleaved with audio. None of them mean anything to the model in isolation. What gives them a job &mdash; <em>extract the total</em>, <em>summarise the call</em>, <em>flag the moment the chart goes up</em> &mdash; is always a text instruction. Text is what tells the model what to <strong>do</strong> with the other senses.</p>
 
-client = anthropic.<span class="cf">Anthropic</span>()
-msg = client.messages.<span class="cf">create</span>(
-    model=<span class="cs">"claude-opus-4-7"</span>,
-    max_tokens=<span class="cn">1024</span>,
-    messages=[{
-        <span class="cp">"role"</span>: <span class="cs">"user"</span>,
-        <span class="cp">"content"</span>: [
-            {<span class="cp">"type"</span>: <span class="cs">"image"</span>, <span class="cp">"source"</span>: {
-                <span class="cp">"type"</span>: <span class="cs">"base64"</span>,
-                <span class="cp">"media_type"</span>: <span class="cs">"image/png"</span>,
-                <span class="cp">"data"</span>: img_b64,
-            }},
-            {<span class="cp">"type"</span>: <span class="cs">"text"</span>, <span class="cp">"text"</span>: <span class="cs">"Extract total, tax, and date as JSON."</span>},
-        ],
-    }],
+        <p>This is also why text is cheap and the rest is expensive. A token of input text on Claude Opus 4.7 costs about <strong>$0.000015</strong>. The same token slot occupied by a vision patch costs the same in compute &mdash; but you needed <strong>~1,300 of them</strong> to encode one screenshot, where a paragraph of text would have used ~80. The bandwidth ratio is roughly 16&times;. So a useful heuristic: <em>think of every image as &ldquo;100 paragraphs of text-equivalent cost.&rdquo;</em> If a single sentence would have answered the question, send the sentence.</p>
+      </div>
+
+      <div class="typ-example">
+        <span class="lbl">Prompt &mdash; one modality</span>
+        Summarise the attached invoice in two lines.<br>
+        <em>&rarr; 8 tokens. &lt; $0.0002.</em>
+      </div>
+
+      <div class="typ-example">
+        <span class="lbl">Prompt &mdash; multimodal, text-led</span>
+        Compare these three screenshots and tell me which dashboard layout puts the &ldquo;daily active users&rdquo; metric most prominently. Return the answer as a number 1, 2, or 3 and one sentence of reasoning.<br>
+        <em>&rarr; ~40 text tokens + 3 &times; 1,334 image tokens &asymp; $0.06 in.</em>
+      </div>
+
+      <div class="typ-body">
+        <p>Notice the second prompt isn&rsquo;t doing anything fancy. It&rsquo;s just <em>asking a question in words about pictures</em>. The model knows what &ldquo;most prominently&rdquo; means because of language pretraining; it knows what the dashboards look like because of vision pretraining; and the cross-modal attention layer is what lets the two pieces of knowledge meet. The text isn&rsquo;t just glue &mdash; it&rsquo;s the <strong>handle</strong> we use to grab the model and point it at a question.</p>
+
+        <p>There is also a quieter reason text wins. Of the four modalities, only text comes with a <em>built-in formal evaluator</em> &mdash; another language model can grade a text answer with high agreement to humans. Vision, audio, and video outputs are far harder to evaluate at scale, which means almost every production system still funnels its final decision through a text representation, even when the input was a sound or a picture. The world is multimodal; the audit trail is text. Plan accordingly.</p>
+
+        <p>This is why every serious multimodal API still puts a <code>messages</code> array of <code>{role, content}</code> at the centre of its surface. Vision, audio, video, structured-output blocks all hang off that spine. The spine is text, and it always will be.</p>
+      </div>
+
+      <div class="typ-foot">&mdash; 13 of 18 &mdash; CETI &mdash; cont&rsquo;d on Side B &mdash;</div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       §3 AUDIO — oscilloscope / phosphor display
+       ============================================================ -->
+  <section class="sec-audio" id="audio">
+    <div class="osc-container">
+      <div class="osc-bar">
+        <span><span class="led"></span>CH-01 // AUDIO_STREAM // 16 kHz</span>
+        <span>SEC 03 // SCOPE_MODE</span>
+      </div>
+      <h2 class="osc-h2">&gt; SIGNAL ACQUIRED. 25ms WINDOWS. LATENCY: 320ms.</h2>
+
+      <div class="osc-body">
+        <p>For most of the past decade, &ldquo;voice AI&rdquo; meant three separate models in a chain: <strong>STT</strong> (speech-to-text, e.g. Whisper) <em>then</em> an LLM <em>then</em> <strong>TTS</strong> (text-to-speech, e.g. ElevenLabs). End-to-end latency was 2&ndash;3 seconds, prosody was discarded at the STT step, and emotional tone was reconstructed from scratch at the TTS step &mdash; usually badly. The user experience was a stilted radio drama where the model couldn&rsquo;t hear that you sounded annoyed.</p>
+
+        <p>Real-time native-audio models broke that pipeline. <strong>GPT-4o</strong>, <strong>Gemini Live</strong>, and the upcoming Claude voice mode encode raw audio frames directly &mdash; the audio enters the same transformer as text, in the same shared embedding space, and the model speaks back by emitting audio tokens that a small vocoder reconstructs into waveform. Round-trip latency drops to about <strong>320ms</strong>, well under the ~500ms threshold where humans start to perceive a conversation as &ldquo;lagging.&rdquo;</p>
+      </div>
+
+      <div class="scope" aria-hidden="true">
+        <div class="scope-axis-y"><span>+1.0</span><span>0</span><span>&minus;1.0</span></div>
+        <div class="scope-grid"></div>
+        <svg class="scope-trace" viewBox="0 0 400 180" preserveAspectRatio="none">
+          <polyline points="0,90 10,85 20,60 30,72 40,40 50,55 60,30 70,48 80,25 90,42 100,32 110,58 120,45 130,75 140,68 150,95 160,82 170,110 180,98 190,125 200,115 210,135 220,118 230,140 240,122 250,130 260,108 270,118 280,90 290,98 300,72 310,82 320,58 330,68 340,45 350,55 360,35 370,48 380,28 390,40 400,30" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <div class="scope-label">TIME &rarr; (25ms / div) &middot; AMPLITUDE (dB)</div>
+      </div>
+
+      <div class="osc-body">
+        <p>Under the hood the audio is converted to a <strong>mel-spectrogram</strong> &mdash; a 2D image where the x-axis is time, the y-axis is frequency (warped to match human hearing), and brightness is amplitude in dB. The encoder slices this into 25ms windows with a 10ms hop, producing roughly <strong>100 frame-tokens per second</strong> of audio. A two-minute voice clip is ~12,000 tokens &mdash; comparable to a long article. The trace above is one second of a single sine sweep; in production what enters the model is the spectrogram of that signal, not the waveform itself.</p>
+
+        <p>This is why <em>prosody is preserved</em>: the spectrogram captures pitch, energy, voicing, formant structure &mdash; everything that distinguishes &ldquo;sure&rdquo; from &ldquo;<em>sure</em>.&rdquo; A native-audio model can detect sarcasm, hesitation, and emotional state because the signal was never thrown away at an intermediate text bottleneck. The same architectural choice means the model can <em>respond</em> with prosody &mdash; matching your energy, lowering its voice when you whisper, slowing down when you sound confused.</p>
+      </div>
+
+      <div class="osc-stats">
+        <div class="osc-stat"><span class="v">320<small>ms</small></span><div class="l">Native voice RTT</div></div>
+        <div class="osc-stat"><span class="v">2800<small>ms</small></span><div class="l">Chained STT&rarr;LLM&rarr;TTS</div></div>
+        <div class="osc-stat"><span class="v">25<small>ms</small></span><div class="l">Spectrogram window</div></div>
+        <div class="osc-stat"><span class="v">100<small>/s</small></span><div class="l">Audio tokens / second</div></div>
+      </div>
+
+      <div class="osc-code"><span class="c"># OpenAI Realtime API · websocket session</span>
+<span class="k">import</span> asyncio, websockets, json, base64
+
+<span class="k">async def</span> stream():
+    ws = <span class="k">await</span> websockets.connect(
+        <span class="s">"wss://api.openai.com/v1/realtime?model=gpt-4o-realtime"</span>,
+        extra_headers={<span class="s">"Authorization"</span>: <span class="s">f"Bearer {KEY}"</span>}
+    )
+    <span class="k">await</span> ws.send(json.dumps({
+        <span class="s">"type"</span>: <span class="s">"session.update"</span>,
+        <span class="s">"session"</span>: {
+            <span class="s">"modalities"</span>: [<span class="s">"text"</span>, <span class="s">"audio"</span>],
+            <span class="s">"voice"</span>: <span class="s">"alloy"</span>,
+            <span class="s">"input_audio_format"</span>: <span class="s">"pcm16"</span>,
+        }
+    }))
+    <span class="c"># Push mic frames as base64 PCM16 chunks ~ every 100ms</span>
+    <span class="k">while</span> chunk := mic.read(<span class="n">1600</span>):
+        <span class="k">await</span> ws.send(json.dumps({
+            <span class="s">"type"</span>: <span class="s">"input_audio_buffer.append"</span>,
+            <span class="s">"audio"</span>: base64.b64encode(chunk).decode()
+        }))
+    <span class="c"># Server emits response.audio.delta events in &lt; 400ms</span></div>
+
+      <div class="osc-body">
+        <p>The latency budget for natural conversation is brutal. Humans wait ~200ms between turns. Beyond ~500ms it sounds like a delay. The chained pipeline lived in the 2,000&ndash;3,000ms range and could never compete. Native models slot in just under the conscious-detection threshold, and the difference is so large that users describe it not as &ldquo;faster&rdquo; but as &ldquo;the AI woke up.&rdquo;</p>
+
+        <p>The practical implication for product builders: voice agents stop being awkward IVR replacements and start being viable for sales calls, therapy intake, language tutoring, accessibility tools, and customer support. The bottleneck moves from <em>latency</em> to <em>interruption-handling</em> &mdash; can the model gracefully shut up when the user starts speaking, can it pick up mid-sentence after a pause, can it tell the difference between &ldquo;keep going&rdquo; back-channels (<em>&ldquo;mm-hm&rdquo;</em>) and an actual interruption. All three frontier providers expose explicit voice-activity-detection (VAD) and barge-in controls in their realtime APIs; this is now the part you have to <em>design</em>, not the part you have to <em>wait for</em>.</p>
+      </div>
+
+      <div class="osc-foot">&gt;&gt; 013/018 &middot; CETI &middot; END_OF_TRACE</div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       §4 VIDEO — cinema-scope letterbox
+       ============================================================ -->
+  <section class="sec-video" id="video">
+    <div class="cine-letterbox-t" aria-hidden="true">
+      <span>SCENE 04 &middot; VIDEO &middot; 16:9</span>
+      <div class="marks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <span>TC 00:00:00:00</span>
+    </div>
+
+    <div class="cine-container">
+      <div class="cine-tag">SCENE 04 &middot; VIDEO</div>
+      <h2 class="cine-h2">Video is just <em>vision</em> with a clock attached.</h2>
+      <p class="cine-sub">10 FPS &middot; 1M-token context &middot; whole-movie analysis</p>
+
+      <div class="cine-body">
+        <p>A video, for a multimodal model, is a sequence of stills sampled at a fixed rate &mdash; each still goes through the same vision encoder as a single image, and the resulting token streams are concatenated in time order. There is no special &ldquo;video transformer.&rdquo; The temporal reasoning happens because the language model attends across all the frame tokens in the same context window and notices that token 4,500 from frame 47 looks a lot like token 4,500 from frame 12.</p>
+
+        <p>The two knobs that matter are <strong>sampling rate</strong> and <strong>context window</strong>. Gemini 3 Pro samples up to <code>10 FPS</code> &mdash; fine enough to catch a basketball shot or a UI animation &mdash; while Claude Opus 4.7 typically takes <em>keyframes</em> (one per few seconds, plus shot-change detection) to keep token counts down for long narrative content. Both approaches are correct for different problems.</p>
+      </div>
+
+      <div class="cine-filmstrip" aria-hidden="true">
+        <div class="cine-frame"><span class="ts">00:01</span></div>
+        <div class="cine-frame"><span class="ts">00:02</span></div>
+        <div class="cine-frame"><span class="ts">00:03</span></div>
+        <div class="cine-frame"><span class="ts">00:04</span></div>
+        <div class="cine-frame"><span class="ts">00:05</span></div>
+        <div class="cine-frame"><span class="ts">00:06</span></div>
+        <div class="cine-frame"><span class="ts">00:07</span></div>
+        <div class="cine-frame"><span class="ts">00:08</span></div>
+      </div>
+
+      <div class="cine-body">
+        <p>The math: a 1-minute 1080p video at 1 FPS at ~1,300 tokens per frame is ~78,000 tokens &mdash; a substantial but workable load. At 10 FPS it&rsquo;s 780,000, which only fits comfortably in <strong>Gemini 3 Pro</strong>&rsquo;s 1M context or its 2M preview tier. This is why &ldquo;send the whole film&rdquo; is a Gemini-shaped problem and &ldquo;extract one moment from a clip&rdquo; is everyone&rsquo;s problem.</p>
+
+        <p>The unlock is what becomes <em>tractable</em>. With 1M tokens you can paste an entire 2-hour film and ask <em>at what timestamp does the protagonist first lie?</em> &mdash; and get a frame-accurate answer with a one-sentence justification. You can drop a 30-minute Zoom recording and ask <em>summarise each speaker&rsquo;s top three concerns</em>. You can feed a tutorial video and ask <em>generate the chapter timestamps</em>. The bottleneck is no longer the model; it&rsquo;s figuring out what to ask.</p>
+      </div>
+
+      <div class="cine-code"><span class="c"># Gemini 3 Pro · video query · file upload + prompt</span>
+<span class="k">from</span> google <span class="k">import</span> genai
+
+client = genai.Client()
+video = client.files.upload(file=<span class="s">"interview.mp4"</span>)  <span class="c"># 28 min</span>
+
+resp = client.models.generate_content(
+    model=<span class="s">"gemini-3-pro"</span>,
+    contents=[video, <span class="s">"At what timestamp does the speaker first mention pricing? Return MM:SS and the exact quote."</span>],
+    config={<span class="s">"video_fps"</span>: <span class="n">2</span>},  <span class="c"># 2 FPS = ~336K tokens for 28 min</span>
 )
-<span class="cf">print</span>(msg.content[<span class="cn">0</span>].text)
-<span class="cc"># → { "total": 42.50, "tax": 3.50, "date": "2026-05-15" }</span></pre>
+<span class="c"># &rarr; "12:43 - 'we charge $0.0015 per thousand input tokens'"</span></div>
+
+      <div class="cine-body">
+        <p>For real-time use cases (live security feeds, sports analysis, driving assistance) the chained approach &mdash; sample frames, vision-encode each one, batch-call the LLM &mdash; still beats native video on cost. But the gap closes every release. The trajectory is clear: video becomes a first-class input the same way images did between 2023 and 2025.</p>
+
+        <p>One subtlety worth naming: long-context video raises evaluation problems that the field hasn&rsquo;t fully solved. &ldquo;Needle in a haystack&rdquo; tests for text are well-established &mdash; you hide a sentence in 1M tokens and check if the model can retrieve it. The video analogue (hide a single object in one frame of a two-hour film) is much harder to score reliably, because there are many right answers (which timestamp counts? plus or minus how many seconds?) and the failure modes are subtle (it found the right scene but described it inaccurately). Treat published video benchmarks with the same skepticism you bring to MMLU.</p>
+      </div>
+
+      <div class="cine-foot">13 / 18 <span>&middot;</span> CETI <span>&middot;</span> END OF SCENE</div>
+    </div>
+
+    <div class="cine-letterbox-b" aria-hidden="true">
+      <span>TC 00:09:14:22</span>
+      <div class="marks"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <span>FADE TO BLACK</span>
     </div>
   </section>
 
-  <!-- STATS -->
-  <section class="section">
-    <p class="section-eyebrow">05 · By the numbers</p>
-    <h2 class="section-heading">The economics of going multimodal.</h2>
+  <!-- ============================================================
+       §5 UNIFIED — brutalist convergence (all four palettes meet)
+       ============================================================ -->
+  <section class="sec-unified" id="unified">
+    <div class="brut-container">
+      <div class="brut-tag">05 / UNIFIED REASONING</div>
+      <h2 class="brut-h2">FOUR STREAMS.<br>ONE TRANSFORMER.<br>ONE ANSWER.</h2>
+      <p class="brut-sub">The whole point of all of the above is that a single attention layer treats them as one substance. The model doesn&rsquo;t &ldquo;switch modes.&rdquo; It just attends.</p>
 
-    <div class="stats">
-      <article class="stat">
-        <div class="stat-val"><span class="num" data-to="1334">0</span></div>
-        <div class="stat-label">Tokens per 1000×1000 image on Claude (width × height ÷ 750)</div>
-      </article>
-      <article class="stat">
-        <div class="stat-val"><span class="num" data-to="10">0</span><span class="unit">×</span></div>
-        <div class="stat-label">Gemini 3 video sampling vs default (10 FPS for fast actions)</div>
-      </article>
-      <article class="stat">
-        <div class="stat-val"><span class="num" data-to="320">0</span><span class="unit">ms</span></div>
-        <div class="stat-label">Native voice round-trip on GPT-4o realtime (vs ~2800ms chained)</div>
-      </article>
-      <article class="stat">
-        <div class="stat-val"><span class="num" data-to="2">0</span><span class="unit">M</span></div>
-        <div class="stat-label">Gemini 3 context — fits a 2-hour video plus a screenplay</div>
-      </article>
+      <div class="brut-grid">
+        <div class="brut-cell v">
+          <span class="num">01</span>
+          <h4>VISION</h4>
+          <p>1,334 patch tokens<br>14&times;14 grid<br>$0.016 / image</p>
+        </div>
+        <div class="brut-cell t">
+          <span class="num">02</span>
+          <h4>Text.</h4>
+          <p>BPE tokens<br>$0.000015 each<br>the instruction layer</p>
+        </div>
+        <div class="brut-cell a">
+          <span class="num">03</span>
+          <h4>AUDIO_</h4>
+          <p>100 tokens / sec<br>25ms windows<br>320ms RTT</p>
+        </div>
+        <div class="brut-cell c">
+          <span class="num">04</span>
+          <h4>Video</h4>
+          <p>1&ndash;10 FPS<br>1M-token context<br>frame-accurate Q&amp;A</p>
+        </div>
+      </div>
+
+      <div class="brut-body">
+        <p>Concretely, consider an end-to-end request: <em>&ldquo;Here&rsquo;s a screenshot of my dashboard and a 30-second voice memo of my CEO complaining about it. Tell me, in your own voice, what the top fix is.&rdquo;</em> The model receives three inputs simultaneously:</p>
+
+        <p><strong>(1)</strong> the screenshot &rarr; 1,334 patch tokens through the vision encoder. <strong>(2)</strong> the audio clip &rarr; 3,000 frame tokens through the audio encoder. <strong>(3)</strong> the text instruction &rarr; ~30 BPE tokens. All three land in the same shared embedding space. <em>Every</em> token can attend to <em>every other</em> token through the same self-attention layer. The model can literally notice that the loudness peak at audio token 1,840 (where the CEO emphasises <em>&ldquo;the chart&rdquo;</em>) is temporally correlated with text token 14 (<em>&ldquo;complaining&rdquo;</em>) which the vision tokens around patch row 8 (a chart in the upper-middle of the dashboard) co-activate with. Cross-modal grounding falls out of the architecture for free.</p>
+
+        <p>It then generates an audio response by sampling output tokens that a vocoder reconstructs into a waveform &mdash; same forward pass, same context. The total latency for a request like this on GPT-4o realtime is under <code>1.2 seconds</code> end-to-end. On a chained system (Whisper &rarr; GPT-4 vision &rarr; ElevenLabs), it would be <code>4&ndash;6 seconds</code> and three API bills.</p>
+      </div>
+
+      <div class="brut-arch" style="margin-top:1.5rem;">
+        <div class="brut-arch-head">WORKED EXAMPLE &middot; ONE REQUEST, THREE INPUTS, TWO OUTPUTS</div>
+<pre style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;line-height:1.55;background:#000;color:#fff;padding:1.25rem;margin:1rem 0 0;white-space:pre;overflow-x:auto;border:2px solid #000;"><span style="color:#ffd400;">POST</span> /v1/chat/completions  <span style="color:#888;"># GPT-4o realtime, abbreviated</span>
+{
+  <span style="color:#00d4ff;">"model"</span>: <span style="color:#39ff14;">"gpt-4o-realtime"</span>,
+  <span style="color:#00d4ff;">"modalities"</span>: [<span style="color:#39ff14;">"text"</span>, <span style="color:#39ff14;">"audio"</span>],
+  <span style="color:#00d4ff;">"voice"</span>: <span style="color:#39ff14;">"alloy"</span>,
+  <span style="color:#00d4ff;">"messages"</span>: [{
+    <span style="color:#00d4ff;">"role"</span>: <span style="color:#39ff14;">"user"</span>,
+    <span style="color:#00d4ff;">"content"</span>: [
+      {<span style="color:#00d4ff;">"type"</span>:<span style="color:#39ff14;">"image_url"</span>,  <span style="color:#00d4ff;">"image_url"</span>:{<span style="color:#00d4ff;">"url"</span>:<span style="color:#39ff14;">"data:image/png;base64,..."</span>}},   <span style="color:#888;"># 1,334 tokens</span>
+      {<span style="color:#00d4ff;">"type"</span>:<span style="color:#39ff14;">"input_audio"</span>, <span style="color:#00d4ff;">"input_audio"</span>:{<span style="color:#00d4ff;">"data"</span>:<span style="color:#39ff14;">"&lt;base64-pcm16&gt;"</span>}}, <span style="color:#888;"># 3,012 tokens</span>
+      {<span style="color:#00d4ff;">"type"</span>:<span style="color:#39ff14;">"text"</span>,        <span style="color:#00d4ff;">"text"</span>:<span style="color:#39ff14;">"What is the CEO most upset about, and what's the cheapest fix? Answer in voice."</span>}
+    ]
+  }]
+}
+<span style="color:#888;"># Response stream begins ~310ms after final byte:</span>
+<span style="color:#39ff14;">data:</span> {"choices":[{"delta":{"audio":{"data":"&lt;pcm16-chunk&gt;","transcript":"The CEO is upset that..."}}}]}</pre>
+      </div>
+
+      <div class="brut-arch">
+        <div class="brut-arch-head">ARCH &middot; CROSS-MODAL ATTENTION (SCHEMATIC)</div>
+        <svg viewBox="0 0 800 320" aria-label="Four input streams converging into one transformer, emitting two output streams">
+          <!-- Input encoders -->
+          <g font-family="Archivo Black, sans-serif" font-size="11" fill="#000">
+            <rect x="20" y="20" width="120" height="42" fill="#1a1a2e" stroke="#000" stroke-width="2"/>
+            <text x="80" y="46" text-anchor="middle" fill="#00d4ff" font-family="Press Start 2P, monospace" font-size="8">VISION_ENC</text>
+
+            <rect x="20" y="90" width="120" height="42" fill="#f4ede0" stroke="#000" stroke-width="2"/>
+            <text x="80" y="116" text-anchor="middle" fill="#8b2c1e" font-family="Special Elite, monospace" font-size="11">BPE Tokeniser</text>
+
+            <rect x="20" y="160" width="120" height="42" fill="#0a0e0a" stroke="#000" stroke-width="2"/>
+            <text x="80" y="186" text-anchor="middle" fill="#39ff14" font-family="JetBrains Mono, monospace" font-size="9">MEL_SPEC</text>
+
+            <rect x="20" y="230" width="120" height="42" fill="#0c0c0d" stroke="#000" stroke-width="2"/>
+            <text x="80" y="256" text-anchor="middle" fill="#d4af37" font-family="Inter, sans-serif" font-style="italic" font-size="11">frame sampler</text>
+          </g>
+          <!-- Arrows to embedding -->
+          <g stroke="#000" stroke-width="2" fill="none">
+            <line x1="140" y1="41" x2="280" y2="145"/>
+            <line x1="140" y1="111" x2="280" y2="155"/>
+            <line x1="140" y1="181" x2="280" y2="165"/>
+            <line x1="140" y1="251" x2="280" y2="175"/>
+          </g>
+          <!-- Shared embedding -->
+          <rect x="280" y="120" width="170" height="80" fill="#000"/>
+          <text x="365" y="148" text-anchor="middle" fill="#fff" font-family="Archivo Black, sans-serif" font-size="12">SHARED EMBED</text>
+          <text x="365" y="170" text-anchor="middle" fill="#ffd400" font-family="JetBrains Mono, monospace" font-size="9">d=4096</text>
+          <text x="365" y="188" text-anchor="middle" fill="#999" font-family="JetBrains Mono, monospace" font-size="8">all tokens equal</text>
+          <!-- Transformer -->
+          <line x1="450" y1="160" x2="510" y2="160" stroke="#000" stroke-width="2"/>
+          <rect x="510" y="100" width="140" height="120" fill="#fff" stroke="#000" stroke-width="3"/>
+          <text x="580" y="130" text-anchor="middle" fill="#000" font-family="Archivo Black, sans-serif" font-size="11">TRANSFORMER</text>
+          <text x="580" y="150" text-anchor="middle" fill="#000" font-family="JetBrains Mono, monospace" font-size="8">cross-modal</text>
+          <text x="580" y="166" text-anchor="middle" fill="#000" font-family="JetBrains Mono, monospace" font-size="8">self-attention</text>
+          <text x="580" y="194" text-anchor="middle" fill="#ff3333" font-family="Archivo Black, sans-serif" font-size="22">&times; N</text>
+          <!-- Outputs -->
+          <line x1="650" y1="140" x2="720" y2="100" stroke="#000" stroke-width="2"/>
+          <line x1="650" y1="180" x2="720" y2="220" stroke="#000" stroke-width="2"/>
+          <rect x="720" y="80" width="70" height="42" fill="#fff" stroke="#000" stroke-width="2"/>
+          <text x="755" y="106" text-anchor="middle" fill="#000" font-family="Archivo Black, sans-serif" font-size="10">TEXT</text>
+          <rect x="720" y="200" width="70" height="42" fill="#000"/>
+          <text x="755" y="226" text-anchor="middle" fill="#39ff14" font-family="JetBrains Mono, monospace" font-size="10">AUDIO</text>
+        </svg>
+      </div>
+
+      <div class="brut-body">
+        <p>The architectural insight here is small and dull and important. <strong>Every modality is just a tokeniser away from being text.</strong> Once you have a way to convert pictures, sound, and video into vectors of the same dimensionality as text embeddings, the transformer doesn&rsquo;t need to be rebuilt. The same attention math works. The same scaling laws apply. The same KV-cache optimisations carry over. This is why progress on multimodal capability has been so fast: <em>nobody had to invent a new model class</em>. They just had to invent better tokenisers.</p>
+
+        <p>What changes for builders is the product surface. A &ldquo;multimodal&rdquo; app isn&rsquo;t one with four separate features (an OCR feature, a transcription feature, a video-summary feature, a chat feature). It&rsquo;s one with a single prompt box that accepts <em>any</em> of those inputs interchangeably and treats the user&rsquo;s instruction as the spine. The right interaction model is a chat input that lets the user drop a screenshot mid-sentence, attach a voice note, paste a video link, and continue typing &mdash; with the model reasoning across all of it as one substance.</p>
+
+        <p>Three failure modes are worth flagging before you ship. <strong>(1) Modality blindness.</strong> Models will sometimes &ldquo;forget&rdquo; one modality if the others dominate token-count &mdash; a 30-second voice memo (3,000 tokens) plus a one-line instruction can be drowned by a single 4K screenshot (5,000+ tokens). If accuracy on the audio matters, downsample the image. <strong>(2) Grounding hallucination.</strong> Cross-modal attention is powerful but not infallible: a model can confidently describe a chart label that isn&rsquo;t there because the text instruction primed it to expect one. Mitigation: ask for verbatim quotes and bounding-box-like locators when accuracy is load-bearing. <strong>(3) Eval debt.</strong> You cannot evaluate a multimodal pipeline with a text-only eval suite. Build a small (50-200 case) golden set <em>per modality combination</em> you care about, and re-run it on every model upgrade. The cost of skipping this is a silent regression that the user finds first.</p>
+      </div>
+
+      <div class="brut-arch" style="margin-top:1.5rem;">
+        <div class="brut-arch-head">BYTE BUDGET &middot; ONE-MINUTE CALL TO EACH MODALITY</div>
+        <table style="width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:0.82rem;">
+          <thead>
+            <tr style="background:#000;color:#fff;">
+              <th style="padding:0.65rem 0.85rem;text-align:left;font-family:'Archivo Black',sans-serif;font-size:0.7rem;letter-spacing:0.1em;">INPUT</th>
+              <th style="padding:0.65rem 0.85rem;text-align:left;font-family:'Archivo Black',sans-serif;font-size:0.7rem;letter-spacing:0.1em;">RAW SIZE</th>
+              <th style="padding:0.65rem 0.85rem;text-align:right;font-family:'Archivo Black',sans-serif;font-size:0.7rem;letter-spacing:0.1em;">TOKENS</th>
+              <th style="padding:0.65rem 0.85rem;text-align:right;font-family:'Archivo Black',sans-serif;font-size:0.7rem;letter-spacing:0.1em;">COST @ OPUS 4.7</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #ddd;"><td style="padding:0.6rem 0.85rem;">200-word prompt</td><td style="padding:0.6rem 0.85rem;">1.2 KB</td><td style="padding:0.6rem 0.85rem;text-align:right;">~260</td><td style="padding:0.6rem 0.85rem;text-align:right;">$0.0039</td></tr>
+            <tr style="border-bottom:1px solid #ddd;"><td style="padding:0.6rem 0.85rem;">1024&times;1024 screenshot</td><td style="padding:0.6rem 0.85rem;">~400 KB</td><td style="padding:0.6rem 0.85rem;text-align:right;">1,398</td><td style="padding:0.6rem 0.85rem;text-align:right;">$0.0210</td></tr>
+            <tr style="border-bottom:1px solid #ddd;"><td style="padding:0.6rem 0.85rem;">60-second voice memo</td><td style="padding:0.6rem 0.85rem;">~960 KB</td><td style="padding:0.6rem 0.85rem;text-align:right;">~6,000</td><td style="padding:0.6rem 0.85rem;text-align:right;">$0.0900</td></tr>
+            <tr><td style="padding:0.6rem 0.85rem;">60-second 1080p video @ 1 FPS</td><td style="padding:0.6rem 0.85rem;">~12 MB</td><td style="padding:0.6rem 0.85rem;text-align:right;">~78,000</td><td style="padding:0.6rem 0.85rem;text-align:right;">$1.17</td></tr>
+          </tbody>
+        </table>
+        <p style="font-family:'Inter',sans-serif;font-size:0.88rem;color:#444;margin:1rem 0 0;line-height:1.6;">Read this table sideways: a frame of video is &asymp; a screenshot &asymp; ~5 paragraphs of text in token cost. Audio at 100 tokens/sec lands between text and vision. Video is the expensive modality not because each frame is special, but because there are <em>so many of them per second</em>. This is why down-sampling to 1 FPS or extracting keyframes is the single biggest cost-control lever in multimodal pipelines &mdash; and why Gemini&rsquo;s 1M context window is less about being clever and more about being the only context window large enough to hold a real video at useful frame rates.</p>
+      </div>
+
+      <div class="brut-foot">013 / 018 &middot; CETI &middot; END</div>
     </div>
   </section>
 
-  <!-- FINAL CTA -->
-  <section class="final">
-    <h2>Build with all the senses.</h2>
-    <p>Multimodal isn't a feature toggle — it changes which problems are tractable. Train your team to think across modalities by default.</p>
-    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
-      Book a workshop
-      <span class="arrow">→</span>
-    </a>
-    <a class="secondary" href="../">← Back to the lookbook</a>
+  <!-- ============================================================
+       COMPARISON TABLE
+       ============================================================ -->
+  <section class="sec-compare">
+    <div class="compare-container">
+      <p class="compare-eyebrow">06 &middot; THE FRONTIER, 2026</p>
+      <h2 class="compare-h2">Four frontier multimodal models.</h2>
+      <p class="compare-sub">No single model wins every modality. Most production stacks now route per-modality: Gemini for video, GPT-4o for real-time audio, Claude for OCR and structured vision, Llama for self-hosted vision. The cost column is input pricing for 1K tokens at standard tier as of May 2026 &mdash; output tokens cost 4-5&times; more across all four. Switching cost between providers is low for stateless calls and high for conversational sessions, which is the lever that keeps vendors honest on price.</p>
+
+      <div class="compare-wrap">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Vision</th>
+              <th>Audio I/O</th>
+              <th>Video</th>
+              <th>Context</th>
+              <th>$ / 1K in</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="model-name">Claude Opus 4.7</span>
+                <span class="model-sub">Anthropic</span>
+              </td>
+              <td class="yes">Hi-res 2576px</td>
+              <td class="partial">In only (beta)</td>
+              <td class="partial">Keyframes</td>
+              <td>200K &middot; 1M beta</td>
+              <td class="price">$0.015</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="model-name">GPT-4o / GPT-5</span>
+                <span class="model-sub">OpenAI</span>
+              </td>
+              <td class="yes">2048px structured</td>
+              <td class="yes">In + out realtime</td>
+              <td class="partial">Frames + audio</td>
+              <td>128K &middot; 256K turbo</td>
+              <td class="price">$0.005</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="model-name">Gemini 3 Pro</span>
+                <span class="model-sub">Google DeepMind</span>
+              </td>
+              <td class="yes">3072px + spatial</td>
+              <td class="yes">In + out live API</td>
+              <td class="yes">Native 10 FPS</td>
+              <td>1M &middot; 2M preview</td>
+              <td class="price">$0.00125</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="model-name">Llama 3.2 Vision 90B</span>
+                <span class="model-sub">Meta &middot; open weights</span>
+              </td>
+              <td class="yes">Fine-tunable</td>
+              <td class="no">Separate model</td>
+              <td class="no">Frame loop</td>
+              <td>128K &middot; self-host</td>
+              <td class="price">self-host</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 
-  <footer class="foot">
-    <span>CETI.AI · Lookbook · Multimodal AI</span>
-    <span><a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a> · <a href="https://wa.me/16502832299">WhatsApp</a></span>
+  <!-- ============================================================
+       DECISION MATRIX
+       ============================================================ -->
+  <section class="sec-decide">
+    <div class="decide-container">
+      <p class="decide-eyebrow">07 &middot; WHEN TO USE WHAT</p>
+      <h2 class="decide-h2">Pick by problem shape, not vendor loyalty.</h2>
+      <p style="font-family:'Inter',sans-serif;font-size:0.95rem;color:#bbb;max-width:720px;margin:0 0 2.5rem;line-height:1.6;">A useful heuristic: if the answer fits in one sentence and the input is a single screenshot, almost any frontier model works and you should pick on price. If the input is a 30-minute recording or a feature-length video, only Gemini&rsquo;s context window currently keeps the prompt one-shot. If the user-perceived latency budget is sub-second and the channel is voice, GPT-4o realtime is the only production-ready option as of this writing. If the data must never leave your network, Llama 3.2 Vision is the only frontier-grade open option &mdash; and the only one where you own the model weights long after the vendor moves on.</p>
+
+      <div class="decide-grid">
+        <div class="decide-card v">
+          <h4>OCR &middot; charts &middot; screenshots</h4>
+          <p class="use">Receipts, dashboards, PDF tables, UI inspection.</p>
+          <p class="pick">&gt; Claude Opus 4.7</p>
+        </div>
+        <div class="decide-card t">
+          <h4>Real-time voice agent</h4>
+          <p class="use">Conversational latency &lt; 500ms. Prosody-aware. Phone or browser.</p>
+          <p class="pick">&gt; GPT-4o Realtime</p>
+        </div>
+        <div class="decide-card c">
+          <h4>Long-form video Q&amp;A</h4>
+          <p class="use">Meetings, films, tutorials. 1M+ token context. Frame-accurate.</p>
+          <p class="pick">&gt; Gemini 3 Pro</p>
+        </div>
+        <div class="decide-card a">
+          <h4>On-prem vision</h4>
+          <p class="use">Confidential images, custom fine-tunes, GPU available.</p>
+          <p class="pick">&gt; Llama 3.2 Vision 90B</p>
+        </div>
+        <div class="decide-card v">
+          <h4>Mixed image + text reasoning</h4>
+          <p class="use">&ldquo;Compare these three layouts.&rdquo; Default to text-led prompting.</p>
+          <p class="pick">&gt; Any frontier model</p>
+        </div>
+        <div class="decide-card c">
+          <h4>Live video understanding</h4>
+          <p class="use">Sports, security, driving. Real-time frame streams.</p>
+          <p class="pick">&gt; Gemini Live API</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="pageFoot">
+    <div class="pageFoot-inner">
+      <h5>SOURCES &middot; CITATIONS</h5>
+      <ul>
+        <li>Anthropic. <em>Claude Vision: Image Input</em>. docs.anthropic.com/en/docs/build-with-claude/vision, 2026.</li>
+        <li>OpenAI. <em>Realtime API Reference</em>. platform.openai.com/docs/guides/realtime, 2026.</li>
+        <li>Google DeepMind. <em>Gemini 3 Pro &mdash; Multimodal &amp; Long Context</em>. ai.google.dev/gemini-api/docs, 2026.</li>
+        <li>Meta AI. <em>Llama 3.2 Vision Model Card</em>. ai.meta.com/llama, 2025.</li>
+        <li>Dosovitskiy et al. <em>An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale</em>. ICLR 2021.</li>
+        <li>Radford et al. <em>Robust Speech Recognition via Large-Scale Weak Supervision (Whisper)</em>. OpenAI, 2022.</li>
+        <li>Sennrich, Haddow &amp; Birch. <em>Neural Machine Translation of Rare Words with Subword Units (BPE)</em>. ACL 2016.</li>
+      </ul>
+
+      <h5>BROWSE</h5>
+      <ul>
+        <li><a href="../">&larr; Back to the lookbook index</a></li>
+        <li><a href="https://cetiai.co">cetiai.co</a> &middot; <a href="https://calendly.com/manutej/30min">Book a workshop</a></li>
+        <li><a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a> &middot; <a href="https://wa.me/16502832299">WhatsApp</a></li>
+      </ul>
+
+      <div class="pageFoot-meta">
+        <span>CETI.AI &middot; Lookbook &middot; 13 / 18 &middot; Multimodal AI</span>
+        <span>Updated 2026-05-15 &middot; polyglot edition</span>
+      </div>
+    </div>
   </footer>
 
   <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-    // ============ INTERSECTION-DRIVEN REVEALS ============
-    const reveal = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
-    document.querySelectorAll('.stat, .tile').forEach((el) => reveal.observe(el));
-
-    // ============ NUMBER TICKER ============
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const dur = 1100;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
-
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 25;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-
-    // ============ MAGIC TILES (cursor-follow glow) ============
-    document.querySelectorAll('.tile').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
-
-    // ============ FUSION VISUAL — vision shape morph ============
-    (function() {
-      const stage = document.getElementById('shape-stage');
-      if (!stage) return;
-      const svgs = stage.querySelectorAll('svg');
-      let i = 0;
-      // Pause if reduced motion
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      setInterval(() => {
-        svgs[i].classList.remove('on');
-        i = (i + 1) % svgs.length;
-        svgs[i].classList.add('on');
-      }, 2200);
-    })();
-
-    // ============ FUSION VISUAL — text typing loop ============
-    (function() {
-      const el = document.getElementById('typed');
-      if (!el) return;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const phrases = [
-        'describe what you see and hear',
-        'summarise this meeting',
-        'what changed in the screenshot?',
-        'transcribe and extract action items'
+    // Pixel-grid demo — 14x14 = 196 cells, light up ~38 in a focal pattern
+    (function () {
+      var grid = document.getElementById('pixGrid');
+      if (!grid) return;
+      var lit = [
+        // central object cluster
+        45,46,47,48, 59,60,61,62, 73,74,75,76, 87,88,89,90,
+        // accent dots (corners + edges)
+        16,29, 168,181,
+        // diagonal sample
+        14,28,42,56,70, 27,41,55,69,83,
+        // a "totals" band
+        130,131,132,133,134,135,136,137,138,139,
       ];
-      let pi = 0, ci = 0, deleting = false;
-
-      function tick() {
-        const full = phrases[pi];
-        if (!deleting) {
-          ci++;
-          el.textContent = full.slice(0, ci);
-          if (ci === full.length) {
-            deleting = true;
-            return setTimeout(tick, 1600);
-          }
-          return setTimeout(tick, 55 + Math.random() * 30);
-        } else {
-          ci--;
-          el.textContent = full.slice(0, ci);
-          if (ci === 0) {
-            deleting = false;
-            pi = (pi + 1) % phrases.length;
-            return setTimeout(tick, 400);
-          }
-          return setTimeout(tick, 28);
-        }
+      var hi = [60,74,75,88,89]; // brightest centroid
+      for (var i = 0; i < 196; i++) {
+        var d = document.createElement('div');
+        if (hi.indexOf(i) > -1) d.className = 'h';
+        else if (lit.indexOf(i) > -1) d.className = 'on';
+        else if (i % 31 === 0) d.className = 'c';
+        else if (i % 47 === 0) d.className = 'g';
+        grid.appendChild(d);
       }
-      setTimeout(tick, 1200);
     })();
   </script>
+
+  <!-- Floating bottom nav (prev / counter / next) -->
   <script src="../shared/nav.js" defer></script>
 </body>
 </html>

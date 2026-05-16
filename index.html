@@ -2,1180 +2,686 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CETI Lookbook — Eighteen Concepts. One Aesthetic.</title>
-  <meta name="description" content="A lookbook of eighteen WOW-level animated explainers — LangGraph, LangChain, MCP, Transformers, Agentic Patterns, Claude Code, Claude Cowork, Agentic PKM, RAG, Vector DBs, Prompting, Evals, Multimodal, Safety, Voice, Coding Agents, Computer Use, AI Economics — built with the CETI shadcn-motion skill.">
-  <meta property="og:title" content="CETI Lookbook — Eighteen Concepts. One Aesthetic.">
-  <meta property="og:description" content="WOW-level animated explainers for the 18 AI / agent concepts that matter in 2026.">
-  <meta name="theme-color" content="#FAF7F2">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>CETI Lookbook — Eighteen sites in a trenchcoat.</title>
+  <meta name="description" content="Eighteen single-file HTML explainers on the 2026 AI / agent landscape — each one a different design language. Brutalist, Bauhaus, magazine editorial, Bloomberg terminal, Win95, CRT phosphor, constitutional brief, academic paper. The skill is the engine; every page wears a different face.">
+  <meta property="og:title" content="CETI Lookbook — Eighteen sites in a trenchcoat.">
+  <meta property="og:description" content="A real lookbook: eighteen AI/agent explainers, eighteen distinct design languages, one engine.">
+  <meta name="theme-color" content="#0A0A0A">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Cinzel:wght@600&family=Cormorant+Garamond:ital,wght@1,400;1,600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;700&family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;700&family=IBM+Plex+Serif:wght@400;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Lora:wght@400;600&family=Playfair+Display:ital,wght@1,400;1,700&family=Pixelify+Sans:wght@400;600&family=Press+Start+2P&family=Tinos:ital,wght@0,400;0,700;1,400&family=VT323&display=swap">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
-      --color-accent: #D94F30;
-      --color-accent-hover: #C4432A;
-      --color-accent-muted: #E8836C;
-      --color-accent-light: #FDEEE9;
-      --color-info: #2A7B9B;
-      --color-actor-1: #D94F30;
-      --color-actor-2: #2A7B9B;
-      --color-actor-3: #7B6DAA;
-      --color-actor-4: #D4A843;
-      --color-actor-5: #2D8B55;
-
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body: 'DM Sans', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.12);
+      --bg: #0A0A0A;
+      --bg-2: #141414;
+      --fg: #F4EFE8;
+      --fg-2: #A8A199;
+      --fg-3: #6C665E;
+      --rule: rgba(255,255,255,0.08);
+      --rule-2: rgba(255,255,255,0.04);
     }
-
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image:
-        radial-gradient(ellipse at 15% 20%, rgba(217, 79, 48, 0.04) 0%, transparent 50%),
-        radial-gradient(ellipse at 85% 80%, rgba(42, 123, 155, 0.03) 0%, transparent 50%);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
+    body { margin: 0; font-family: 'Inter', -apple-system, system-ui, sans-serif; color: var(--fg); background: var(--bg); line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+    /* TOP STRIP */
+    .top { position: sticky; top: 0; z-index: 80; display: flex; justify-content: space-between; align-items: center; padding: 0.875rem 1.5rem; background: rgba(10,10,10,0.85); backdrop-filter: saturate(180%) blur(12px); -webkit-backdrop-filter: saturate(180%) blur(12px); border-bottom: 1px solid var(--rule-2); font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-2); }
+    .top .brand { color: var(--fg); font-weight: 600; }
+    .top .brand b { color: #FF6644; }
+    .top .meta { display: flex; gap: 1.25rem; }
+    .top .meta b { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    /* HERO — kinetic typography */
+    .hero { min-height: calc(100dvh - 50px); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 6rem 1.5rem 8rem; text-align: center; position: relative; overflow: hidden; }
+    .drift { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: 0.06; }
+    .drift span { position: absolute; white-space: nowrap; font-size: clamp(2rem, 4vw, 4rem); animation: drift 60s linear infinite; }
+    .drift span:nth-child(1) { top: 10%; left: -10%; animation-delay: 0s;    font-family: 'IBM Plex Mono', monospace;   color: #39FF14; }
+    .drift span:nth-child(2) { top: 22%; left: -10%; animation-delay: -8s;   font-family: 'EB Garamond', serif;         font-style: italic; color: #FFFFFF; }
+    .drift span:nth-child(3) { top: 35%; left: -10%; animation-delay: -16s;  font-family: 'VT323', monospace;            color: #33FF33; }
+    .drift span:nth-child(4) { top: 48%; left: -10%; animation-delay: -24s;  font-family: 'Bebas Neue', sans-serif;     color: #FF8C2C; }
+    .drift span:nth-child(5) { top: 61%; left: -10%; animation-delay: -32s;  font-family: 'Playfair Display', serif;    font-style: italic; color: #C5775F; }
+    .drift span:nth-child(6) { top: 74%; left: -10%; animation-delay: -40s;  font-family: 'Tinos', serif;                color: #C8743C; }
+    .drift span:nth-child(7) { top: 87%; left: -10%; animation-delay: -48s;  font-family: 'Cinzel', serif;               color: #7A0E0E; letter-spacing: 0.3em; }
+    @keyframes drift { from { transform: translateX(0); } to { transform: translateX(120vw); } }
+
+    .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg-2); margin-bottom: 2.5rem; display: flex; align-items: center; gap: 1rem; }
+    .eyebrow::before, .eyebrow::after { content: ""; display: inline-block; width: 2rem; height: 1px; background: var(--fg-3); }
+    .eyebrow b { color: #FF6644; font-weight: 600; }
+
+    .hero-line { font-size: clamp(2.5rem, 8vw, 6.5rem); line-height: 0.92; letter-spacing: -0.04em; margin: 0; font-weight: 700; max-width: 16ch; }
+    .hero-line.l1 { font-family: 'Bricolage Grotesque', serif; font-weight: 800; }
+    .hero-line.l3 { font-family: 'Bricolage Grotesque', serif; font-weight: 800; }
+
+    /* Kinetic morphing word */
+    .kinetic { display: inline-block; position: relative; min-width: 9ch; min-height: 1em; text-align: center; vertical-align: baseline; }
+    .kinetic span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; animation: kineticCycle 27s linear infinite; }
+    .kinetic span:nth-child( 1) { animation-delay:  0s;     font-family: 'IBM Plex Mono', monospace;        color: #39FF14;                                                          letter-spacing: -0.02em; }
+    .kinetic span:nth-child( 2) { animation-delay:  1.5s;   font-family: 'Inter', sans-serif;               color: #0070F3;  font-weight: 600;                                       letter-spacing: -0.04em; }
+    .kinetic span:nth-child( 3) { animation-delay:  3s;     font-family: 'Tinos', serif;                    color: #C8743C;  font-style: italic;                                     letter-spacing: -0.02em; }
+    .kinetic span:nth-child( 4) { animation-delay:  4.5s;   font-family: 'EB Garamond', serif;              color: #1F77B4;                                                          letter-spacing: -0.01em; }
+    .kinetic span:nth-child( 5) { animation-delay:  6s;     font-family: 'Inter', sans-serif;               color: #DD2226;  font-weight: 900;                                       letter-spacing: -0.03em; }
+    .kinetic span:nth-child( 6) { animation-delay:  7.5s;   font-family: 'VT323', monospace;                color: #33FF33;                                                          letter-spacing: 0.04em; }
+    .kinetic span:nth-child( 7) { animation-delay:  9s;     font-family: 'Playfair Display', serif;         color: #C5775F;  font-style: italic;                                     letter-spacing: -0.01em; }
+    .kinetic span:nth-child( 8) { animation-delay: 10.5s;   font-family: 'Lora', serif;                     color: #1A6470;                                                          letter-spacing: -0.01em; }
+    .kinetic span:nth-child( 9) { animation-delay: 12s;     font-family: 'JetBrains Mono', monospace;       color: #C678DD;                                                          letter-spacing: -0.02em; }
+    .kinetic span:nth-child(10) { animation-delay: 13.5s;   font-family: 'IBM Plex Serif', serif;           color: #005A8B;                                                          letter-spacing: 0; }
+    .kinetic span:nth-child(11) { animation-delay: 15s;     font-family: 'Crimson Pro', serif;              color: #8B1A1A;  font-weight: 600;                                       letter-spacing: -0.01em; }
+    .kinetic span:nth-child(12) { animation-delay: 16.5s;   font-family: 'Inter', sans-serif;               color: #10B981;  font-weight: 500;                                       letter-spacing: -0.04em; }
+    .kinetic span:nth-child(13) { animation-delay: 18s;     font-family: 'Press Start 2P', monospace;       color: #FFFFFF;  font-size: 0.55em;                                      letter-spacing: 0.02em; }
+    .kinetic span:nth-child(14) { animation-delay: 19.5s;   font-family: 'Cinzel', serif;                   color: #7A0E0E;  font-weight: 600;                                       letter-spacing: 0.12em; }
+    .kinetic span:nth-child(15) { animation-delay: 21s;     font-family: 'Cormorant Garamond', serif;       color: #D4AF37;  font-style: italic;                                     letter-spacing: 0; }
+    .kinetic span:nth-child(16) { animation-delay: 22.5s;   font-family: 'Bebas Neue', sans-serif;          color: #FF8C2C;                                                          letter-spacing: 0.04em; }
+    .kinetic span:nth-child(17) { animation-delay: 24s;     font-family: 'VT323', monospace;                color: #000080;  background: #C0C0C0;                                    letter-spacing: 0; padding: 0 0.15em; }
+    .kinetic span:nth-child(18) { animation-delay: 25.5s;   font-family: 'IBM Plex Mono', monospace;        color: #FF9500;                                                          letter-spacing: 0.04em; }
+    @keyframes kineticCycle {
+      0%, 4.5%       { opacity: 0; transform: translateY(8px); }
+      5.5%, 5.55%    { opacity: 1; transform: translateY(0); }
+      5.56%, 100%    { opacity: 0; transform: translateY(-8px); }
     }
 
-    /* ============ NAV ============ */
-    .nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 56px;
-      background: rgba(250, 247, 242, 0.85);
-      backdrop-filter: saturate(180%) blur(8px);
-      -webkit-backdrop-filter: saturate(180%) blur(8px);
-      border-bottom: 1px solid var(--color-border-light);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      padding: 0 1.5rem;
-    }
-    .nav-inner {
-      max-width: 1280px;
-      margin: 0 auto;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .nav-brand {
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 1rem;
-      letter-spacing: -0.01em;
-    }
-    .nav-brand .dot { color: var(--color-accent); }
-    .nav-tag {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-    }
+    .hero-sub { max-width: 56ch; margin: 3.5rem auto 0; color: var(--fg-2); font-size: 1.05rem; line-height: 1.6; }
+    .hero-sub b { color: var(--fg); font-weight: 500; }
 
-    /* ============ HERO ============ */
-    .hero {
-      min-height: 92dvh;
-      padding: 9rem 1.5rem 4rem;
-      max-width: 1280px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      opacity: 0;
-      transition: opacity 600ms var(--ease-out);
-    }
-    .eyebrow::before {
-      content: "";
-      display: inline-block;
-      width: 2rem;
-      height: 1px;
-      background: var(--color-accent);
-    }
-    .hero.visible .eyebrow { opacity: 1; }
+    .hero-cta { display: inline-flex; align-items: center; gap: 0.75rem; margin-top: 2.5rem; padding: 0.95rem 1.5rem; background: var(--fg); color: var(--bg); font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; border-radius: 999px; border: none; cursor: pointer; transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms; }
+    .hero-cta:hover { background: #FFFFFF; transform: translateY(-1px); }
+    .hero-cta .arr { transition: transform 220ms; }
+    .hero-cta:hover .arr { transform: translate(2px, 2px); }
 
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.75rem, 7vw, 5.5rem);
-      line-height: 1.02;
-      letter-spacing: -0.035em;
-      margin: 1.5rem 0 1.75rem;
-      max-width: 16ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity 700ms var(--ease-spring),
-        transform 700ms var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
-    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 440ms; }
-    .hero.visible .hero-title .word:nth-child(6) { transition-delay: 520ms; }
-    .hero-title em { font-style: normal; color: var(--color-accent); }
+    /* Ticker strip */
+    .ticker { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 0.875rem 0; overflow: hidden; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--fg-3); white-space: nowrap; }
+    .ticker .scroll { display: inline-block; animation: tickerScroll 80s linear infinite; padding-left: 100%; }
+    .ticker .scroll span { margin: 0 2.5rem; }
+    .ticker .scroll b { color: var(--fg); }
+    @keyframes tickerScroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 
-    .hero-sub {
-      font-size: 1.25rem;
-      color: var(--color-text-secondary);
-      max-width: 60ch;
-      line-height: 1.55;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
-      transition-delay: 700ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+    /* Wall */
+    .wall { padding: 4rem 1.5rem 8rem; max-width: 1500px; margin: 0 auto; }
+    .wall-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 1.5rem; border-bottom: 1px solid var(--rule); margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem; }
+    .wall-title { font-family: 'Bricolage Grotesque', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.03em; margin: 0; }
+    .wall-sub { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--fg-3); }
+    .wall-sub b { color: var(--fg-2); }
 
-    .cta-row {
-      display: flex;
-      gap: 1rem;
-      margin-top: 2.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-      opacity: 0;
-      transition: opacity 700ms var(--ease-out);
-      transition-delay: 900ms;
-    }
-    .hero.visible .cta-row { opacity: 1; }
+    /* Bento grid */
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); grid-auto-rows: 220px; gap: 14px; }
+    .card { position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 1.25rem; border-radius: 14px; overflow: hidden; cursor: pointer; text-decoration: none; isolation: isolate; transform: translateZ(0); transition: transform 360ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 360ms; opacity: 0; transform: translateY(20px); }
+    .card.visible { opacity: 1; transform: translateY(0); transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 360ms; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
 
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 1rem 1.75rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 1rem;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease;
-      will-change: transform;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(3px); }
+    .card .num { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; opacity: 0.6; }
+    .card .title { font-size: 1.35rem; line-height: 1.15; letter-spacing: -0.01em; margin: 0; }
+    .card .blurb { font-size: 0.82rem; line-height: 1.45; opacity: 0.85; margin: 0.4rem 0 0; }
+    .card .tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; align-self: flex-start; }
+    .card .meta { display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.55; padding-top: 0.5rem; border-top: 1px solid currentColor; }
+    .card .meta b { font-weight: 500; opacity: 1; }
+    .card .arrow { position: absolute; top: 1.25rem; right: 1.25rem; font-size: 1rem; opacity: 0.55; transition: transform 220ms, opacity 220ms; }
+    .card:hover .arrow { transform: translate(2px, -2px); opacity: 1; }
 
-    .secondary {
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: color 200ms;
-    }
-    .secondary:hover { color: var(--color-accent); }
+    /* PER-CARD AESTHETICS (each preserves its target page's design language) */
 
-    /* ============ STATS ============ */
-    .stats {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 4rem 1.5rem;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2rem;
-    }
-    .stat {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
-    }
-    .stat.visible { opacity: 1; transform: translateY(0); }
-    .stat:nth-child(2).visible { transition-delay: 80ms; }
-    .stat:nth-child(3).visible { transition-delay: 160ms; }
-    .stat:nth-child(4).visible { transition-delay: 240ms; }
-    .stat-value {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-    .stat-value .plus { color: var(--color-accent); }
-    .stat-label {
-      margin-top: 0.5rem;
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-    }
+    .c-langgraph { background: #000; color: #39FF14; font-family: 'IBM Plex Mono', monospace; border: 1px solid #39FF14; }
+    .c-langgraph .title { color: #FFF; font-weight: 500; }
+    .c-langgraph .blurb { color: #A0A0A0; }
+    .c-langgraph .tag { color: #00FFFF; }
+    .c-langgraph .meta { border-top-color: rgba(57, 255, 20, 0.25); color: #39FF14; }
+    .c-langgraph .ascii { font-size: 0.65rem; opacity: 0.5; letter-spacing: 0; margin-top: 0.5rem; white-space: pre; line-height: 1; font-family: 'IBM Plex Mono', monospace; }
 
-    /* ============ LOOKBOOK GRID ============ */
-    .lookbook {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem 6rem;
-    }
-    .section-heading {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      margin: 0 0 0.75rem;
-    }
-    .section-sub {
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      margin: 0 0 3rem;
-      line-height: 1.55;
-    }
+    .c-langchain { background: #FFFFFF; color: #0A0A0A; }
+    .c-langchain .title { font-family: 'Inter', sans-serif; font-weight: 600; color: #0A0A0A; }
+    .c-langchain .blurb { color: #666666; font-family: 'Inter', sans-serif; }
+    .c-langchain .tag { color: #0070F3; }
+    .c-langchain .meta { border-top-color: #EAEAEA; color: #999; }
+    .c-langchain .stage { display: flex; align-items: center; gap: 6px; margin-top: 0.5rem; }
+    .c-langchain .stage i { display: inline-block; width: 10px; height: 10px; border: 1px solid #0070F3; border-radius: 3px; }
+    .c-langchain .stage em { font-style: normal; color: #999; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; }
+    .c-langchain .arrow { color: #0070F3; }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      grid-auto-rows: minmax(280px, auto);
-      gap: 1rem;
-    }
-    .card {
-      grid-column: span 6;
-      grid-row: span 1;
-      position: relative;
-      padding: 1.75rem;
-      background:
-        radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
-          rgba(217, 79, 48, 0.06), transparent 40%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 1.25rem;
-      cursor: pointer;
-      text-decoration: none;
-      color: var(--color-text);
-      overflow: hidden;
-      opacity: 0;
-      transform: translateY(24px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring),
-        border-color 300ms ease,
-        box-shadow 300ms ease;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .card.visible { opacity: 1; transform: translateY(0); }
-    .card:hover { border-color: var(--color-accent-muted); box-shadow: var(--shadow-lg); }
-    .card:hover .card-arrow { transform: translateX(4px); color: var(--color-accent); }
+    .c-mcp { background: #F7F2E9; color: #1A1A1A; font-family: 'Tinos', serif; }
+    .c-mcp .title { font-family: 'Tinos', serif; font-weight: 700; line-height: 1.05; font-size: 1.65rem; }
+    .c-mcp .title em { color: #C8743C; font-style: italic; }
+    .c-mcp .blurb { font-family: 'Tinos', serif; font-style: italic; color: #555555; }
+    .c-mcp .tag { font-family: 'Tinos', serif; color: #C8743C; font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 0.78rem; }
+    .c-mcp .meta { border-top-color: #C8743C; color: #999; }
 
-    /* card-grid layout */
-    .card-1 { grid-column: span 8; grid-row: span 2; }
-    .card-2 { grid-column: span 4; }
-    .card-3 { grid-column: span 4; }
-    .card-4 { grid-column: span 6; }
-    .card-5 { grid-column: span 6; }
-    .card-6 { grid-column: span 4; }
-    .card-7 { grid-column: span 4; }
-    .card-8 { grid-column: span 4; }
+    .c-transformers { background: #FFFFFF; color: #000; font-family: 'EB Garamond', serif; }
+    .c-transformers .tag { font-family: 'Inter', sans-serif; color: #1F77B4; font-weight: 600; }
+    .c-transformers .title { font-family: 'EB Garamond', serif; font-weight: 700; font-style: italic; }
+    .c-transformers .blurb { color: #444444; font-family: 'EB Garamond', serif; }
+    .c-transformers .meta { border-top-color: #1F77B4; color: #888; }
+    .c-transformers .eq { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #D62728; background: rgba(214, 39, 40, 0.06); padding: 0.25rem 0.5rem; align-self: flex-start; margin-top: 0.4rem; border-radius: 4px; }
 
-    .card-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-accent);
-      align-self: flex-start;
-      background: var(--color-accent-light);
-      padding: 0.3rem 0.7rem;
-      border-radius: 999px;
-    }
-    .card-tag .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--color-accent);
-    }
-    .card-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.65rem;
-      letter-spacing: -0.015em;
-      line-height: 1.15;
-      margin: 0;
-    }
-    .card-1 .card-title { font-size: 2.5rem; }
-    .card-body {
-      font-size: 0.95rem;
-      color: var(--color-text-secondary);
-      margin: 0;
-      flex: 1;
-    }
-    .card-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-muted);
-      padding-top: 0.5rem;
-      border-top: 1px solid var(--color-border-light);
-    }
-    .card-arrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      color: var(--color-text);
-      transition: transform 300ms var(--ease-out), color 200ms;
-      font-family: var(--font-body);
-      font-weight: 500;
-      text-transform: none;
-      letter-spacing: 0;
-      font-size: 0.85rem;
-    }
+    .c-agentic { background: #FFFFFF; color: #000; font-family: 'Inter', sans-serif; padding: 0; overflow: visible; }
+    .c-agentic .inner { padding: 1.25rem; height: 100%; display: flex; flex-direction: column; justify-content: space-between; position: relative; z-index: 1; }
+    .c-agentic .shape { position: absolute; right: -18px; top: -18px; width: 110px; height: 110px; border-radius: 50%; background: #DD2226; z-index: 0; }
+    .c-agentic .shape-2 { position: absolute; left: -10px; bottom: -10px; width: 60px; height: 60px; background: #F7D000; z-index: 0; }
+    .c-agentic .title { font-family: 'Inter', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em; line-height: 0.95; font-size: 1.5rem; }
+    .c-agentic .tag { color: #0066CC; font-family: 'Inter', sans-serif; font-weight: 700; }
+    .c-agentic .blurb { color: #333; font-family: 'Inter', sans-serif; font-weight: 500; }
+    .c-agentic .meta { border-top-color: #000; color: #000; font-weight: 600; }
+    .c-agentic .arrow { color: #000; z-index: 2; }
 
-    /* ============ CARD MOTIFS — tiny inline previews of each page's signature visual ============ */
-    .motif {
-      width: 100%;
-      aspect-ratio: 16 / 7;
-      border-radius: 0.75rem;
-      background: var(--color-bg-warm);
-      overflow: hidden;
-      position: relative;
-    }
-    .card-1 .motif { aspect-ratio: 16/8; }
-
-    /* MOTIF 1 — LANGGRAPH (cyclic loop) */
-    .motif-graph {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .motif-graph svg { width: 90%; max-width: 360px; }
-    .motif-graph .node circle {
-      fill: var(--color-surface);
-      stroke: var(--color-accent);
-      stroke-width: 2;
-    }
-    .motif-graph .node text {
-      fill: var(--color-accent);
-      font-family: var(--font-mono);
-      font-size: 8px;
-      text-anchor: middle;
-      dominant-baseline: middle;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    .motif-graph .edge {
-      fill: none;
-      stroke: var(--color-border);
-      stroke-width: 1.5;
-      stroke-dasharray: 3 4;
-    }
-    .motif-graph .pulse {
-      fill: var(--color-accent);
-      r: 4;
-      filter: drop-shadow(0 0 6px var(--color-accent));
-      offset-distance: 0%;
-      animation: pulse-cycle 5s linear infinite;
-    }
-    @keyframes pulse-cycle { to { offset-distance: 100%; } }
-
-    /* MOTIF 2 — LANGCHAIN (horizontal pipeline) */
-    .motif-pipe {
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      padding: 0 1rem;
-      position: relative;
-    }
-    .motif-pipe::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 1.5rem;
-      right: 1.5rem;
-      height: 2px;
-      background: var(--color-border);
-      transform: translateY(-50%);
-    }
-    .motif-pipe .stage {
-      position: relative;
-      z-index: 1;
-      width: 18%;
-      aspect-ratio: 1;
-      background: var(--color-surface);
-      border: 2px solid var(--color-accent);
-      border-radius: 0.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-mono);
-      font-size: 0.55rem;
-      font-weight: 500;
-      color: var(--color-accent);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    .motif-pipe .packet {
-      position: absolute;
-      top: 50%;
-      width: 14px;
-      height: 14px;
-      background: var(--color-accent);
-      border-radius: 4px;
-      transform: translateY(-50%);
-      box-shadow: 0 0 12px rgba(217, 79, 48, 0.5);
-      animation: pipe-flow 4s linear infinite;
-    }
-    @keyframes pipe-flow {
-      0% { left: 0; opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { left: calc(100% - 14px); opacity: 0; }
-    }
-
-    /* MOTIF 3 — MCP (radial hub-spoke) */
-    .motif-hub {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .motif-hub .hub {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      box-shadow: 0 0 20px rgba(217, 79, 48, 0.5);
-      position: relative;
-      z-index: 2;
-    }
-    .motif-hub .spoke {
-      position: absolute;
-      width: 70%;
-      height: 1px;
-      background: linear-gradient(to right, var(--color-accent), transparent);
-      left: 50%;
-      top: 50%;
-      transform-origin: 0 0;
-    }
-    .motif-hub .satellite {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--color-surface);
-      border: 2px solid var(--color-info);
-      left: 50%;
-      top: 50%;
-    }
-
-    /* MOTIF 4 — TRANSFORMERS (attention matrix) */
-    .motif-matrix {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      grid-template-rows: repeat(8, 1fr);
-      gap: 2px;
-      padding: 1.25rem;
-    }
-    .motif-matrix .cell {
-      background: var(--color-border-light);
-      border-radius: 1px;
-      animation: matrix-pulse 6s ease-in-out infinite;
-    }
-
-    /* MOTIF 5 — AGENTIC PATTERNS (four mini diagrams) */
-    .motif-patterns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      gap: 0.5rem;
-      padding: 0.75rem;
-    }
-    .pattern-cell {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 0.4rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-    .pattern-cell::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      box-shadow: 0 0 8px var(--color-accent);
-    }
-    .pattern-cell:nth-child(1)::after { content: "→ → →"; position: absolute; font-size: 7px; color: var(--color-accent); font-family: var(--font-mono); top: 6px; right: 6px; }
-    .pattern-cell:nth-child(2)::after { content: "⇉"; position: absolute; font-size: 9px; color: var(--color-accent); font-family: var(--font-mono); top: 6px; right: 6px; }
-    .pattern-cell:nth-child(3)::after { content: "⇊⇊"; position: absolute; font-size: 9px; color: var(--color-accent); font-family: var(--font-mono); top: 6px; right: 6px; }
-    .pattern-cell:nth-child(4)::after { content: "⊕"; position: absolute; font-size: 9px; color: var(--color-accent); font-family: var(--font-mono); top: 6px; right: 6px; }
-
-    /* MOTIF 6 — CLAUDE CODE (terminal) */
-    .motif-terminal {
-      background: #1E1E2E;
-      padding: 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      color: #CDD6F4;
-      line-height: 1.6;
-      overflow: hidden;
-    }
-    .motif-terminal .prompt { color: #A6E3A1; }
-    .motif-terminal .cursor {
-      display: inline-block;
-      width: 5px;
-      height: 0.6rem;
-      background: var(--color-accent);
-      vertical-align: middle;
-      animation: blink 1s steps(2) infinite;
-    }
+    .c-claude-code { background: #0A0E0A; color: #33FF33; font-family: 'JetBrains Mono', monospace; border: 1px solid rgba(51, 255, 51, 0.25); position: relative; }
+    .c-claude-code::after { content: ""; position: absolute; inset: 0; pointer-events: none; background-image: repeating-linear-gradient(0deg, rgba(51,255,51,0.04), rgba(51,255,51,0.04) 1px, transparent 1px, transparent 3px); }
+    .c-claude-code .tag { color: #FFB000; }
+    .c-claude-code .title { font-family: 'VT323', monospace; font-size: 1.65rem; color: #33FF33; font-weight: 400; letter-spacing: 0.02em; }
+    .c-claude-code .blurb { color: #22AA22; }
+    .c-claude-code .meta { border-top-color: rgba(51, 255, 51, 0.25); color: #22AA22; }
+    .c-claude-code .arrow { color: #33FF33; }
+    .c-claude-code .prompt { color: #A6E3A1; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin-top: 0.4rem; }
+    .c-claude-code .prompt b { color: #33FF33; font-weight: 400; }
+    .c-claude-code .prompt i { display: inline-block; width: 6px; height: 0.85rem; background: #33FF33; vertical-align: middle; animation: blink 1s steps(2) infinite; font-style: normal; }
     @keyframes blink { 50% { opacity: 0; } }
 
-    /* MOTIF 7 — CLAUDE COWORK (before / after) */
-    .motif-compare {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-      padding: 0.75rem;
-    }
-    .compare-col {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 0.4rem;
-      padding: 0.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-    .compare-col.after { border-color: var(--color-accent-muted); background: var(--color-accent-light); }
-    .compare-col span {
-      height: 6px;
-      border-radius: 2px;
-      background: var(--color-border);
-    }
-    .compare-col.after span { background: var(--color-accent-muted); }
-    .compare-col span:nth-child(1) { width: 90%; }
-    .compare-col span:nth-child(2) { width: 70%; }
-    .compare-col span:nth-child(3) { width: 80%; }
-    .compare-col span:nth-child(4) { width: 60%; }
-    .compare-col.after span:nth-child(1) { width: 70%; }
-    .compare-col.after span:nth-child(2) { width: 40%; }
-    .compare-col.after span { animation-delay: 0.2s; }
+    .c-cowork { background: #FAF8F4; color: #1F1A14; }
+    .c-cowork .tag { font-family: 'Playfair Display', serif; font-style: italic; color: #C5775F; text-transform: none; letter-spacing: 0.02em; font-size: 0.8rem; }
+    .c-cowork .title { font-family: 'Playfair Display', serif; font-style: italic; font-weight: 400; font-size: 1.75rem; line-height: 1.1; }
+    .c-cowork .blurb { font-family: 'Inter', sans-serif; color: #7A7268; font-size: 0.85rem; }
+    .c-cowork .meta { border-top-color: #7B9270; color: #7A7268; }
+    .c-cowork .ribbon { background: #7B9270; color: #FAF8F4; padding: 0.25rem 0.625rem; font-family: 'Inter', sans-serif; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; align-self: flex-start; margin-top: 0.4rem; }
 
-    /* MOTIF 8 — LLM WIKI (knowledge graph) */
-    .motif-knowledge {
-      position: relative;
-    }
-    .motif-knowledge svg {
-      width: 100%;
-      height: 100%;
-    }
-    .motif-knowledge .knode {
-      fill: var(--color-surface);
-      stroke: var(--color-accent);
-      stroke-width: 1.5;
-    }
-    .motif-knowledge .kedge {
-      stroke: var(--color-border);
-      stroke-width: 1;
-    }
-    .motif-knowledge .kpulse {
-      fill: var(--color-accent);
-      filter: drop-shadow(0 0 4px var(--color-accent));
-      animation: kpulse 3s ease-in-out infinite;
-    }
-    @keyframes kpulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+    .c-llm-wiki { background: #FBF9F4; color: #2A2A2A; font-family: 'Lora', serif; background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 22px 22px; }
+    .c-llm-wiki .tag { font-family: 'Inter', sans-serif; color: #A8855C; font-weight: 500; }
+    .c-llm-wiki .title { font-family: 'Lora', serif; font-weight: 600; color: #2A2A2A; }
+    .c-llm-wiki .blurb { font-family: 'Lora', serif; color: #6B6B6B; }
+    .c-llm-wiki .meta { border-top-color: rgba(26, 100, 112, 0.3); color: #6B6B6B; }
+    .c-llm-wiki .links { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #1A6470; margin-top: 0.4rem; }
+    .c-llm-wiki .links code { background: rgba(26,100,112,0.08); padding: 0.05rem 0.3rem; border-radius: 3px; font-family: 'JetBrains Mono', monospace; }
 
-    @keyframes matrix-pulse {
-      0% { background: var(--color-border-light); }
-      50% { background: var(--color-accent); }
-      100% { background: var(--color-border-light); }
-    }
+    .c-rag { background: #0D1117; color: #E6EDF3; font-family: 'JetBrains Mono', monospace; }
+    .c-rag .tag { color: #56B6C2; }
+    .c-rag .title { color: #E6EDF3; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+    .c-rag .blurb { color: #8B949E; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }
+    .c-rag .meta { border-top-color: rgba(86, 182, 194, 0.25); color: #8B949E; }
+    .c-rag .cell { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #56B6C2; margin-top: 0.4rem; }
+    .c-rag .cell em { color: #C678DD; font-style: normal; }
+    .c-rag .cell i { color: #98C379; font-style: normal; }
+    .c-rag .cell b { color: #E5C07B; font-weight: 400; }
+    .c-rag .arrow { color: #56B6C2; }
 
-    /* ============ FINAL CTA ============ */
-    .final {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 6rem 1.5rem;
-      text-align: center;
-    }
-    .final h2 {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      margin: 0 0 1rem;
-    }
-    .final p {
-      color: var(--color-text-secondary);
-      margin: 0 0 2rem;
-      font-size: 1.05rem;
-    }
+    .c-vectors { background: #FFFFFF; color: #000; font-family: 'IBM Plex Sans', sans-serif; }
+    .c-vectors .tag { font-family: 'IBM Plex Mono', monospace; color: #005A8B; font-weight: 500; }
+    .c-vectors .title { font-family: 'IBM Plex Sans', sans-serif; font-weight: 700; color: #000; }
+    .c-vectors .blurb { color: #444; font-family: 'IBM Plex Sans', sans-serif; }
+    .c-vectors .meta { border-top-color: #005A8B; color: #888; }
+    .c-vectors .eqn { font-family: 'IBM Plex Serif', serif; font-style: italic; font-size: 0.95rem; color: #008080; margin-top: 0.4rem; align-self: flex-start; }
+    .c-vectors .eqn b { color: #005A8B; font-style: normal; font-weight: 600; }
 
-    footer {
-      text-align: center;
-      padding: 3rem 1.5rem 4rem;
-      color: var(--color-text-muted);
-      font-size: 0.85rem;
-      border-top: 1px solid var(--color-border-light);
-    }
-    footer .row { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
-    footer a { color: var(--color-text-secondary); text-decoration: none; }
-    footer a:hover { color: var(--color-accent); }
+    .c-prompting { background: #F4F0E6; color: #1B1B1B; font-family: 'Crimson Pro', serif; }
+    .c-prompting .tag { font-family: 'IBM Plex Sans', sans-serif; color: #8B1A1A; font-weight: 600; }
+    .c-prompting .title { font-family: 'Crimson Pro', serif; font-weight: 600; font-size: 1.55rem; }
+    .c-prompting .title em { color: #8B1A1A; font-style: italic; }
+    .c-prompting .blurb { font-family: 'Crimson Pro', serif; color: #5C5C5C; }
+    .c-prompting .meta { border-top-color: #8B1A1A; color: #5C5C5C; }
+    .c-prompting .marker { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: #8B1A1A; margin-top: 0.4rem; }
 
-    /* ============ RESPONSIVE ============ */
-    @media (max-width: 980px) {
-      .grid { grid-template-columns: repeat(6, 1fr); }
-      .card-1 { grid-column: span 6; grid-row: span 1; }
-      .card-2, .card-3, .card-6, .card-7, .card-8 { grid-column: span 3; }
-      .card-4, .card-5 { grid-column: span 6; }
+    .c-evals { background: #FBFAFA; color: #0F172A; }
+    .c-evals .tag { font-family: 'Inter', sans-serif; color: #10B981; font-weight: 600; }
+    .c-evals .title { font-family: 'Inter', sans-serif; font-weight: 600; }
+    .c-evals .blurb { color: #475569; font-family: 'Inter', sans-serif; }
+    .c-evals .meta { border-top-color: #E5E7EB; color: #94A3B8; }
+    .c-evals .metric { display: flex; align-items: baseline; gap: 0.4rem; margin-top: 0.4rem; }
+    .c-evals .metric b { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: #10B981; font-variant-numeric: tabular-nums; font-weight: 500; }
+    .c-evals .metric span { font-size: 0.72rem; color: #64748B; }
+    .c-evals .arrow { color: #10B981; }
+
+    .c-multimodal { background: #000; color: #FFF; padding: 0; overflow: hidden; }
+    .c-multimodal .quad { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; height: 100%; gap: 1px; background: #FFF; }
+    .c-multimodal .q { padding: 0.6rem; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; }
+    .c-multimodal .q1 { background: #1B2940; color: #FFF; font-family: 'Press Start 2P', monospace; font-size: 0.45rem; line-height: 1.5; }
+    .c-multimodal .q2 { background: #F5EBD8; color: #2A2118; font-family: 'Crimson Pro', serif; }
+    .c-multimodal .q3 { background: #0A0E0A; color: #33FF33; font-family: 'VT323', monospace; font-size: 0.85rem; }
+    .c-multimodal .q4 { background: #1A1A1A; color: #D4AF37; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.55rem; }
+    .c-multimodal .overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.8rem 1rem; background: rgba(0,0,0,0.92); color: #FFF; font-family: 'IBM Plex Mono', monospace; display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; }
+    .c-multimodal .overlay b { color: #FFF; font-weight: 500; text-transform: none; letter-spacing: 0; font-size: 0.95rem; font-family: 'Inter', sans-serif; }
+    .c-multimodal .overlay em { color: #999; font-style: normal; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; }
+
+    .c-safety { background: #F2EDDF; color: #1A1A1A; font-family: 'EB Garamond', serif; position: relative; }
+    .c-safety .tag { font-family: 'Cinzel', serif; color: #7A0E0E; font-weight: 600; letter-spacing: 0.18em; font-size: 0.7rem; }
+    .c-safety .title { font-family: 'EB Garamond', serif; font-weight: 700; font-style: italic; line-height: 1.1; font-size: 1.55rem; }
+    .c-safety .blurb { font-family: 'EB Garamond', serif; color: #555; }
+    .c-safety .meta { border-top-color: #7A0E0E; color: #555; }
+    .c-safety .seal { position: absolute; top: 1.25rem; right: 4rem; width: 32px; height: 32px; border: 1px solid #7A0E0E; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #7A0E0E; font-family: 'Cinzel', serif; font-size: 0.6rem; font-weight: 600; letter-spacing: 0; }
+    .c-safety .arrow { color: #7A0E0E; }
+
+    .c-voice { background: linear-gradient(180deg, #1A1A1A 0%, #222 100%); color: #F0EAE0; }
+    .c-voice .tag { font-family: 'IBM Plex Mono', monospace; color: #D4AF37; }
+    .c-voice .title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; color: #F0EAE0; font-size: 1.65rem; }
+    .c-voice .blurb { color: #9C8B70; font-family: 'IBM Plex Sans', sans-serif; font-feature-settings: "smcp"; font-size: 0.78rem; }
+    .c-voice .meta { border-top-color: #D4AF37; color: #9C8B70; }
+    .c-voice .knob { position: absolute; top: 1.25rem; right: 4rem; width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #555 0%, #222 60%); border: 2px solid #D4AF37; }
+    .c-voice .knob::after { content: ""; position: absolute; top: 4px; left: 50%; width: 1px; height: 8px; background: #D4AF37; transform: translateX(-50%); }
+    .c-voice .led { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #FF8C2C; box-shadow: 0 0 8px #FF8C2C; margin-right: 0.4rem; vertical-align: middle; animation: ledpulse 2.4s ease-in-out infinite; }
+    @keyframes ledpulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+    .c-voice .arrow { color: #D4AF37; }
+
+    .c-coding { background: #1E2530; color: #FFFFFF; font-family: 'Inter', sans-serif; }
+    .c-coding .tag { font-family: 'Inter', sans-serif; color: #FF8C2C; font-weight: 700; }
+    .c-coding .title { font-family: 'Bebas Neue', sans-serif; font-weight: 400; font-size: 2rem; line-height: 1; letter-spacing: 0.02em; color: #FFF; }
+    .c-coding .blurb { color: #A6B0C2; font-size: 0.82rem; }
+    .c-coding .meta { border-top-color: rgba(255, 140, 44, 0.4); color: #A6B0C2; }
+    .c-coding .stat { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; line-height: 1; color: #FF8C2C; font-variant-numeric: tabular-nums; margin-top: 0.4rem; }
+    .c-coding .stat span { font-size: 0.85rem; color: #A6B0C2; margin-left: 0.4rem; letter-spacing: 0.1em; }
+    .c-coding .arrow { color: #FF8C2C; }
+
+    .c-computer { background: #008080; color: #000; padding: 0; }
+    .c-computer .window { background: #C0C0C0; height: 100%; display: flex; flex-direction: column; box-shadow: inset 1px 1px 0 #FFFFFF, inset -1px -1px 0 #404040; }
+    .c-computer .bar { background: linear-gradient(90deg, #000080 0%, #1084D0 100%); color: #FFF; padding: 0.25rem 0.5rem; display: flex; justify-content: space-between; align-items: center; font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 600; }
+    .c-computer .bar .ctrls { font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.18em; }
+    .c-computer .body { padding: 0.875rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; font-family: 'Inter', sans-serif; }
+    .c-computer .tag { font-family: 'IBM Plex Mono', monospace; color: #000080; }
+    .c-computer .title { font-family: 'Pixelify Sans', monospace; font-weight: 600; color: #000; font-size: 1.4rem; line-height: 1.15; }
+    .c-computer .blurb { color: #404040; font-family: 'Inter', sans-serif; font-size: 0.78rem; }
+    .c-computer .meta { border-top-color: rgba(0,0,0,0.25); color: #404040; }
+    .c-computer .arrow { color: #000; z-index: 2; }
+
+    .c-econ { background: #000; color: #F0E8C8; font-family: 'IBM Plex Mono', monospace; border: 1px solid #FF9500; }
+    .c-econ .tag { color: #FF9500; }
+    .c-econ .title { color: #F0E8C8; font-family: 'IBM Plex Mono', monospace; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.15rem; }
+    .c-econ .blurb { color: #A09684; font-size: 0.78rem; }
+    .c-econ .meta { border-top-color: rgba(255, 149, 0, 0.4); color: #A09684; }
+    .c-econ .ticker-mini { font-size: 0.7rem; color: #00FF00; margin-top: 0.4rem; font-family: 'IBM Plex Mono', monospace; }
+    .c-econ .ticker-mini b { color: #F0E8C8; }
+    .c-econ .ticker-mini em { color: #FF3030; font-style: normal; }
+    .c-econ .arrow { color: #FF9500; }
+
+    /* Bento spans */
+    .span-3 { grid-column: span 3; }
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .row-2 { grid-row: span 2; }
+
+    /* Footer */
+    footer { padding: 4rem 1.5rem 6rem; max-width: 1500px; margin: 0 auto; border-top: 1px solid var(--rule); display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2rem; color: var(--fg-3); font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; letter-spacing: 0.05em; }
+    footer h4 { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg-2); margin: 0 0 1rem; font-weight: 500; }
+    footer a { color: var(--fg-2); text-decoration: none; display: block; padding: 0.25rem 0; }
+    footer a:hover { color: var(--fg); }
+    footer .colophon { font-size: 0.78rem; line-height: 1.7; }
+    footer .colophon b { color: var(--fg-2); font-weight: 500; }
+    footer code { color: #FF6644; font-family: 'IBM Plex Mono', monospace; }
+
+    /* Responsive */
+    @media (max-width: 1000px) {
+      .grid { grid-template-columns: repeat(6, 1fr); grid-auto-rows: 200px; }
+      .span-3, .span-4, .span-5 { grid-column: span 3; }
+      .span-6, .span-7, .span-8 { grid-column: span 6; }
+      footer { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
-      .stats { grid-template-columns: 1fr 1fr; }
-      .grid { grid-template-columns: 1fr; }
-      .card, .card-1, .card-2, .card-3, .card-4, .card-5, .card-6, .card-7, .card-8 {
-        grid-column: span 1;
-        grid-row: span 1;
-      }
-      .hero { padding-top: 6rem; }
+      .grid { grid-template-columns: 1fr; grid-auto-rows: minmax(220px, auto); }
+      .span-3, .span-4, .span-5, .span-6, .span-7, .span-8 { grid-column: span 1; }
+      .row-2 { grid-row: span 1; }
+      .hero { padding: 4rem 1.5rem 6rem; }
+      .top .meta { gap: 0.625rem; }
     }
 
-    /* ============ REDUCED MOTION ============ */
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-      .hero .word, .hero-sub, .cta-row, .stat, .card, .eyebrow {
-        opacity: 1 !important;
-        transform: none !important;
-      }
-      .motif-graph .pulse, .motif-pipe .packet, .motif-matrix .cell { animation: none !important; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      .kinetic span { opacity: 0; }
+      .kinetic span:nth-child(1) { opacity: 1; }
+      .card { opacity: 1 !important; transform: none !important; }
+      .drift { display: none; }
     }
     @media (hover: none) {
-      .magnetic { transform: none !important; }
+      .card:hover { transform: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <nav class="nav">
-    <div class="nav-inner">
-      <span class="nav-brand">CETI<span class="dot">.</span>AI</span>
-      <span class="nav-tag">LOOKBOOK · shadcn-motion</span>
-    </div>
-  </nav>
+  <header class="top">
+    <span class="brand">CETI<b>.</b>AI · Lookbook</span>
+    <span class="meta">
+      <span><b>18</b> pages</span>
+      <span><b>18</b> aesthetics</span>
+      <span><b>v1.0</b> · 2026</span>
+    </span>
+  </header>
 
-  <!-- HERO -->
-  <section class="hero" id="hero">
-    <p class="eyebrow">SHADCN-MOTION · CONCEPT EXPLAINERS · 2026</p>
-    <h1 class="hero-title">
-      <span class="word">Eighteen</span>
-      <span class="word">concepts.</span>
-      <span class="word"><em>One</em></span>
-      <span class="word">aesthetic.</span>
-      <span class="word">Zero</span>
-      <span class="word">slop.</span>
+  <section class="hero">
+    <div class="drift" aria-hidden="true">
+      <span>&gt; LANGGRAPH.HTML | grep stateful</span>
+      <span>USB-C for LLMs.</span>
+      <span>$ claude --resume</span>
+      <span>EIGHTEEN HEADS, ONE BODY</span>
+      <span>The lookbook is the spec.</span>
+      <span>Attention is all you need.</span>
+      <span>ARTICLE I · SECTION 1</span>
+    </div>
+
+    <p class="eyebrow">CETI <b>·</b> Lookbook <b>·</b> May 2026</p>
+
+    <h1 class="hero-line l1">Same skill.</h1>
+    <h1 class="hero-line l2">
+      <span class="kinetic" aria-label="Eighteen">
+        <span>EIGHTEEN</span>
+        <span>Eighteen</span>
+        <span>Eighteen</span>
+        <span>Eighteen</span>
+        <span>EIGHTEEN</span>
+        <span>EIGHTEEN</span>
+        <span>Eighteen</span>
+        <span>Eighteen</span>
+        <span>EIGHTEEN</span>
+        <span>Eighteen</span>
+        <span>Eighteen</span>
+        <span>Eighteen</span>
+        <span>EIGHTEEN</span>
+        <span>EIGHTEEN</span>
+        <span>Eighteen</span>
+        <span>EIGHTEEN</span>
+        <span>EIGHTEEN</span>
+        <span>EIGHTEEN</span>
+      </span>
     </h1>
-    <p class="hero-sub">A living lookbook built with the CETI <code style="font-family:var(--font-mono); font-size:0.9em; padding:2px 6px; background:var(--color-accent-light); border-radius:4px; color:var(--color-accent);">shadcn-motion</code> skill. Eighteen single-file pages covering the AI / agent concepts that matter in 2026 — from LangGraph to MCP to Computer Use to AI Economics — each with a signature animated visual specific to that concept. Click any tile, or use the floating nav at the bottom of every page.</p>
-    <div class="cta-row">
-      <a href="#lookbook" class="magnetic">
-        Explore the eighteen
-        <span class="arrow">↓</span>
-      </a>
-      <a href="https://cetiai.co" class="secondary">CETI.AI →</a>
-    </div>
+    <h1 class="hero-line l3">personalities.</h1>
+
+    <p class="hero-sub">A real <b>lookbook</b> — eighteen single-file HTML explainers on the 2026 AI/agent landscape, each in a different visual language. <b>Brutalist</b>, Bauhaus, magazine editorial, Bloomberg terminal, Win95, CRT phosphor, constitutional brief, academic paper, digital garden, vintage hi-fi. The skill is the engine. <b>Every page wears a different face.</b></p>
+
+    <a href="#wall" class="hero-cta">See the wall <span class="arr">↘</span></a>
   </section>
 
-  <!-- STATS -->
-  <section class="stats">
-    <div class="stat">
-      <div class="stat-value"><span class="num" data-to="18">0</span></div>
-      <div class="stat-label">Detailed explainer pages</div>
+  <div class="ticker" aria-hidden="true">
+    <div class="scroll">
+      <span><b>01</b> Brutalist · LangGraph</span> <span>·</span>
+      <span><b>02</b> Vercel/Linear · LangChain</span> <span>·</span>
+      <span><b>03</b> Editorial Essay · MCP</span> <span>·</span>
+      <span><b>04</b> Academic Paper · Transformers</span> <span>·</span>
+      <span><b>05</b> Bauhaus · Agentic Patterns</span> <span>·</span>
+      <span><b>06</b> CRT Terminal · Claude Code</span> <span>·</span>
+      <span><b>07</b> Magazine · Claude Cowork</span> <span>·</span>
+      <span><b>08</b> Digital Garden · LLM Wiki</span> <span>·</span>
+      <span><b>09</b> Observable · RAG</span> <span>·</span>
+      <span><b>10</b> Whitepaper · Vectors</span> <span>·</span>
+      <span><b>11</b> Reference Manual · Prompting</span> <span>·</span>
+      <span><b>12</b> Stripe Dashboard · Evals</span> <span>·</span>
+      <span><b>13</b> Polyglot · Multimodal</span> <span>·</span>
+      <span><b>14</b> Constitutional · Safety</span> <span>·</span>
+      <span><b>15</b> Vintage Hi-Fi · Voice</span> <span>·</span>
+      <span><b>16</b> Sports Stats · Coding Agents</span> <span>·</span>
+      <span><b>17</b> Win95 · Computer Use</span> <span>·</span>
+      <span><b>18</b> Bloomberg · AI Economics</span> <span>·</span>
     </div>
-    <div class="stat">
-      <div class="stat-value"><span class="num" data-to="14">0</span></div>
-      <div class="stat-label">Animation libraries + engines synthesized</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value"><span class="num" data-to="20">0</span></div>
-      <div class="stat-label">Catalogued components</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value"><span class="num" data-to="0">0</span></div>
-      <div class="stat-label">Purple gradients · forever</div>
-    </div>
-  </section>
+  </div>
 
-  <!-- LOOKBOOK GRID -->
-  <section class="lookbook" id="lookbook">
-    <h2 class="section-heading">The lookbook.</h2>
-    <p class="section-sub">Each tile is a full single-file page with its own signature visual. The motif on each card is a preview, not the real thing — open the page to see it in full bloom.</p>
+  <section class="wall" id="wall">
+    <div class="wall-head">
+      <h2 class="wall-title">The wall.</h2>
+      <span class="wall-sub"><b>18 / 18</b> · click anywhere to enter</span>
+    </div>
 
     <div class="grid">
 
-      <!-- 1. LANGGRAPH (featured wide tile) -->
-      <a href="./langgraph/" class="card card-1">
-        <span class="card-tag"><span class="dot"></span>LANGGRAPH</span>
-        <h3 class="card-title">Agents that remember.</h3>
-        <p class="card-body">Stateful, multi-step LLM agents built as directed graphs. Conditional edges, checkpointing, human-in-the-loop — the architecture pattern that turns prompts into systems.</p>
-        <div class="motif motif-graph">
-          <svg viewBox="0 0 360 130" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <path id="loopPath" d="M 80,65 Q 80,20 180,20 Q 280,20 280,65 Q 280,110 180,110 Q 80,110 80,65 Z" />
-            </defs>
-            <use href="#loopPath" class="edge" />
-            <g class="node">
-              <circle cx="80" cy="65" r="26"></circle>
-              <text x="80" y="65">REASON</text>
-            </g>
-            <g class="node">
-              <circle cx="180" cy="20" r="22"></circle>
-              <text x="180" y="20">ACT</text>
-            </g>
-            <g class="node">
-              <circle cx="280" cy="65" r="26"></circle>
-              <text x="280" y="65">OBSERVE</text>
-            </g>
-            <g class="node">
-              <circle cx="180" cy="110" r="22"></circle>
-              <text x="180" y="110">↻</text>
-            </g>
-            <circle class="pulse" style="offset-path: path('M 80,65 Q 80,20 180,20 Q 280,20 280,65 Q 280,110 180,110 Q 80,110 80,65 Z');"></circle>
-          </svg>
+      <a href="./langgraph/" class="card c-langgraph span-5 row-2">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">01 / 18</span>
+          <span class="tag">[ BRUTALIST ]</span>
+          <h3 class="title">Agents that remember.</h3>
+          <p class="blurb">// stateful graph agents · ReAct loop · checkpointing · human-in-loop · multi-agent supervisors</p>
+          <pre class="ascii">┌─[ AGENT.LOOP ]─┐
+│ REASON → ACT  │
+│   ↓     ↓     │
+│ OBSERVE ← ↻   │
+└───────────────┘</pre>
         </div>
-        <div class="card-meta">
-          <span>· stateful graphs · ReAct loops · checkpoints</span>
-          <span class="card-arrow">Open →</span>
-        </div>
+        <div class="meta"><b>LANGGRAPH</b><span>107 KB · 3,879 W</span></div>
       </a>
 
-      <!-- 2. LANGCHAIN -->
-      <a href="./langchain/" class="card card-2">
-        <span class="card-tag"><span class="dot"></span>LANGCHAIN</span>
-        <h3 class="card-title">Compose, don't code.</h3>
-        <p class="card-body">LCEL pipelines composed with the `|` operator. Prompt → retriever → format → LLM → parser.</p>
-        <div class="motif motif-pipe">
-          <div class="stage">P</div>
-          <div class="stage">R</div>
-          <div class="stage">F</div>
-          <div class="stage">L</div>
-          <div class="stage">O</div>
-          <div class="packet"></div>
+      <a href="./langchain/" class="card c-langchain span-4">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">02 / 18</span>
+          <span class="tag">— Vercel / Linear</span>
+          <h3 class="title">Compose, don't code.</h3>
+          <p class="blurb">LCEL pipelines composed with the <code style="font-family:JetBrains Mono,monospace;font-size:0.85em;color:#0070F3;">|</code> operator. Restraint over expression.</p>
+          <div class="stage"><i></i><em>prompt | model | parser</em></div>
         </div>
-        <div class="card-meta">
-          <span>· LCEL · runnables · pipes</span>
-          <span class="card-arrow">Open →</span>
-        </div>
+        <div class="meta"><b>LANGCHAIN</b><span>81 KB · 3,978 W</span></div>
       </a>
 
-      <!-- 3. MCP -->
-      <a href="./mcp/" class="card card-3">
-        <span class="card-tag"><span class="dot"></span>MODEL CONTEXT PROTOCOL</span>
-        <h3 class="card-title">USB-C for LLMs.</h3>
-        <p class="card-body">One open protocol. Every tool. The Anthropic standard that makes LLMs talk to your real software.</p>
-        <div class="motif motif-hub">
-          <div class="hub"></div>
-          <div class="satellite" style="transform: translate(-50%,-50%) translate(70px, 0);"></div>
-          <div class="satellite" style="transform: translate(-50%,-50%) translate(-70px, 0);"></div>
-          <div class="satellite" style="transform: translate(-50%,-50%) translate(0, -40px);"></div>
-          <div class="satellite" style="transform: translate(-50%,-50%) translate(0, 40px);"></div>
-          <div class="satellite" style="transform: translate(-50%,-50%) translate(50px, -28px);"></div>
-          <div class="satellite" style="transform: translate(-50%,-50%) translate(-50px, 28px);"></div>
+      <a href="./mcp/" class="card c-mcp span-3">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">03 / 18</span>
+          <span class="tag">ON THE PROTOCOL</span>
+          <h3 class="title"><em>USB-C</em> for LLMs.</h3>
+          <p class="blurb">An open standard, and what it quietly changed.</p>
         </div>
-        <div class="card-meta">
-          <span>· tools · resources · prompts</span>
-          <span class="card-arrow">Open →</span>
-        </div>
+        <div class="meta"><b>MCP</b><span>59 KB · 5,861 W</span></div>
       </a>
 
-      <!-- 4. TRANSFORMERS -->
-      <a href="./transformers/" class="card card-4">
-        <span class="card-tag"><span class="dot"></span>TRANSFORMERS</span>
-        <h3 class="card-title">Attention is all you need.</h3>
-        <p class="card-body">From the 2017 paper to today's frontier models — the architecture mental model in plain language, with the iconic attention-matrix visualization animated live.</p>
-        <div class="motif motif-matrix" id="motif-matrix"></div>
-        <div class="card-meta">
-          <span>· self-attention · MoE · GQA · 1.8T params</span>
-          <span class="card-arrow">Open →</span>
+      <a href="./transformers/" class="card c-transformers span-4">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">04 / 18</span>
+          <span class="tag">§4. ARCHITECTURE</span>
+          <h3 class="title">Attention, revisited.</h3>
+          <p class="blurb">A modern survey. Figure 1: attention matrix. Listing 1: scaled dot-product attention.</p>
+          <div class="eq">softmax(QK^T / √d_k) V</div>
         </div>
+        <div class="meta"><b>TRANSFORMERS</b><span>73 KB · 5,715 W</span></div>
       </a>
 
-      <!-- 5. AGENTIC PATTERNS -->
-      <a href="./agentic-patterns/" class="card card-5">
-        <span class="card-tag"><span class="dot"></span>ORCHESTRATOR PATTERNS</span>
-        <h3 class="card-title">Four patterns. One mental model.</h3>
-        <p class="card-body">Chaining, routing, parallelization, orchestrator-workers — the four canonical ways to build agentic systems, explained without jargon.</p>
-        <div class="motif motif-patterns">
-          <div class="pattern-cell"></div>
-          <div class="pattern-cell"></div>
-          <div class="pattern-cell"></div>
-          <div class="pattern-cell"></div>
-        </div>
-        <div class="card-meta">
-          <span>· non-technical · 5 patterns · decision tree</span>
-          <span class="card-arrow">Open →</span>
-        </div>
-      </a>
-
-      <!-- 6. CLAUDE CODE -->
-      <a href="./claude-code/" class="card card-6">
-        <span class="card-tag"><span class="dot"></span>CLAUDE CODE</span>
-        <h3 class="card-title">Not a chatbot. A teammate.</h3>
-        <p class="card-body">The terminal-based AI work partner, demystified for non-technical readers.</p>
-        <div class="motif motif-terminal">
-          <div><span class="prompt">$</span> claude</div>
-          <div><span style="color:#94E2D5">▸</span> organize Notion db</div>
-          <div style="color:#A6E3A1">✓ scanning workspace</div>
-          <div style="color:#A6E3A1">✓ found 23 duplicates<span class="cursor"></span></div>
-        </div>
-        <div class="card-meta">
-          <span>· terminal · agents · workflows</span>
-          <span class="card-arrow">Open →</span>
-        </div>
-      </a>
-
-      <!-- 7. CLAUDE COWORK -->
-      <a href="./claude-cowork/" class="card card-7">
-        <span class="card-tag"><span class="dot"></span>CLAUDE COWORK</span>
-        <h3 class="card-title">Your coworker, on demand.</h3>
-        <p class="card-body">For business users — research, analysis, writing, decisions. Before/after vignettes that make the time-savings tangible.</p>
-        <div class="motif motif-compare">
-          <div class="compare-col">
-            <span></span><span></span><span></span><span></span>
+      <a href="./agentic-patterns/" class="card c-agentic span-3">
+        <span class="arrow">→</span>
+        <div class="shape" aria-hidden="true"></div>
+        <div class="shape-2" aria-hidden="true"></div>
+        <div class="inner">
+          <div>
+            <span class="num">05 / 18</span>
+            <span class="tag">§02 PATTERNS</span>
+            <h3 class="title">Four patterns. One model.</h3>
+            <p class="blurb">Chaining · routing · parallel · orchestrator.</p>
           </div>
-          <div class="compare-col after">
-            <span></span><span></span>
-          </div>
-        </div>
-        <div class="card-meta">
-          <span>· non-technical · workflows · use cases</span>
-          <span class="card-arrow">Open →</span>
+          <div class="meta"><b>AGENTIC</b><span>99 KB</span></div>
         </div>
       </a>
 
-      <!-- 8. LLM WIKI -->
-      <a href="./llm-wiki/" class="card card-8">
-        <span class="card-tag"><span class="dot"></span>AGENTIC PKM</span>
-        <h3 class="card-title">Your second brain, now agentic.</h3>
-        <p class="card-body">Karpathy's personal LLM wiki — now with AI agents that can read AND write back to your knowledge graph.</p>
-        <div class="motif motif-knowledge">
-          <svg viewBox="0 0 360 130" preserveAspectRatio="xMidYMid meet">
-            <line class="kedge" x1="60" y1="40" x2="140" y2="65"/>
-            <line class="kedge" x1="140" y1="65" x2="220" y2="35"/>
-            <line class="kedge" x1="140" y1="65" x2="200" y2="100"/>
-            <line class="kedge" x1="220" y1="35" x2="300" y2="60"/>
-            <line class="kedge" x1="200" y1="100" x2="280" y2="95"/>
-            <line class="kedge" x1="300" y1="60" x2="280" y2="95"/>
-            <circle class="knode" cx="60" cy="40" r="9"/>
-            <circle class="knode" cx="140" cy="65" r="11"/>
-            <circle class="knode" cx="220" cy="35" r="10"/>
-            <circle class="knode" cx="200" cy="100" r="9"/>
-            <circle class="knode" cx="300" cy="60" r="9"/>
-            <circle class="knode" cx="280" cy="95" r="10"/>
-            <circle class="kpulse" cx="140" cy="65" r="4"/>
-            <circle class="kpulse" cx="220" cy="35" r="3" style="animation-delay: 1s;"/>
-            <circle class="kpulse" cx="280" cy="95" r="3" style="animation-delay: 2s;"/>
-          </svg>
+      <a href="./claude-code/" class="card c-claude-code span-4">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">06 / 18</span>
+          <span class="tag">// man 1 claude-code</span>
+          <h3 class="title">claude-code.sh</h3>
+          <p class="blurb">not a chatbot. a teammate. terminal-native.</p>
+          <div class="prompt"><b>$</b> claude --resume<i></i></div>
         </div>
-        <div class="card-meta">
-          <span>· obsidian · roam · agentic PKM</span>
-          <span class="card-arrow">Open →</span>
+        <div class="meta"><b>CLAUDE.CODE</b><span>78 KB · 3,561 W</span></div>
+      </a>
+
+      <a href="./claude-cowork/" class="card c-cowork span-4">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">07 / 18</span>
+          <span class="tag">Issue · seven</span>
+          <h3 class="title">Your coworker, on demand.</h3>
+          <p class="blurb">A magazine on AI for business users. Three case studies. One editor's letter.</p>
+          <span class="ribbon">FEATURE STORY</span>
         </div>
+        <div class="meta"><b>COWORK</b><span>75 KB · 4,581 W</span></div>
+      </a>
+
+      <a href="./llm-wiki/" class="card c-llm-wiki span-4">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">08 / 18</span>
+          <span class="tag">#pkm</span>
+          <h3 class="title">Your second brain, now agentic.</h3>
+          <p class="blurb">Karpathy-style personal LLM wiki, now with AI as co-author of your graph.</p>
+          <div class="links">↳ <code>[[obsidian]]</code> · <code>[[notion]]</code> · <code>[[markdown]]</code></div>
+        </div>
+        <div class="meta"><b>LLM-WIKI</b><span>92 KB · 3,523 W</span></div>
+      </a>
+
+      <a href="./rag/" class="card c-rag span-5">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">09 / 18</span>
+          <span class="tag">rag.ipynb</span>
+          <h3 class="title">Don't fine-tune. Retrieve.</h3>
+          <p class="blurb"># 21 cells. embedding · search · rerank · eval. lost-in-the-middle. ragas metrics.</p>
+          <div class="cell"><em>In[1]:</em> <i>from</i> <b>langchain</b> <i>import</i> <b>RAG</b></div>
+        </div>
+        <div class="meta"><b>RAG</b><span>93 KB · 4,092 W</span></div>
+      </a>
+
+      <a href="./vectors/" class="card c-vectors span-3">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">10 / 18</span>
+          <span class="tag">TECHNICAL NOTE</span>
+          <h3 class="title">Meaning, as coordinates.</h3>
+          <p class="blurb">A whitepaper on embeddings, distance metrics, and HNSW indexing.</p>
+          <div class="eqn">cos(<b>u</b>, <b>v</b>) = u·v / ‖u‖‖v‖</div>
+        </div>
+        <div class="meta"><b>VECTORS</b><span>74 KB · 4,527 W</span></div>
+      </a>
+
+      <a href="./prompting/" class="card c-prompting span-4">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">11 / 18</span>
+          <span class="tag">CHAPTER 11 · CETI HANDBOOK</span>
+          <h3 class="title">Prompting is <em>engineering.</em></h3>
+          <p class="blurb">A reference manual chapter. Six patterns. Twelve listings. A bibliography.</p>
+          <div class="marker">§11.1 · §11.2 · §11.3 · §11.4 · §11.5 · §11.6</div>
+        </div>
+        <div class="meta"><b>PROMPTING</b><span>85 KB · 5,762 W</span></div>
+      </a>
+
+      <a href="./evals/" class="card c-evals span-3">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">12 / 18</span>
+          <span class="tag">— Evaluation</span>
+          <h3 class="title">If you can't measure it, you can't ship it.</h3>
+          <div class="metric"><b>94.2%</b><span>accuracy · 30d</span></div>
+        </div>
+        <div class="meta"><b>EVALS</b><span>75 KB · 3,917 W</span></div>
+      </a>
+
+      <a href="./multimodal/" class="card c-multimodal span-4 row-2">
+        <span class="arrow" style="color:#FFF;z-index:2;">→</span>
+        <div class="quad">
+          <div class="q q1">VISION<br>14×14<br>PATCHES</div>
+          <div class="q q2">text as<br>universal<br>interface</div>
+          <div class="q q3">~~/\/~~<br>STT · TTS<br>800ms</div>
+          <div class="q q4">VIDEO<br>10 FPS<br>1M TOK</div>
+        </div>
+        <div class="overlay">
+          <em>13 / 18 · multimodal</em>
+          <b>Pixels, text, sound — one model.</b>
+        </div>
+      </a>
+
+      <a href="./safety/" class="card c-safety span-4">
+        <span class="arrow">→</span>
+        <span class="seal">XIV</span>
+        <div>
+          <span class="num">14 / 18</span>
+          <span class="tag">ARTICLE XIV</span>
+          <h3 class="title">Helpful. Honest. Harmless. Engineered.</h3>
+          <p class="blurb">A constitutional brief on alignment, guardrails, and what we don't yet know.</p>
+        </div>
+        <div class="meta"><b>SAFETY</b><span>68 KB · 4,862 W</span></div>
+      </a>
+
+      <a href="./voice/" class="card c-voice span-4">
+        <span class="arrow">→</span>
+        <div class="knob" aria-hidden="true"></div>
+        <div>
+          <span class="num">15 / 18</span>
+          <span class="tag"><span class="led"></span>SERIAL · 15</span>
+          <h3 class="title">Conversations, not commands.</h3>
+          <p class="blurb">An audio engineer's handbook on voice AI. Rack-mounted, gold-bezeled, VU-metered.</p>
+        </div>
+        <div class="meta"><b>VOICE</b><span>82 KB · 3,511 W</span></div>
+      </a>
+
+      <a href="./coding-agents/" class="card c-coding span-4">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">16 / 18</span>
+          <span class="tag">LEAGUE · 2026</span>
+          <h3 class="title">SIX TOOLS. ONE JOB. DIFFERENT BETS.</h3>
+          <div class="stat">87.6<span>SWE-BENCH · OPUS 4.7</span></div>
+        </div>
+        <div class="meta"><b>CODING.AGENTS</b><span>103 KB · 4,297 W</span></div>
+      </a>
+
+      <a href="./computer-use/" class="card c-computer span-4">
+        <span class="arrow" style="z-index:2;color:#000;">→</span>
+        <div class="window">
+          <div class="bar">
+            <span>Computer Use 2.0.exe</span>
+            <span class="ctrls">_ □ ×</span>
+          </div>
+          <div class="body">
+            <div>
+              <span class="num">17 / 18</span>
+              <span class="tag">README.TXT</span>
+              <h3 class="title">When the agent uses your computer.</h3>
+              <p class="blurb">Setup Wizard for browser agents, end-to-end QA, and form-filling autonomy.</p>
+            </div>
+            <div class="meta"><b>COMPUTER.USE</b><span>96 KB · 4,115 W</span></div>
+          </div>
+        </div>
+      </a>
+
+      <a href="./ai-economics/" class="card c-econ span-4">
+        <span class="arrow">→</span>
+        <div>
+          <span class="num">18 / 18</span>
+          <span class="tag">AI/ECON ▸</span>
+          <h3 class="title">TOKENS ARE THE NEW SAAS UNIT</h3>
+          <p class="blurb">A terminal-style briefing on cost, latency, prompt caching, and the four cost levers.</p>
+          <div class="ticker-mini"><b>OPUS</b>$25 <em>▲0.0</em> · <b>SONNET</b>$15 · <b>CACHE</b><em>−90%</em></div>
+        </div>
+        <div class="meta"><b>AI.ECON</b><span>81 KB · 4,483 W</span></div>
       </a>
 
     </div>
-  </section>
-
-  <!-- MORE — applied + frontier concepts -->
-  <section class="lookbook" id="more" style="padding-top:1rem;">
-    <h2 class="section-heading">Applied + frontier.</h2>
-    <p class="section-sub">Ten more single-file pages — the practical patterns (RAG, prompting, evals, economics) and the frontier surface (multimodal, safety, voice, coding agents, computer use). Same aesthetic, same anti-slop bar.</p>
-
-    <div class="more-grid">
-      <a href="./rag/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-1);">RAG</span>
-        <h3 class="more-title">RAG Architecture</h3>
-        <p class="more-body">Don't fine-tune. Retrieve. Pipeline + 2D vector-space visualization of nearest-neighbor search.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-      <a href="./vectors/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-2);">VECTORS</span>
-        <h3 class="more-title">Vector DBs + Embeddings</h3>
-        <p class="more-body">Meaning as coordinates. 50-dot semantic clusters animate into place; hover to see neighbors.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-      <a href="./prompting/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-3);">PROMPTS</span>
-        <h3 class="more-title">Prompt Engineering Patterns</h3>
-        <p class="more-body">Prompting is engineering. Six mini live demos: CoT, Few-Shot, Role, JSON, Self-Consistency, ReAct.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-      <a href="./evals/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-4);">EVALS</span>
-        <h3 class="more-title">AI Evals + Observability</h3>
-        <p class="more-body">If you can't measure it, you can't ship it. A live dashboard with KPIs, sparklines, and trace timeline.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-      <a href="./multimodal/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-5);">MULTIMODAL</span>
-        <h3 class="more-title">Multimodal AI</h3>
-        <p class="more-body">Pixels, text, sound — one model. Three input streams fuse into a unified token pipe.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-      <a href="./safety/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-1);">SAFETY</span>
-        <h3 class="more-title">AI Safety + Alignment</h3>
-        <p class="more-body">Helpful, honest, harmless — engineered. Guardrail pipeline + Constitutional AI self-critique loop.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-      <a href="./voice/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-2);">VOICE</span>
-        <h3 class="more-title">Voice AI + Real-Time Agents</h3>
-        <p class="more-body">Conversations, not commands. STT → LLM → TTS pipeline with live waveforms + latency budget.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-      <a href="./coding-agents/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-3);">CODING</span>
-        <h3 class="more-title">AI Coding Agents Landscape</h3>
-        <p class="more-body">Six tools. One job. Different bets. Capability matrix across Claude Code, Cursor, Copilot, Aider, Cline, Devin.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-      <a href="./computer-use/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-4);">COMPUTER</span>
-        <h3 class="more-title">Computer Use + Browser Agents</h3>
-        <p class="more-body">When the agent uses your computer. Live browser frame with autonomous cursor + action log.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-      <a href="./ai-economics/" class="more-card">
-        <span class="more-tag" style="--c: var(--color-actor-5);">ECON</span>
-        <h3 class="more-title">AI Economics</h3>
-        <p class="more-body">Every prompt has a price. Animated cost curves, prompt-caching savings, price ladder.</p>
-        <span class="more-arrow">Open →</span>
-      </a>
-    </div>
-  </section>
-
-  <style>
-    .more-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    .more-card {
-      display: flex;
-      flex-direction: column;
-      gap: 0.625rem;
-      padding: 1.5rem;
-      background:
-        radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%),
-          color-mix(in oklab, var(--c, var(--color-accent)) 8%, transparent), transparent 40%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 1rem;
-      text-decoration: none;
-      color: var(--color-text);
-      transition: border-color 240ms, box-shadow 240ms, transform 240ms var(--ease-spring);
-      opacity: 0;
-      transform: translateY(16px);
-    }
-    .more-card.visible { opacity: 1; transform: translateY(0); transition: opacity 700ms var(--ease-spring), transform 700ms var(--ease-spring), border-color 240ms, box-shadow 240ms; }
-    .more-card:hover { border-color: var(--c, var(--color-accent-muted)); box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    .more-card:hover .more-arrow { color: var(--c, var(--color-accent)); transform: translateX(3px); }
-    .more-tag {
-      align-self: flex-start;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--c, var(--color-accent));
-      background: color-mix(in oklab, var(--c, var(--color-accent)) 14%, transparent);
-      padding: 0.25rem 0.625rem;
-      border-radius: 999px;
-    }
-    .more-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.2rem;
-      letter-spacing: -0.01em;
-      line-height: 1.2;
-      margin: 0;
-    }
-    .more-body {
-      font-size: 0.9rem;
-      color: var(--color-text-secondary);
-      margin: 0;
-      flex: 1;
-      line-height: 1.5;
-    }
-    .more-arrow {
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      color: var(--color-text);
-      font-weight: 500;
-      transition: transform 240ms var(--ease-out), color 200ms;
-    }
-    @media (hover: none) {
-      .more-card:hover { transform: none !important; }
-    }
-  </style>
-
-  <!-- FINAL CTA -->
-  <section class="final">
-    <h2>Want this aesthetic for your course or product?</h2>
-    <p>The <code style="font-family:var(--font-mono); font-size:0.95em; padding:2px 6px; background:var(--color-accent-light); border-radius:4px; color:var(--color-accent);">shadcn-motion</code> skill is open source — clone the plugin, run <code style="font-family:var(--font-mono); font-size:0.95em;">./install.sh</code>, and you have it locally. Or work with CETI to build pages like these for your domain.</p>
-    <a href="https://calendly.com/manutej/30min" class="magnetic">
-      Book a conversation
-      <span class="arrow">→</span>
-    </a>
   </section>
 
   <footer>
-    <div class="row">
-      <a href="https://cetiai.co">cetiai.co</a>
-      <a href="https://github.com/manutej/shadcn-motion">shadcn-motion plugin →</a>
-      <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a>
+    <div class="colophon">
+      <h4>About</h4>
+      <p>The CETI Lookbook is a curated wall of eighteen explainers on the 2026 AI / agent landscape — each one rendered in a different visual language to demonstrate what's possible when the design system is the question, not the answer.</p>
+      <p style="margin-top:1rem;">Every page is single-file HTML, under 110KB, mobile-first, accessibility-checked, and built with the <b>shadcn-motion</b> Claude Code skill (which lives in this repo at <code>/skills/shadcn-motion</code>).</p>
     </div>
-    <p style="margin-top:1.5rem; font-family:var(--font-mono); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em;">© 2026 CETI.AI · all eight pages built in one afternoon with the skill that made them.</p>
+    <div>
+      <h4>Built with</h4>
+      <a href="./skills/shadcn-motion/SKILL.md">shadcn-motion skill</a>
+      <a href="./plugin/">plugin form</a>
+      <a href="./README.md">README</a>
+      <a href="./HANDOFF.md">HANDOFF</a>
+      <a href="./REQUIREMENTS.md">requirements</a>
+      <a href="./SUGGESTIONS.md">suggestions</a>
+    </div>
+    <div>
+      <h4>CETI</h4>
+      <a href="https://cetiai.co">cetiai.co</a>
+      <a href="https://github.com/manutej/ceti-lookbook">github / ceti-lookbook</a>
+      <a href="https://calendly.com/manutej/30min">book a conversation</a>
+      <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a>
+      <p style="margin-top:1.5rem; font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase;">© 2026 CETI.AI · v1.0</p>
+    </div>
   </footer>
 
-  <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-    // ============ INTERSECTION REVEAL ============
-    const reveal = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
-    document.querySelectorAll('.stat, .card, .more-card').forEach((el) => reveal.observe(el));
-
-    // Cursor-follow glow on the more-cards
-    document.querySelectorAll('.more-card').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
-
-    // ============ NUMBER TICKERS ============
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      if (to === 0) { el.textContent = '0'; return; }
-      const dur = 1200;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
-
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 28;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-
-    // ============ CARD GLOW FOLLOW ============
-    document.querySelectorAll('.card').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
-
-    // ============ TRANSFORMERS ATTENTION MATRIX MOTIF ============
-    const matrix = document.getElementById('motif-matrix');
-    if (matrix) {
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          const cell = document.createElement('div');
-          cell.className = 'cell';
-          // Lower-triangular causal pattern, animated with diagonal delay
-          const causal = c <= r ? 1 : 0;
-          const delay = (r + c) * 0.08;
-          if (causal) {
-            cell.style.animationDelay = `${delay}s`;
-            cell.style.animationDuration = '4s';
-          } else {
-            cell.style.animation = 'none';
-            cell.style.background = 'transparent';
-          }
-          matrix.appendChild(cell);
-        }
-      }
-    }
-  </script>
   <script src="./shared/nav.js" defer></script>
+  <script>
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    document.querySelectorAll('.card').forEach((el) => io.observe(el));
+  </script>
 </body>
 </html>

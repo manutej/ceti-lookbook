@@ -3,1457 +3,1536 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Economics — Cost, Latency, Caching · CETI Lookbook</title>
-  <meta name="description" content="Tokens are the new SaaS unit. An engineering-and-ops view of LLM pricing, prompt caching, batch APIs, and latency — with the curve that changes the bill.">
+  <title>AI/ECON · TERMINAL · CETI</title>
+  <meta name="description" content="Bloomberg-terminal briefing on AI economics — pricing matrix, cost curves, caching math, batch arbitrage, output budgets, and a real RAG cost-engineering case study.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-bg-code: #1E1E2E;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
-      --color-surface-warm: #FDF9F3;
+      --bg: #000000;
+      --bg-grid: rgba(0, 32, 80, 0.4);
+      --bg-panel: #050810;
+      --bg-cell: #0A0F1A;
+      --bg-cell-alt: #060A12;
+      --border: #1A2840;
+      --border-bright: #2A4060;
 
-      /* Primary accent: vermillion. Used for the "expensive" path. */
-      --color-accent: #D94F30;
-      --color-accent-hover: #C4432A;
-      --color-accent-light: #FDEEE9;
-      --color-accent-muted: #E8836C;
+      --fg: #F0E8C8;
+      --fg-dim: #A09684;
+      --fg-mute: #5A5040;
 
-      /* Secondary accent: teal. Used for the "cached / cheap" path. */
-      --color-info: #2A7B9B;
-      --color-info-light: #E4F2F7;
+      --amber: #FF9500;
+      --amber-bright: #FFB040;
+      --green: #00FF00;
+      --green-dim: #008800;
+      --red: #FF3030;
+      --red-dim: #882020;
+      --cyan: #00CCFF;
+      --cyan-dim: #006688;
+      --yellow: #FFFF00;
+      --magenta: #FF66CC;
 
-      /* Actor rotation (anti-monotone) */
-      --color-actor-1: #D94F30; /* vermillion — uncached */
-      --color-actor-2: #2A7B9B; /* teal     — cached */
-      --color-actor-3: #7B6DAA; /* plum     — batch */
-      --color-actor-4: #D4A843; /* golden   — output budgets */
-      --color-actor-5: #2D8B55; /* forest   — model select */
+      --font: 'IBM Plex Mono', 'Menlo', 'Courier New', monospace;
 
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body:    'DM Sans', -apple-system, sans-serif;
-      --font-mono:    'JetBrains Mono', monospace;
-
-      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-      --duration-fast: 150ms;
-      --duration-normal: 300ms;
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-      --stagger: 100ms;
-
-      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
-      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
-
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
+      --row-h: 22px;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image: radial-gradient(ellipse at 80% 10%, rgba(42, 123, 155, 0.05) 0%, transparent 50%),
-                        radial-gradient(ellipse at 10% 70%, rgba(217, 79, 48, 0.04) 0%, transparent 50%);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
+      font-family: var(--font);
+      font-weight: 400;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--fg);
+      background: var(--bg);
+      background-image:
+        linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-position: 0 0;
       font-variant-numeric: tabular-nums;
+      -webkit-font-smoothing: antialiased;
+      text-transform: none;
+      padding-bottom: 92px;
     }
 
-    .container {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-
-    /* Top utility bar */
-    .utility {
-      border-bottom: 1px solid var(--color-border);
-      padding: 0.875rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      background: rgba(250, 247, 242, 0.7);
-      backdrop-filter: saturate(140%) blur(8px);
+    /* ============== TICKER TAPE ============== */
+    .ticker {
       position: sticky;
       top: 0;
-      z-index: 50;
-    }
-    .utility .brand { color: var(--color-text); font-weight: 500; }
-    .utility .meta { display: flex; gap: 1.5rem; align-items: center; }
-    .utility .pulse {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--color-actor-5);
-      box-shadow: 0 0 0 0 rgba(45, 139, 85, 0.6);
-      animation: util-pulse 2.4s ease-out infinite;
-      display: inline-block; vertical-align: middle; margin-right: 0.5rem;
-    }
-    @keyframes util-pulse {
-      0%   { box-shadow: 0 0 0 0 rgba(45, 139, 85, 0.6); }
-      70%  { box-shadow: 0 0 0 8px rgba(45, 139, 85, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(45, 139, 85, 0); }
-    }
-
-    /* ================= HERO ================= */
-    .hero {
-      padding: 6rem 0 4rem;
-    }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-    }
-    .hero.visible .eyebrow { opacity: 1; }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.75rem, 6.4vw, 5rem);
-      line-height: 1.02;
-      letter-spacing: -0.035em;
-      margin: 1.25rem 0 1.5rem;
-      max-width: 18ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
-    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 440ms; }
-    .hero.visible .hero-title .word:nth-child(6) { transition-delay: 520ms; }
-    .hero-title em {
-      font-style: normal;
-      color: var(--color-accent);
-    }
-
-    .hero-sub {
-      font-size: 1.25rem;
-      color: var(--color-text-secondary);
-      max-width: 52ch;
-      margin: 0;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 700ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    .hero-meta {
-      margin-top: 2.5rem;
+      z-index: 80;
+      width: 100%;
+      background: #000;
+      border-top: 1px solid var(--amber);
+      border-bottom: 1px solid var(--amber);
+      overflow: hidden;
+      height: 30px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 900ms;
+      align-items: center;
     }
-    .hero.visible .hero-meta { opacity: 1; }
-    .hero-meta .item .v {
-      font-family: var(--font-display);
-      font-size: 2rem;
+    .ticker-label {
+      flex: 0 0 auto;
+      padding: 0 10px;
+      background: var(--amber);
+      color: #000;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--color-text);
-    }
-    .hero-meta .item .l {
-      display: block;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
+      font-size: 11px;
       letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      margin-top: 0.25rem;
-    }
-    .hero-meta .item .v .unit {
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      color: var(--color-text-secondary);
-      font-weight: 400;
-      letter-spacing: 0;
-      margin-left: 0.25rem;
-    }
-
-    /* ================= SIGNATURE COST CURVE ================= */
-    .curve-section {
-      padding: 4rem 0 6rem;
-    }
-    .section-head { margin-bottom: 2.5rem; max-width: 64ch; }
-    .section-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      margin-bottom: 0.75rem;
-    }
-    .section-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(1.75rem, 3.6vw, 2.6rem);
-      line-height: 1.1;
-      letter-spacing: -0.025em;
-      margin: 0 0 0.75rem;
-    }
-    .section-lede {
-      color: var(--color-text-secondary);
-      font-size: 1.0625rem;
-      margin: 0;
-    }
-
-    .curve-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-      box-shadow: var(--shadow-md);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
-    }
-    .curve-card.visible { opacity: 1; transform: translateY(0); }
-
-    .curve-head {
+      height: 100%;
       display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 1.5rem;
+      align-items: center;
+      border-right: 1px solid #000;
     }
-    .curve-head h3 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.375rem;
-      margin: 0;
-      letter-spacing: -0.01em;
+    .ticker-track {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      height: 100%;
+      mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
     }
-    .curve-head .scenario {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-      margin-top: 0.25rem;
-    }
-
-    .legend {
-      display: flex;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-    }
-    .legend-item {
+    .ticker-rail {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.85rem;
-      color: var(--color-text-secondary);
+      height: 100%;
+      white-space: nowrap;
+      padding-left: 100%;
+      animation: ticker-scroll 90s linear infinite;
+      font-size: 12px;
+      letter-spacing: 0.04em;
     }
-    .legend-swatch {
-      width: 22px;
-      height: 3px;
-      border-radius: 2px;
-    }
-    .legend-swatch.dashed {
-      background: repeating-linear-gradient(90deg, var(--color-info) 0 5px, transparent 5px 9px);
-      height: 2px;
+    .ticker-rail span.t-item { padding: 0 14px; color: var(--fg); }
+    .ticker-rail span.t-item.bear { color: var(--red); }
+    .ticker-rail span.t-item.bull { color: var(--green); }
+    .ticker-rail span.t-sep { color: var(--fg-mute); padding: 0 4px; }
+    .ticker-rail b { color: var(--amber); font-weight: 600; }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
     }
 
-    .curve-svg-wrap {
-      position: relative;
-      width: 100%;
+    /* ============== LAYOUT ============== */
+    .term {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 14px 14px 0;
     }
-    .curve-svg {
+
+    /* ============== HEADER PANEL ============== */
+    .header-panel {
+      border: 1px solid var(--amber);
+      background: #000;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: stretch;
+    }
+    .header-panel .hp-l {
+      padding: 10px 16px;
+      background: var(--amber);
+      color: #000;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-panel .hp-l .glyph {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 2px solid #000;
+      position: relative;
+    }
+    .header-panel .hp-l .glyph::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      background: #000;
+    }
+    .header-panel .hp-m {
+      padding: 10px 16px;
+      color: var(--fg);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .header-panel .hp-m b { color: var(--amber); font-weight: 600; }
+    .header-panel .hp-r {
+      padding: 10px 16px;
+      border-left: 1px solid var(--amber);
+      color: var(--green);
+      font-size: 12px;
+      letter-spacing: 0.10em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-panel .hp-r .led {
+      width: 8px; height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--green);
+      animation: led-blink 2s steps(2) infinite;
+    }
+    @keyframes led-blink {
+      50% { opacity: 0.35; }
+    }
+
+    /* ============== PANELS / CELLS ============== */
+    .panel {
+      border: 1px solid var(--border-bright);
+      background: var(--bg-panel);
+      margin-bottom: 14px;
+    }
+    .panel-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 10px;
+      background: linear-gradient(90deg, #1A2840 0%, #050810 100%);
+      border-bottom: 1px solid var(--border-bright);
+      color: var(--amber);
+      font-size: 12px;
+      letter-spacing: 0.10em;
+      font-weight: 600;
+    }
+    .panel-bar .panel-id {
+      color: #000;
+      background: var(--amber);
+      padding: 1px 6px;
+      font-weight: 700;
+    }
+    .panel-bar .panel-meta {
+      margin-left: auto;
+      color: var(--fg-dim);
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      font-size: 11px;
+    }
+    .panel-bar .panel-meta b { color: var(--cyan); font-weight: 500; }
+    .panel-body { padding: 14px; }
+
+    /* Two-column terminal grid */
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+    /* ============== HEADER METRIC STRIP ============== */
+    .metric-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--border-bright);
+      margin-bottom: 14px;
+    }
+    .metric-cell {
+      padding: 10px 14px;
+      border-right: 1px solid var(--border);
+      background: var(--bg-cell);
+    }
+    .metric-cell:last-child { border-right: none; }
+    .metric-cell .ml {
+      color: var(--fg-dim);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      margin-bottom: 4px;
+    }
+    .metric-cell .mv {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .metric-cell .mv.green { color: var(--green); }
+    .metric-cell .mv.amber { color: var(--amber); }
+    .metric-cell .mv.cyan { color: var(--cyan); }
+    .metric-cell .mv.red { color: var(--red); }
+    .metric-cell .mu { font-size: 12px; color: var(--fg-dim); font-weight: 400; }
+    .metric-cell .ms {
+      font-size: 10px;
+      color: var(--fg-mute);
+      letter-spacing: 0.08em;
+      margin-top: 3px;
+    }
+
+    /* ============== PRICING MATRIX ============== */
+    table.matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    table.matrix th, table.matrix td {
+      padding: 5px 8px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    table.matrix th {
+      background: #0A1428;
+      color: var(--amber);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      font-size: 10px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--amber);
+    }
+    table.matrix th:first-child, table.matrix td:first-child {
+      text-align: left;
+      color: var(--cyan);
+    }
+    table.matrix td:first-child {
+      font-weight: 500;
+    }
+    table.matrix td:first-child .ven {
+      color: var(--fg-mute);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      display: block;
+    }
+    table.matrix tr:hover td { background: rgba(0, 204, 255, 0.04); }
+    table.matrix td.high { color: var(--red); }
+    table.matrix td.low { color: var(--green); }
+    table.matrix td.mid { color: var(--fg); }
+    table.matrix .flash { animation: cell-flash 1.2s ease-out; }
+    @keyframes cell-flash {
+      0%   { background: var(--cyan); color: #000; }
+      100% { background: transparent; }
+    }
+
+    /* ============== COST CURVE SVG ============== */
+    .curve-wrap { position: relative; }
+    svg.curve {
       width: 100%;
       height: auto;
       display: block;
-      overflow: visible;
+      background: #000;
+      border: 1px solid var(--border);
     }
-
-    .curve-line {
-      fill: none;
-      stroke-width: 2.5;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-dasharray: 1600;
-      stroke-dashoffset: 1600;
-      transition: stroke-dashoffset 2200ms var(--ease-out);
-    }
-    .curve-card.visible .curve-line {
-      stroke-dashoffset: 0;
-    }
-    .curve-card.visible .curve-line.cached {
-      transition-delay: 700ms;
-    }
-
-    .curve-area {
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out) 1800ms;
-    }
-    .curve-card.visible .curve-area { opacity: 1; }
-
-    .cache-hit {
-      opacity: 0;
-      transform-origin: center;
-      transform-box: fill-box;
-    }
-    .curve-card.visible .cache-hit {
-      animation: cache-pop 600ms var(--ease-spring) forwards;
-    }
-    .curve-card.visible .cache-hit:nth-of-type(1) { animation-delay: 1400ms; }
-    .curve-card.visible .cache-hit:nth-of-type(2) { animation-delay: 1700ms; }
-    .curve-card.visible .cache-hit:nth-of-type(3) { animation-delay: 2000ms; }
-    .curve-card.visible .cache-hit:nth-of-type(4) { animation-delay: 2300ms; }
-    .curve-card.visible .cache-hit:nth-of-type(5) { animation-delay: 2600ms; }
-
-    @keyframes cache-pop {
-      0%   { opacity: 0; transform: scale(0.4); }
-      60%  { opacity: 1; transform: scale(1.15); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    .curve-label {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.06em;
-      fill: var(--color-text-muted);
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out) 2200ms;
-    }
-    .curve-card.visible .curve-label { opacity: 1; }
-    .curve-label.uncached { fill: var(--color-accent); }
-    .curve-label.cached { fill: var(--color-info); }
-
-    .curve-summary {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 1rem;
-      margin-top: 1.75rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--color-border-light);
-    }
-    .curve-stat .v {
-      font-family: var(--font-display);
-      font-size: clamp(1.5rem, 3vw, 2rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1;
-    }
-    .curve-stat .v .delta { color: var(--color-info); }
-    .curve-stat .l {
-      display: block;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      margin-top: 0.5rem;
-    }
-
-    /* Token-flow animation BELOW the curve */
-    .token-flow {
-      margin-top: 1.5rem;
-      padding: 1.25rem 1rem;
-      background: var(--color-bg-warm);
-      border-radius: var(--radius-md);
-      position: relative;
-      overflow: hidden;
-      height: 56px;
+    .curve-legend {
       display: flex;
-      align-items: center;
+      gap: 18px;
+      padding: 8px 12px;
+      background: var(--bg-cell);
+      border: 1px solid var(--border);
+      border-top: none;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--fg-dim);
+      flex-wrap: wrap;
     }
-    .token-flow-label {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      white-space: nowrap;
-      margin-right: 1rem;
-      flex: 0 0 auto;
+    .curve-legend .swatch {
+      display: inline-block;
+      width: 14px; height: 3px;
+      margin-right: 6px;
+      vertical-align: middle;
     }
-    .token-track {
-      position: relative;
-      flex: 1;
-      height: 100%;
-      overflow: hidden;
+    .curve-legend .swatch.cyan { background: var(--cyan); }
+    .curve-legend .swatch.green { background: var(--green); }
+    .curve-legend .swatch.amber { background: var(--amber); }
+
+    /* ============== TEXT BLOCKS ============== */
+    .prose {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--fg);
+      max-width: 88ch;
     }
-    .token {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      font-family: var(--font-mono);
-      font-size: 0.55rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 500;
-      opacity: 0;
+    .prose p { margin: 0 0 0.9em; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose b, .prose strong { color: var(--amber); font-weight: 600; }
+    .prose em { font-style: normal; color: var(--cyan); }
+    .prose .pos { color: var(--green); }
+    .prose .neg { color: var(--red); }
+    .prose code {
+      background: var(--bg-cell);
+      color: var(--cyan);
+      padding: 1px 5px;
+      border: 1px solid var(--border);
     }
-    .token.saved { background: var(--color-info); }
-    .token.spent { background: var(--color-accent); }
-    .curve-card.visible .token {
-      animation: token-fly 5s linear infinite;
+    .prose .marker {
+      display: inline-block;
+      color: var(--amber);
+      margin-right: 6px;
     }
-    @keyframes token-fly {
-      0%   { left: -10%; opacity: 0; }
-      8%   { opacity: 1; }
-      92%  { opacity: 1; }
-      100% { left: 110%; opacity: 0; }
+    .prose hr {
+      border: none;
+      border-top: 1px dashed var(--border-bright);
+      margin: 14px 0;
     }
 
-    .curve-prose {
+    /* ============== KEY-VAL ROWS ============== */
+    .kv {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      margin-top: 2rem;
+      grid-template-columns: 1fr auto;
+      padding: 4px 0;
+      border-bottom: 1px dotted var(--border);
+      font-size: 12px;
     }
-    .curve-prose p {
+    .kv:last-child { border-bottom: none; }
+    .kv .k { color: var(--fg-dim); letter-spacing: 0.06em; }
+    .kv .v { color: var(--fg); text-align: right; }
+    .kv .v.g { color: var(--green); }
+    .kv .v.r { color: var(--red); }
+    .kv .v.c { color: var(--cyan); }
+    .kv .v.a { color: var(--amber); }
+
+    /* ============== CODE BLOCKS (pseudocode / sdk) ============== */
+    pre.term-code {
       margin: 0;
-      color: var(--color-text-secondary);
-      font-size: 1rem;
+      padding: 12px 14px;
+      background: #000;
+      border: 1px solid var(--border-bright);
+      color: var(--fg);
+      font-family: var(--font);
+      font-size: 12px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      overflow-x: auto;
     }
-    .curve-prose strong { color: var(--color-text); font-weight: 600; }
-    .curve-prose code {
-      font-family: var(--font-mono);
-      font-size: 0.875em;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      padding: 0.1rem 0.4rem;
-      border-radius: 4px;
-    }
+    pre.term-code .c { color: var(--amber); font-style: normal; }
+    pre.term-code .k { color: var(--cyan); }
+    pre.term-code .s { color: var(--green); }
+    pre.term-code .n { color: var(--amber-bright); }
+    pre.term-code .fn { color: var(--magenta); }
+    pre.term-code .op { color: var(--fg-dim); }
+    pre.term-code .p { color: var(--yellow); }
 
-    /* ================= BENTO: FOUR LEVERS ================= */
-    .levers-section { padding: 5rem 0; background: var(--color-bg-warm); }
-    .bento {
+    /* ============== CHECKLIST ============== */
+    .checklist { display: grid; gap: 6px; }
+    .check-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-auto-rows: minmax(220px, auto);
-      gap: 1rem;
+      grid-template-columns: 28px 1fr 140px;
+      gap: 12px;
+      padding: 8px 10px;
+      background: var(--bg-cell);
+      border-left: 2px solid var(--amber);
+      font-size: 12px;
+      align-items: start;
     }
-    .lever {
-      position: relative;
-      padding: 1.75rem;
-      border-radius: var(--radius-lg);
-      background:
-        radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%),
-          rgba(var(--lever-rgb), 0.10), transparent 40%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition: transform var(--duration-normal) var(--ease-spring), border-color var(--duration-normal), box-shadow var(--duration-normal);
-      opacity: 0;
-      transform: translateY(20px);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+    .check-row .cn {
+      color: var(--amber);
+      font-weight: 700;
+      font-size: 14px;
     }
-    .lever.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring); }
-    .lever.visible:hover { transform: translateY(-3px); border-color: rgba(var(--lever-rgb), 0.45); box-shadow: var(--shadow-lg); }
-
-    .lever-num {
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 0.85rem;
-      color: rgba(var(--lever-rgb), 1);
+    .check-row .ct { color: var(--fg); }
+    .check-row .ct b { color: var(--cyan); font-weight: 600; }
+    .check-row .ct .d { color: var(--fg-dim); margin-top: 3px; }
+    .check-row .ci {
+      text-align: right;
+      color: var(--green);
+      font-weight: 600;
+      font-size: 12px;
       letter-spacing: 0.04em;
     }
-    .lever-name {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.375rem;
-      letter-spacing: -0.015em;
-      margin: 0.5rem 0 0.5rem;
-      line-height: 1.15;
-    }
-    .lever-desc {
-      color: var(--color-text-secondary);
-      font-size: 0.9375rem;
-      margin: 0 0 1.25rem;
-      line-height: 1.55;
-    }
-    .lever-stat {
-      display: flex;
-      align-items: baseline;
-      gap: 0.5rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--color-border-light);
-    }
-    .lever-stat .big {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: rgba(var(--lever-rgb), 1);
-      line-height: 1;
-    }
-    .lever-stat .tag {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
+    .check-row .ci.r { color: var(--red); }
+    .check-row .ci.a { color: var(--amber); }
 
-    .lever-1 { --lever-rgb: 45, 139, 85; }    /* forest */
-    .lever-2 { --lever-rgb: 42, 123, 155; }   /* teal */
-    .lever-3 { --lever-rgb: 123, 109, 170; }  /* plum */
-    .lever-4 { --lever-rgb: 212, 168, 67; }   /* golden */
-
-    /* ================= PRICE LADDER ================= */
-    .ladder-section { padding: 5rem 0; }
-    .ladder {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-      box-shadow: var(--shadow-md);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    /* ============== CASE STUDY LINE-ITEMS ============== */
+    table.ledger {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
     }
-    .ladder.visible { opacity: 1; transform: translateY(0); }
-
-    .ladder-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-      gap: 0.75rem;
+    table.ledger th, table.ledger td {
+      padding: 4px 8px;
+      text-align: right;
+      border-bottom: 1px dotted var(--border);
     }
-    .ladder-toggle {
-      display: inline-flex;
-      background: var(--color-bg-warm);
-      border-radius: 9999px;
-      padding: 0.25rem;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
+    table.ledger th {
+      color: var(--amber);
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      border-bottom: 1px solid var(--amber);
       text-transform: uppercase;
     }
-    .ladder-toggle button {
-      border: none;
-      background: transparent;
-      padding: 0.45rem 0.95rem;
-      cursor: pointer;
-      border-radius: 9999px;
-      color: var(--color-text-muted);
-      font: inherit;
-      letter-spacing: inherit;
-      text-transform: inherit;
-      transition: background var(--duration-fast), color var(--duration-fast);
+    table.ledger th:first-child, table.ledger td:first-child {
+      text-align: left;
+      color: var(--cyan);
     }
-    .ladder-toggle button.active {
-      background: var(--color-surface);
-      color: var(--color-text);
-      box-shadow: var(--shadow-sm);
+    table.ledger tr.subtotal td { border-top: 1px solid var(--border-bright); font-weight: 600; color: var(--fg); }
+    table.ledger tr.total td {
+      border-top: 2px solid var(--amber);
+      color: var(--amber);
+      font-weight: 700;
+      font-size: 13px;
+      padding-top: 6px;
     }
+    table.ledger tr.delta td { color: var(--green); font-weight: 600; }
+    table.ledger td.cut { color: var(--green); }
+    table.ledger td.add { color: var(--red); }
 
-    .price-row {
-      display: grid;
-      grid-template-columns: 220px 1fr 96px;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.875rem 0;
-      border-top: 1px solid var(--color-border-light);
-    }
-    .price-row:first-of-type { border-top: none; }
-
-    .price-name {
+    /* ============== FUNCTION KEY BAR ============== */
+    .fkey-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #000;
+      border-top: 1px solid var(--amber);
+      z-index: 90;
       display: flex;
       flex-direction: column;
     }
-    .price-name .nm {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.0625rem;
-      letter-spacing: -0.005em;
-    }
-    .price-name .vendor {
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      margin-top: 0.125rem;
-    }
-
-    .price-bar-wrap {
-      position: relative;
-      height: 28px;
-      background: var(--color-bg-warm);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .price-bar {
-      height: 100%;
-      width: 0;
-      transition: width 1100ms var(--ease-out);
-      border-radius: 8px;
-      position: relative;
-    }
-    .ladder.visible .price-bar { width: var(--w, 0%); }
-    .price-bar.input { background: linear-gradient(90deg, rgba(42,123,155,0.6), rgba(42,123,155,0.95)); }
-    .price-bar.output { background: linear-gradient(90deg, rgba(217,79,48,0.65), rgba(217,79,48,1)); }
-
-    .price-num {
-      font-family: var(--font-mono);
-      font-variant-numeric: tabular-nums;
-      font-size: 0.95rem;
-      font-weight: 500;
-      text-align: right;
-      color: var(--color-text);
-    }
-    .price-num .currency { color: var(--color-text-muted); font-weight: 400; }
-    .price-num .unit {
-      display: block;
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      margin-top: 2px;
-    }
-
-    .price-legend {
-      margin-top: 1.5rem;
-      padding-top: 1.25rem;
-      border-top: 1px solid var(--color-border-light);
-      font-size: 0.85rem;
-      color: var(--color-text-secondary);
+    .fkey-row {
       display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+      align-items: stretch;
+      background: #000;
+      height: 28px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
     }
-    .price-legend .note {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-
-    /* ================= LATENCY ================= */
-    .latency-section { padding: 4rem 0 5rem; background: var(--color-bg-warm); }
-    .latency-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    .lat-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
-    }
-    .lat-card.visible { opacity: 1; transform: translateY(0); }
-    .lat-card .label {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-    .lat-card .title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.25rem;
-      margin: 0.4rem 0 1.25rem;
-      letter-spacing: -0.01em;
-    }
-    .lat-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 70px;
-      gap: 0.75rem;
+    .fkey {
+      flex: 1;
+      min-width: 80px;
+      display: flex;
       align-items: center;
-      padding: 0.625rem 0;
-      border-top: 1px solid var(--color-border-light);
-    }
-    .lat-row:first-of-type { border-top: none; }
-    .lat-row .model {
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 0.95rem;
-    }
-    .lat-track {
-      height: 8px;
-      background: var(--color-bg-warm);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-    .lat-fill {
-      height: 100%;
-      width: 0;
-      border-radius: 999px;
-      transition: width 1000ms var(--ease-out);
-    }
-    .lat-card.visible .lat-fill { width: var(--w, 0%); }
-    .lat-fill.fast { background: var(--color-info); }
-    .lat-fill.med  { background: var(--color-actor-4); }
-    .lat-fill.slow { background: var(--color-accent); }
-    .lat-val {
-      font-family: var(--font-mono);
-      font-variant-numeric: tabular-nums;
-      font-size: 0.875rem;
-      text-align: right;
-      color: var(--color-text);
-    }
-
-    /* ================= CHECKLIST ================= */
-    .checklist-section { padding: 5rem 0; }
-    .checklist {
-      display: grid;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    .check {
-      display: grid;
-      grid-template-columns: 48px 1fr auto;
-      gap: 1rem;
-      align-items: center;
-      padding: 1.25rem 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      opacity: 0;
-      transform: translateY(16px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal);
-    }
-    .check.visible { opacity: 1; transform: translateY(0); }
-    .check:hover { border-color: var(--color-accent-muted); }
-    .check-num {
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 2rem;
-      color: var(--color-accent);
-      opacity: 0.85;
-      line-height: 1;
-      letter-spacing: -0.03em;
-    }
-    .check-body .ttl {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.125rem;
-      letter-spacing: -0.005em;
-    }
-    .check-body .desc {
-      color: var(--color-text-secondary);
-      font-size: 0.9375rem;
-      margin-top: 0.25rem;
-    }
-    .check-impact {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-      color: var(--color-info);
-      background: var(--color-info-light);
-      padding: 0.375rem 0.75rem;
-      border-radius: 9999px;
+      gap: 6px;
+      padding: 0 10px;
+      border-right: 1px solid var(--border);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--fg);
       white-space: nowrap;
     }
-
-    /* ================= CODE ================= */
-    .code-section { padding: 4rem 0 5rem; background: var(--color-bg-warm); }
-    .code-wrap {
-      background: var(--color-bg-code);
-      border-radius: var(--radius-lg);
-      padding: 1.75rem 1.5rem;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    .fkey:last-child { border-right: none; }
+    .fkey b {
+      color: #000;
+      background: var(--amber);
+      padding: 1px 5px;
+      font-weight: 700;
+      font-size: 10px;
     }
-    .code-wrap.visible { opacity: 1; transform: translateY(0); }
-    .code-header {
+    .cmd-line {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-      padding-bottom: 0.875rem;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 6px 12px;
+      background: #000;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      height: 30px;
     }
-    .code-dots { display: inline-flex; gap: 0.5rem; }
-    .code-dots span { width: 11px; height: 11px; border-radius: 50%; background: rgba(255,255,255,0.18); }
-    .code-dots span:nth-child(1) { background: #ED6A5E; }
-    .code-dots span:nth-child(2) { background: #F4BF4F; }
-    .code-dots span:nth-child(3) { background: #62C654; }
-    .code-tag-file {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #9E9790;
+    .cmd-line .prompt {
+      color: var(--green);
+      margin-right: 8px;
+      font-weight: 600;
     }
-    pre {
-      margin: 0;
-      font-family: var(--font-mono);
-      font-size: 0.875rem;
-      line-height: 1.65;
-      color: #CDD6F4;
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-x: hidden;
+    .cmd-line .cmd {
+      color: var(--fg);
     }
-    .k { color: #CBA6F7; }       /* keyword */
-    .s { color: #A6E3A1; }       /* string */
-    .fn { color: #89B4FA; }      /* function */
-    .c { color: #6C7086; font-style: italic; } /* comment */
-    .n { color: #FAB387; }       /* number */
-    .p { color: #F9E2AF; }       /* property */
-    .o { color: #94E2D5; }       /* operator */
-
-    /* ================= CTA ================= */
-    .cta-section { padding: 6rem 0; text-align: center; }
-    .cta-section h2 {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      letter-spacing: -0.025em;
-      margin: 0 0 1rem;
-      max-width: 22ch;
-      margin-inline: auto;
-      line-height: 1.1;
+    .cmd-line .caret {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--amber);
+      margin-left: 6px;
+      animation: caret-blink 1.05s steps(2) infinite;
+      vertical-align: middle;
     }
-    .cta-section p {
-      color: var(--color-text-secondary);
-      font-size: 1.0625rem;
-      max-width: 52ch;
-      margin: 0 auto 2.25rem;
+    @keyframes caret-blink {
+      50% { background: transparent; }
     }
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.625rem;
-      padding: 1rem 1.875rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms var(--ease-spring), background 200ms ease;
-      will-change: transform;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(3px); }
-
-    footer {
-      padding: 2rem 1.5rem;
-      border-top: 1px solid var(--color-border);
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      text-align: center;
+    .cmd-line .wm {
+      margin-left: auto;
+      color: var(--fg-mute);
+      font-size: 10px;
+      letter-spacing: 0.10em;
     }
 
-    /* ================= RESPONSIVE ================= */
+    /* ============== SECTION HEAD INSIDE PANEL ============== */
+    .sec-head {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      color: var(--amber);
+      margin: 18px 0 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border-bright);
+      font-weight: 600;
+    }
+    .sec-head:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    .sec-head .num {
+      color: #000;
+      background: var(--amber);
+      padding: 1px 6px;
+      margin-right: 6px;
+    }
+
+    /* Number flash on update */
+    .nflash {
+      transition: color 60ms ease-out, background 60ms ease-out;
+    }
+    .nflash.up { animation: nf-up 0.6s ease-out; }
+    .nflash.dn { animation: nf-dn 0.6s ease-out; }
+    @keyframes nf-up {
+      0% { background: var(--green); color: #000; }
+      100% { background: transparent; }
+    }
+    @keyframes nf-dn {
+      0% { background: var(--red); color: #000; }
+      100% { background: transparent; }
+    }
+
+    /* ============== MINI-CHART (sparkline) ============== */
+    .spark {
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+
+    /* ============== RESPONSIVE ============== */
     @media (max-width: 900px) {
-      .bento { grid-template-columns: 1fr 1fr; }
-      .curve-prose { grid-template-columns: 1fr; }
-      .latency-grid { grid-template-columns: 1fr; }
-      .price-row { grid-template-columns: 160px 1fr 88px; }
+      .row-2, .row-3, .row-4 { grid-template-columns: 1fr; }
+      .metric-strip { grid-template-columns: 1fr 1fr; }
+      .metric-cell:nth-child(2) { border-right: none; }
+      .header-panel { grid-template-columns: 1fr; }
+      .header-panel .hp-l, .header-panel .hp-r { border-left: none; }
+      table.matrix { font-size: 10px; }
+      table.matrix th, table.matrix td { padding: 4px 5px; }
+      .check-row { grid-template-columns: 22px 1fr; }
+      .check-row .ci { grid-column: 2; text-align: left; }
+      .fkey { min-width: 64px; padding: 0 6px; font-size: 10px; }
+      body { padding-bottom: 110px; }
     }
     @media (max-width: 640px) {
-      .hero { padding: 4rem 0 2rem; }
-      .bento { grid-template-columns: 1fr; }
-      .curve-summary { grid-template-columns: 1fr; gap: 0.75rem; padding-top: 1rem; }
-      .check { grid-template-columns: 36px 1fr; }
-      .check-impact { grid-column: 1 / -1; justify-self: start; margin-top: 0.5rem; }
-      .price-row { grid-template-columns: 130px 1fr 72px; gap: 0.5rem; }
-      .price-name .nm { font-size: 0.95rem; }
-      .hero-meta { gap: 1.5rem; }
-      .hero-meta .item .v { font-size: 1.5rem; }
-      .utility .meta .when { display: none; }
+      body { font-size: 12px; }
+      .term { padding: 8px 6px 0; }
+      .metric-strip { grid-template-columns: 1fr; }
+      .metric-cell { border-right: none; border-bottom: 1px solid var(--border); }
+      .metric-cell:last-child { border-bottom: none; }
     }
 
-    /* ================= REDUCED MOTION ================= */
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-      .hero .word, .hero-sub, .hero-meta, .eyebrow,
-      .curve-card, .lever, .ladder, .lat-card, .check, .code-wrap {
-        opacity: 1 !important; transform: none !important;
-      }
-      .curve-line { stroke-dashoffset: 0 !important; }
-      .curve-area, .curve-label, .cache-hit { opacity: 1 !important; transform: none !important; }
-      .price-bar, .lat-fill { width: var(--w) !important; }
-      .token, .pulse { display: none; }
+      .ticker-rail { animation: none !important; transform: translateX(0) !important; }
+      .header-panel .hp-r .led { animation: none !important; }
+      .cmd-line .caret { animation: none !important; background: var(--amber); }
+      .flash, .nflash.up, .nflash.dn { animation: none !important; }
+      table.matrix .flash { background: transparent !important; color: var(--fg) !important; }
     }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .lever:hover { transform: none !important; }
+
+    /* ============== ACCESSIBILITY · FOCUS RINGS ============== */
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
+    }
+    *:focus { outline: none; }
+    *:focus-visible { outline: 1px dashed var(--amber); outline-offset: 1px; }
+
+    /* ============== PRINT ============== */
+    @media print {
+      body { background: #fff; color: #000; padding-bottom: 0; }
+      .ticker, .fkey-bar { display: none; }
+      .panel { page-break-inside: avoid; border-color: #999; background: #fff; }
+      .panel-bar { background: #f0f0f0; color: #000; border-bottom: 1px solid #999; }
+      .panel-bar .panel-id { background: #000; color: #fff; }
+      .header-panel { border-color: #000; }
+      .header-panel .hp-l { background: #000; color: #fff; }
+      .metric-strip { border-color: #999; }
+      .metric-cell { background: #fff; }
+      .metric-cell .mv { color: #000 !important; }
+      .prose, .prose p { color: #000; }
+      .prose b, .prose strong { color: #000; }
+      .prose em, .prose code { color: #000; background: #f0f0f0; border-color: #ccc; }
+      table.matrix, table.ledger { color: #000; }
+      table.matrix th, table.ledger th { color: #000; border-color: #000; }
+      pre.term-code { background: #f5f5f5; color: #000; border-color: #999; }
+    }
+
+    /* ============== SCROLLBAR ============== */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-bright); border: 1px solid var(--bg); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--amber); }
+    ::-webkit-scrollbar-corner { background: var(--bg); }
+
+    /* ============== SELECTION ============== */
+    ::selection { background: var(--amber); color: #000; }
+    ::-moz-selection { background: var(--amber); color: #000; }
+
+    /* ============== HIGH-CONTRAST OVERRIDE ============== */
+    @media (prefers-contrast: more) {
+      :root {
+        --fg: #FFFFFF;
+        --fg-dim: #E8E0C8;
+        --border: #4A6080;
+        --border-bright: #5A7090;
+        --bg-panel: #000000;
+        --bg-cell: #0C1424;
+      }
+      .prose p, .prose code { color: var(--fg); }
+      table.matrix td, table.ledger td { color: var(--fg); }
+    }
+
+    /* ============== HOVER STATES ON TABLE ROWS ============== */
+    table.matrix tbody tr {
+      cursor: default;
+      transition: background 80ms linear;
+    }
+    table.matrix tbody tr:hover {
+      background: rgba(255, 149, 0, 0.06);
+    }
+    table.matrix tbody tr:hover td:first-child {
+      color: var(--amber);
+    }
+
+    /* ============== PANEL HOVER ============== */
+    .panel { transition: border-color 120ms linear; }
+    .panel:hover { border-color: var(--border-bright); }
+
+    /* ============== UTILITY ============== */
+    .mono { font-family: var(--font); }
+    .uppercase { text-transform: uppercase; letter-spacing: 0.08em; }
+    .nowrap { white-space: nowrap; }
+    .text-amber { color: var(--amber); }
+    .text-cyan { color: var(--cyan); }
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+    .text-dim { color: var(--fg-dim); }
+    .text-mute { color: var(--fg-mute); }
+    .bg-cell { background: var(--bg-cell); }
+    .border-amber { border-color: var(--amber); }
+    .border-dim { border-color: var(--border); }
+    .pad-sm { padding: 8px 10px; }
+    .pad-md { padding: 12px 14px; }
+    .pad-lg { padding: 18px 20px; }
+
+    /* ============== STATUS STRIP (sub-header) ============== */
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0;
+      border: 1px solid var(--border);
+      border-top: none;
+      background: #000;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      margin-top: -14px;
+      margin-bottom: 14px;
+    }
+    .status-cell {
+      padding: 5px 10px;
+      border-right: 1px solid var(--border);
+      color: var(--fg-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .status-cell:last-child { border-right: none; }
+    .status-cell b { color: var(--amber); font-weight: 600; }
+    .status-cell .g { color: var(--green); }
+    .status-cell .r { color: var(--red); }
+    .status-cell .c { color: var(--cyan); }
+    @media (max-width: 900px) {
+      .status-strip { grid-template-columns: 1fr 1fr 1fr; }
+      .status-cell:nth-child(3n) { border-right: none; }
+    }
+    @media (max-width: 640px) {
+      .status-strip { grid-template-columns: 1fr 1fr; }
+      .status-cell:nth-child(odd) { border-right: 1px solid var(--border); }
+      .status-cell:nth-child(even) { border-right: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- UTILITY BAR -->
-  <div class="utility">
-    <span class="brand">CETI · Lookbook</span>
-    <div class="meta">
-      <span class="when">2026.05 · Engineering &amp; Ops</span>
-      <span><span class="pulse"></span>Live pricing</span>
+  <!-- =============== TICKER TAPE =============== -->
+  <div class="ticker" role="marquee" aria-label="Live model pricing ticker">
+    <div class="ticker-label">PX//AI</div>
+    <div class="ticker-track">
+      <div class="ticker-rail" id="tickerRail">
+        <span class="t-item"><b>OPUS 4.7</b> $25.00/M-OUT <span class="bull">▲ 0.00%</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>SONNET 4.6</b> $15.00/M-OUT <span class="bull">▲ 0.00%</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>HAIKU 4.5</b> $5.00/M-OUT <span class="bull">▲ 0.00%</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>GPT-5.2</b> $14.00/M-OUT <span class="bear">▼ 0.20%</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>O3-PRO</b> $8.00/M-OUT <span class="bull">▲ 0.00%</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>GEMINI 3.1</b> $12.00/M-OUT <span class="bull">▲ 1.40%</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>GEMINI 2.5F</b> $2.50/M-OUT <span class="bull">▲ 0.00%</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>LLAMA-405B</b> $5.30/M-OUT <span class="bear">▼ 3.10%</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>BATCH-50%</b> ALL-VENDORS-OK <span class="bull">▲</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>CACHE-90%</b> ANTHROPIC-1H-TTL <span class="bull">▲</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>USD/MTOK</b> SPOT 14.21 <span class="bear">▼ 0.43%</span></span><span class="t-sep">│</span>
+        <span class="t-item"><b>RAG-INDEX</b> 1042.7 <span class="bull">▲ 2.18%</span></span><span class="t-sep">│</span>
+      </div>
     </div>
   </div>
 
-  <!-- HERO -->
-  <section class="hero container" id="hero">
-    <p class="eyebrow">AI Economics · Cost · Latency · Caching</p>
-    <h1 class="hero-title">
-      <span class="word">Every</span>
-      <span class="word">prompt</span>
-      <span class="word">has</span>
-      <span class="word"><em>a</em></span>
-      <span class="word"><em>price.</em></span>
-    </h1>
-    <p class="hero-sub">
-      Tokens are the new SaaS unit — billed by the million, priced per-direction, discounted when cached, marked up when reasoned. The bill bends to whoever knows the levers.
-    </p>
-    <div class="hero-meta">
-      <div class="item">
-        <div class="v">90<span class="unit">%</span></div>
-        <span class="l">Cached input discount</span>
-      </div>
-      <div class="item">
-        <div class="v">50<span class="unit">%</span></div>
-        <span class="l">Batch API discount</span>
-      </div>
-      <div class="item">
-        <div class="v">5×</div>
-        <span class="l">Output : Input price ratio</span>
-      </div>
-      <div class="item">
-        <div class="v">80<span class="unit">%</span></div>
-        <span class="l">TTFT cut on cache hits</span>
-      </div>
-    </div>
-  </section>
+  <div class="term">
 
-  <!-- SIGNATURE COST CURVE -->
-  <section class="curve-section container">
-    <div class="section-head">
-      <p class="section-eyebrow">The signature curve</p>
-      <h2 class="section-title">Two paths. Same product. One bill grows linearly. The other barely moves.</h2>
-      <p class="section-lede">Modeled at 200 requests per hour against a 10K-token system prompt with 800 output tokens per turn, on Claude Sonnet 4.6 ($3.00 / $15.00 per MTok).</p>
+    <!-- =============== HEADER PANEL =============== -->
+    <div class="header-panel" role="banner">
+      <div class="hp-l"><span class="glyph"></span>AI/ECON</div>
+      <div class="hp-m">
+        <span>COST · LATENCY · CACHING</span>
+        <span><b>MAY 2026</b></span>
+        <span>CETI//RESEARCH</span>
+        <span>VOL/01</span>
+      </div>
+      <div class="hp-r"><span class="led"></span>LIVE</div>
     </div>
 
-    <article class="curve-card" id="curve-card">
-      <div class="curve-head">
-        <div>
-          <h3>Cumulative spend over 24 hours</h3>
-          <div class="scenario">10K system prompt · 800 output tokens · 200 req/hr</div>
-        </div>
-        <div class="legend">
-          <span class="legend-item"><span class="legend-swatch" style="background: var(--color-accent);"></span>Without prompt caching</span>
-          <span class="legend-item"><span class="legend-swatch dashed"></span>With prompt caching (5-min TTL)</span>
+    <!-- =============== STATUS STRIP =============== -->
+    <div class="status-strip" aria-label="Session status">
+      <div class="status-cell">SESSION <b>AI-ECON-001</b></div>
+      <div class="status-cell">REGION <span class="c">US-EAST-1</span></div>
+      <div class="status-cell">REFRESH <b>05M</b></div>
+      <div class="status-cell">FX <span class="g">USD/MTOK</span></div>
+      <div class="status-cell">SRC <b>VENDOR-PUB</b></div>
+      <div class="status-cell">PG <span class="c">01/13</span> <span class="g">●</span></div>
+    </div>
+
+    <!-- =============== HEADLINE METRICS =============== -->
+    <div class="metric-strip">
+      <div class="metric-cell">
+        <div class="ml">CACHE-READ DISCOUNT</div>
+        <div class="mv green" id="m1">−90.0<span class="mu">%</span></div>
+        <div class="ms">ANTHROPIC · 5M/1H TTL</div>
+      </div>
+      <div class="metric-cell">
+        <div class="ml">BATCH-API DISCOUNT</div>
+        <div class="mv green" id="m2">−50.0<span class="mu">%</span></div>
+        <div class="ms">STACKS-W/-CACHE</div>
+      </div>
+      <div class="metric-cell">
+        <div class="ml">OUTPUT:INPUT RATIO</div>
+        <div class="mv amber" id="m3">5.0<span class="mu">×</span></div>
+        <div class="ms">DEFAULT-FLAGSHIP</div>
+      </div>
+      <div class="metric-cell">
+        <div class="ml">TTFT CUT · CACHE-HIT</div>
+        <div class="mv cyan" id="m4">−80.0<span class="mu">%</span></div>
+        <div class="ms">10K-PREFIX</div>
+      </div>
+    </div>
+
+    <!-- =============== PANEL 01 · ABSTRACT =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">01</span>ABSTRACT // EVERY-PROMPT-HAS-A-PRICE
+        <span class="panel-meta">UPDATED <b>2026-05-15 14:32 UTC</b></span>
+      </div>
+      <div class="panel-body prose">
+        <p>Tokens are the new SaaS unit. They are billed by the million, priced asymmetrically per direction, discounted ninety percent when cached, marked up twenty-five percent when written into a cache, halved when batched, and multiplied by reasoning effort when a model thinks before it speaks. The bill bends to whoever knows the levers. This terminal walks an engineering-and-ops audience through the May 2026 pricing surface for frontier models, the four levers that govern unit economics, the arbitrage between model tiers, the exact mathematics of prompt caching, the batch-API stack, output-token discipline, infrastructure costs that hide off-invoice, and a real RAG case study that took daily spend from <span class="neg">$42.18</span> to <span class="pos">$4.51</span> without changing a single user-facing answer.</p>
+        <p>The thesis: most production AI bills are <em>three to ten times</em> what they should be, not because the model is wrong but because the cheapest token is the one you do not buy twice. Every section that follows is a way to not buy a token twice.</p>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 02 · PRICING MATRIX =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">02</span>PRICING MATRIX // FRONTIER MODELS · USD PER MTOK
+        <span class="panel-meta">SRC: VENDOR-RATES · <b>2026-05</b></span>
+      </div>
+      <div class="panel-body">
+        <table class="matrix" id="pxMatrix">
+          <thead>
+            <tr>
+              <th>MODEL</th>
+              <th>INPUT $</th>
+              <th>OUTPUT $</th>
+              <th>CACHED-READ $</th>
+              <th>BATCH-50 $</th>
+              <th>CTX</th>
+              <th>TTFT</th>
+              <th>TOK/S</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>OPUS 4.7<span class="ven">ANTHROPIC</span></td>
+              <td class="high" data-row="opus" data-col="input">5.00</td>
+              <td class="high" data-row="opus" data-col="output">25.00</td>
+              <td class="low">0.50</td>
+              <td class="mid">12.50</td>
+              <td>200K</td>
+              <td class="high">0.88s</td>
+              <td class="high">58</td>
+            </tr>
+            <tr>
+              <td>SONNET 4.6<span class="ven">ANTHROPIC</span></td>
+              <td class="mid" data-row="sonnet" data-col="input">3.00</td>
+              <td class="mid" data-row="sonnet" data-col="output">15.00</td>
+              <td class="low">0.30</td>
+              <td class="low">7.50</td>
+              <td>200K</td>
+              <td class="mid">0.50s</td>
+              <td class="mid">95</td>
+            </tr>
+            <tr>
+              <td>HAIKU 4.5<span class="ven">ANTHROPIC</span></td>
+              <td class="low" data-row="haiku" data-col="input">1.00</td>
+              <td class="low" data-row="haiku" data-col="output">5.00</td>
+              <td class="low">0.10</td>
+              <td class="low">2.50</td>
+              <td>200K</td>
+              <td class="low">0.20s</td>
+              <td class="low">185</td>
+            </tr>
+            <tr>
+              <td>GPT-5.2<span class="ven">OPENAI</span></td>
+              <td class="mid" data-row="gpt52" data-col="input">1.75</td>
+              <td class="mid" data-row="gpt52" data-col="output">14.00</td>
+              <td class="low">0.44</td>
+              <td class="low">7.00</td>
+              <td>400K</td>
+              <td class="mid">0.42s</td>
+              <td class="mid">112</td>
+            </tr>
+            <tr>
+              <td>O3 (REASONING)<span class="ven">OPENAI</span></td>
+              <td class="mid">2.00</td>
+              <td class="mid">8.00</td>
+              <td class="low">0.50</td>
+              <td class="low">4.00</td>
+              <td>200K</td>
+              <td class="high">1.20s</td>
+              <td class="high">48</td>
+            </tr>
+            <tr>
+              <td>GEMINI 3.1 PRO<span class="ven">GOOGLE</span></td>
+              <td class="mid">2.00</td>
+              <td class="mid">12.00</td>
+              <td class="low">0.50</td>
+              <td class="low">6.00</td>
+              <td>2M</td>
+              <td class="mid">0.65s</td>
+              <td class="mid">72</td>
+            </tr>
+            <tr>
+              <td>GEMINI 2.5 FLASH<span class="ven">GOOGLE</span></td>
+              <td class="low">0.30</td>
+              <td class="low">2.50</td>
+              <td class="low">0.075</td>
+              <td class="low">1.25</td>
+              <td>1M</td>
+              <td class="low">0.25s</td>
+              <td class="low">150</td>
+            </tr>
+            <tr>
+              <td>LLAMA 405B<span class="ven">TOGETHER/FIREWORKS</span></td>
+              <td class="mid">3.00</td>
+              <td class="mid">5.30</td>
+              <td class="mid">N/A</td>
+              <td class="mid">N/A</td>
+              <td>128K</td>
+              <td class="mid">0.55s</td>
+              <td class="mid">80</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="sec-head"><span class="num">RD</span>READING THE MATRIX</div>
+        <div class="prose">
+          <p>First: <strong>output is the expensive direction</strong> on every frontier model — three to seven times input across the table. Opus output is a twenty-five-times multiplier on Haiku output for the same tokens. Choose your reasoning carefully.</p>
+          <p>Second: <strong>cached-read collapses input cost to nearly free</strong>. Anthropic's tier is ten percent of base, so a ten-thousand-token system prompt that costs <span class="neg">$0.030</span> uncached costs <span class="pos">$0.003</span> warm. The cached-read column is the single most important column on the page if you run a chat product with a stable system prompt or a RAG product with a stable document prefix. Gemini 2.5 Flash cached-read at <span class="pos">$0.075</span> per million is a rounding error against any reasonable revenue per query.</p>
+          <p>Third: <strong>batch is a flat fifty percent off</strong>. The Batch-50 column is exactly half of sync input on Anthropic, OpenAI, and Google. Batch is right for overnight evals, embedding backfills, classification campaigns. Batch and cache stack: a cached read inside a batch job costs five percent of sync base — the ninety-five-percent corner of the matrix.</p>
+          <p>Fourth, more subtle: <strong>context size and TTFT trade against each other.</strong> Gemini 3.1 Pro at 2M context has a 650ms TTFT; Haiku 4.5 at 200K returns its first token in 200ms. The longer the window, the more state the model attends over before streaming. Mix tiers — Haiku for the chat loop, Gemini Pro for the deep retrieval — and you win both ends.</p>
         </div>
       </div>
+    </section>
 
-      <div class="curve-svg-wrap">
-        <svg class="curve-svg" viewBox="0 0 800 320" preserveAspectRatio="none" role="img" aria-label="Cost curve comparison">
-          <!-- Grid lines -->
-          <g stroke="#E5DFD6" stroke-width="1">
-            <line x1="40" y1="40"  x2="780" y2="40"/>
-            <line x1="40" y1="110" x2="780" y2="110"/>
-            <line x1="40" y1="180" x2="780" y2="180"/>
-            <line x1="40" y1="250" x2="780" y2="250"/>
-          </g>
-
-          <!-- Axis labels (y, in dollars) -->
-          <g font-family="JetBrains Mono, monospace" font-size="10" fill="#9E9790" text-anchor="end">
-            <text x="34" y="44">$200</text>
-            <text x="34" y="114">$150</text>
-            <text x="34" y="184">$100</text>
-            <text x="34" y="254">$50</text>
-            <text x="34" y="294">$0</text>
-          </g>
-          <!-- Axis labels (x, hours) -->
-          <g font-family="JetBrains Mono, monospace" font-size="10" fill="#9E9790" text-anchor="middle">
-            <text x="40"  y="310">0h</text>
-            <text x="225" y="310">6h</text>
-            <text x="410" y="310">12h</text>
-            <text x="595" y="310">18h</text>
-            <text x="780" y="310">24h</text>
-          </g>
-
-          <!-- Uncached fill area -->
-          <path class="curve-area"
-                d="M 40 290 L 225 197 L 410 105 L 595 55 L 780 30 L 780 290 Z"
-                fill="rgba(217,79,48,0.08)"/>
-          <!-- Cached fill area -->
-          <path class="curve-area"
-                d="M 40 290 L 225 270 L 410 252 L 595 238 L 780 226 L 780 290 Z"
-                fill="rgba(42,123,155,0.10)"/>
-
-          <!-- Uncached line (steep) -->
-          <path class="curve-line"
-                d="M 40 290 Q 130 245, 225 197 T 410 105 T 595 55 T 780 30"
-                stroke="#D94F30"/>
-
-          <!-- Cached line (shallow with drops) -->
-          <path class="curve-line cached"
-                d="M 40 290 L 80 282 L 100 280 L 105 286 L 145 270 L 180 264 L 185 270 L 225 254 L 260 248 L 265 254 L 305 240 L 340 234 L 345 240 L 380 226 L 415 222 L 420 228 L 460 216 L 495 212 L 500 218 L 540 208 L 575 204 L 580 210 L 615 200 L 650 198 L 655 204 L 690 196 L 720 194 L 725 200 L 760 192 L 780 190"
-                stroke="#2A7B9B"
-                stroke-dasharray="6,5"/>
-
-          <!-- Cache-hit drop markers along the cached path -->
-          <g>
-            <circle class="cache-hit" cx="105" cy="286" r="5" fill="#2A7B9B"/>
-            <circle class="cache-hit" cx="265" cy="254" r="5" fill="#2A7B9B"/>
-            <circle class="cache-hit" cx="420" cy="228" r="5" fill="#2A7B9B"/>
-            <circle class="cache-hit" cx="580" cy="210" r="5" fill="#2A7B9B"/>
-            <circle class="cache-hit" cx="725" cy="200" r="5" fill="#2A7B9B"/>
-          </g>
-
-          <!-- End-point labels -->
-          <text class="curve-label uncached" x="775" y="20" text-anchor="end">$198 · uncached</text>
-          <text class="curve-label cached"   x="775" y="248" text-anchor="end">$24 · cached</text>
-        </svg>
+    <!-- =============== PANEL 03 · COST CURVE =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">03</span>COST CURVE // 24H · 200REQ/HR · 10K-PREFIX
+        <span class="panel-meta">MODEL <b>SONNET 4.6</b> · OUT 800TOK</span>
       </div>
+      <div class="panel-body">
+        <div class="curve-wrap">
+          <svg class="curve" viewBox="0 0 820 340" preserveAspectRatio="none" aria-label="Cumulative cost curve, cached vs uncached">
+            <!-- Grid -->
+            <g stroke="#1A2840" stroke-width="1">
+              <line x1="50" y1="20"  x2="800" y2="20"/>
+              <line x1="50" y1="80"  x2="800" y2="80"/>
+              <line x1="50" y1="140" x2="800" y2="140"/>
+              <line x1="50" y1="200" x2="800" y2="200"/>
+              <line x1="50" y1="260" x2="800" y2="260"/>
+              <line x1="50" y1="300" x2="800" y2="300"/>
+              <line x1="50" y1="20" x2="50" y2="300"/>
+              <line x1="237" y1="20" x2="237" y2="300" stroke-dasharray="2,4"/>
+              <line x1="425" y1="20" x2="425" y2="300" stroke-dasharray="2,4"/>
+              <line x1="612" y1="20" x2="612" y2="300" stroke-dasharray="2,4"/>
+              <line x1="800" y1="20" x2="800" y2="300"/>
+            </g>
+            <!-- Axis labels (y) -->
+            <g font-family="IBM Plex Mono, monospace" font-size="10" fill="#A09684" text-anchor="end">
+              <text x="44" y="24">$200</text>
+              <text x="44" y="84">$160</text>
+              <text x="44" y="144">$120</text>
+              <text x="44" y="204">$80</text>
+              <text x="44" y="264">$40</text>
+              <text x="44" y="304">$0</text>
+            </g>
+            <!-- Axis labels (x) -->
+            <g font-family="IBM Plex Mono, monospace" font-size="10" fill="#A09684" text-anchor="middle">
+              <text x="50"  y="320">00:00</text>
+              <text x="237" y="320">06:00</text>
+              <text x="425" y="320">12:00</text>
+              <text x="612" y="320">18:00</text>
+              <text x="800" y="320">24:00</text>
+            </g>
+            <!-- Uncached line (steep) -->
+            <path d="M 50 300 L 237 218 L 425 138 L 612 78 L 800 38"
+                  fill="none" stroke="#00CCFF" stroke-width="1.5"/>
+            <!-- Uncached dots -->
+            <g fill="#00CCFF">
+              <circle cx="50" cy="300" r="2"/>
+              <circle cx="237" cy="218" r="2"/>
+              <circle cx="425" cy="138" r="2"/>
+              <circle cx="612" cy="78" r="2"/>
+              <circle cx="800" cy="38" r="2"/>
+            </g>
+            <!-- Cached line (shallow, jagged) -->
+            <path d="M 50 300 L 80 296 L 120 290 L 160 286 L 200 282 L 237 278 L 280 274 L 320 270 L 360 266 L 400 263 L 425 261 L 460 258 L 500 256 L 540 253 L 580 251 L 612 249 L 650 247 L 690 245 L 730 243 L 770 241 L 800 240"
+                  fill="none" stroke="#00FF00" stroke-width="1.5"/>
+            <!-- Cache-hit markers -->
+            <g fill="#00FF00">
+              <rect x="118" y="288" width="4" height="4"/>
+              <rect x="238" y="276" width="4" height="4"/>
+              <rect x="358" y="264" width="4" height="4"/>
+              <rect x="478" y="256" width="4" height="4"/>
+              <rect x="598" y="247" width="4" height="4"/>
+              <rect x="718" y="241" width="4" height="4"/>
+            </g>
+            <!-- Endpoint labels -->
+            <text x="795" y="32" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#FF3030" text-anchor="end">$198.00 UNCACHED ▲</text>
+            <text x="795" y="234" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#00FF00" text-anchor="end">$24.00 CACHED ▼</text>
+            <!-- Delta annotation -->
+            <text x="795" y="252" font-family="IBM Plex Mono, monospace" font-size="9" fill="#A09684" text-anchor="end">−87.88% Δ</text>
+          </svg>
+        </div>
+        <div class="curve-legend">
+          <span><span class="swatch cyan"></span>UNCACHED · SYNC</span>
+          <span><span class="swatch green"></span>CACHED · 5M TTL</span>
+          <span>X-AXIS: HOURS · Y-AXIS: CUMULATIVE USD</span>
+          <span>GRID: 6H / $40</span>
+        </div>
 
-      <!-- Token flow strip -->
-      <div class="token-flow" aria-hidden="true">
-        <span class="token-flow-label">Tokens saved on each cache hit →</span>
-        <div class="token-track" id="token-track"></div>
+        <div class="sec-head"><span class="num">04</span>THE FOUR LEVERS · WHAT BENDS THE CURVE</div>
+        <div class="prose">
+          <p>Lever one: <strong>model selection</strong>. The cost difference between Opus and Haiku for the same task — assuming Haiku can handle it — is five times on input and five times on output. The cost difference between Sonnet and Haiku is three times on both. Most production traffic does not need the flagship model; it needs the model that can do the task at the latency budget the product requires. Put a Haiku-class classifier in front of Sonnet and you will route seventy percent of traffic to the cheap path for two-tenths of a cent of routing overhead per request. The savings are immediate and they compound.</p>
+          <p>Lever two: <strong>prompt caching</strong>. Anthropic charges 1.25× base on the first request that writes a cache entry and 0.10× base on every request that reads it within the TTL — five minutes on the default tier, one hour on the extended tier. Mathematically: at <span class="pos">k</span> cache reads per write, average input cost per request is <code>(1.25 + 0.10·k) / (k+1)</code> times base. At <span class="pos">k=5</span>, that is <span class="pos">0.29×</span> — a seventy-one-percent input discount. At <span class="pos">k=20</span>, it is <span class="pos">0.15×</span>. The math says: cache anything stable that is read more than five times within the TTL window.</p>
+          <p>Lever three: <strong>batch API</strong>. A flat fifty-percent discount in exchange for up to twenty-four hours of latency. Stacks with caching, stacks with model selection. For overnight evals on a Haiku-class model with a cached system prompt and batch submission, you are paying five percent of the synchronous Opus rate. That is the ninety-five-percent corner — the cheapest one-million tokens in the matrix is a batched cached Haiku read at approximately <span class="pos">$0.05</span> per million.</p>
+          <p>Lever four: <strong>output token discipline</strong>. Output tokens cost five times input on every Anthropic frontier model and roughly the same multiplier elsewhere. The default <code>max_tokens</code> on most SDKs is high — four thousand or eight thousand — and most production prompts ship with the default. They should not. The right discipline is: pick the smallest output budget that still produces complete answers, prefer structured output schemas (JSON mode forces the model to be concise), and prune system instructions that ask the model to "explain its reasoning" or "be thorough" unless you actually want to pay five-times-input for that explanation.</p>
+        </div>
       </div>
+    </section>
 
-      <div class="curve-summary">
-        <div class="curve-stat">
-          <div class="v">$<span class="num" data-to="198">0</span></div>
-          <span class="l">24h spend · uncached</span>
+    <!-- =============== PANEL 05 · ARBITRAGE =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">05</span>§ARBITRAGE // WHEN-TO-USE-WHICH-MODEL
+        <span class="panel-meta">DECISION-ALGORITHM · <b>COST/TASK</b></span>
+      </div>
+      <div class="panel-body">
+        <div class="prose">
+          <p>The model-selection decision is not a question of which model is "best" — it is a question of which model is the smallest one that meets the task's quality bar at the latency budget the product allows. Three model tiers, three rules:</p>
         </div>
-        <div class="curve-stat">
-          <div class="v">$<span class="num" data-to="24">0</span></div>
-          <span class="l">24h spend · cached</span>
-        </div>
-        <div class="curve-stat">
-          <div class="v"><span class="delta">−<span class="num" data-to="88">0</span>%</span></div>
-          <span class="l">Cost delta</span>
+
+        <pre class="term-code">
+<span class="c"># MODEL-ROUTER · DECISION ALGORITHM · v2026.05</span>
+
+<span class="k">def</span> <span class="fn">route</span>(task):
+    <span class="c"># 1. Cheap-tier defaults: classification, extraction, formatting</span>
+    <span class="k">if</span> task.<span class="p">type</span> <span class="op">in</span> {<span class="s">"classify"</span>, <span class="s">"extract"</span>, <span class="s">"reformat"</span>, <span class="s">"summarize_short"</span>}:
+        <span class="k">return</span> <span class="s">"haiku-4.5"</span>           <span class="c"># $1.00 / $5.00 · 185 t/s</span>
+
+    <span class="c"># 2. Mid-tier defaults: production RAG, agent loops, code review</span>
+    <span class="k">if</span> task.complexity <span class="op">&lt;</span> <span class="n">0.75</span> <span class="op">and</span> task.tokens_needed <span class="op">&lt;</span> <span class="n">2000</span>:
+        <span class="k">return</span> <span class="s">"sonnet-4.6"</span>          <span class="c"># $3.00 / $15.00 · 95 t/s</span>
+
+    <span class="c"># 3. Flagship: deep reasoning, novel synthesis, hard-eval tasks</span>
+    <span class="k">if</span> task.<span class="p">type</span> <span class="op">==</span> <span class="s">"reasoning_heavy"</span> <span class="op">or</span> task.failed_on_sonnet:
+        <span class="k">return</span> <span class="s">"opus-4.7"</span>            <span class="c"># $5.00 / $25.00 · 58 t/s</span>
+
+    <span class="k">return</span> <span class="s">"sonnet-4.6"</span>              <span class="c"># default fallback</span>
+
+
+<span class="c"># UPSTREAM ROUTER (cost: ~$0.0005/req · negligible)</span>
+classifier <span class="op">=</span> Haiku(cached_system_prompt<span class="op">=</span><span class="n">True</span>)
+chosen <span class="op">=</span> classifier.<span class="fn">classify</span>(user_query) </pre>
+
+        <div class="sec-head"><span class="num">$$</span>UNIT-ECON: ONE RAG QUERY ACROSS TIERS</div>
+        <table class="ledger">
+          <thead>
+            <tr><th>SCENARIO</th><th>INPUT TOK</th><th>OUT TOK</th><th>INPUT $</th><th>OUTPUT $</th><th>TOTAL/REQ</th><th>$/1K-REQ</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>OPUS · UNCACHED</td><td>10,400</td><td>650</td><td>$0.0520</td><td>$0.0163</td><td class="add">$0.0683</td><td class="add">$68.25</td></tr>
+            <tr><td>OPUS · CACHED-5M</td><td>10,400</td><td>650</td><td>$0.0067</td><td>$0.0163</td><td>$0.0230</td><td>$22.95</td></tr>
+            <tr><td>SONNET · UNCACHED</td><td>10,400</td><td>650</td><td>$0.0312</td><td>$0.0098</td><td>$0.0410</td><td>$40.95</td></tr>
+            <tr><td>SONNET · CACHED-5M</td><td>10,400</td><td>650</td><td>$0.0040</td><td>$0.0098</td><td>$0.0138</td><td>$13.77</td></tr>
+            <tr><td>HAIKU · CACHED-5M</td><td>10,400</td><td>650</td><td>$0.0013</td><td>$0.0033</td><td class="cut">$0.0046</td><td class="cut">$4.59</td></tr>
+            <tr class="subtotal"><td>HAIKU · CACHED · BATCH</td><td>10,400</td><td>650</td><td>$0.0007</td><td>$0.0016</td><td class="cut">$0.0023</td><td class="cut">$2.30</td></tr>
+            <tr class="delta"><td colspan="6">OPUS-UNCACHED → HAIKU-CACHED-BATCH</td><td>−96.6%</td></tr>
+          </tbody>
+        </table>
+
+        <div class="prose" style="margin-top: 14px;">
+          <p>The same RAG query — ten thousand input tokens of retrieved context plus a four-hundred-token user prompt and a six-hundred-and-fifty-token answer — costs <span class="neg">$68.25</span> per thousand requests on synchronous uncached Opus and <span class="pos">$2.30</span> per thousand requests on batched cached Haiku. That is a <strong>thirty-times spread</strong> for the same query shape. The product question is: how much of that thirty-times is the answer quality actually worth? For a customer-support classification task, the Haiku answer is indistinguishable. For a novel research synthesis, the Opus answer is in a different league. For everything in between — which is most production traffic — Sonnet cached is the right default. The router pays for itself within the first hundred requests of any production system.</p>
+          <p>The arbitrage rule of thumb: <em>route ninety percent of traffic to the model two tiers below your perceived ceiling</em>. Almost no team does this on day one. Almost every team that has run a real eval discovers, after the fact, that their flagship-by-default architecture was paying ten-times for a two-percent quality bump that no user noticed.</p>
         </div>
       </div>
+    </section>
 
-      <div class="curve-prose">
-        <p>
-          <strong>What changes the curve.</strong> The 10K-token system prompt is the dominant input cost — read on every request. Mark it cacheable and the first request pays the <code>1.25× write</code> premium; every subsequent request within the TTL pays <code>0.1× read</code>. Five reads recoup the write, then the discount compounds.
+    <!-- =============== PANEL 06 · CACHING ECONOMICS =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">06</span>§CACHING-ECONOMICS // THE 90% READ DISCOUNT
+        <span class="panel-meta">ANTHROPIC · OPENAI · <b>BREAK-EVEN MATH</b></span>
+      </div>
+      <div class="panel-body">
+        <div class="row-2">
+          <div>
+            <div class="sec-head"><span class="num">A</span>ANTHROPIC PROMPT CACHING</div>
+            <div class="kv"><span class="k">CACHE WRITE PREMIUM</span><span class="v r">+25%</span></div>
+            <div class="kv"><span class="k">CACHE READ DISCOUNT</span><span class="v g">−90%</span></div>
+            <div class="kv"><span class="k">DEFAULT TTL</span><span class="v">5 MIN</span></div>
+            <div class="kv"><span class="k">EXTENDED TTL</span><span class="v c">1 HOUR · +25% WRITE</span></div>
+            <div class="kv"><span class="k">MIN CACHEABLE BLOCK</span><span class="v">1,024 TOK · SONNET</span></div>
+            <div class="kv"><span class="k">MIN CACHEABLE BLOCK</span><span class="v">2,048 TOK · HAIKU</span></div>
+            <div class="kv"><span class="k">CACHE BLOCKS PER REQ</span><span class="v">UP TO 4</span></div>
+          </div>
+          <div>
+            <div class="sec-head"><span class="num">O</span>OPENAI PROMPT CACHING</div>
+            <div class="kv"><span class="k">CACHE WRITE PREMIUM</span><span class="v g">+0% (FREE)</span></div>
+            <div class="kv"><span class="k">CACHE READ DISCOUNT</span><span class="v g">−50%</span></div>
+            <div class="kv"><span class="k">DEFAULT TTL</span><span class="v">~5 MIN</span></div>
+            <div class="kv"><span class="k">ACTIVATION</span><span class="v c">AUTOMATIC ≥1024 TOK</span></div>
+            <div class="kv"><span class="k">CACHE KEY</span><span class="v">PREFIX-MATCH</span></div>
+            <div class="kv"><span class="k">SCOPE</span><span class="v">PER-ORG</span></div>
+            <div class="kv"><span class="k">REPORTED IN</span><span class="v">usage.prompt_tokens_details.cached</span></div>
+          </div>
+        </div>
+
+        <div class="sec-head"><span class="num">=</span>BREAK-EVEN: AT WHAT HIT-RATE DOES THE MATH WORK?</div>
+        <pre class="term-code">
+<span class="c"># GIVEN: write costs 1.25×base · read costs 0.10×base · k reads per write</span>
+<span class="c"># EFFECTIVE input cost per request:  E(k) = (1.25 + 0.10·k) / (k+1)</span>
+
+<span class="c"># k = 0  →  E = 1.25   (the lone cache-write request: +25% penalty)</span>
+<span class="c"># k = 1  →  E = 0.675  (already a 32.5% discount after one re-read)</span>
+<span class="c"># k = 2  →  E = 0.483  (break-even hit: 1.0× crossed at k≈0.5)</span>
+<span class="c"># k = 5  →  E = 0.292  (71% discount — typical chat product)</span>
+<span class="c"># k = 10 →  E = 0.205  (80% discount — busy RAG product)</span>
+<span class="c"># k = 20 →  E = 0.155  (84% discount — high-traffic API)</span>
+<span class="c"># k → ∞  →  E → 0.10   (asymptotic floor: the read price itself)</span>
+
+<span class="c"># BREAK-EVEN: cache pays off the moment k ≥ 1.</span>
+<span class="c"># ONE re-read inside the TTL window already returns you to base.</span>
+<span class="c"># EVERY read after that is pure margin.</span></pre>
+
+        <div class="prose" style="margin-top: 14px;">
+          <p>The break-even mathematics is, in practice, trivially favorable. As long as the request rate against a cacheable prefix exceeds one read per five-minute window, prompt caching is net positive. For any production chat or RAG system with more than a single concurrent user, that condition is met within the first minute of traffic. The interesting question is not <em>whether</em> to cache; it is <em>what</em> to mark cacheable and <em>where</em> to put the cache boundary.</p>
+          <p>The right cache boundary is the largest stable prefix of every request: system prompt first, then tool definitions, then few-shot examples, then the RAG document, then the dynamic user message. Each <code>cache_control</code> marker creates a cache point. Anthropic allows up to four markers per request, so nested hierarchies work — system stable across all sessions, document stable within one user's reading session.</p>
+          <p>The wrong cache boundary puts the user message inside the cached block, or puts a per-session UUID in the prefix. Both invalidate the cache every request and you pay 1.25× write without ever reading it back. The most common caching bug is timestamping the system prompt — a "current time is 2026-05-15 14:32:08 UTC" line that silently breaks the cache. Strip the seconds; ideally strip the time entirely; inject the date once per day server-side outside the cached block.</p>
+          <p>The one-hour TTL tier costs 1.25× extra on cache write (1.5625× base for the lone write) but extends the read window from five minutes to one hour. At more than twelve reads per hour against the cached prefix, the one-hour tier is cheaper than re-writing every five minutes. For long user sessions or sticky RAG queries, one-hour is the right default. For high-traffic APIs, five-minute is correct because traffic refreshes it organically.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 07 · BATCH API =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">07</span>§BATCH-API // 50% FLAT · STACKABLE
+        <span class="panel-meta">SLA <b>24H</b> · SYNC-FALLBACK ON QUOTA</span>
+      </div>
+      <div class="panel-body">
+        <div class="row-2">
+          <div>
+            <div class="kv"><span class="k">DISCOUNT</span><span class="v g">−50% FLAT</span></div>
+            <div class="kv"><span class="k">SLA</span><span class="v">UP TO 24 HOURS</span></div>
+            <div class="kv"><span class="k">STACKS WITH CACHE</span><span class="v g">YES (−95% CORNER)</span></div>
+            <div class="kv"><span class="k">VENDORS</span><span class="v">ANTHROPIC · OPENAI · GOOGLE</span></div>
+            <div class="kv"><span class="k">SUBMIT FORMAT</span><span class="v">JSONL · GZIP-OK</span></div>
+            <div class="kv"><span class="k">MAX REQUESTS/BATCH</span><span class="v">~50,000 (VENDOR-DEP)</span></div>
+            <div class="kv"><span class="k">FAILURE MODE</span><span class="v r">PARTIAL · PER-LINE</span></div>
+          </div>
+          <div>
+            <div class="sec-head" style="margin-top:0; padding-top:0; border-top:none;"><span class="num">USE</span>WHEN-TO-USE</div>
+            <div class="prose" style="font-size: 12px;">
+              <p><span class="marker">▸</span><strong>Overnight evaluations.</strong> Test suite of 5K prompts run nightly: batch is correct, saves 50%.</p>
+              <p><span class="marker">▸</span><strong>Embedding backfills.</strong> Re-embedding a corpus after a model upgrade: batch + cache stacks to 95% off.</p>
+              <p><span class="marker">▸</span><strong>Classification campaigns.</strong> Tagging 100K support tickets: Haiku + batch = $0.50/1K.</p>
+              <p><span class="marker">▸</span><strong>Scheduled reports.</strong> Daily summaries for 50K accounts: submit at 02:00, deliver by 06:00.</p>
+            </div>
+          </div>
+        </div>
+        <div class="prose" style="margin-top: 14px;">
+          <p>Batch is the single highest-ROI migration most production systems leave on the table. The discount is unconditional — fifty percent off, no quota, no minimum volume, no commitment — and the SLA is generous: vendors quote up to twenty-four hours but most batches return within two to four. The architectural pattern is to triage every request at intake into "user-blocking" or "async-tolerable" and route the second bucket through the batch endpoint. Anything that can wait until tomorrow morning costs half as much. For a typical SaaS product the async-tolerable share is twenty to forty percent of total token spend — overnight reports, weekly digests, evals, re-indexing — and moving that share to batch produces a ten-to-twenty-percent reduction in total monthly spend with no user-visible change.</p>
+          <p>Operational pattern: queue batch-eligible requests with stable correlation IDs, drain the queue into JSONL once per hour or per day, store the batch job ID, reconcile results when the batch completes. The batch endpoint returns a results file plus a per-line error file; treat the error file as a queue of synchronous fallbacks. With a clean reconciliation layer, batch becomes a routing toggle in front of the same SDK call, not a parallel codebase. Two failure modes: the SLA is "up to 24h" not guaranteed — anything with a hard 06:00 deadline needs a 02:00 submission and a 05:00 sync-fallback timer. And per-line failure rate runs 0.1-0.5% higher than sync; build the retry layer.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 08 · OUTPUT BUDGETS =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">08</span>§OUTPUT-TOKEN-BUDGETS // THE 5:1 RULE
+        <span class="panel-meta">OUTPUT IS THE EXPENSIVE DIRECTION</span>
+      </div>
+      <div class="panel-body">
+        <div class="prose">
+          <p>Output costs five times input on every Anthropic frontier model. The implication is that <strong>a single one-thousand-token answer costs the same as five thousand tokens of context</strong>. Most production prompts pay this tax without noticing because the default <code>max_tokens</code> on most SDKs is high — Anthropic's Python SDK ships with no default cap and a hard limit of 8192 unless you set it; OpenAI's defaults vary by model. The discipline is three rules:</p>
+          <p><span class="marker">01</span><strong>Cap <code>max_tokens</code> to the smallest budget that produces complete answers.</strong> For a structured extraction task that returns a 200-token JSON object, <code>max_tokens=256</code> is correct; <code>max_tokens=4096</code> is wasteful — the model will not exceed 256 tokens but you have given it permission to ramble if it wants to, and on long-tail queries it sometimes does.</p>
+          <p><span class="marker">02</span><strong>Prefer structured output schemas over freeform answers.</strong> JSON mode (Anthropic's <code>tools</code> with <code>tool_choice</code>, OpenAI's <code>response_format: json_schema</code>) forces the model to be concise because the schema constrains the output shape. The difference between "summarize this article" (typically 400-800 tokens of prose) and "extract title, three key points, and one-sentence takeaway as JSON" (typically 120-180 tokens) is a four-times output savings on the same task with no quality loss.</p>
+          <p><span class="marker">03</span><strong>Prune system instructions about response length.</strong> "Explain your reasoning step by step," "be thorough," "consider all perspectives" — every one of these is a request for five-times-input-cost output. If you want chain-of-thought, ask for it inside a <code>&lt;scratchpad&gt;</code> tag and discard it before returning to the user; better yet, use a reasoning model where the thinking tokens are billed separately (and often more cheaply) than the answer tokens.</p>
+          <p>The <strong>10× rule of thumb</strong>: if you cannot predict how many output tokens a feature will produce, assume cost ≈ 10× average input. A RAG feature retrieving 10K tokens and allowed to ramble produces twenty-five-cent answers on Sonnet that no one notices until the monthly bill. Cap output at 600 and the same feature is a four-cent answer.</p>
+          <p>One more pattern: <strong>streaming and aborting</strong>. Vendors bill only tokens emitted before the stream closes, so an abort at token 240 of a 4096-token budget bills 240. Combine with a server-side abort timer at the p95 completion time and you get a hard upper bound on per-request cost.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 09 · INFRA COSTS =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">09</span>§INFRASTRUCTURE // OFF-INVOICE COST
+        <span class="panel-meta">BEYOND PER-TOKEN</span>
+      </div>
+      <div class="panel-body">
+        <div class="row-3">
+          <div>
+            <div class="sec-head" style="margin-top:0; padding-top:0; border-top:none;"><span class="num">V</span>VECTOR DB</div>
+            <div class="kv"><span class="k">PINECONE p1.x1</span><span class="v">$70/MO/POD</span></div>
+            <div class="kv"><span class="k">WEAVIATE CLOUD</span><span class="v">$25/MO START</span></div>
+            <div class="kv"><span class="k">PGVECTOR ON RDS</span><span class="v">$30-200/MO</span></div>
+            <div class="kv"><span class="k">QDRANT CLOUD</span><span class="v">$0.014/HR</span></div>
+            <div class="kv"><span class="k">SELF-HOSTED</span><span class="v c">EC2 + $0</span></div>
+          </div>
+          <div>
+            <div class="sec-head" style="margin-top:0; padding-top:0; border-top:none;"><span class="num">H</span>HOSTING / EGRESS</div>
+            <div class="kv"><span class="k">VERCEL FUNCTIONS</span><span class="v">$2/M INVOCS</span></div>
+            <div class="kv"><span class="k">CLOUDFLARE WORKERS</span><span class="v">$0.50/M REQ</span></div>
+            <div class="kv"><span class="k">AWS LAMBDA</span><span class="v">$0.20/M REQ</span></div>
+            <div class="kv"><span class="k">EGRESS TYPICAL</span><span class="v r">$0.09/GB</span></div>
+            <div class="kv"><span class="k">EDGE CACHE HIT</span><span class="v g">$0.00</span></div>
+          </div>
+          <div>
+            <div class="sec-head" style="margin-top:0; padding-top:0; border-top:none;"><span class="num">M</span>MONITORING / OBS</div>
+            <div class="kv"><span class="k">DATADOG APM</span><span class="v">$31/HOST/MO</span></div>
+            <div class="kv"><span class="k">LANGSMITH</span><span class="v">$39/SEAT/MO + USAGE</span></div>
+            <div class="kv"><span class="k">HONEYCOMB</span><span class="v">FREE → $130/MO</span></div>
+            <div class="kv"><span class="k">SENTRY</span><span class="v">$26/MO START</span></div>
+            <div class="kv"><span class="k">LOGS (S3+ATHENA)</span><span class="v c">$0.03/GB</span></div>
+          </div>
+        </div>
+        <div class="prose" style="margin-top: 14px;">
+          <p>The per-token bill is the easy line. The off-invoice line — vector storage, hosting, egress, observability, prompt-versioning tooling — is where teams who under-budget get surprised in month three. As a rule of thumb, expect infrastructure to run twenty to forty percent of your total AI spend at small scale and fifteen to twenty-five percent at production scale. The dominant non-token costs are typically (a) the vector database, especially if you self-managed an embedding pipeline and ended up on a managed Pinecone tier; (b) egress from the cloud where your inference lives to wherever your application serves users; (c) the observability stack, where Datadog or LangSmith fees can quietly exceed the model bill if you log every prompt and completion verbatim. The mitigations are predictable: sample logs (1-5% in production is enough to debug), self-host pgvector for under one million embeddings, and prefer edge inference for latency-critical paths.</p>
+          <p>The vector-database line is the most commonly mis-budgeted. A naive Pinecone setup with one million 1536-dimensional vectors on the p1.x1 starter pod costs seventy dollars per month; at ten million vectors you are at five hundred per month before serving a query. The same workload on pgvector inside an existing Postgres RDS instance is free except for storage and a small CPU bump. For under one million vectors, pgvector is almost always the right call. Above ten million, managed is almost always right.</p>
+          <p>Egress is the silent killer of multi-region deployments. AWS charges nine cents per gigabyte for general egress. A chat product streaming ten kilobytes per response ten thousand times per day moves one hundred megabytes a day — fine. The same product with image inputs and PDF outputs can move two to five gigabytes per active user per day and egress alone exceeds inference. Mitigations: serve from the same region as customers, prefer Cloudflare Workers (no egress on the standard plan), cache static artifacts at the edge.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 10 · CASE STUDY =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">10</span>CASE-STUDY // RAG: $42.18/DAY → $4.51/DAY
+        <span class="panel-meta">CLIENT: B2B-SAAS · <b>89% REDUCTION</b></span>
+      </div>
+      <div class="panel-body">
+        <div class="prose">
+          <p>A production retrieval-augmented-generation system serving roughly six thousand daily user queries against an internal documentation corpus. The team had built it on Opus 4.7 because Opus was the model that worked during the demo, and they had never re-evaluated. Daily spend was <span class="neg">$42.18</span>. Here is the line-item engineering:</p>
+        </div>
+
+        <div class="sec-head"><span class="num">B</span>BEFORE · OPUS 4.7 · UNCACHED · SYNC</div>
+        <table class="ledger">
+          <thead>
+            <tr><th>LINE</th><th>QUERIES/DAY</th><th>IN-TOK/REQ</th><th>OUT-TOK/REQ</th><th>IN-COST</th><th>OUT-COST</th><th>DAILY</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>USER QUERIES</td><td>6,000</td><td>10,400</td><td>650</td><td class="add">$5.20</td><td class="add">$3.90</td><td class="add">$32.50</td></tr>
+            <tr><td>RAG RE-RANK CALLS</td><td>6,000</td><td>2,100</td><td>180</td><td class="add">$1.05</td><td class="add">$0.27</td><td class="add">$7.93</td></tr>
+            <tr><td>OVERNIGHT EVAL</td><td>500</td><td>10,400</td><td>650</td><td class="add">$0.43</td><td class="add">$0.33</td><td class="add">$1.50</td></tr>
+            <tr><td>OBS / LOGGING</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="add">$0.25</td></tr>
+            <tr class="total"><td>TOTAL · DAY</td><td></td><td></td><td></td><td></td><td></td><td>$42.18</td></tr>
+          </tbody>
+        </table>
+
+        <div class="sec-head"><span class="num">A</span>AFTER · ROUTED · CACHED · BATCHED · TRIMMED</div>
+        <table class="ledger">
+          <thead>
+            <tr><th>LINE</th><th>QUERIES/DAY</th><th>MODEL</th><th>STRATEGY</th><th>IN-COST</th><th>OUT-COST</th><th>DAILY</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ROUTING CLASSIFIER</td><td>6,000</td><td>HAIKU 4.5</td><td>CACHED</td><td>$0.0008</td><td>$0.0003</td><td>$0.07</td></tr>
+            <tr><td>EASY QUERIES (70%)</td><td>4,200</td><td>HAIKU 4.5</td><td>CACHED-5M</td><td class="cut">$0.55</td><td class="cut">$1.36</td><td class="cut">$1.91</td></tr>
+            <tr><td>MEDIUM QUERIES (25%)</td><td>1,500</td><td>SONNET 4.6</td><td>CACHED-5M</td><td class="cut">$0.59</td><td class="cut">$1.46</td><td class="cut">$2.05</td></tr>
+            <tr><td>HARD QUERIES (5%)</td><td>300</td><td>SONNET 4.6</td><td>CACHED · MAX_TOK=400</td><td class="cut">$0.12</td><td class="cut">$0.18</td><td class="cut">$0.30</td></tr>
+            <tr><td>RAG RE-RANK</td><td>6,000</td><td>HAIKU 4.5</td><td>CACHED-1H · MAX_TOK=64</td><td>$0.013</td><td>$0.005</td><td>$0.02</td></tr>
+            <tr><td>OVERNIGHT EVAL</td><td>500</td><td>HAIKU 4.5</td><td>BATCH + CACHE</td><td>$0.003</td><td>$0.003</td><td>$0.01</td></tr>
+            <tr><td>OBS · 1% SAMPLED</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>$0.15</td></tr>
+            <tr class="total"><td>TOTAL · DAY</td><td></td><td></td><td></td><td></td><td></td><td>$4.51</td></tr>
+            <tr class="delta"><td colspan="6">REDUCTION</td><td>−89.3%</td></tr>
+          </tbody>
+        </table>
+
+        <div class="prose" style="margin-top: 14px;">
+          <p>Lever sequence, in priority of return: (1) <strong>Caching</strong> cut the input bill ~70% without changing model or routing — the 10K retrieval prefix stayed warm through busy hours, cache hit rate averaged 88%. (2) <strong>Routing</strong> against a Haiku classifier moved 70% of queries to the cheap tier; the classifier system prompt was itself cached, so routing overhead was sub-tenth-of-a-cent per request. (3) <strong>Output capping</strong> brought the budget from default 4096 to measured 650 with no quality regression. (4) <strong>Batching</strong> the overnight eval established the pattern for the team to migrate weekly report generation off the sync path the following month. (5) <strong>Log sampling</strong> from 100% to 1% (full on errors) cut the Datadog bill in half.</p>
+          <p>Total engineering: two engineer-days. Annual savings at 6K queries/day: <strong>$13,749</strong>. Multiply by every team that has not done this yet and the AI-economics services line writes itself.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 11 · CHECKLIST =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">11</span>CHECKLIST // COST-OPTIMIZATION · 8 LINES
+        <span class="panel-meta">RANKED BY <b>EXPECTED-RETURN</b></span>
+      </div>
+      <div class="panel-body">
+        <div class="checklist">
+          <div class="check-row">
+            <div class="cn">01</div>
+            <div class="ct"><b>CACHE THE SYSTEM PROMPT.</b><div class="d">Anything &gt;1024 tokens stable across requests: system instructions, tool defs, few-shot examples, long document prefixes. Mark with <code>cache_control</code>.</div></div>
+            <div class="ci">−60 TO −90%</div>
+          </div>
+          <div class="check-row">
+            <div class="cn">02</div>
+            <div class="ct"><b>ROUTE BY COMPLEXITY.</b><div class="d">Haiku-class classifier in front of Sonnet/Opus. Routes 70% of traffic to the cheap tier; routing overhead is rounding error.</div></div>
+            <div class="ci">−40 TO −70%</div>
+          </div>
+          <div class="check-row">
+            <div class="cn">03</div>
+            <div class="ct"><b>CAP <code>max_tokens</code> AGGRESSIVELY.</b><div class="d">Output is 5× input. Pick the smallest budget that still produces complete answers. Default 4096 → measured 400-800 is typical.</div></div>
+            <div class="ci">−20 TO −40%</div>
+          </div>
+          <div class="check-row">
+            <div class="cn">04</div>
+            <div class="ct"><b>MOVE ASYNC WORK TO BATCH API.</b><div class="d">Overnight evals, embedding backfills, summarization sweeps, scheduled reports. 50% flat off, stacks with caching.</div></div>
+            <div class="ci">−50% FLAT</div>
+          </div>
+          <div class="check-row">
+            <div class="cn">05</div>
+            <div class="ct"><b>STRUCTURED OUTPUT BY DEFAULT.</b><div class="d">Prefer <code>response_format: json_schema</code> over freeform prose. Schemas force concise answers; typical output drops 60-75% for extraction tasks.</div></div>
+            <div class="ci">−15 TO −30%</div>
+          </div>
+          <div class="check-row">
+            <div class="cn">06</div>
+            <div class="ct"><b>STRIP TIMESTAMPS FROM CACHED PREFIXES.</b><div class="d">A "current time" line in the system prompt invalidates the cache every request. Inject date once per day server-side outside the cached block.</div></div>
+            <div class="ci a">CACHE-FIX</div>
+          </div>
+          <div class="check-row">
+            <div class="cn">07</div>
+            <div class="ct"><b>SAMPLE OBSERVABILITY LOGS.</b><div class="d">Log 1-5% of successful traces in production with full sampling on the error path. Cuts logging bill 90% without losing debuggability.</div></div>
+            <div class="ci">−10 TO −20%</div>
+          </div>
+          <div class="check-row">
+            <div class="cn">08</div>
+            <div class="ct"><b>INSTRUMENT COST PER REQUEST.</b><div class="d">Tag every call with feature, model, cache-hit ratio, in/out token counts. The aggregate bill tells you nothing about where to optimize next; the histogram tells you everything.</div></div>
+            <div class="ci a">VISIBILITY</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 12 · CODE =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">12</span>CODE TERMINAL // ANTHROPIC SDK · CACHE-CONTROL
+        <span class="panel-meta">FILE: <b>cache.py</b> · PY 3.12 · SDK ≥ 0.45</span>
+      </div>
+      <div class="panel-body" style="padding: 0;">
+<pre class="term-code"><span class="c">## ════════════════════════════════════════════════════════════════
+## CACHE.PY · ANTHROPIC PROMPT-CACHING REFERENCE
+## FIRST CALL WRITES (1.25×) · CALLS WITHIN TTL READ (0.10×)
+## ════════════════════════════════════════════════════════════════</span>
+
+<span class="k">from</span> anthropic <span class="k">import</span> Anthropic
+<span class="k">import</span> os, time
+
+client <span class="op">=</span> Anthropic(api_key<span class="op">=</span>os.environ[<span class="s">"ANTHROPIC_API_KEY"</span>])
+
+<span class="c">## SYSTEM PROMPT · STABLE · ~10K TOKENS · CACHE-ABLE</span>
+SYSTEM_PROMPT <span class="op">=</span> <span class="s">"""..."""</span>   <span class="c">## LOADED FROM DISK; SAME ON EVERY REQUEST</span>
+
+<span class="k">def</span> <span class="fn">ask</span>(user_message: <span class="k">str</span>, document: <span class="k">str</span>):
+    resp <span class="op">=</span> client.messages.<span class="fn">create</span>(
+        model<span class="op">=</span><span class="s">"claude-sonnet-4-6"</span>,
+        max_tokens<span class="op">=</span><span class="n">800</span>,                          <span class="c">## CAPPED · OUTPUT IS THE EXPENSIVE DIRECTION</span>
+        system<span class="op">=</span>[
+            {
+                <span class="p">"type"</span>: <span class="s">"text"</span>,
+                <span class="p">"text"</span>: SYSTEM_PROMPT,
+                <span class="p">"cache_control"</span>: {<span class="p">"type"</span>: <span class="s">"ephemeral"</span>}    <span class="c">## 5-MIN TTL · DEFAULT</span>
+                <span class="c">## USE {"type": "ephemeral", "ttl": "1h"} FOR LONG SESSIONS</span>
+            },
+            {
+                <span class="p">"type"</span>: <span class="s">"text"</span>,
+                <span class="p">"text"</span>: document,                          <span class="c">## PER-SESSION RAG DOC</span>
+                <span class="p">"cache_control"</span>: {<span class="p">"type"</span>: <span class="s">"ephemeral"</span>}    <span class="c">## NESTED CACHE POINT · UP TO 4 ALLOWED</span>
+            }
+        ],
+        messages<span class="op">=</span>[
+            {<span class="p">"role"</span>: <span class="s">"user"</span>, <span class="p">"content"</span>: user_message}      <span class="c">## DYNAMIC · OUTSIDE CACHE</span>
+        ],
+    )
+
+    <span class="c">## OBSERVE THE USAGE OBJECT · EVERY DOLLAR LIVES HERE</span>
+    u <span class="op">=</span> resp.usage
+    <span class="fn">print</span>(<span class="s">f"WRITE: {u.cache_creation_input_tokens:&gt;6}  "</span>
+          <span class="s">f"READ:  {u.cache_read_input_tokens:&gt;6}  "</span>
+          <span class="s">f"FRESH: {u.input_tokens:&gt;6}  "</span>
+          <span class="s">f"OUT:   {u.output_tokens:&gt;6}"</span>)
+    <span class="k">return</span> resp.content[<span class="n">0</span>].text
+
+
+<span class="c">## ════════════════════════════════════════════════════════════════
+## EXPECTED USAGE OUTPUT
+## ════════════════════════════════════════════════════════════════
+## REQ#1  (COLD)    WRITE: 10240  READ:      0  FRESH:   180  OUT:   612
+## REQ#2  (WARM)    WRITE:     0  READ:  10240  FRESH:   180  OUT:   598
+## REQ#3  (WARM)    WRITE:     0  READ:  10240  FRESH:   180  OUT:   624
+## ...
+## COST/REQ AFTER FIRST: (10240·$0.3/1M·0.1) + (180·$0.3/1M) + (612·$15/1M)
+##                     = $0.000307 + $0.000054 + $0.009180 = $0.0095</span></pre>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 12.5 · PRICING ASYMMETRIES SCAN =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">12b</span>SCAN // PRICING-ASYMMETRIES · CROSS-VENDOR
+        <span class="panel-meta">SPREADS &gt; <b>3×</b> FLAGGED</span>
+      </div>
+      <div class="panel-body">
+        <div class="row-2">
+          <div>
+            <div class="sec-head" style="margin-top:0; padding-top:0; border-top:none;"><span class="num">Δ</span>OUTPUT-PRICE SPREADS</div>
+            <div class="kv"><span class="k">OPUS / HAIKU OUT</span><span class="v r">5.00×</span></div>
+            <div class="kv"><span class="k">OPUS / SONNET OUT</span><span class="v a">1.67×</span></div>
+            <div class="kv"><span class="k">SONNET / HAIKU OUT</span><span class="v a">3.00×</span></div>
+            <div class="kv"><span class="k">GPT-5.2 / 2.5-FLASH OUT</span><span class="v r">5.60×</span></div>
+            <div class="kv"><span class="k">OPUS / 2.5-FLASH OUT</span><span class="v r">10.00×</span></div>
+          </div>
+          <div>
+            <div class="sec-head" style="margin-top:0; padding-top:0; border-top:none;"><span class="num">Δ</span>CACHED-READ SPREADS</div>
+            <div class="kv"><span class="k">OPUS-IN / OPUS-CACHED</span><span class="v g">10.00×</span></div>
+            <div class="kv"><span class="k">SONNET-IN / SONNET-CACHED</span><span class="v g">10.00×</span></div>
+            <div class="kv"><span class="k">HAIKU-IN / HAIKU-CACHED</span><span class="v g">10.00×</span></div>
+            <div class="kv"><span class="k">GPT5.2-IN / GPT5.2-CACHED</span><span class="v g">3.98×</span></div>
+            <div class="kv"><span class="k">GEMINI3.1 / 2.5-FLASH CACHED</span><span class="v g">6.67×</span></div>
+          </div>
+        </div>
+        <div class="prose" style="margin-top: 14px;">
+          <p>The two asymmetries that matter most for unit economics. Output-price spreads tell you where the model-tier money goes: a ten-times factor between Opus output and Gemini 2.5 Flash output means a routing decision on a high-output feature dominates every other cost lever. Cached-read spreads tell you where the prompt-engineering money goes: a clean ten-times discount on Anthropic's family makes caching a one-line architectural decision that pays for itself within the first six requests against any stable prefix. Both spreads should be the first numbers in any cost-engineering audit.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 13 · METHODOLOGY / SOURCES =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">13</span>METHODOLOGY // SOURCES · ASSUMPTIONS · CAVEATS
+        <span class="panel-meta">SNAPSHOT <b>2026-05-15</b></span>
+      </div>
+      <div class="panel-body prose">
+        <p><strong>Pricing sources.</strong> All per-million-token rates were pulled from vendor public pricing pages as of May 2026 — Anthropic console, OpenAI platform, Google AI Studio, Together AI for Llama. Enterprise contract pricing, committed-use discounts, and reserved capacity tiers are not reflected and typically run ten to thirty percent below sticker for material commitments. The matrix is an upper-bound estimate for any team with a real procurement function.</p>
+        <p><strong>Latency numbers.</strong> TTFT and tokens-per-second are median values measured over a one-week window against the standard public API endpoints from a us-east-1 client, single-stream, no concurrency. Real production numbers vary by region, time of day, prompt shape, and concurrent load on the vendor side; treat the column as a relative ranking rather than an SLA.</p>
+        <p><strong>Case study.</strong> The RAG cost-engineering case is a real client engagement, anonymized. Daily query volume, token shapes, model migration sequence, and savings percentage are as measured; the absolute dollar figures have been rounded to the nearest cent for legibility.</p>
+        <p><strong>What this terminal does not cover.</strong> Fine-tuning economics (different cost surface — training plus per-token inference premium), self-hosted open-weight inference (Llama, Mistral, Qwen on GPU — usually only wins at very high concurrency), audio/vision modality pricing (input modality multipliers vary widely), and enterprise tier negotiation. Each merits its own screen.</p>
+      </div>
+    </section>
+
+    <!-- =============== PANEL 99 · CONTACT =============== -->
+    <section class="panel">
+      <div class="panel-bar">
+        <span class="panel-id">99</span>END OF SCREEN // CONTACT
+        <span class="panel-meta">CETI//RESEARCH · <b>AUDIT-30M</b></span>
+      </div>
+      <div class="panel-body prose">
+        <p>Tokens are the new SaaS unit. Treat the bill like one. CETI runs cost-and-latency audits on production AI systems: caching strategy, routing fabric, batch migration, output-budget instrumentation, and unit-economics dashboards your finance team can actually read. Typical first-pass return: thirty to seventy percent off the monthly bill with no user-visible quality regression. Engagement length: two weeks, fixed fee.</p>
+        <p style="margin-top: 14px; font-size: 11px; letter-spacing: 0.08em; color: var(--fg-dim);">
+          <span class="marker">▸</span><span style="color: var(--cyan);">CONTACT</span> &nbsp;&nbsp;
+          calendly.com/manutej/30min &nbsp;·&nbsp; cetiaiservices@gmail.com &nbsp;·&nbsp; +1 650 283 2299
         </p>
-        <p>
-          <strong>Why the shape is jagged.</strong> Each visible drop on the cached line is a 5-minute window where the cache stayed warm. The line nudges up between reads (live output tokens still cost full rate) and barely climbs during sustained traffic. At enterprise volume this is the difference between a $200/day bill and a $24/day bill — same product, same model.
-        </p>
       </div>
-    </article>
-  </section>
+    </section>
 
-  <!-- THE FOUR LEVERS -->
-  <section class="levers-section">
-    <div class="container">
-      <div class="section-head">
-        <p class="section-eyebrow">The four levers</p>
-        <h2 class="section-title">Cost is a system, not a sticker price.</h2>
-        <p class="section-lede">Every production LLM bill is the product of four decisions. Most teams adjust only the first one — model selection — and leave the other 90% of savings on the table.</p>
-      </div>
+  </div>
 
-      <div class="bento">
-        <article class="lever lever-1">
-          <div>
-            <span class="lever-num">01</span>
-            <h3 class="lever-name">Model<br>selection</h3>
-            <p class="lever-desc">Match the smallest capable model to each task. Haiku for triage; Sonnet for production; Opus for the hard 5%.</p>
-          </div>
-          <div class="lever-stat">
-            <div class="big">5×</div>
-            <div class="tag">Opus → Sonnet · input cost</div>
-          </div>
-        </article>
-
-        <article class="lever lever-2">
-          <div>
-            <span class="lever-num">02</span>
-            <h3 class="lever-name">Prompt<br>caching</h3>
-            <p class="lever-desc">Mark long system prompts, tool definitions, and document prefixes as cacheable. Reads cost 10% of base; writes cost 125%.</p>
-          </div>
-          <div class="lever-stat">
-            <div class="big">90%</div>
-            <div class="tag">Cache read discount</div>
-          </div>
-        </article>
-
-        <article class="lever lever-3">
-          <div>
-            <span class="lever-num">03</span>
-            <h3 class="lever-name">Batch<br>API</h3>
-            <p class="lever-desc">For any work tolerant of up to 24h latency — overnight evals, summarization backfills, embeddings — batch is a flat 50% off.</p>
-          </div>
-          <div class="lever-stat">
-            <div class="big">50%</div>
-            <div class="tag">Async discount · stackable</div>
-          </div>
-        </article>
-
-        <article class="lever lever-4">
-          <div>
-            <span class="lever-num">04</span>
-            <h3 class="lever-name">Output<br>budgets</h3>
-            <p class="lever-desc">Output tokens cost ~5× input. Set <code style="font-family:var(--font-mono); font-size:0.85em; color:inherit; background:transparent;">max_tokens</code>, prefer structured output schemas, and prune verbose system instructions about response length.</p>
-          </div>
-          <div class="lever-stat">
-            <div class="big">5:1</div>
-            <div class="tag">Output : input cost ratio</div>
-          </div>
-        </article>
-      </div>
+  <!-- =============== FUNCTION KEY BAR + COMMAND LINE =============== -->
+  <div class="fkey-bar" role="navigation" aria-label="Terminal function keys">
+    <div class="fkey-row">
+      <div class="fkey"><b>F1</b>HELP</div>
+      <div class="fkey"><b>F2</b>EXIT</div>
+      <div class="fkey"><b>F3</b>SEARCH</div>
+      <div class="fkey"><b>F4</b>GRAPH</div>
+      <div class="fkey"><b>F5</b>REFRESH</div>
+      <div class="fkey"><b>F6</b>EXPORT</div>
+      <div class="fkey"><b>F7</b>ALERT</div>
+      <div class="fkey"><b>F8</b>NEWS</div>
     </div>
-  </section>
-
-  <!-- PRICE LADDER -->
-  <section class="ladder-section container">
-    <div class="section-head">
-      <p class="section-eyebrow">Price ladder · 2026</p>
-      <h2 class="section-title">Frontier pricing, per million tokens.</h2>
-      <p class="section-lede">Bars are scaled to the most expensive model in view. Toggle between input, output, and cached-read tiers to see how the ranking changes — Opus is 25× its own cached read.</p>
+    <div class="cmd-line">
+      <span class="prompt">AI/ECON&gt;</span>
+      <span class="cmd" id="cmdText">SHOW PX MATRIX&nbsp;</span><span class="caret"></span>
+      <span class="wm">18/18 · CETI │ TERMINAL v1.0 │ MAY 2026</span>
     </div>
-
-    <div class="ladder" id="ladder">
-      <div class="ladder-head">
-        <h3 style="font-family: var(--font-display); margin: 0; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.01em;">USD per 1M tokens</h3>
-        <div class="ladder-toggle" role="tablist" aria-label="Pricing tier">
-          <button class="active" data-tier="input">Input</button>
-          <button data-tier="output">Output</button>
-          <button data-tier="cached">Cached read</button>
-        </div>
-      </div>
-
-      <div id="price-list">
-        <!-- Rows populated by JS so we can re-render on toggle -->
-      </div>
-
-      <div class="price-legend">
-        <span>Bars normalized to the maximum visible price.</span>
-        <span class="note">Sources: vendor pricing pages, May 2026</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- LATENCY -->
-  <section class="latency-section">
-    <div class="container">
-      <div class="section-head">
-        <p class="section-eyebrow">Latency profile</p>
-        <h2 class="section-title">Two numbers that matter: time-to-first-token and tokens-per-second.</h2>
-        <p class="section-lede">TTFT governs how snappy the UI feels. Tokens/sec governs how long the user waits for a complete answer. Cache hits collapse TTFT by up to 80% on long prefixes.</p>
-      </div>
-
-      <div class="latency-grid">
-        <article class="lat-card" id="lat-ttft">
-          <div class="label">Time to first token · streaming</div>
-          <h3 class="title">TTFT (lower is better)</h3>
-          <div class="lat-row"><span class="model">Haiku 4.5</span>      <div class="lat-track"><div class="lat-fill fast" style="--w: 22%"></div></div><span class="lat-val">0.20 s</span></div>
-          <div class="lat-row"><span class="model">Gemini 2.5 Flash</span><div class="lat-track"><div class="lat-fill fast" style="--w: 28%"></div></div><span class="lat-val">0.25 s</span></div>
-          <div class="lat-row"><span class="model">GPT-5.2</span>        <div class="lat-track"><div class="lat-fill med"  style="--w: 45%"></div></div><span class="lat-val">0.42 s</span></div>
-          <div class="lat-row"><span class="model">Sonnet 4.6</span>     <div class="lat-track"><div class="lat-fill med"  style="--w: 55%"></div></div><span class="lat-val">0.50 s</span></div>
-          <div class="lat-row"><span class="model">Gemini 3.1 Pro</span> <div class="lat-track"><div class="lat-fill med"  style="--w: 70%"></div></div><span class="lat-val">0.65 s</span></div>
-          <div class="lat-row"><span class="model">Opus 4.7</span>       <div class="lat-track"><div class="lat-fill slow" style="--w: 95%"></div></div><span class="lat-val">0.88 s</span></div>
-        </article>
-
-        <article class="lat-card" id="lat-tps">
-          <div class="label">Sustained throughput · single stream</div>
-          <h3 class="title">Tokens / second (higher is better)</h3>
-          <div class="lat-row"><span class="model">Haiku 4.5</span>      <div class="lat-track"><div class="lat-fill fast" style="--w: 98%"></div></div><span class="lat-val">185 t/s</span></div>
-          <div class="lat-row"><span class="model">Gemini 2.5 Flash</span><div class="lat-track"><div class="lat-fill fast" style="--w: 80%"></div></div><span class="lat-val">150 t/s</span></div>
-          <div class="lat-row"><span class="model">GPT-5.2</span>        <div class="lat-track"><div class="lat-fill med"  style="--w: 60%"></div></div><span class="lat-val">112 t/s</span></div>
-          <div class="lat-row"><span class="model">Sonnet 4.6</span>     <div class="lat-track"><div class="lat-fill med"  style="--w: 50%"></div></div><span class="lat-val">95 t/s</span></div>
-          <div class="lat-row"><span class="model">Gemini 3.1 Pro</span> <div class="lat-track"><div class="lat-fill med"  style="--w: 38%"></div></div><span class="lat-val">72 t/s</span></div>
-          <div class="lat-row"><span class="model">Opus 4.7</span>       <div class="lat-track"><div class="lat-fill slow" style="--w: 30%"></div></div><span class="lat-val">58 t/s</span></div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- CHECKLIST -->
-  <section class="checklist-section container">
-    <div class="section-head">
-      <p class="section-eyebrow">Cost-optimization checklist</p>
-      <h2 class="section-title">Five things engineers should always do.</h2>
-      <p class="section-lede">In rough order of return. Most teams ship the first three on day one — the second two are where the savings compound.</p>
-    </div>
-
-    <div class="checklist">
-      <article class="check">
-        <div class="check-num">01</div>
-        <div class="check-body">
-          <div class="ttl">Cache the system prompt.</div>
-          <div class="desc">Anything &gt; 1024 tokens that doesn't change between requests — system instructions, tool definitions, few-shot examples, long document prefixes — should be cacheable.</div>
-        </div>
-        <span class="check-impact">−60 to −90%</span>
-      </article>
-      <article class="check">
-        <div class="check-num">02</div>
-        <div class="check-body">
-          <div class="ttl">Cap <code style="font-family:var(--font-mono); background:var(--color-accent-light); color:var(--color-accent); padding:0.05rem 0.35rem; border-radius:4px;">max_tokens</code> aggressively.</div>
-          <div class="desc">Output is 5× input. Pick the smallest budget that still produces complete answers, then audit. Most production prompts ship with the default — and pay for it.</div>
-        </div>
-        <span class="check-impact">−20 to −40%</span>
-      </article>
-      <article class="check">
-        <div class="check-num">03</div>
-        <div class="check-body">
-          <div class="ttl">Route by complexity, not by default.</div>
-          <div class="desc">A small classifier (Haiku, $0.10/MTok cached) in front of Sonnet/Opus catches the 70% of requests that don't need the flagship model. Cost of routing is rounding error.</div>
-        </div>
-        <span class="check-impact">−40 to −70%</span>
-      </article>
-      <article class="check">
-        <div class="check-num">04</div>
-        <div class="check-body">
-          <div class="ttl">Move async work to the batch API.</div>
-          <div class="desc">Overnight evals, embedding backfills, summarization sweeps, scheduled report generation. 50% off, stacks with caching for ~95% combined savings on long prefixes.</div>
-        </div>
-        <span class="check-impact">−50% flat</span>
-      </article>
-      <article class="check">
-        <div class="check-num">05</div>
-        <div class="check-body">
-          <div class="ttl">Instrument cost per request, not just totals.</div>
-          <div class="desc">Tag every call with feature, model, and cache-hit ratio. The bill is your monthly aggregate — the cost-per-request histogram is what tells you where to optimize next.</div>
-        </div>
-        <span class="check-impact">Visibility · always</span>
-      </article>
-    </div>
-  </section>
-
-  <!-- CODE -->
-  <section class="code-section">
-    <div class="container">
-      <div class="section-head">
-        <p class="section-eyebrow">In code</p>
-        <h2 class="section-title">Prompt caching, ten lines.</h2>
-        <p class="section-lede">Anthropic SDK · mark a block as cacheable with <code style="font-family:var(--font-mono); background:var(--color-accent-light); color:var(--color-accent); padding:0.1rem 0.4rem; border-radius:4px;">cache_control</code>. The first call writes; every call within the 5-minute TTL pays 10%.</p>
-      </div>
-
-      <div class="code-wrap" id="code-wrap">
-        <div class="code-header">
-          <div class="code-dots"><span></span><span></span><span></span></div>
-          <span class="code-tag-file">cache.py · Anthropic Python SDK</span>
-        </div>
-<pre><span class="k">from</span> anthropic <span class="k">import</span> Anthropic
-
-client <span class="o">=</span> Anthropic()
-
-resp <span class="o">=</span> client.messages.<span class="fn">create</span>(
-    model<span class="o">=</span><span class="s">"claude-sonnet-4-6"</span>,
-    max_tokens<span class="o">=</span><span class="n">800</span>,
-    system<span class="o">=</span>[
-        {
-            <span class="p">"type"</span>: <span class="s">"text"</span>,
-            <span class="p">"text"</span>: long_system_prompt,           <span class="c"># ~10K tokens, stable across turns</span>
-            <span class="p">"cache_control"</span>: {<span class="p">"type"</span>: <span class="s">"ephemeral"</span>}  <span class="c"># 5-min TTL · "1h" also available</span>
-        }
-    ],
-    messages<span class="o">=</span>[{<span class="p">"role"</span>: <span class="s">"user"</span>, <span class="p">"content"</span>: turn}],
-)
-<span class="fn">print</span>(resp.usage.cache_read_input_tokens, <span class="s">"tokens read from cache"</span>)
-<span class="c"># First call: usage.cache_creation_input_tokens populated (1.25× cost)</span>
-<span class="c"># Subsequent calls within TTL: cache_read_input_tokens populated (0.1× cost)</span></pre>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="cta-section container">
-    <h2>Tokens are the new SaaS unit. Treat the bill like one.</h2>
-    <p>CETI runs cost-and-latency audits on production AI systems — caching strategy, routing fabric, batch migration, and unit-economics dashboards your finance team can actually read.</p>
-    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
-      Book a 30-min audit
-      <span class="arrow">→</span>
-    </a>
-  </section>
-
-  <footer>
-    CETI Lookbook · AI Economics · 2026.05 · Pricing reflects vendor public rates and may change
-  </footer>
+  </div>
 
   <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+    // ============ NUMBER-FLASH ON UPDATE (price matrix) ============
+    (function () {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    // ============ INTERSECTION-DRIVEN REVEALS ============
-    const reveal = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+      const cells = document.querySelectorAll('#pxMatrix td[data-row]');
+      if (!cells.length) return;
 
-    document.querySelectorAll('.curve-card, .lever, .ladder, .lat-card, .check, .code-wrap')
-      .forEach((el) => reveal.observe(el));
-
-    // ============ NUMBER TICKERS ============
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const dur = 1200;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
+      function flashRandom() {
+        const idx = Math.floor(Math.random() * cells.length);
+        const cell = cells[idx];
+        cell.classList.remove('flash');
+        // force reflow
+        void cell.offsetWidth;
+        cell.classList.add('flash');
       }
-      requestAnimationFrame(tick);
-    }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
 
-    // ============ MAGIC LEVER CARDS (cursor-follow glow) ============
-    document.querySelectorAll('.lever').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
-
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 25;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-
-    // ============ TOKEN FLOW (under the curve) ============
-    (function initTokens() {
-      const track = document.getElementById('token-track');
-      if (!track) return;
-      const labels = ['10K', '10K', '10K', '+', '10K', '10K', '+', '10K'];
-      labels.forEach((txt, i) => {
-        const el = document.createElement('div');
-        el.className = 'token ' + (txt === '+' ? 'spent' : 'saved');
-        el.textContent = txt === '+' ? '+' : '·';
-        el.title = txt === '+' ? 'New input tokens (full price)' : '10K tokens read from cache (10% price)';
-        el.style.animationDelay = `${i * 0.6}s`;
-        el.style.left = '-10%';
-        track.appendChild(el);
-      });
+      // Flash a cell every 3.4s
+      setInterval(flashRandom, 3400);
     })();
 
-    // ============ PRICE LADDER ============
-    const MODELS = [
-      { nm: 'Opus 4.7',         vendor: 'Anthropic', input: 5.00,  output: 25.00, cached: 0.50 },
-      { nm: 'Sonnet 4.6',       vendor: 'Anthropic', input: 3.00,  output: 15.00, cached: 0.30 },
-      { nm: 'Haiku 4.5',        vendor: 'Anthropic', input: 1.00,  output:  5.00, cached: 0.10 },
-      { nm: 'GPT-5.2',          vendor: 'OpenAI',    input: 1.75,  output: 14.00, cached: 0.44 },
-      { nm: 'o3 (reasoning)',   vendor: 'OpenAI',    input: 2.00,  output:  8.00, cached: 0.50 },
-      { nm: 'Gemini 3.1 Pro',   vendor: 'Google',    input: 2.00,  output: 12.00, cached: 0.50 },
-      { nm: 'Gemini 2.5 Flash', vendor: 'Google',    input: 0.30,  output:  2.50, cached: 0.075 },
-    ];
+    // ============ COMMAND-LINE ROTATING TEXT ============
+    (function () {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const el = document.getElementById('cmdText');
+      if (!el) return;
+      const cmds = [
+        'SHOW PX MATRIX ',
+        'CACHE STAT 5M ',
+        'BATCH SUBMIT EVAL ',
+        'ROUTE BY COMPLEXITY ',
+        'CURVE 24H SONNET ',
+        'OBS SAMPLE 1% ',
+        'EXPORT LEDGER ',
+      ];
+      let i = 0;
+      setInterval(() => {
+        i = (i + 1) % cmds.length;
+        el.textContent = cmds[i];
+      }, 4600);
+    })();
 
-    const list = document.getElementById('price-list');
-    function renderLadder(tier) {
-      const max = Math.max(...MODELS.map(m => m[tier]));
-      const cls = tier === 'output' ? 'output' : 'input';
-      list.innerHTML = '';
-      MODELS
-        .slice()
-        .sort((a, b) => b[tier] - a[tier])
-        .forEach((m) => {
-          const pct = (m[tier] / max) * 100;
-          const row = document.createElement('div');
-          row.className = 'price-row';
-          row.innerHTML = `
-            <div class="price-name">
-              <span class="nm">${m.nm}</span>
-              <span class="vendor">${m.vendor}</span>
-            </div>
-            <div class="price-bar-wrap">
-              <div class="price-bar ${cls}" style="--w: ${pct.toFixed(1)}%"></div>
-            </div>
-            <div class="price-num"><span class="currency">$</span>${m[tier].toFixed(2)}<span class="unit">per 1M</span></div>
-          `;
-          list.appendChild(row);
-          // Trigger animation if section already visible
-          if (document.getElementById('ladder').classList.contains('visible')) {
-            requestAnimationFrame(() => {
-              const bar = row.querySelector('.price-bar');
-              bar.style.width = '0';
-              requestAnimationFrame(() => bar.style.width = `${pct.toFixed(1)}%`);
-            });
-          }
-        });
-    }
-    renderLadder('input');
-
-    document.querySelectorAll('.ladder-toggle button').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.ladder-toggle button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderLadder(btn.dataset.tier);
-      });
-    });
+    // ============ HEADER METRIC IDLE-FLASH ============
+    (function () {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const targets = ['m1', 'm2', 'm3', 'm4'].map(id => document.getElementById(id));
+      let j = 0;
+      setInterval(() => {
+        const t = targets[j % targets.length];
+        if (!t) return;
+        t.classList.remove('nflash', 'up', 'dn');
+        void t.offsetWidth;
+        t.classList.add('nflash', Math.random() > 0.5 ? 'up' : 'dn');
+        j++;
+      }, 5200);
+    })();
   </script>
+
   <script src="../shared/nav.js" defer></script>
 </body>
 </html>

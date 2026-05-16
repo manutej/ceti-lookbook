@@ -3,1214 +3,1101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transformers — Attention is all you need · CETI.AI Lookbook</title>
-  <meta name="description" content="From the 2017 paper to modern decoder-only LLMs — Q/K/V attention, the layer cake, RoPE, GQA, MoE, FlashAttention. A mental model for developers.">
+  <title>Attention, Revisited. — Manu Mulaveesala, CETI.AI</title>
+  <meta name="description" content="An academic-paper-style survey of the self-attention mechanism, the transformer architecture, and the modern evolutions (RoPE, GQA, MoE, FlashAttention, SwiGLU) from 2017 to 2026.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-bg-code: #1E1E2E;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
-      --color-accent: #D94F30;
-      --color-accent-hover: #C4432A;
-      --color-accent-light: #FDEEE9;
-      --color-accent-muted: #E8836C;
-      --color-info: #2A7B9B;
-      --color-actor-2: #2A7B9B;
-      --color-actor-3: #7B6DAA;
-      --color-actor-4: #D4A843;
-      --color-actor-5: #2D8B55;
+      --paper:        #FFFFFF;
+      --ink:          #000000;
+      --ink-soft:     #1A1A1A;
+      --caption:      #444444;
+      --rule:         #BFBFBF;
+      --rule-soft:    #E5E5E5;
+      --blue:         #1F77B4;
+      --red:          #D62728;
+      --grid-bg:      #FAFAFA;
 
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body: 'DM Sans', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-      --duration-fast: 150ms;
-      --duration-normal: 300ms;
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
+      --serif:        'EB Garamond', 'Computer Modern', Georgia, 'Times New Roman', serif;
+      --sans:         'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      --mono:         'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, monospace;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image:
-        radial-gradient(ellipse at 18% 12%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
-        radial-gradient(ellipse at 92% 80%, rgba(42, 123, 155, 0.04) 0%, transparent 55%);
-      line-height: 1.6;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 17px;
+      line-height: 1.55;
       -webkit-font-smoothing: antialiased;
+      /* Faint paper grain via SVG noise */
+      background-image:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.025 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
     }
 
-    ::selection { background: var(--color-accent-light); color: var(--color-text); }
+    ::selection { background: #FFEFA8; color: var(--ink); }
 
-    /* ============ SECTION SCAFFOLD ============ */
-    .wrap {
-      max-width: 1100px;
+    /* --------- PAGE FRAME --------- */
+    .page {
+      max-width: 880px;
       margin: 0 auto;
+      padding: 5rem 1.75rem 4rem;
+    }
+
+    /* --------- TITLE BLOCK --------- */
+    .title-block {
+      text-align: center;
+      padding-bottom: 2.25rem;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 2.5rem;
+    }
+    .paper-title {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: clamp(2rem, 4.6vw, 3.1rem);
+      line-height: 1.1;
+      letter-spacing: -0.005em;
+      margin: 0 0 1.1rem;
+      font-feature-settings: "lnum" 1;
+    }
+    .paper-title::after {
+      content: "";
+      display: block;
+      width: 64px;
+      height: 2px;
+      margin: 1.1rem auto 0;
+      background: var(--red);
+    }
+    .authors {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-style: italic;
+      color: var(--ink-soft);
+      margin: 0;
+    }
+    .affiliation {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--caption);
+      margin-top: 0.4rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* --------- ABSTRACT --------- */
+    .abstract {
+      max-width: 620px;
+      margin: 0 auto 2.5rem;
+      padding: 0 1.5rem;
+      font-style: italic;
+      font-size: 0.98rem;
+      line-height: 1.55;
+      color: var(--ink-soft);
+      text-align: justify;
+      hyphens: auto;
+    }
+    .abstract::before {
+      content: "Abstract.";
+      font-style: normal;
+      font-weight: 600;
+      margin-right: 0.5em;
+      font-variant: small-caps;
+      letter-spacing: 0.04em;
+    }
+
+    /* --------- SECTION HEADINGS --------- */
+    h2.section {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.15rem;
+      letter-spacing: -0.005em;
+      margin: 2.5rem 0 0.9rem;
+      color: var(--ink);
+    }
+    h2.section .num {
+      color: var(--ink);
+      font-weight: 700;
+      margin-right: 0.5em;
+    }
+    h3.subsection {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 1.6rem 0 0.5rem;
+      color: var(--ink);
+    }
+    h3.subsection .num {
+      font-weight: 700;
+      margin-right: 0.45em;
+    }
+
+    /* --------- TWO-COLUMN BODY --------- */
+    .body-cols {
+      column-count: 2;
+      column-gap: 2.25rem;
+      column-rule: none;
+      text-align: justify;
+      hyphens: auto;
+    }
+    .body-cols p {
+      margin: 0 0 0.85rem;
+      font-size: 0.96rem;
+      line-height: 1.58;
+      orphans: 2;
+      widows: 2;
+    }
+    .body-cols p + p { text-indent: 1.3em; }
+    .body-cols h2, .body-cols h3 {
+      column-span: all;
+    }
+
+    /* Figures span all columns */
+    figure.fig {
+      column-span: all;
+      margin: 1.4rem 0 1.6rem;
+      break-inside: avoid;
+    }
+    figcaption {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--caption);
+      margin-top: 0.55rem;
+      text-align: left;
+    }
+    figcaption .label {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    /* --------- EQUATION --------- */
+    .equation {
+      column-span: all;
+      text-align: center;
+      margin: 1.2rem 0 1.4rem;
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      letter-spacing: 0;
+      position: relative;
+      padding: 0.4rem 0;
+    }
+    .equation.inline-eq {
+      font-size: 0.98rem;
+    }
+    .equation .eq-body {
+      display: inline-block;
       padding: 0 1.5rem;
     }
-    section { padding: 5rem 0; }
-
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: var(--color-accent);
-      margin: 0 0 1.25rem;
-    }
-
-    h1, h2, h3 {
-      font-family: var(--font-display);
-      letter-spacing: -0.02em;
-      line-height: 1.08;
-      margin: 0;
-    }
-
-    /* ============ HERO ============ */
-    .hero {
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 6rem 1.5rem 4rem;
-      max-width: 1100px;
-      margin: 0 auto;
-      position: relative;
-    }
-    .hero-title {
-      font-weight: 800;
-      font-size: clamp(2.75rem, 7.5vw, 6rem);
-      line-height: 1.02;
-      margin: 1.5rem 0 1.75rem;
-      max-width: 14ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 300ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 400ms; }
-    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 500ms; }
-    .hero-title em {
-      font-style: normal;
-      color: var(--color-accent);
-    }
-    .hero-eyebrow {
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
-    }
-    .hero.visible .hero-eyebrow { opacity: 1; }
-
-    .hero-sub {
-      font-size: 1.2rem;
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 700ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    .cta-row {
-      display: flex;
-      gap: 1.25rem;
-      margin-top: 2.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 900ms;
-    }
-    .hero.visible .cta-row { opacity: 1; }
-
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 1rem 1.75rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease;
-      will-change: transform;
-      text-decoration: none;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(3px); }
-    .secondary {
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-family: var(--font-mono);
-      transition: color 200ms;
-    }
-    .secondary:hover { color: var(--color-accent); }
-
-    /* ============ SECTION HEADINGS ============ */
-    .section-head {
-      max-width: 60ch;
-      margin-bottom: 3rem;
-    }
-    .section-head h2 {
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-    .section-head p {
-      color: var(--color-text-secondary);
-      font-size: 1.1rem;
-      margin: 0;
-    }
-
-    /* ============ ATTENTION MATRIX (the WOW) ============ */
-    .matrix-section {
-      background: var(--color-bg-warm);
-      padding-top: 6rem;
-      padding-bottom: 6rem;
-    }
-    .matrix-layout {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 4rem;
-      align-items: center;
-    }
-    .matrix-stage {
-      position: relative;
-      padding: 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 1.25rem;
-      box-shadow: var(--shadow-md);
-    }
-    .matrix-caption {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-text-muted);
-      margin-bottom: 1.25rem;
-    }
-    .matrix-caption .pattern-name {
-      color: var(--color-accent);
-      font-weight: 500;
-    }
-    .matrix {
-      display: grid;
-      grid-template-columns: auto repeat(8, 1fr);
-      grid-template-rows: auto repeat(8, 1fr);
-      gap: 4px;
-      aspect-ratio: 1 / 1;
-    }
-    .matrix-label {
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--color-text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 3.2ch;
-    }
-    .matrix-label.row {
-      justify-content: flex-end;
-      padding-right: 0.4rem;
-    }
-    .matrix-cell {
-      border-radius: 3px;
-      background: var(--color-accent);
-      opacity: var(--w, 0.02);
-      transition: opacity 480ms var(--ease-out);
-      aspect-ratio: 1 / 1;
-      min-height: 18px;
-    }
-    .matrix-cell.diag {
-      box-shadow: 0 0 0 1px var(--color-accent-muted);
-    }
-    .pattern-pills {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .pill {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 0.4rem 0.85rem;
-      border-radius: 9999px;
-      background: var(--color-bg);
-      border: 1px solid var(--color-border);
-      color: var(--color-text-secondary);
-      cursor: pointer;
-      transition: all 200ms var(--ease-out);
-      font-weight: 500;
-    }
-    .pill:hover { color: var(--color-accent); border-color: var(--color-accent-muted); }
-    .pill.active {
-      background: var(--color-accent);
-      color: white;
-      border-color: var(--color-accent);
-    }
-
-    .qkv {
-      display: grid;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    .qkv-row {
-      display: grid;
-      grid-template-columns: 3rem 1fr;
-      gap: 1rem;
-      align-items: baseline;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--color-border);
-    }
-    .qkv-row:last-child { border-bottom: none; }
-    .qkv-key {
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 1.8rem;
-      color: var(--color-accent);
-      line-height: 1;
-    }
-    .qkv-body { font-size: 0.98rem; color: var(--color-text-secondary); }
-    .qkv-body strong { color: var(--color-text); font-weight: 500; }
-
-    /* ============ LAYER CAKE ============ */
-    .cake-layout {
-      display: grid;
-      grid-template-columns: 0.85fr 1.15fr;
-      gap: 4rem;
-      align-items: center;
-    }
-    .cake {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      max-width: 320px;
-      margin: 0 auto;
-    }
-    .layer {
-      padding: 1rem 1.25rem;
-      border-radius: 12px;
-      border: 1px solid var(--color-border);
-      background: var(--color-surface);
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-secondary);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      transition: all 400ms var(--ease-out);
-    }
-    .layer.embed { background: var(--color-accent-light); color: var(--color-accent); border-color: var(--color-accent-muted); }
-    .layer.output { background: var(--color-bg-warm); }
-    .layer.block {
-      background: var(--color-surface);
-      box-shadow: var(--shadow-md);
-    }
-    .layer.glow {
-      border-color: var(--color-accent);
-      box-shadow: 0 0 0 3px var(--color-accent-light), var(--shadow-lg);
-      transform: translateX(4px);
-    }
-    .layer .layer-num {
-      font-size: 0.65rem;
-      color: var(--color-text-muted);
-      font-weight: 400;
-    }
-    .layer.glow .layer-num { color: var(--color-accent); }
-    .stack-label {
-      text-align: center;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-text-muted);
-      margin-top: 0.75rem;
-    }
-    .stack-label .n {
-      font-family: var(--font-display);
-      font-weight: 700;
-      color: var(--color-accent);
-      font-size: 1rem;
-    }
-
-    /* ============ BENTO GRID ============ */
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    .tile {
-      position: relative;
-      padding: 1.75rem;
-      border-radius: 1rem;
-      background:
-        radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
-          rgba(217, 79, 48, 0.07), transparent 40%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      opacity: 0;
-      transform: translateY(20px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring),
-        border-color var(--duration-normal),
-        box-shadow var(--duration-normal);
-    }
-    .tile.visible { opacity: 1; transform: translateY(0); }
-    .tile.visible:hover { border-color: var(--color-accent-muted); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
-    .tile-tag {
-      display: inline-block;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 0.3rem 0.7rem;
-      border-radius: 9999px;
-      font-weight: 500;
-    }
-    .tile-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: -0.01em;
-      margin: 0.85rem 0 0.5rem;
-    }
-    .tile-body {
-      color: var(--color-text-secondary);
+    .equation .eq-tag {
+      position: absolute;
+      right: 0.4rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--serif);
       font-size: 0.92rem;
-      margin: 0;
+      color: var(--caption);
+    }
+    .equation .frac {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      margin: 0 0.15em;
+    }
+    .equation .frac .num,
+    .equation .frac .den {
+      display: block;
+      padding: 0 0.35em;
+      line-height: 1.1;
+    }
+    .equation .frac .num { border-bottom: 1px solid var(--ink); padding-bottom: 0.1em; }
+    .equation .frac .den { padding-top: 0.1em; }
+    .equation sup { font-size: 0.7em; }
+    .equation sub { font-size: 0.65em; }
+
+    /* --------- FIGURE 1: ATTENTION MATRIX --------- */
+    .matrix-fig {
+      background: var(--grid-bg);
+      border: 1px solid var(--rule-soft);
+      padding: 1.2rem 1.4rem 1.4rem;
+    }
+    .matrix-frame {
+      display: grid;
+      grid-template-columns: 3.6ch repeat(8, 1fr);
+      grid-template-rows: 1.5rem repeat(8, 1fr);
+      gap: 3px;
+      max-width: 460px;
+      margin: 0 auto;
+      aspect-ratio: 1 / 1;
+    }
+    .axis-label {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--caption);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: lowercase;
+      letter-spacing: 0.04em;
+    }
+    .axis-label.row {
+      justify-content: flex-end;
+      padding-right: 0.4em;
+    }
+    .cell {
+      background: var(--blue);
+      opacity: var(--w, 0.02);
+      transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 14px;
+      border-radius: 1px;
+    }
+    .matrix-axes {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.8rem;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--caption);
+    }
+    .matrix-axes .axis-key {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .matrix-axes .swatch {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: var(--blue);
+    }
+
+    /* --------- FIGURE 2: LAYER STACK --------- */
+    .stack-fig {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1.4rem;
+      align-items: start;
+      padding: 1rem 1.2rem;
+      border: 1px solid var(--rule-soft);
+      background: var(--grid-bg);
+    }
+    .stack-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 200px;
+    }
+    .layer-box {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 0.55rem 0.75rem;
+      background: var(--paper);
+      border: 1px solid var(--ink);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+    .layer-box.io {
+      background: var(--paper);
+      border-color: var(--caption);
+      color: var(--caption);
+    }
+    .layer-box .idx {
+      font-size: 0.62rem;
+      color: var(--caption);
+    }
+    .layer-box.io .idx { color: var(--caption); }
+    .stack-notes {
+      font-family: var(--serif);
+      font-size: 0.9rem;
       line-height: 1.55;
     }
-
-    /* ============ TIMELINE ============ */
-    .timeline-section {
-      background: var(--color-bg-warm);
-    }
-    .timeline {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 1rem;
-      margin-top: 1rem;
-      position: relative;
-    }
-    .timeline::before {
-      content: "";
-      position: absolute;
-      top: 6.5rem;
-      left: 8%;
-      right: 8%;
-      height: 2px;
-      background: linear-gradient(to right, var(--color-border) 0%, var(--color-accent-muted) 100%);
-      z-index: 0;
-    }
-    .era {
-      position: relative;
-      z-index: 1;
-      padding: 1.5rem 1rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 1rem;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(20px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring),
-        border-color var(--duration-normal);
-    }
-    .era.visible { opacity: 1; transform: translateY(0); }
-    .era:nth-child(1).visible { transition-delay: 0ms; }
-    .era:nth-child(2).visible { transition-delay: 100ms; }
-    .era:nth-child(3).visible { transition-delay: 200ms; }
-    .era:nth-child(4).visible { transition-delay: 300ms; }
-    .era:nth-child(5).visible { transition-delay: 400ms; }
-    .era:hover { border-color: var(--color-accent-muted); }
-
-    .era-year {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-text-muted);
-    }
-    .era-name {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.1rem;
-      margin: 0.5rem 0 0.25rem;
-      letter-spacing: -0.01em;
-    }
-    .era-num {
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: clamp(1.8rem, 3vw, 2.4rem);
-      color: var(--color-accent);
-      line-height: 1;
-      margin: 0.75rem 0 0.3rem;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -0.02em;
-    }
-    .era-unit {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-muted);
-    }
-    .era-note {
-      margin-top: 0.75rem;
+    .stack-notes dl { margin: 0; }
+    .stack-notes dt {
+      font-family: var(--sans);
+      font-weight: 600;
       font-size: 0.78rem;
-      color: var(--color-text-secondary);
-      line-height: 1.4;
+      margin-top: 0.6rem;
+      letter-spacing: 0.02em;
     }
-    .era .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--color-surface);
-      border: 2px solid var(--color-accent);
-      margin: 0.5rem auto 0;
-    }
-
-    /* ============ CODE BLOCK ============ */
-    .code-section { background: var(--color-bg); }
-    .code-wrap {
-      background: var(--color-bg-code);
-      border-radius: 1rem;
-      padding: 2rem;
-      margin-top: 1.5rem;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-      overflow: hidden;
-    }
-    .code-wrap::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(to right, transparent, var(--color-accent-muted), transparent);
-    }
-    .code-head {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      margin-bottom: 1.25rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .code-head .filename {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      color: #9E9790;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    .code-head .dots { display: flex; gap: 6px; }
-    .code-head .dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.12); }
-    .code-head .dots span:first-child { background: #E8836C; }
-    pre {
-      margin: 0;
-      font-family: var(--font-mono);
+    .stack-notes dt:first-of-type { margin-top: 0; }
+    .stack-notes dd {
+      margin: 0.15rem 0 0;
+      color: var(--ink-soft);
       font-size: 0.88rem;
-      line-height: 1.65;
-      color: #CDD6F4;
-      white-space: pre-wrap;
-      word-break: break-word;
     }
-    .ck { color: #CBA6F7; } /* keyword */
-    .cs { color: #A6E3A1; } /* string */
-    .cf { color: #89B4FA; } /* function */
-    .cc { color: #6C7086; font-style: italic; } /* comment */
-    .cn { color: #FAB387; } /* number */
-    .cp { color: #F9E2AF; } /* property */
-    .co { color: #94E2D5; } /* operator */
-    .ct { color: #F38BA8; } /* tag/type */
 
-    /* ============ FINAL CTA ============ */
-    .final {
-      text-align: center;
-      padding: 7rem 1.5rem;
-      max-width: 720px;
-      margin: 0 auto;
+    /* --------- FIGURE 3: BAR CHART --------- */
+    .chart-fig {
+      padding: 1.2rem 1.4rem;
+      border: 1px solid var(--rule-soft);
+      background: var(--grid-bg);
     }
-    .final h2 {
-      font-size: clamp(2.25rem, 5vw, 3.25rem);
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-    .final p {
-      color: var(--color-text-secondary);
-      font-size: 1.1rem;
-      margin-bottom: 2.25rem;
-    }
-    .footer {
-      padding: 2rem 1.5rem 3rem;
-      text-align: center;
-      color: var(--color-text-muted);
-      font-family: var(--font-mono);
+    .chart {
+      display: grid;
+      grid-template-columns: 4.5ch 1fr;
+      gap: 0.4rem 0.6rem;
+      align-items: center;
+      font-family: var(--mono);
       font-size: 0.72rem;
-      letter-spacing: 0.12em;
+    }
+    .chart .y-label {
+      text-align: right;
+      color: var(--caption);
+    }
+    .chart .bar-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .chart .bar {
+      height: 14px;
+      background: var(--blue);
+      transform-origin: left;
+      transform: scaleX(0);
+      transition: transform 900ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .chart .bar.peak { background: var(--red); }
+    .chart-fig.visible .bar { transform: scaleX(var(--scale, 1)); }
+    .chart .val {
+      color: var(--ink);
+      font-feature-settings: "tnum" 1;
+    }
+    .chart .x-axis {
+      grid-column: 2 / 3;
+      border-top: 1px solid var(--ink);
+      margin-top: 0.4rem;
+      padding-top: 0.25rem;
+      display: flex;
+      justify-content: space-between;
+      color: var(--caption);
+      font-size: 0.65rem;
+    }
+
+    /* --------- TABLE (Table 1) --------- */
+    .data-table {
+      column-span: all;
+      margin: 1.4rem 0 1.6rem;
+      break-inside: avoid;
+    }
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--serif);
+      font-size: 0.88rem;
+      color: var(--ink);
+    }
+    .data-table caption {
+      caption-side: bottom;
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--caption);
+      margin-top: 0.55rem;
+      text-align: left;
+    }
+    .data-table caption .label {
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .data-table thead th {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.74rem;
       text-transform: uppercase;
-      border-top: 1px solid var(--color-border-light);
-      max-width: 1100px;
-      margin: 0 auto;
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      padding: 0.55rem 0.7rem;
+      border-bottom: 1.5px solid var(--ink);
+      border-top: 1.5px solid var(--ink);
+      text-align: left;
+      background: var(--grid-bg);
+    }
+    .data-table tbody td {
+      padding: 0.5rem 0.7rem;
+      border-bottom: 1px solid var(--rule-soft);
+      vertical-align: top;
+    }
+    .data-table tbody tr:last-child td {
+      border-bottom: 1.5px solid var(--ink);
+    }
+    .data-table .num-col {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-feature-settings: "tnum" 1;
+      white-space: nowrap;
+    }
+    .data-table .year-col {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      color: var(--caption);
+    }
+    .data-table .frontier-row td {
+      color: var(--ink);
+    }
+    .data-table .frontier-row .model-cell::after {
+      content: " \25CF";
+      color: var(--red);
+      font-size: 0.7em;
+      vertical-align: super;
     }
 
-    /* ============ ANIMATE-IN UTILITY ============ */
-    .animate-in {
+    /* --------- LISTING (CODE) --------- */
+    .listing {
+      column-span: all;
+      margin: 1.2rem 0 1.4rem;
+      border: 1px solid var(--rule-soft);
+      background: var(--grid-bg);
+      break-inside: avoid;
+    }
+    .listing-head {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      color: var(--caption);
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid var(--rule-soft);
+      letter-spacing: 0.02em;
+    }
+    .listing-head .label {
+      color: var(--ink);
+      font-weight: 600;
+    }
+    pre.code {
+      margin: 0;
+      padding: 1rem 1.2rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: var(--ink);
+      overflow-x: auto;
+      white-space: pre;
+    }
+    pre.code .kw { color: var(--blue); }
+    pre.code .cm { color: var(--caption); font-style: italic; }
+    pre.code .st { color: var(--red); }
+
+    /* --------- REFERENCES --------- */
+    .references {
+      column-span: all;
+      margin-top: 2rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--rule);
+    }
+    .references h2 {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin: 0 0 0.9rem;
+    }
+    .references ol {
+      list-style: none;
+      counter-reset: ref;
+      padding: 0;
+      margin: 0;
+      columns: 2;
+      column-gap: 2rem;
+    }
+    .references li {
+      counter-increment: ref;
+      font-size: 0.84rem;
+      line-height: 1.5;
+      margin-bottom: 0.55rem;
+      padding-left: 2.2em;
+      position: relative;
+      color: var(--ink-soft);
+      break-inside: avoid;
+    }
+    .references li::before {
+      content: "[" counter(ref) "]";
+      position: absolute;
+      left: 0;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--ink);
+    }
+    .references li .auth { font-style: italic; }
+    .references li .ttl { color: var(--ink); }
+
+    /* --------- WATERMARK --------- */
+    .watermark {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule-soft);
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--caption);
+    }
+
+    /* --------- FADE-IN --------- */
+    .fade {
       opacity: 0;
-      transform: translateY(22px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
+      transition: opacity 700ms ease;
     }
-    .animate-in.visible { opacity: 1; transform: translateY(0); }
+    .fade.visible { opacity: 1; }
 
-    /* ============ RESPONSIVE ============ */
-    @media (max-width: 900px) {
-      .matrix-layout, .cake-layout { grid-template-columns: 1fr; gap: 2.5rem; }
-      .bento { grid-template-columns: 1fr 1fr; }
-      .timeline { grid-template-columns: 1fr 1fr; }
-      .timeline::before { display: none; }
-    }
-    @media (max-width: 560px) {
-      section { padding: 3.5rem 0; }
-      .bento { grid-template-columns: 1fr; }
-      .timeline { grid-template-columns: 1fr; }
-      .matrix { grid-template-columns: auto repeat(6, 1fr); grid-template-rows: auto repeat(6, 1fr); }
-      .matrix-cell.hide-mobile { display: none; }
-      .matrix-label.hide-mobile { display: none; }
-      .hero { padding-top: 4rem; }
+    /* --------- RESPONSIVE --------- */
+    @media (max-width: 720px) {
+      .page { padding: 3rem 1.1rem 2.5rem; }
+      .body-cols { column-count: 1; }
+      .references ol { columns: 1; }
+      .stack-fig { grid-template-columns: 1fr; }
+      .matrix-frame { max-width: 100%; }
+      .paper-title { font-size: 2rem; }
+      .data-table table { font-size: 0.78rem; }
+      .data-table thead th { font-size: 0.66rem; padding: 0.4rem 0.4rem; }
+      .data-table tbody td { padding: 0.4rem 0.4rem; }
     }
 
-    /* ============ REDUCED MOTION ============ */
+    /* --------- REDUCED MOTION --------- */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
       }
-      .hero .word, .hero-sub, .cta-row, .hero-eyebrow,
-      .tile, .era, .animate-in {
-        opacity: 1 !important;
-        transform: none !important;
-      }
-      /* Static diagonal-only attention pattern for reduced motion */
-      .matrix-cell { opacity: 0.04 !important; transition: none !important; }
-      .matrix-cell.diag { opacity: 0.85 !important; }
-    }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .tile:hover { transform: none !important; }
+      .fade { opacity: 1 !important; }
+      .chart .bar { transform: scaleX(var(--scale, 1)) !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ============ HERO ============ -->
-  <section class="hero" id="hero">
-    <p class="eyebrow hero-eyebrow">Transformers · Modern LLM architectures · CETI.AI Lookbook</p>
-    <h1 class="hero-title">
-      <span class="word">Attention</span>
-      <span class="word">is</span>
-      <span class="word">all</span>
-      <span class="word">you</span>
-      <span class="word"><em>need.</em></span>
-    </h1>
-    <p class="hero-sub">
-      One sentence in a 2017 paper rewrote machine learning. Eight years later it powers every model you've heard of — GPT, Claude, Llama, Gemini. This is the mental model for what's actually inside, and how the architecture evolved into the LLMs of 2026.
+  <article class="page">
+
+    <!-- ============ TITLE BLOCK ============ -->
+    <header class="title-block">
+      <h1 class="paper-title">Attention, Revisited.</h1>
+      <p class="authors">Manu Mulaveesala</p>
+      <p class="affiliation">CETI.AI &middot; May 2026</p>
+    </header>
+
+    <!-- ============ ABSTRACT ============ -->
+    <p class="abstract">
+      We revisit the self-attention mechanism that has defined large language models since Vaswani et al. (2017). In a single operation &mdash; a scaled dot product between learned <em>query</em> and <em>key</em> projections, normalized by softmax and used to mix learned <em>values</em> &mdash; the transformer replaced recurrence with parallelism and unlocked the scaling regime in which all current frontier models operate. This survey presents a compact but rigorous mental model of the architecture: tokenization and embeddings, positional encoding schemes (sinusoidal, RoPE, ALiBi), the scaled dot-product attention equation, multi-head attention and its motivations, position-wise feed-forward networks, normalization placement, and residual connections. We trace the rise of the decoder-only paradigm, survey five post-2020 refinements (RoPE, GQA, MoE, FlashAttention, SwiGLU), discuss Chinchilla-style scaling laws, tabulate the four orders of magnitude of parameter scaling from 2017 to 2026, and close with the inference-time considerations &mdash; KV cache, speculative decoding, continuous batching &mdash; that now dominate deployment economics. The aim is a working understanding sufficient to read contemporary architecture papers and reason about real deployment trade-offs.
     </p>
-    <div class="cta-row">
-      <a class="magnetic" href="#attention">
-        Start with attention
-        <span class="arrow">→</span>
-      </a>
-      <a class="secondary" href="#evolution">jump to 2017 → 2026 ↓</a>
-    </div>
-  </section>
 
-  <!-- ============ ATTENTION MATRIX (the WOW) ============ -->
-  <section class="matrix-section" id="attention">
-    <div class="wrap">
-      <div class="section-head animate-in">
-        <p class="eyebrow">01 · Self-attention</p>
-        <h2>Every token looks at every other token.</h2>
-        <p>The 2017 idea, in one image: each token in the sequence asks "who else should I pay attention to?" The answer is a matrix of weights. Brighter cell = more attention from row→column.</p>
+    <!-- ============ BODY ============ -->
+    <div class="body-cols">
+
+      <!-- ===== 1. INTRODUCTION ===== -->
+      <h2 class="section"><span class="num">1.</span>Introduction</h2>
+
+      <p>Nine years after its publication, "Attention Is All You Need" (Vaswani et al., 2017) remains the architectural backbone of every frontier language model in production. The contribution of that paper was not a new task, nor a new dataset, nor a new optimizer; it was the removal of recurrence from sequence modeling. By replacing the recurrent step with a mechanism that compares every token to every other token in parallel, the transformer made it possible to train at scales that recurrent networks could not reach in any practical wall-clock time, and it eliminated the path-length bottleneck that had previously bounded the propagation of gradient information across long sequences.</p>
+
+      <p>The intellectual debt is older than 2017. Attention as a soft alignment mechanism between sequences was introduced for neural machine translation by Bahdanau, Cho, and Bengio in 2015, as a remedy for the fixed-length bottleneck of encoder&ndash;decoder RNNs; Luong, Pham, and Manning (2015) refined the formulation shortly thereafter. The decisive step in 2017 was to remove the recurrent encoder altogether and stack attention on top of attention, leaving only the linear projections, the softmax, and the residual block. The architecture that resulted was, on paper, almost embarrassingly simple. In practice, it scaled better than anything before it and continues to scale.</p>
+
+      <p>The architecture has since been extended by roughly four orders of magnitude in parameter count, applied to images (Dosovitskiy et al., 2021), audio, code, protein structures, and decision-making, and refined with a small number of carefully chosen modifications. The outline of the original block, however, is preserved: an attention layer, a per-token feed-forward layer, residual connections around each, and a normalization step. This survey describes that block in detail, makes the attention computation concrete with a small worked example, traces the scaling trajectory that followed, surveys the five modifications that distinguish modern stacks from the 2017 reference design, and discusses what changes when the model is deployed rather than trained.</p>
+
+      <p>The aim is pedagogical rather than novel. The mental model below should be sufficient to read an architecture-comparison paper, debug a training run, evaluate which of the post-2020 modifications are appropriate for a given regime, and reason about the throughput, latency, and memory cost of serving a model in production. We assume the reader is comfortable with linear algebra at the level of matrix multiplication and softmax, and has at least passing familiarity with gradient-based optimization; no specific background in natural language processing is required.</p>
+
+      <p>Notation is standard. We write <em>n</em> for sequence length, d<sub>model</sub> for the residual-stream feature dimension, d<sub>k</sub> for the per-head key dimension, <em>h</em> for the number of attention heads (with d<sub>model</sub> = <em>h</em> &middot; d<sub>k</sub> when heads are not grouped), d<sub>ff</sub> for the feed-forward inner dimension (commonly 4 &middot; d<sub>model</sub>), and <em>N</em> for the number of stacked transformer blocks. Boldface is omitted for typographic convenience; all uppercase Roman letters in equations refer to matrices.</p>
+
+      <p>The remainder of this paper is organized as follows. Section 2 dissects the transformer block sub-layer by sub-layer. Section 3 explains why the decoder-only variant has come to dominate. Section 4 surveys the five modern refinements. Section 5 covers scaling laws. Section 6 tabulates the empirical model timeline from 2017 to 2026. Section 7 turns to inference-time considerations. Section 8 presents the canonical attention computation in Python.</p>
+
+      <!-- ===== 2. THE ARCHITECTURE ===== -->
+      <h2 class="section"><span class="num">2.</span>The Architecture</h2>
+
+      <p>A transformer is almost entirely a single block, repeated. Tokens enter as integer indices, are mapped to dense vectors by an embedding table, are augmented with positional information, and then flow upward through <em>N</em> identical layers. Each layer applies multi-head attention to mix information across tokens and a position-wise feed-forward network (FFN) to transform each token independently. Residual connections wrap both sub-layers and a normalization step is applied at each entry. After the final block, an unembedding projection followed by a softmax produces a probability distribution over the next token. We now unpack this assembly one sub-layer at a time.</p>
+
+      <h3 class="subsection"><span class="num">2.1</span>Token Embeddings</h3>
+
+      <p>The model never sees text directly. A tokenizer first segments raw bytes into a vocabulary of subword units &mdash; byte-pair encoding (Sennrich et al., 2016), WordPiece, or, increasingly, SentencePiece byte-level variants &mdash; producing an integer sequence of length <em>n</em>. Each integer indexes a learned embedding table of shape (V, d<sub>model</sub>), where V is the vocabulary size (commonly 32K&ndash;200K) and d<sub>model</sub> is the residual-stream dimension (commonly 4096 in mid-scale models, 12288 or larger in frontier models). The lookup produces a dense matrix <em>X</em> &isin; &reals;<sup>n &times; d<sub>model</sub></sup>.</p>
+
+      <p>The unembedding matrix at the top of the network shares either its weights with the embedding table (weight tying, common in smaller models) or learns its own projection (more common at scale, where unembedding capacity is cheap and useful). Either way, every operation in between is a function on <em>X</em>; the only place vocabulary enters or leaves the model is at these two endpoints.</p>
+
+      <h3 class="subsection"><span class="num">2.2</span>Positional Encoding</h3>
+
+      <p>Attention is permutation-equivariant: shuffle the rows of <em>X</em> and the rows of the output shuffle correspondingly. Order information must therefore be injected explicitly. Vaswani et al. used a fixed sinusoidal scheme, adding to each row of <em>X</em> a vector whose components are sines and cosines of geometrically spaced frequencies. The construction allows the model to recover relative position from the inner product of two encodings, and the fixed scheme generalizes (in principle) to sequence lengths longer than those seen during training.</p>
+
+      <p>In practice the original sinusoidal scheme has been almost entirely displaced. Two alternatives dominate. Rotary Position Embeddings (RoPE; Su et al., 2021) apply a position-dependent rotation to the query and key vectors themselves, encoding relative position multiplicatively rather than additively; we return to this in &sect;4.1. ALiBi (Press et al., 2022) skips position vectors altogether and instead adds a linearly decaying bias to attention scores as a function of the query&ndash;key distance, which yields strong length extrapolation at the cost of a less flexible inductive bias. Both schemes share the property that position is expressed as a function of the <em>difference</em> between two indices, not as an absolute coordinate.</p>
+
+      <h3 class="subsection"><span class="num">2.3</span>Scaled Dot-Product Attention</h3>
+
+      <p>Self-attention takes a sequence of <em>n</em> token vectors and returns a new sequence in which each output vector is a weighted mixture of the inputs. The weights are learned, content-dependent, and computed in parallel. Three learned linear projections produce a <em>query</em>, a <em>key</em>, and a <em>value</em> for every token. Each query is compared against every key by a scaled inner product; the resulting matrix of scores is normalized row-wise by a softmax, then used to mix the values.</p>
+
+      <p>Concretely, given matrices <em>Q</em>, <em>K</em>, <em>V</em> &isin; &reals;<sup>n &times; d<sub>k</sub></sup> obtained by applying three learned linear projections to the same input sequence <em>X</em> &isin; &reals;<sup>n &times; d<sub>model</sub></sup>, the scaled dot-product attention is defined as:</p>
+
+      <div class="equation" aria-label="Attention equation">
+        <span class="eq-body">
+          Attention(Q, K, V) = softmax<span style="font-family: var(--serif);">(</span><span class="frac"><span class="num">Q K<sup>T</sup></span><span class="den">&radic;d<sub>k</sub></span></span><span style="font-family: var(--serif);">)</span> V
+        </span>
+        <span class="eq-tag">(1)</span>
       </div>
 
-      <div class="matrix-layout">
-        <div class="matrix-stage animate-in">
-          <div class="matrix-caption">
-            <span>attention weights · 8 × 8</span>
-            <span class="pattern-name" id="patternName">causal</span>
+      <p>Each term carries a distinct operational role. <em>Q</em> represents the question every position asks of the others: "given who I am, who matters?". <em>K</em> is the advertisement every position offers in return: "here is what I am, in a form designed to be matched against questions." Their inner product <em>QK</em><sup>T</sup> measures the alignment between every query and every key, producing an <em>n</em> &times; <em>n</em> matrix of compatibility scores. <em>V</em> carries the content actually mixed into the output once the row-normalized scores have decided how much of each value flows where.</p>
+
+      <p>The scaling factor 1/&radic;d<sub>k</sub> prevents the dot products from growing in magnitude with d<sub>k</sub>, which would otherwise push the softmax into regions of vanishing gradient. Without it, training at modern feature dimensions (d<sub>k</sub> = 128 is typical) is numerically unstable from the first step. A masking matrix may be applied additively to the scores prior to the softmax; in decoder-only language models a lower-triangular mask enforces the causal constraint that token <em>i</em> may attend only to tokens <em>j</em> &le; <em>i</em>, with masked positions receiving a large negative value (typically &minus;10<sup>9</sup>) so that the corresponding softmax weight is numerically indistinguishable from zero. Encoder-style architectures such as BERT (Devlin et al., 2019) omit the mask entirely and permit bidirectional attention, at the cost of an objective that is no longer autoregressive.</p>
+
+      <!-- ===== FIGURE 1 ===== -->
+      <figure class="fig" id="fig1">
+        <div class="matrix-fig">
+          <div class="matrix-frame" id="matrix" aria-label="Attention weight matrix, 8 by 8">
+            <div class="axis-label"></div>
+            <div class="axis-label">the</div>
+            <div class="axis-label">cat</div>
+            <div class="axis-label">sat</div>
+            <div class="axis-label">on</div>
+            <div class="axis-label">the</div>
+            <div class="axis-label">mat</div>
+            <div class="axis-label">and</div>
+            <div class="axis-label">slept</div>
+            <!-- 8 rows generated by JS to keep markup short -->
           </div>
-          <div class="matrix" id="matrix" aria-label="Animated attention weight matrix">
-            <!-- corner -->
-            <div class="matrix-label"></div>
-            <!-- column labels -->
-            <div class="matrix-label">THE</div>
-            <div class="matrix-label">CAT</div>
-            <div class="matrix-label">SAT</div>
-            <div class="matrix-label">ON</div>
-            <div class="matrix-label">THE</div>
-            <div class="matrix-label">MAT</div>
-            <div class="matrix-label hide-mobile">AND</div>
-            <div class="matrix-label hide-mobile">SLEPT</div>
-            <!-- rows -->
-            <!-- row 0 -->
-            <div class="matrix-label row">THE</div>
-            <div class="matrix-cell" data-r="0" data-c="0"></div>
-            <div class="matrix-cell" data-r="0" data-c="1"></div>
-            <div class="matrix-cell" data-r="0" data-c="2"></div>
-            <div class="matrix-cell" data-r="0" data-c="3"></div>
-            <div class="matrix-cell" data-r="0" data-c="4"></div>
-            <div class="matrix-cell" data-r="0" data-c="5"></div>
-            <div class="matrix-cell hide-mobile" data-r="0" data-c="6"></div>
-            <div class="matrix-cell hide-mobile" data-r="0" data-c="7"></div>
-            <!-- row 1 -->
-            <div class="matrix-label row">CAT</div>
-            <div class="matrix-cell" data-r="1" data-c="0"></div>
-            <div class="matrix-cell" data-r="1" data-c="1"></div>
-            <div class="matrix-cell" data-r="1" data-c="2"></div>
-            <div class="matrix-cell" data-r="1" data-c="3"></div>
-            <div class="matrix-cell" data-r="1" data-c="4"></div>
-            <div class="matrix-cell" data-r="1" data-c="5"></div>
-            <div class="matrix-cell hide-mobile" data-r="1" data-c="6"></div>
-            <div class="matrix-cell hide-mobile" data-r="1" data-c="7"></div>
-            <!-- row 2 -->
-            <div class="matrix-label row">SAT</div>
-            <div class="matrix-cell" data-r="2" data-c="0"></div>
-            <div class="matrix-cell" data-r="2" data-c="1"></div>
-            <div class="matrix-cell" data-r="2" data-c="2"></div>
-            <div class="matrix-cell" data-r="2" data-c="3"></div>
-            <div class="matrix-cell" data-r="2" data-c="4"></div>
-            <div class="matrix-cell" data-r="2" data-c="5"></div>
-            <div class="matrix-cell hide-mobile" data-r="2" data-c="6"></div>
-            <div class="matrix-cell hide-mobile" data-r="2" data-c="7"></div>
-            <!-- row 3 -->
-            <div class="matrix-label row">ON</div>
-            <div class="matrix-cell" data-r="3" data-c="0"></div>
-            <div class="matrix-cell" data-r="3" data-c="1"></div>
-            <div class="matrix-cell" data-r="3" data-c="2"></div>
-            <div class="matrix-cell" data-r="3" data-c="3"></div>
-            <div class="matrix-cell" data-r="3" data-c="4"></div>
-            <div class="matrix-cell" data-r="3" data-c="5"></div>
-            <div class="matrix-cell hide-mobile" data-r="3" data-c="6"></div>
-            <div class="matrix-cell hide-mobile" data-r="3" data-c="7"></div>
-            <!-- row 4 -->
-            <div class="matrix-label row">THE</div>
-            <div class="matrix-cell" data-r="4" data-c="0"></div>
-            <div class="matrix-cell" data-r="4" data-c="1"></div>
-            <div class="matrix-cell" data-r="4" data-c="2"></div>
-            <div class="matrix-cell" data-r="4" data-c="3"></div>
-            <div class="matrix-cell" data-r="4" data-c="4"></div>
-            <div class="matrix-cell" data-r="4" data-c="5"></div>
-            <div class="matrix-cell hide-mobile" data-r="4" data-c="6"></div>
-            <div class="matrix-cell hide-mobile" data-r="4" data-c="7"></div>
-            <!-- row 5 -->
-            <div class="matrix-label row">MAT</div>
-            <div class="matrix-cell" data-r="5" data-c="0"></div>
-            <div class="matrix-cell" data-r="5" data-c="1"></div>
-            <div class="matrix-cell" data-r="5" data-c="2"></div>
-            <div class="matrix-cell" data-r="5" data-c="3"></div>
-            <div class="matrix-cell" data-r="5" data-c="4"></div>
-            <div class="matrix-cell" data-r="5" data-c="5"></div>
-            <div class="matrix-cell hide-mobile" data-r="5" data-c="6"></div>
-            <div class="matrix-cell hide-mobile" data-r="5" data-c="7"></div>
-            <!-- row 6 -->
-            <div class="matrix-label row hide-mobile">AND</div>
-            <div class="matrix-cell hide-mobile" data-r="6" data-c="0"></div>
-            <div class="matrix-cell hide-mobile" data-r="6" data-c="1"></div>
-            <div class="matrix-cell hide-mobile" data-r="6" data-c="2"></div>
-            <div class="matrix-cell hide-mobile" data-r="6" data-c="3"></div>
-            <div class="matrix-cell hide-mobile" data-r="6" data-c="4"></div>
-            <div class="matrix-cell hide-mobile" data-r="6" data-c="5"></div>
-            <div class="matrix-cell hide-mobile" data-r="6" data-c="6"></div>
-            <div class="matrix-cell hide-mobile" data-r="6" data-c="7"></div>
-            <!-- row 7 -->
-            <div class="matrix-label row hide-mobile">SLEPT</div>
-            <div class="matrix-cell hide-mobile" data-r="7" data-c="0"></div>
-            <div class="matrix-cell hide-mobile" data-r="7" data-c="1"></div>
-            <div class="matrix-cell hide-mobile" data-r="7" data-c="2"></div>
-            <div class="matrix-cell hide-mobile" data-r="7" data-c="3"></div>
-            <div class="matrix-cell hide-mobile" data-r="7" data-c="4"></div>
-            <div class="matrix-cell hide-mobile" data-r="7" data-c="5"></div>
-            <div class="matrix-cell hide-mobile" data-r="7" data-c="6"></div>
-            <div class="matrix-cell hide-mobile" data-r="7" data-c="7"></div>
-          </div>
-          <div class="pattern-pills">
-            <button class="pill" data-pattern="diagonal">diagonal · self</button>
-            <button class="pill active" data-pattern="causal">causal · GPT-style</button>
-            <button class="pill" data-pattern="local">local window</button>
-            <button class="pill" data-pattern="full">full · BERT-style</button>
+          <div class="matrix-axes">
+            <span>row = query token <em>i</em></span>
+            <span class="axis-key"><span class="swatch"></span>opacity &prop; w<sub>ij</sub></span>
+            <span>col = key token <em>j</em></span>
           </div>
         </div>
+        <figcaption>
+          <span class="label">Figure 1:</span> Attention weight matrix for an 8-token sequence under a causal (decoder-only) mask. Cell (<em>i</em>, <em>j</em>) shows the weight assigned by query token <em>i</em> to key token <em>j</em>; the lower-triangular structure reflects the fact that each position attends only to itself and earlier positions. Weights are normalized to sum to one along each row.
+        </figcaption>
+      </figure>
 
-        <div class="animate-in">
-          <div class="qkv">
-            <div class="qkv-row">
-              <div class="qkv-key">Q</div>
-              <div class="qkv-body"><strong>Query</strong> — "What am I looking for?" Each token projects a question into a learned vector space.</div>
-            </div>
-            <div class="qkv-row">
-              <div class="qkv-key">K</div>
-              <div class="qkv-body"><strong>Key</strong> — "What do I offer?" Every other token advertises what it has to contribute.</div>
-            </div>
-            <div class="qkv-row">
-              <div class="qkv-key">V</div>
-              <div class="qkv-body"><strong>Value</strong> — "Here's my content." Once attention picks the matches, values are mixed by the attention weights.</div>
-            </div>
-            <div class="qkv-row">
-              <div class="qkv-key">×n</div>
-              <div class="qkv-body"><strong>Multi-head</strong> — do this whole thing in parallel ~32 times, each "head" learning a different relationship (syntax, coreference, position). Then concatenate.</div>
-            </div>
+      <h3 class="subsection"><span class="num">2.4</span>Multi-Head Attention</h3>
+
+      <p>A single attention head produces, for each position, a single weighted average over the value vectors. This is expressive but narrow: any one head must commit to one notion of "relevance" per position. Multi-head attention runs <em>h</em> attention computations in parallel, each with its own learned projections to lower-dimensional Q, K, and V (typically d<sub>k</sub> = d<sub>model</sub> / <em>h</em>), concatenates the outputs along the feature axis, and applies a final learned linear map back to d<sub>model</sub>.</p>
+
+      <p>The empirical observation, supported by probing studies, is that different heads specialize: some attend to the previous token, some to the syntactic head of the current phrase, some to coreference antecedents, some to positional offsets that have no obvious linguistic name. The total compute per token is dominated by the <em>O</em>(<em>n</em><sup>2</sup> d<sub>k</sub>) cost of computing <em>QK</em><sup>T</sup>, and the constant in front of the quadratic term scales with <em>h</em>; this is the central reason that context-length efficiency has become the principal engineering frontier of the past three years.</p>
+
+      <h3 class="subsection"><span class="num">2.5</span>Feed-Forward Networks</h3>
+
+      <p>Between attention sub-layers, every position passes through an identical two-layer MLP applied independently per token. In the 2017 paper this was a linear expansion to d<sub>ff</sub> = 4 &middot; d<sub>model</sub>, a ReLU nonlinearity, and a linear projection back. The FFN is where most of the parameters live: with d<sub>ff</sub> = 4 d<sub>model</sub>, the per-block FFN contributes 8 d<sub>model</sub><sup>2</sup> weights against attention's 4 d<sub>model</sub><sup>2</sup>, so the FFN holds roughly two-thirds of the parameter budget of a dense transformer.</p>
+
+      <p>Modern transformers replace the ReLU with a gated variant, typically SwiGLU (Shazeer, 2020); we discuss this in &sect;4.5. The intuition is unchanged: attention mixes tokens, the FFN transforms each token, and the two alternate.</p>
+
+      <h3 class="subsection"><span class="num">2.6</span>Layer Normalization</h3>
+
+      <p>LayerNorm (Ba et al., 2016) rescales the features of each token to have zero mean and unit variance, then applies a learned affine transform. Without normalization, the residual stream tends to drift in magnitude as it accumulates contributions across <em>N</em> = 32&ndash;80 layers, and gradient-based optimization becomes unstable.</p>
+
+      <p>Two design choices are worth flagging. The first is the <em>placement</em> of the normalization step. The 2017 paper applied LayerNorm <em>after</em> each residual addition (Post-LN); the modern convention is to apply it <em>before</em> each sub-layer (Pre-LN), inside the residual branch. Pre-LN trains stably without warmup schedules and is more robust at large <em>N</em>; Post-LN can yield slightly stronger final performance when it converges but is notoriously fragile at scale (Xiong et al., 2020). Every frontier-class language model since GPT-2 has used Pre-LN. The second choice is the normalization statistic itself: RMSNorm (Zhang &amp; Sennrich, 2019) drops the mean centering and divides only by the root-mean-square of the features, saving a small but measurable amount of compute with no measurable quality loss. RMSNorm is now standard in the Llama family and most open-weight stacks.</p>
+
+      <h3 class="subsection"><span class="num">2.7</span>Residual Connections</h3>
+
+      <p>Each sub-layer is wrapped in a residual connection: the output is added to the input rather than replacing it. The consequence is that the activations at the top of layer <em>&ell;</em> are the sum of the embedding plus all the contributions from layers 1 through <em>&ell;</em>. The "residual stream" picture (Elhage et al., 2021) treats this sum as a shared communication channel that every sub-layer reads from and writes to. Most of the mechanistic interpretability literature is organized around this picture; it is a useful frame even outside that subfield.</p>
+
+      <!-- ===== FIGURE 2 ===== -->
+      <figure class="fig" id="fig2">
+        <div class="stack-fig">
+          <div class="stack-diagram" aria-hidden="true">
+            <div class="layer-box io"><span>embed + pos</span><span class="idx">in</span></div>
+            <div class="layer-box"><span>attn + FFN</span><span class="idx">L1</span></div>
+            <div class="layer-box"><span>attn + FFN</span><span class="idx">L2</span></div>
+            <div class="layer-box"><span>attn + FFN</span><span class="idx">L3</span></div>
+            <div class="layer-box"><span>&middot; &middot; &middot;</span><span class="idx">&middot;&middot;&middot;</span></div>
+            <div class="layer-box"><span>attn + FFN</span><span class="idx">L<sub>N</sub></span></div>
+            <div class="layer-box io"><span>unembed &rarr; softmax</span><span class="idx">out</span></div>
+          </div>
+          <div class="stack-notes">
+            <dl>
+              <dt>Embed</dt>
+              <dd>Token id &rarr; learned vector of dimension d<sub>model</sub> (commonly 4096). Position information is added (sinusoidal in 2017; rotary in modern stacks).</dd>
+              <dt>Attention</dt>
+              <dd>Multi-head scaled dot-product, as in &sect;2.3. The only sub-layer that mixes information across tokens.</dd>
+              <dt>FFN</dt>
+              <dd>A two-layer MLP applied identically to each token. Holds roughly two thirds of model parameters.</dd>
+              <dt>Norm</dt>
+              <dd>LayerNorm (2017) or RMSNorm (2020+) keeps activation magnitudes bounded across <em>N</em> = 32&ndash;80 layers. Pre-LN placement is now universal.</dd>
+            </dl>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
+        <figcaption>
+          <span class="label">Figure 2:</span> Layer stack of a modern decoder-only transformer. The same residual block &mdash; attention followed by FFN, each wrapped with normalization and a residual connection &mdash; is repeated <em>N</em> times, with <em>N</em> typically between 32 and 80 in frontier-class models.
+        </figcaption>
+      </figure>
 
-  <!-- ============ LAYER CAKE ============ -->
-  <section id="layers">
-    <div class="wrap">
-      <div class="section-head animate-in">
-        <p class="eyebrow">02 · The layer cake</p>
-        <h2>Stack the same block, 32 to 80 times.</h2>
-        <p>A transformer is mostly one block, repeated. Tokens flow up through embeddings, through N identical layers of <em>attention + feed-forward</em>, and out as a probability distribution over the next token.</p>
+      <p>It is useful to remember that attention is the <em>only</em> sub-layer in which tokens interact. The FFN, the normalization, and the residual addition all operate per-token; the entire memory of "what other tokens exist" enters and leaves the block through attention. This separation has direct engineering consequences: the FFN parameters can be sharded along the feature dimension without communication, while attention is the sub-layer that determines KV-cache size, inference memory pressure, and, in distributed training, the dominant pattern of cross-device traffic.</p>
+
+      <!-- ===== 3. DECODER-ONLY ===== -->
+      <h2 class="section"><span class="num">3.</span>The Decoder-Only Paradigm</h2>
+
+      <p>The 2017 paper used an encoder&ndash;decoder configuration appropriate to machine translation, with a cross-attention sub-layer connecting the two stacks. Within two years the field had bifurcated. BERT (Devlin et al., 2019) demonstrated that the encoder half alone, trained with a masked-language-modeling objective, produced strong representations for downstream classification and span tasks. GPT (Radford et al., 2018, 2019) demonstrated that the decoder half alone, trained autoregressively, scaled smoothly with parameters and data and could perform a remarkable range of tasks as a side effect of next-token prediction. T5 (Raffel et al., 2020) argued for the full encoder&ndash;decoder.</p>
+
+      <p>Empirically, the decoder-only design has won at the frontier. There are three reasons. First, the training objective is uniform: every token is a prediction target, and there is no need to design pretext tasks (masking, span corruption, sentence-order shuffling) whose strengths and weaknesses must be balanced. Second, the decoder-only stack is the same stack used at inference; there is no asymmetry between training and serving, which simplifies caching and routing. Third, the in-context learning behavior that motivates contemporary use of language models &mdash; few-shot prompting, instruction following, tool use &mdash; emerges naturally from a model that has been trained to predict the next token in long, varied text, and is harder to elicit from a model trained on a balanced mixture of pretext objectives.</p>
+
+      <p>There is a fourth reason that has nothing to do with model quality and everything to do with serving systems. A causal language model can be served with a KV cache: at generation step <em>t</em>, the K and V tensors for tokens 1 through <em>t</em>&minus;1 are already in memory from earlier steps and need not be recomputed. An encoder, by contrast, must re-run its full forward pass whenever its input changes. The KV cache is the single most important data structure in modern LLM serving, and it exists only because the decoder-only design permits it.</p>
+
+      <p>The remaining encoder-only and encoder&ndash;decoder workloads &mdash; embedding generation, retrieval, dense classification, structured translation &mdash; remain commercially significant, but they live downstream of the frontier rather than at it.</p>
+
+      <!-- ===== 4. MODERN EVOLUTIONS ===== -->
+      <h2 class="section"><span class="num">4.</span>Modern Evolutions</h2>
+
+      <p>Five refinements distinguish modern stacks from the 2017 reference design. None of them change the outline of Figure 2; each addresses a specific limitation of the original.</p>
+
+      <h3 class="subsection"><span class="num">4.1</span>Rotary Position Embeddings (RoPE)</h3>
+
+      <p>The 2017 paper added sinusoidal position vectors directly to the token embeddings, treating position as an additive perturbation in input space. The choice is appealingly simple but couples position to content in a way that limits the model's ability to generalize to sequence lengths it has not seen.</p>
+
+      <p>RoPE (Su et al., 2021) instead applies a position-dependent rotation to the query and key vectors. Concretely, the d<sub>k</sub>-dimensional vectors are interpreted as d<sub>k</sub>/2 two-dimensional sub-vectors, and each sub-vector is rotated by an angle proportional to its position index <em>m</em> and to a feature-specific frequency &theta;<sub>j</sub>. Because rotations preserve inner products, the resulting Q<sup>T</sup>K depends only on the <em>difference</em> <em>m</em>&nbsp;&minus;&nbsp;<em>n</em>, not on either absolute index. Position enters the attention score through the geometry of the dot product itself, not as a vector that has to be carefully added and subtracted.</p>
+
+      <p>The practical consequences are large. RoPE generalizes more gracefully to sequence lengths beyond those seen at training time, particularly when combined with NTK-aware or YaRN frequency-scaling tricks (Peng et al., 2023). It composes cleanly with FlashAttention because the rotation can be folded into the Q/K projection without materializing any additional tensors. And it expresses relative position with no parameter cost: the rotations are deterministic functions of the position index. Every open-weight frontier model released since 2023 uses RoPE.</p>
+
+      <h3 class="subsection"><span class="num">4.2</span>Grouped-Query Attention (GQA)</h3>
+
+      <p>In multi-head attention every head has its own Q, K, and V. At inference time the K and V tensors for all past tokens must be cached so that subsequent generation steps do not recompute them. The cache scales as <em>O</em>(<em>n</em> &middot; <em>h</em> &middot; d<sub>k</sub> &middot; <em>N</em>) per request; for a 70-billion-parameter dense model with a 32K-token context and <em>h</em> = 64 heads, the cache can exceed the size of the model weights themselves.</p>
+
+      <p>Grouped-Query Attention (Ainslie et al., 2023) lets <em>g</em> &lt; <em>h</em> query heads share a single key/value pair, shrinking the cache by a factor of <em>h</em>/<em>g</em>. The earlier multi-query attention (Shazeer, 2019) is the limiting case <em>g</em> = 1, in which all query heads share a single K/V; GQA interpolates between MQA and full multi-head, typically with <em>g</em> = 8 in production. Empirically the quality cost is negligible for <em>g</em> &ge; 4 and small even at <em>g</em> = 1, which suggests that the per-head specialization of keys and values is much less important than the per-head specialization of queries.</p>
+
+      <p>GQA is the single most consequential change for long-context inference economics. A model whose KV cache is eight times smaller can serve eight times more concurrent requests at the same memory budget, or one request with eight times the context length, or any combination in between. Long-context inference at production scale is largely a consequence of this change, working in concert with the FlashAttention kernel discussed below.</p>
+
+      <h3 class="subsection"><span class="num">4.3</span>Mixture of Experts (MoE)</h3>
+
+      <p>A position-wise FFN treats every token identically. A mixture-of-experts FFN replaces the single MLP with a bank of <em>E</em> expert MLPs and a small router that selects the top <em>k</em> &ll; <em>E</em> experts per token. Each token is processed by its <em>k</em> chosen experts, the outputs are weighted by the router scores, and the result is summed.</p>
+
+      <p>The architectural appeal is the decoupling of capacity from compute. Total parameter count grows by a factor of <em>E</em>/<em>k</em> while compute per token stays roughly fixed; a model with E = 64, k = 2 has thirty-two times more parameters than a dense baseline with the same per-token FLOPs. MoE appeared in Shazeer et al. (2017) as the "outrageously large" sparsely-gated layer, became practical for language modeling with Switch Transformer (Fedus et al., 2021), and was rediscovered at scale by Mixtral (Jiang et al., 2024) and by the widely-reported but officially-undisclosed architecture of GPT-4. DeepSeek-V3 (DeepSeek-AI, 2024) is the current open-weight reference point.</p>
+
+      <p>Two engineering challenges remain. The first is load balancing: a naive router can collapse onto a few popular experts, leaving most of the capacity idle. Auxiliary balance losses and capacity factors are the standard remedies, though the literature continues to refine them. The second is the communication pattern: experts are typically sharded across devices, and routing a token to its chosen experts induces an all-to-all exchange whose latency dominates throughput at large <em>E</em>. The systems work required to make MoE training efficient on contemporary clusters is substantial and largely undocumented in public papers.</p>
+
+      <h3 class="subsection"><span class="num">4.4</span>FlashAttention</h3>
+
+      <p>FlashAttention (Dao et al., 2022) computes exactly the same attention as Equation (1), but reorders the computation to keep intermediate values in fast on-chip SRAM rather than off-chip HBM. The original attention implementation materializes the full <em>n</em> &times; <em>n</em> score matrix in HBM, performs the softmax in HBM, and then multiplies it by <em>V</em> in HBM &mdash; three round trips to a memory tier roughly an order of magnitude slower than the SRAM that the matrix-multiply units can actually reach.</p>
+
+      <p>The IO-aware reformulation tiles the computation into blocks small enough to fit in SRAM, performs the softmax online over each block using the running-maximum trick that makes it numerically stable, and writes only the final output to HBM. The result is a constant-factor speedup of two to four times on long sequences and, more importantly, a memory footprint that scales linearly rather than quadratically with sequence length. Practical context windows of 128K tokens and beyond are largely an engineering consequence of this work; the second and third versions of the kernel (Dao, 2023; Shah et al., 2024) have continued to compress the wall-clock cost of long-context training and inference without changing the underlying mathematics.</p>
+
+      <p>The intellectual lesson generalizes. The bottleneck in modern training is rarely arithmetic; it is the movement of bytes across the memory hierarchy. A class of architectural ideas that look numerically identical to their predecessors but are friendlier to the underlying hardware now drives a substantial fraction of progress.</p>
+
+      <h3 class="subsection"><span class="num">4.5</span>SwiGLU Activation</h3>
+
+      <p>The 2017 FFN used a ReLU between its two linear layers. Shazeer (2020) surveys gated variants in which the activation is the elementwise product of a Swish-activated projection and a linear projection: SwiGLU(x) = Swish(xW<sub>1</sub>) &odot; (xW<sub>2</sub>). The construction adds a third weight matrix &mdash; to keep parameter count roughly constant the hidden dimension is reduced from 4 d<sub>model</sub> to approximately 8 d<sub>model</sub> / 3 &mdash; and produces small but consistent improvements in perplexity for the same FLOPs.</p>
+
+      <p>The cost is real (a third matrix multiply per token per layer) and the gain is small, but it is robust across model sizes and data mixtures, which is why every open-weight model in the Llama lineage and most of its descendants now ships with SwiGLU. GeGLU, the Gaussian-error-linear-unit variant, performs similarly and is occasionally preferred.</p>
+
+      <p>Taken together, these five refinements illustrate a pattern characteristic of the post-2020 period: the mathematical specification of the model has changed less than the way the specification is realized on hardware and at scale. Most of the remaining gains in the architecture are expected to come from similar systems-level work &mdash; smarter caching, better routing, more careful quantization, length-extending attention variants &mdash; rather than from any rewrite of the residual block itself.</p>
+
+      <!-- ===== 5. SCALING LAWS ===== -->
+      <h2 class="section"><span class="num">5.</span>Scaling Laws</h2>
+
+      <p>The empirical fact that motivated frontier investment is that loss falls smoothly as a power law in the three independent inputs that govern training: the number of parameters <em>N</em>, the number of tokens <em>D</em>, and the floating-point compute budget <em>C</em>. Kaplan et al. (2020), using a fixed dataset and modest compute, derived exponents that suggested the optimal scaling under a fixed compute budget allocates most of the additional FLOPs to parameter count: roughly <em>N</em> &prop; <em>C</em><sup>0.73</sup>, <em>D</em> &prop; <em>C</em><sup>0.27</sup>.</p>
+
+      <p>Hoffmann et al. (2022), in the paper that introduced Chinchilla, repeated the experiment with a wider hyperparameter sweep and reached the opposite conclusion: under compute-optimal allocation, parameter count and training tokens should scale in roughly equal proportion, <em>N</em> &prop; <em>C</em><sup>0.5</sup> and <em>D</em> &prop; <em>C</em><sup>0.5</sup>. The practical recommendation is approximately twenty training tokens per parameter for a model that will be trained once and not retrained.</p>
+
+      <p>The reconciliation between these two results is partly methodological &mdash; Kaplan used a fixed learning-rate schedule that under-trained the larger models &mdash; and partly economic. Chinchilla's "compute-optimal" frontier minimizes loss at a fixed training compute budget but does not account for inference cost. A model that will be served billions of times benefits from being smaller and trained on more tokens than the Chinchilla optimum, because each saved parameter saves compute on every inference call. The Llama 2 and Llama 3 model cards are explicit about training their models well past the Chinchilla optimum for precisely this reason.</p>
+
+      <p>The current operational rule of thumb at frontier scale is that doubling compute, allocated jointly to parameters and data in roughly Chinchilla proportions, halves the gap to irreducible loss. This regularity has held to within a constant factor across at least two more decades of model size since the original Kaplan paper, which is a remarkable empirical claim that would have seemed implausible in 2019.</p>
+
+      <!-- ===== 6. TIMELINE ===== -->
+      <h2 class="section"><span class="num">6.</span>From 2017 to 2026</h2>
+
+      <p>The architectural outline of Figure 2 has remained stable for nearly a decade. What has changed dramatically is scale. The original transformer used roughly 65 million parameters and was trained for machine translation on the WMT 2014 English&ndash;German dataset. Table 1 lists the reference points along the trajectory from that paper to the present.</p>
+
+      <!-- ===== TABLE 1 ===== -->
+      <div class="data-table" id="table1">
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Model</th>
+              <th class="num-col">Params</th>
+              <th>Architecture</th>
+              <th>Context</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="year-col">2017</td>
+              <td>Transformer (base)</td>
+              <td class="num-col">65 M</td>
+              <td>Enc&ndash;dec, Post-LN, sinusoidal</td>
+              <td class="num-col">512</td>
+            </tr>
+            <tr>
+              <td class="year-col">2019</td>
+              <td>GPT-2</td>
+              <td class="num-col">1.5 B</td>
+              <td>Dec-only, Pre-LN, learned pos</td>
+              <td class="num-col">1024</td>
+            </tr>
+            <tr>
+              <td class="year-col">2020</td>
+              <td>GPT-3</td>
+              <td class="num-col">175 B</td>
+              <td>Dec-only, Pre-LN, learned pos</td>
+              <td class="num-col">2048</td>
+            </tr>
+            <tr>
+              <td class="year-col">2023</td>
+              <td>Llama 2</td>
+              <td class="num-col">70 B</td>
+              <td>Dec-only, RMSNorm, RoPE, GQA</td>
+              <td class="num-col">4 K</td>
+            </tr>
+            <tr>
+              <td class="year-col">2023</td>
+              <td>GPT-4 (est.)</td>
+              <td class="num-col">~1.8 T</td>
+              <td>MoE, dec-only, unconfirmed</td>
+              <td class="num-col">8&ndash;128 K</td>
+            </tr>
+            <tr>
+              <td class="year-col">2024</td>
+              <td>Llama 3.1</td>
+              <td class="num-col">405 B</td>
+              <td>Dec-only, RoPE, GQA, SwiGLU</td>
+              <td class="num-col">128 K</td>
+            </tr>
+            <tr>
+              <td class="year-col">2024</td>
+              <td>DeepSeek-V3</td>
+              <td class="num-col">671 B</td>
+              <td>MoE (37 B active), MLA, RoPE</td>
+              <td class="num-col">128 K</td>
+            </tr>
+            <tr class="frontier-row">
+              <td class="year-col">2025</td>
+              <td class="model-cell">Claude Opus 4.7</td>
+              <td class="num-col">undisclosed</td>
+              <td>Dec-only, 1 M ctx variant</td>
+              <td class="num-col">1 M</td>
+            </tr>
+            <tr class="frontier-row">
+              <td class="year-col">2025</td>
+              <td class="model-cell">Gemini 3 Pro</td>
+              <td class="num-col">undisclosed</td>
+              <td>MoE, multimodal, dec-only</td>
+              <td class="num-col">2 M</td>
+            </tr>
+          </tbody>
+          <caption>
+            <span class="label">Table 1:</span> Reference points along the 2017&ndash;2026 model trajectory. Parameter counts for proprietary models are estimates or have not been disclosed; "active" figures for MoE refer to the per-token compute, "total" to the parameter inventory. Frontier-class models are marked with a red dot.
+          </caption>
+        </table>
       </div>
 
-      <div class="cake-layout">
-        <div class="animate-in">
-          <div class="cake" id="cake" aria-hidden="true">
-            <div class="layer embed" data-layer="0">
-              <span>EMBED + POS</span><span class="layer-num">in</span>
-            </div>
-            <div class="layer block" data-layer="1">
-              <span>ATTENTION + FFN</span><span class="layer-num">L01</span>
-            </div>
-            <div class="layer block" data-layer="2">
-              <span>ATTENTION + FFN</span><span class="layer-num">L02</span>
-            </div>
-            <div class="layer block" data-layer="3">
-              <span>ATTENTION + FFN</span><span class="layer-num">L03</span>
-            </div>
-            <div class="layer block" data-layer="4">
-              <span>ATTENTION + FFN</span><span class="layer-num">···</span>
-            </div>
-            <div class="layer block" data-layer="5">
-              <span>ATTENTION + FFN</span><span class="layer-num">L80</span>
-            </div>
-            <div class="layer output" data-layer="6">
-              <span>UNEMBED → SOFTMAX</span><span class="layer-num">out</span>
-            </div>
+      <p>Figure 3 plots a subset of these reference points on a logarithmic axis. Even on a log scale the slope is steep: roughly four orders of magnitude of parameter scaling in seven years, with a further factor of three to ten when sparse parameter counts are included. The architectural component of this trajectory is essentially unchanged: the choice of attention, the residual block, the token-level FFN. What scaled was the box around it &mdash; the dataset, the cluster, the training duration, the budget, and the operations infrastructure required to keep tens of thousands of accelerators in sync for months at a time.</p>
+
+      <!-- ===== FIGURE 3 ===== -->
+      <figure class="fig" id="fig3">
+        <div class="chart-fig">
+          <div class="chart" id="chart">
+            <span class="y-label">2017</span>
+            <div class="bar-row"><div class="bar" style="--scale: 0.04"></div><span class="val">65 M</span></div>
+
+            <span class="y-label">2019</span>
+            <div class="bar-row"><div class="bar" style="--scale: 0.12"></div><span class="val">1.5 B</span></div>
+
+            <span class="y-label">2020</span>
+            <div class="bar-row"><div class="bar" style="--scale: 0.40"></div><span class="val">175 B</span></div>
+
+            <span class="y-label">2023</span>
+            <div class="bar-row"><div class="bar" style="--scale: 0.78"></div><span class="val">~1.8 T</span></div>
+
+            <span class="y-label">2024</span>
+            <div class="bar-row"><div class="bar peak" style="--scale: 0.55"></div><span class="val">405 B</span></div>
+
+            <span class="x-axis"><span>10<sup>7</sup></span><span>10<sup>9</sup></span><span>10<sup>12</sup></span></span>
           </div>
-          <p class="stack-label"><span class="n">N = 32–80</span> identical blocks in modern LLMs</p>
         </div>
+        <figcaption>
+          <span class="label">Figure 3:</span> Reported parameter counts on a log scale for five reference models &mdash; Vaswani (2017), GPT-2 (2019), GPT-3 (2020), GPT-4 (2023, estimated), and Llama 3.1 (2024). Red bar denotes the latest open-weight reference point at the time of the original draft; GPT-4 figure is community-estimated and not officially confirmed.
+        </figcaption>
+      </figure>
 
-        <div class="bento">
-          <article class="tile animate-in">
-            <span class="tile-tag">embed</span>
-            <h3 class="tile-title">Token → vector</h3>
-            <p class="tile-body">Each token becomes a learned ~4096-dimensional vector. Position information is added (sinusoidal in 2017, RoPE today).</p>
-          </article>
-          <article class="tile animate-in">
-            <span class="tile-tag">attention</span>
-            <h3 class="tile-title">Mix across tokens</h3>
-            <p class="tile-body">The Q/K/V machinery. The only place where tokens look at each other. Everything else acts per-token.</p>
-          </article>
-          <article class="tile animate-in">
-            <span class="tile-tag">ffn</span>
-            <h3 class="tile-title">Think per token</h3>
-            <p class="tile-body">A two-layer MLP applied to each token independently. ~⅔ of the model's parameters live here.</p>
-          </article>
-          <article class="tile animate-in">
-            <span class="tile-tag">layer-norm</span>
-            <h3 class="tile-title">Keep the math sane</h3>
-            <p class="tile-body">Normalizes activations so the signal doesn't explode or vanish across 80 layers. RMSNorm replaces LayerNorm in most modern stacks.</p>
-          </article>
-        </div>
-      </div>
-    </div>
-  </section>
+      <p>The 2024 reference point of particular interest is Meta's Llama 3.1 (Dubey et al., 2024), the first fully open-weight model in the frontier class. Its 405-billion-parameter variant is dense rather than mixture-of-experts and ships with RoPE, GQA, SwiGLU activations, RMSNorm, and a 128K-token context window: a near-canonical instance of the modifications surveyed in &sect;4. DeepSeek-V3 (DeepSeek-AI, 2024) followed shortly after with a 671B-parameter MoE configuration that activates only 37B per token, and introduced Multi-Head Latent Attention (MLA), a further compression of the KV cache that is not yet universally adopted but is being actively studied.</p>
 
-  <!-- ============ TIMELINE ============ -->
-  <section class="timeline-section" id="evolution">
-    <div class="wrap">
-      <div class="section-head animate-in">
-        <p class="eyebrow">03 · From 2017 to 2026</p>
-        <h2>The same block, scaled five orders of magnitude.</h2>
-        <p>The architecture changed less than you'd think. Parameter count changed by a factor of ~10,000× from the original paper to today's frontier models.</p>
-      </div>
+      <p>One observation worth recording is that, although the wall-clock cost of training has risen by several orders of magnitude over this period, the cost per token of inference for a model of comparable quality has fallen sharply. Quantization to 8-bit and 4-bit weights, speculative decoding, the KV-cache compression discussed in &sect;4.2 and &sect;7, and IO-aware attention kernels have each contributed; the aggregate effect is that capabilities that required a research cluster in 2020 now run comfortably on consumer hardware. Whether this trend continues depends as much on systems work as on architectural innovation.</p>
 
-      <div class="timeline">
-        <article class="era">
-          <div class="era-year">JUN 2017</div>
-          <div class="era-name">"Attention is all you need"</div>
-          <div class="dot"></div>
-          <div class="era-num"><span class="num" data-to="65" data-suffix="M">0</span></div>
-          <div class="era-unit">params · encoder-decoder</div>
-          <div class="era-note">The original transformer, designed for machine translation.</div>
-        </article>
-        <article class="era">
-          <div class="era-year">FEB 2019</div>
-          <div class="era-name">GPT-2</div>
-          <div class="dot"></div>
-          <div class="era-num"><span class="num" data-to="1.5" data-suffix="B" data-decimals="1">0</span></div>
-          <div class="era-unit">decoder-only · text</div>
-          <div class="era-note">"Too dangerous to release" — first hint of scale unlocking generality.</div>
-        </article>
-        <article class="era">
-          <div class="era-year">MAY 2020</div>
-          <div class="era-name">GPT-3</div>
-          <div class="dot"></div>
-          <div class="era-num"><span class="num" data-to="175" data-suffix="B">0</span></div>
-          <div class="era-unit">few-shot in-context</div>
-          <div class="era-note">100× larger than GPT-2. Few-shot learning emerged as a property of scale.</div>
-        </article>
-        <article class="era">
-          <div class="era-year">MAR 2023</div>
-          <div class="era-name">GPT-4</div>
-          <div class="dot"></div>
-          <div class="era-num">~<span class="num" data-to="1.8" data-suffix="T" data-decimals="1">0</span></div>
-          <div class="era-unit">rumored MoE · multimodal</div>
-          <div class="era-note">Estimated mixture-of-experts; OpenAI never published the architecture.</div>
-        </article>
-        <article class="era">
-          <div class="era-year">JUL 2024</div>
-          <div class="era-name">Llama 3.1</div>
-          <div class="dot"></div>
-          <div class="era-num"><span class="num" data-to="405" data-suffix="B">0</span></div>
-          <div class="era-unit">open-weight · dense</div>
-          <div class="era-note">Meta's frontier-class open model. RoPE + GQA + SwiGLU + 128K context.</div>
-        </article>
-      </div>
-    </div>
-  </section>
+      <!-- ===== 7. INFERENCE ===== -->
+      <h2 class="section"><span class="num">7.</span>Inference-Time Considerations</h2>
 
-  <!-- ============ MODERN EVOLUTIONS ============ -->
-  <section id="modern">
-    <div class="wrap">
-      <div class="section-head animate-in">
-        <p class="eyebrow">04 · What changed</p>
-        <h2>Four upgrades that quietly redefined the block.</h2>
-        <p>The shape of the transformer is the same. Inside the block, four ideas have become standard since 2020. Every frontier model in 2026 uses some combination of these.</p>
+      <p>Training is dominated by the gradient computation; inference is dominated by memory motion and the autoregressive constraint that token <em>t</em> + 1 cannot begin until token <em>t</em> has finished. Three engineering ideas now structure essentially every production serving stack.</p>
+
+      <p>The first is the <em>KV cache</em>. Because attention at step <em>t</em> requires the K and V projections of every prior token, naively re-running the model on the full prefix at each step would be <em>O</em>(<em>n</em><sup>2</sup>) in tokens already emitted. Instead the K and V tensors are computed once per token and retained in GPU memory; subsequent generation steps perform attention against the cache rather than recomputing it. This is the data structure that makes long-context generation tractable, and its size is the principal driver of per-request memory consumption. GQA (&sect;4.2) and the more aggressive MLA scheme used by DeepSeek attack precisely this object.</p>
+
+      <p>The second is <em>speculative decoding</em> (Leviathan et al., 2023; Chen et al., 2023). A small "draft" model proposes several tokens of continuation, and the large "target" model verifies them in parallel by computing the probabilities it would have assigned. Accepted prefixes commit; the first rejected token is replaced by the target model's own sample, and decoding continues. Because the verification step is a single parallel forward pass through the target model, the wall-clock cost per accepted token can be substantially less than one full target-model step. The technique adds no quality loss; the only cost is the draft model's compute and the implementation complexity.</p>
+
+      <p>The third is <em>continuous batching</em> (sometimes called iteration-level batching), introduced by Orca (Yu et al., 2022) and now standard in vLLM (Kwon et al., 2023) and similar systems. Static batching pads all requests in a batch to the same length, wasting compute on the shorter ones. Continuous batching schedules per-iteration rather than per-request, swapping completed sequences out of the batch and admitting new ones at every step. The combination of continuous batching and the PagedAttention KV-cache layout has lifted serving throughput by roughly an order of magnitude relative to the naive 2022 baseline.</p>
+
+      <p>Beyond these three, an active and rapidly moving body of work covers prefix caching (sharing the cache across requests with common prompts), tensor- and pipeline-parallel sharding across devices, quantization of weights and KV cache to 8-bit and 4-bit, disaggregated prefill and decode serving, and speculative scheduling for multi-turn conversation. None of this affects the equations in &sect;2; all of it affects whether the equations can be evaluated at a cost that supports the business above them.</p>
+
+      <!-- ===== 8. CODE ===== -->
+      <h2 class="section"><span class="num">8.</span>Listing 1: The Attention Mechanism</h2>
+
+      <p>For concreteness, Listing 1 implements Equation (1) in PyTorch. Every transformer ever trained reduces, at its core, to the four lines inside the function body. Multi-head attention is recovered by reshaping the leading feature dimension into a <code>(heads, d_k)</code> pair and applying the same function in parallel; the layer cake of Figure 2 is recovered by wrapping this function with residual addition, normalization, and a two-layer MLP, and repeating the resulting block <em>N</em> times.</p>
+
+      <div class="listing" id="listing1">
+        <div class="listing-head"><span class="label">Listing 1.</span> &nbsp; <code>attention.py</code> &mdash; scaled dot-product attention.</div>
+<pre class="code"><span class="cm"># Q, K, V: (batch, heads, seq_len, d_k)</span>
+<span class="cm"># mask:    (1, 1, seq_len, seq_len) lower-triangular for causal LMs</span>
+<span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn.functional <span class="kw">as</span> F
+
+<span class="kw">def</span> attention(Q, K, V, mask=<span class="kw">None</span>):
+    d_k    = Q.size(-<span class="st">1</span>)
+    scores = Q @ K.transpose(-<span class="st">2</span>, -<span class="st">1</span>) / d_k**<span class="st">0.5</span>   <span class="cm"># QK^T / sqrt(d_k)</span>
+
+    <span class="kw">if</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="kw">None</span>:
+        scores = scores.masked_fill(mask == <span class="st">0</span>, -<span class="st">1e9</span>)  <span class="cm"># causal: forbid future</span>
+
+    weights = F.softmax(scores, dim=-<span class="st">1</span>)               <span class="cm"># row-wise normalization</span>
+    <span class="kw">return</span> weights @ V                               <span class="cm"># mix the values</span>
+
+<span class="cm"># In production this whole function is replaced by a single call:</span>
+<span class="cm">#   F.scaled_dot_product_attention(Q, K, V, is_causal=True)</span>
+<span class="cm"># which dispatches to a FlashAttention-style kernel under the hood.</span></pre>
       </div>
 
-      <div class="bento">
-        <article class="tile animate-in">
-          <span class="tile-tag">positional</span>
-          <h3 class="tile-title">RoPE</h3>
-          <p class="tile-body">Rotary positional embeddings. Encodes position by rotating Q/K vectors in complex space — generalizes cleanly to longer sequences than seen in training.</p>
-        </article>
-        <article class="tile animate-in">
-          <span class="tile-tag">attention</span>
-          <h3 class="tile-title">GQA</h3>
-          <p class="tile-body">Grouped-Query Attention. Multiple Q heads share one K/V pair — shrinks the KV-cache 4–8× with near-zero quality loss. The reason long-context inference is affordable.</p>
-        </article>
-        <article class="tile animate-in">
-          <span class="tile-tag">sparsity</span>
-          <h3 class="tile-title">Mixture of Experts</h3>
-          <p class="tile-body">Replace one big FFN with many small ones plus a router. Only a few experts activate per token — total params explode, compute per token stays flat.</p>
-        </article>
-        <article class="tile animate-in">
-          <span class="tile-tag">systems</span>
-          <h3 class="tile-title">FlashAttention</h3>
-          <p class="tile-body">Same math, better memory access. Fuses operations on-GPU to skip the slow HBM round-trip. Long context windows (128K+) became practical because of this.</p>
-        </article>
-      </div>
-    </div>
-  </section>
+      <p>A useful conceptual decomposition is to separate the architecture into three nearly orthogonal axes. The first is the <em>token-mixing</em> operator, currently attention. The second is the <em>per-token</em> nonlinearity, currently a gated MLP. The third is the <em>positional encoding</em>, currently rotary. Improvements in any single axis tend to transfer cleanly to models that share the other two, which is one reason the modifications surveyed in &sect;4 propagated so rapidly across the field. A reader who has reached this point should be able to read Figure 1 of any recent architecture paper without surprise, identify which of the three axes a proposed modification touches, and form a reasonable expectation of which deployment regime &mdash; training-bound, inference-bound, memory-bound, or context-length-bound &mdash; the modification is most likely to help.</p>
 
-  <!-- ============ CODE ============ -->
-  <section class="code-section" id="code">
-    <div class="wrap">
-      <div class="section-head animate-in">
-        <p class="eyebrow">05 · What it looks like in code</p>
-        <h2>One equation, the whole idea.</h2>
-        <p>The attention layer of every transformer reduces to this. Everything else — multi-head, layer-norm, residuals, FFN — wraps around it.</p>
-      </div>
+      <p>The pedagogical surprise of the transformer is how little of the architecture is "necessary" in any deep sense. Attention is not the only operator that can mix tokens; recurrent, convolutional, and state-space alternatives (Gu &amp; Dao, 2023) have all been demonstrated and continue to be actively investigated. The empirical advantage of attention lies in a combination of parallelism, expressivity, and remarkably forgiving optimization behavior at scale &mdash; properties that have held across model sizes, modalities, and training regimes. Finally, a note on what this article has deliberately omitted. We have said nothing about tokenization detail beyond noting that it exists, although the choice of tokenizer has subtle but real effects on multilingual performance and on numeric reasoning. We have said nothing about the training objective beyond noting that contemporary frontier models are autoregressive; the literature on instruction tuning, RLHF, and direct preference optimization is large and beyond the scope of an architectural note. We have said nothing about evaluation, alignment, or interpretability. The intent has been to describe the residual block itself with enough precision that the reader can place the rest of the literature in context.</p>
 
-      <div class="code-wrap animate-in">
-        <div class="code-head">
-          <div class="dots"><span></span><span></span><span></span></div>
-          <div class="filename">attention.py · scaled dot-product</div>
-        </div>
-<pre><span class="cc"># Q, K, V: (batch, heads, seq_len, d_k)</span>
-<span class="ck">import</span> torch
-<span class="ck">import</span> torch.nn.functional <span class="ck">as</span> F
+      <!-- ===== REFERENCES ===== -->
+      <section class="references" aria-label="References">
+        <h2>References</h2>
+        <ol>
+          <li><span class="auth">Bahdanau, D., Cho, K., &amp; Bengio, Y.</span> (2015). <span class="ttl">Neural Machine Translation by Jointly Learning to Align and Translate.</span> In <em>International Conference on Learning Representations</em> (ICLR).</li>
+          <li><span class="auth">Luong, M.-T., Pham, H., &amp; Manning, C. D.</span> (2015). <span class="ttl">Effective Approaches to Attention-based Neural Machine Translation.</span> In <em>EMNLP</em>.</li>
+          <li><span class="auth">Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, &Lstrok;., &amp; Polosukhin, I.</span> (2017). <span class="ttl">Attention Is All You Need.</span> In <em>Advances in Neural Information Processing Systems</em> (NeurIPS).</li>
+          <li><span class="auth">Shazeer, N., Mirhoseini, A., Maziarz, K., Davis, A., Le, Q., Hinton, G., &amp; Dean, J.</span> (2017). <span class="ttl">Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer.</span> In <em>ICLR</em>.</li>
+          <li><span class="auth">Sennrich, R., Haddow, B., &amp; Birch, A.</span> (2016). <span class="ttl">Neural Machine Translation of Rare Words with Subword Units.</span> In <em>ACL</em>.</li>
+          <li><span class="auth">Ba, J. L., Kiros, J. R., &amp; Hinton, G. E.</span> (2016). <span class="ttl">Layer Normalization.</span> <em>arXiv:1607.06450</em>.</li>
+          <li><span class="auth">Radford, A., Narasimhan, K., Salimans, T., &amp; Sutskever, I.</span> (2018). <span class="ttl">Improving Language Understanding by Generative Pre-Training.</span> OpenAI technical report.</li>
+          <li><span class="auth">Devlin, J., Chang, M.-W., Lee, K., &amp; Toutanova, K.</span> (2019). <span class="ttl">BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.</span> In <em>NAACL</em>.</li>
+          <li><span class="auth">Radford, A., Wu, J., Child, R., Luan, D., Amodei, D., &amp; Sutskever, I.</span> (2019). <span class="ttl">Language Models are Unsupervised Multitask Learners.</span> OpenAI technical report.</li>
+          <li><span class="auth">Shazeer, N.</span> (2019). <span class="ttl">Fast Transformer Decoding: One Write-Head is All You Need.</span> <em>arXiv:1911.02150</em>.</li>
+          <li><span class="auth">Zhang, B., &amp; Sennrich, R.</span> (2019). <span class="ttl">Root Mean Square Layer Normalization.</span> In <em>NeurIPS</em>.</li>
+          <li><span class="auth">Kaplan, J., McCandlish, S., Henighan, T., Brown, T. B., Chess, B., Child, R., Gray, S., Radford, A., Wu, J., &amp; Amodei, D.</span> (2020). <span class="ttl">Scaling Laws for Neural Language Models.</span> <em>arXiv:2001.08361</em>.</li>
+          <li><span class="auth">Brown, T. B., et al.</span> (2020). <span class="ttl">Language Models are Few-Shot Learners.</span> In <em>NeurIPS</em>.</li>
+          <li><span class="auth">Raffel, C., Shazeer, N., Roberts, A., Lee, K., Narang, S., Matena, M., Zhou, Y., Li, W., &amp; Liu, P. J.</span> (2020). <span class="ttl">Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer.</span> <em>JMLR</em>.</li>
+          <li><span class="auth">Xiong, R., et al.</span> (2020). <span class="ttl">On Layer Normalization in the Transformer Architecture.</span> In <em>ICML</em>.</li>
+          <li><span class="auth">Shazeer, N.</span> (2020). <span class="ttl">GLU Variants Improve Transformer.</span> <em>arXiv:2002.05202</em>.</li>
+          <li><span class="auth">Fedus, W., Zoph, B., &amp; Shazeer, N.</span> (2021). <span class="ttl">Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity.</span> <em>arXiv:2101.03961</em>.</li>
+          <li><span class="auth">Su, J., Lu, Y., Pan, S., Wen, B., &amp; Liu, Y.</span> (2021). <span class="ttl">RoFormer: Enhanced Transformer with Rotary Position Embedding.</span> <em>arXiv:2104.09864</em>.</li>
+          <li><span class="auth">Dosovitskiy, A., et al.</span> (2021). <span class="ttl">An Image Is Worth 16x16 Words: Transformers for Image Recognition at Scale.</span> In <em>ICLR</em>.</li>
+          <li><span class="auth">Elhage, N., et al.</span> (2021). <span class="ttl">A Mathematical Framework for Transformer Circuits.</span> Anthropic.</li>
+          <li><span class="auth">Hoffmann, J., et al.</span> (2022). <span class="ttl">Training Compute-Optimal Large Language Models.</span> In <em>NeurIPS</em> (the "Chinchilla" paper).</li>
+          <li><span class="auth">Dao, T., Fu, D. Y., Ermon, S., Rudra, A., &amp; R&eacute;, C.</span> (2022). <span class="ttl">FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness.</span> In <em>NeurIPS</em>.</li>
+          <li><span class="auth">Press, O., Smith, N. A., &amp; Lewis, M.</span> (2022). <span class="ttl">Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation.</span> In <em>ICLR</em>.</li>
+          <li><span class="auth">Yu, G.-I., Jeong, J. S., Kim, G.-W., Kim, S., &amp; Chun, B.-G.</span> (2022). <span class="ttl">Orca: A Distributed Serving System for Transformer-Based Generative Models.</span> In <em>OSDI</em>.</li>
+          <li><span class="auth">Ainslie, J., Lee-Thorp, J., de Jong, M., Zemlyanskiy, Y., Lebr&oacute;n, F., &amp; Sanghai, S.</span> (2023). <span class="ttl">GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints.</span> In <em>EMNLP</em>.</li>
+          <li><span class="auth">Dao, T.</span> (2023). <span class="ttl">FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning.</span> <em>arXiv:2307.08691</em>.</li>
+          <li><span class="auth">Leviathan, Y., Kalman, M., &amp; Matias, Y.</span> (2023). <span class="ttl">Fast Inference from Transformers via Speculative Decoding.</span> In <em>ICML</em>.</li>
+          <li><span class="auth">Chen, C., Borgeaud, S., Irving, G., Lespiau, J.-B., Sifre, L., &amp; Jumper, J.</span> (2023). <span class="ttl">Accelerating Large Language Model Decoding with Speculative Sampling.</span> <em>arXiv:2302.01318</em>.</li>
+          <li><span class="auth">Kwon, W., Li, Z., Zhuang, S., Sheng, Y., Zheng, L., Yu, C. H., Gonzalez, J., Zhang, H., &amp; Stoica, I.</span> (2023). <span class="ttl">Efficient Memory Management for Large Language Model Serving with PagedAttention.</span> In <em>SOSP</em>.</li>
+          <li><span class="auth">Peng, B., Quesnelle, J., Fan, H., &amp; Shippole, E.</span> (2023). <span class="ttl">YaRN: Efficient Context Window Extension of Large Language Models.</span> <em>arXiv:2309.00071</em>.</li>
+          <li><span class="auth">Gu, A., &amp; Dao, T.</span> (2023). <span class="ttl">Mamba: Linear-Time Sequence Modeling with Selective State Spaces.</span> <em>arXiv:2312.00752</em>.</li>
+          <li><span class="auth">Jiang, A. Q., et al.</span> (2024). <span class="ttl">Mixtral of Experts.</span> <em>arXiv:2401.04088</em>.</li>
+          <li><span class="auth">Shah, J., Bikshandi, G., Zhang, Y., Thakkar, V., Ramani, P., &amp; Dao, T.</span> (2024). <span class="ttl">FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-Precision.</span> <em>arXiv:2407.08608</em>.</li>
+          <li><span class="auth">Dubey, A., et al.</span> (2024). <span class="ttl">The Llama 3 Herd of Models.</span> <em>arXiv:2407.21783</em>.</li>
+          <li><span class="auth">DeepSeek-AI.</span> (2024). <span class="ttl">DeepSeek-V3 Technical Report.</span> <em>arXiv:2412.19437</em>.</li>
+        </ol>
+      </section>
 
-<span class="ck">def</span> <span class="cf">attention</span>(Q, K, V, mask<span class="co">=</span><span class="ck">None</span>):
-    d_k <span class="co">=</span> Q.size(<span class="co">-</span><span class="cn">1</span>)                          <span class="cc"># key dim</span>
-    scores <span class="co">=</span> Q <span class="co">@</span> K.transpose(<span class="co">-</span><span class="cn">2</span>, <span class="co">-</span><span class="cn">1</span>) <span class="co">/</span> d_k<span class="co">**</span><span class="cn">0.5</span>  <span class="cc"># QKᵀ / √d_k</span>
+    </div><!-- /body-cols -->
 
-    <span class="ck">if</span> mask <span class="ck">is</span> <span class="ck">not</span> <span class="ck">None</span>:
-        scores <span class="co">=</span> scores.masked_fill(mask <span class="co">==</span> <span class="cn">0</span>, <span class="co">-</span><span class="cn">1e9</span>)
+    <div class="watermark">04 / 18 &middot; CETI Lookbook</div>
 
-    weights <span class="co">=</span> F.softmax(scores, dim<span class="co">=-</span><span class="cn">1</span>)        <span class="cc"># the matrix above</span>
-    <span class="ck">return</span> weights <span class="co">@</span> V                          <span class="cc"># mix the values</span></pre>
-      </div>
-      <p style="color: var(--color-text-secondary); margin-top: 1.5rem; font-size: 0.95rem; max-width: 60ch;">
-        That's it. Run it 32 times per layer (multi-head), stack the layer 80 times, and you have a frontier LLM. Everything since 2017 has been making this faster, cheaper, or longer.
-      </p>
-    </div>
-  </section>
-
-  <!-- ============ FINAL CTA ============ -->
-  <section class="final" id="next">
-    <div class="animate-in">
-      <p class="eyebrow">Where to go next</p>
-      <h2>You now have the mental model.</h2>
-      <p>Read the original paper for the gold standard. Read Karpathy's nanoGPT to see it in 300 lines. Read Raschka's "Big LLM Architecture Comparison" to see how 22 frontier models differ.</p>
-      <a class="magnetic" href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">
-        Read the 2017 paper
-        <span class="arrow">→</span>
-      </a>
-    </div>
-  </section>
-
-  <footer class="footer">
-    CETI.AI · Lookbook · Transformers &amp; modern LLM architectures
-  </footer>
+  </article>
 
   <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
+    // ============ BUILD MATRIX ROWS ============
+    (function buildMatrix() {
+      const tokens = ['the', 'cat', 'sat', 'on', 'the', 'mat', 'and', 'slept'];
+      const grid = document.getElementById('matrix');
+      if (!grid) return;
+      for (let r = 0; r < 8; r++) {
+        const rowLabel = document.createElement('div');
+        rowLabel.className = 'axis-label row';
+        rowLabel.textContent = tokens[r];
+        grid.appendChild(rowLabel);
+        for (let c = 0; c < 8; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+          grid.appendChild(cell);
+        }
+      }
+    })();
 
-    // ============ ANIMATE-IN ON SCROLL ============
-    const reveal = new IntersectionObserver((entries) => {
+    // ============ FADE IN ============
+    document.querySelectorAll('.title-block, .abstract, .body-cols > *, .references').forEach(el => el.classList.add('fade'));
+    const fadeObs = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (e.isIntersecting) {
           e.target.classList.add('visible');
-          reveal.unobserve(e.target);
+          fadeObs.unobserve(e.target);
         }
       });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
-    document.querySelectorAll('.animate-in, .tile, .era').forEach(el => reveal.observe(el));
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    document.querySelectorAll('.fade').forEach(el => fadeObs.observe(el));
 
-    // ============ NUMBER TICKER ============
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const decimals = +(el.dataset.decimals || 0);
-      const suffix = el.dataset.suffix || '';
-      const dur = 1300;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        const v = easeOutCubic(p) * to;
-        el.textContent = v.toFixed(decimals) + suffix;
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num').forEach(el => numObs.observe(el));
-
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 25;
-    const isTouch = matchMedia('(hover: none)').matches;
-    if (!isTouch) {
-      document.querySelectorAll('.magnetic').forEach((btn) => {
-        btn.addEventListener('mousemove', (e) => {
-          const r = btn.getBoundingClientRect();
-          const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-          const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-          btn.style.setProperty('--mx', `${x}px`);
-          btn.style.setProperty('--my', `${y}px`);
-        });
-        btn.addEventListener('mouseleave', () => {
-          btn.style.setProperty('--mx', '0px');
-          btn.style.setProperty('--my', '0px');
-        });
-      });
-    }
-
-    // ============ MAGIC CARD CURSOR GLOW ============
-    if (!isTouch) {
-      document.querySelectorAll('.tile').forEach((card) => {
-        card.addEventListener('mousemove', (e) => {
-          const r = card.getBoundingClientRect();
-          card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-          card.style.setProperty('--my', `${e.clientY - r.top}px`);
-        });
-      });
-    }
-
-    // ============ ATTENTION MATRIX ============
+    // ============ ATTENTION MATRIX (one-shot, then settles) ============
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const N = 8;
-    const cells = Array.from(document.querySelectorAll('.matrix-cell'));
-    const patternName = document.getElementById('patternName');
-    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Pattern generators — returns weight matrix W[r][c] in [0, 1]
-    function makePattern(name) {
+    // Causal attention pattern, softmax-normalized along each row
+    function causalWeights() {
       const W = Array.from({ length: N }, () => Array(N).fill(0));
-      if (name === 'diagonal') {
-        for (let i = 0; i < N; i++) W[i][i] = 1;
-      } else if (name === 'causal') {
-        for (let r = 0; r < N; r++) {
-          // exponential decay along the row, only for c <= r, normalized softmax-ish
-          const raw = [];
-          for (let c = 0; c <= r; c++) raw.push(Math.exp(-(r - c) * 0.5));
-          const sum = raw.reduce((a, b) => a + b, 0);
-          for (let c = 0; c <= r; c++) W[r][c] = raw[c] / sum;
-        }
-      } else if (name === 'local') {
-        for (let r = 0; r < N; r++) {
-          const raw = [];
-          const window = 2;
-          for (let c = 0; c < N; c++) raw.push(Math.abs(r - c) <= window ? Math.exp(-Math.abs(r - c) * 0.6) : 0);
-          const sum = raw.reduce((a, b) => a + b, 0) || 1;
-          for (let c = 0; c < N; c++) W[r][c] = raw[c] / sum;
-        }
-      } else if (name === 'full') {
-        for (let r = 0; r < N; r++) {
-          // BERT-style: every token attends with mild bias toward similar tokens (here arbitrary peaks)
-          const raw = [];
-          for (let c = 0; c < N; c++) raw.push(0.5 + 0.4 * Math.cos((r - c) * 0.9));
-          const sum = raw.reduce((a, b) => a + b, 0);
-          for (let c = 0; c < N; c++) W[r][c] = raw[c] / sum;
-        }
+      for (let r = 0; r < N; r++) {
+        const raw = [];
+        for (let c = 0; c <= r; c++) raw.push(Math.exp(-(r - c) * 0.55));
+        const s = raw.reduce((a, b) => a + b, 0);
+        for (let c = 0; c <= r; c++) W[r][c] = raw[c] / s;
       }
       return W;
     }
 
-    function applyPattern(name, animated) {
-      const W = makePattern(name);
+    function paintMatrix() {
+      const W = causalWeights();
+      const cells = document.querySelectorAll('#matrix .cell');
       cells.forEach((cell) => {
         const r = +cell.dataset.r;
         const c = +cell.dataset.c;
-        let w = W[r][c];
-        // amplify visually so small values still register
-        w = Math.pow(w, 0.55);
-        const op = Math.max(0.025, Math.min(1, w));
+        const w = W[r][c];
+        // Visual amplification so small weights are still legible
+        const op = w > 0 ? Math.max(0.06, Math.min(1, Math.pow(w, 0.55))) : 0.02;
         cell.style.setProperty('--w', op.toFixed(3));
-        cell.classList.toggle('diag', r === c && w > 0.3);
       });
-      if (patternName) patternName.textContent = name;
     }
 
-    // Initial state
-    applyPattern('causal', false);
-
-    // Pill click handlers
-    document.querySelectorAll('.pill').forEach((pill) => {
-      pill.addEventListener('click', () => {
-        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        applyPattern(pill.dataset.pattern, true);
-        // pause auto-cycle once user takes control
-        autoCycle = false;
-      });
-    });
-
-    // Auto-cycle through patterns (unless reduced motion)
-    let autoCycle = !reducedMotion;
-    const cycleOrder = ['diagonal', 'causal', 'local', 'full'];
-    let cycleIdx = 1;
-    if (autoCycle) {
-      const matrixSection = document.querySelector('.matrix-section');
-      let cycleTimer = null;
-      const startCycle = () => {
-        if (cycleTimer) return;
-        cycleTimer = setInterval(() => {
-          if (!autoCycle) return;
-          cycleIdx = (cycleIdx + 1) % cycleOrder.length;
-          const name = cycleOrder[cycleIdx];
-          applyPattern(name, true);
-          document.querySelectorAll('.pill').forEach(p => {
-            p.classList.toggle('active', p.dataset.pattern === name);
-          });
-        }, 3200);
-      };
-      const stopCycle = () => {
-        if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; }
-      };
-      // Only run when section is visible
-      const sectObs = new IntersectionObserver((entries) => {
-        entries.forEach(e => e.isIntersecting ? startCycle() : stopCycle());
-      }, { threshold: 0.25 });
-      sectObs.observe(matrixSection);
-    }
-
-    // ============ LAYER CAKE FLOW ============
-    if (!reducedMotion) {
-      const cake = document.getElementById('cake');
-      const layers = cake ? Array.from(cake.querySelectorAll('.layer')) : [];
-      let cakeTimer = null;
-      let li = 0;
-      const flowStep = () => {
-        layers.forEach(l => l.classList.remove('glow'));
-        if (layers[li]) layers[li].classList.add('glow');
-        li = (li + 1) % layers.length;
-      };
-      const cakeObs = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting && !cakeTimer) {
-            flowStep();
-            cakeTimer = setInterval(flowStep, 700);
-          } else if (!e.isIntersecting && cakeTimer) {
-            clearInterval(cakeTimer); cakeTimer = null;
-            layers.forEach(l => l.classList.remove('glow'));
+    // Animate once when Figure 1 enters view, then settle.
+    const fig1 = document.getElementById('fig1');
+    if (fig1) {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            if (reduced) {
+              paintMatrix();
+            } else {
+              // Brief "build-up" — set all cells low, then settle to final.
+              const cells = document.querySelectorAll('#matrix .cell');
+              cells.forEach(c => c.style.setProperty('--w', '0.04'));
+              setTimeout(paintMatrix, 220);
+            }
+            obs.unobserve(e.target);
           }
         });
-      }, { threshold: 0.4 });
-      if (cake) cakeObs.observe(cake);
+      }, { threshold: 0.35 });
+      obs.observe(fig1);
+    } else {
+      paintMatrix();
+    }
+
+    // ============ CHART REVEAL ============
+    const fig3 = document.getElementById('fig3');
+    if (fig3) {
+      const chartFig = fig3.querySelector('.chart-fig');
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            chartFig.classList.add('visible');
+            obs.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.3 });
+      obs.observe(chartFig);
     }
   </script>
   <script src="../shared/nav.js" defer></script>

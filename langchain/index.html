@@ -3,652 +3,858 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LangChain Pipelines — Compose, don't code · CETI.AI Lookbook</title>
-  <meta name="description" content="A plain-English explanation of LangChain Expression Language (LCEL) and the pipe operator — for people who've heard of LangChain and want to understand how the pieces actually click together.">
+  <title>LangChain — Compose, don't code · CETI Lookbook</title>
+  <meta name="description" content="A precise explanation of LangChain Expression Language (LCEL) and the pipe operator — the Runnable contract, four execution modes, one chain definition.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-bg-code: #1E1E2E;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
+      --bg: #FFFFFF;
+      --bg-alt: #FAFAFA;
+      --bg-code: #0A0A0A;
+      --fg: #0A0A0A;
+      --fg-2: #666666;
+      --fg-3: #999999;
+      --border: #EAEAEA;
+      --border-strong: #D4D4D4;
 
-      --color-accent: #D94F30;
-      --color-accent-hover: #C4432A;
-      --color-accent-muted: #E8836C;
-      --color-accent-light: #FDEEE9;
+      --accent: #0070F3;
+      --accent-hover: #0058C8;
 
-      --color-actor-2: #2A7B9B;
-      --color-actor-3: #7B6DAA;
-      --color-actor-4: #D4A843;
-      --color-actor-5: #2D8B55;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
 
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body: 'DM Sans', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+      --shadow-blue: 0 4px 14px rgba(0, 112, 243, 0.22);
 
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --r-sm: 4px;
+      --r-md: 6px;
+      --r-lg: 8px;
 
-      --duration-fast: 150ms;
-      --duration-normal: 300ms;
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-
-      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
-      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image: radial-gradient(ellipse at 15% 0%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
-                        radial-gradient(ellipse at 85% 60%, rgba(42, 123, 155, 0.035) 0%, transparent 55%);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--fg);
+      background: var(--bg);
+      font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     }
-    ::selection { background: var(--color-accent-light); color: var(--color-accent-hover); }
+    ::selection { background: var(--accent); color: #FFFFFF; }
 
     /* ============ NAV STRIP ============ */
-    .top-strip {
-      max-width: 1180px;
+    .strip {
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 1.5rem 1.5rem 0;
+      padding: 1.25rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
     }
-    .top-strip .brand { color: var(--color-text); font-weight: 500; }
-    .top-strip .brand b { color: var(--color-accent); font-weight: 500; }
+    .strip .brand { color: var(--fg); }
+    .strip .meta { color: var(--fg-3); font-family: var(--mono); font-size: 0.75rem; }
+
+    /* ============ READING COLUMN ============ */
+    .col {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    .col-wide {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
 
     /* ============ HERO ============ */
     .hero {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 6rem 1.5rem 4rem;
+      padding: 9rem 0 7rem;
+      animation: fade-up 700ms var(--ease) both;
+    }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--color-accent);
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
-    }
-    .hero.visible .eyebrow { opacity: 1; }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.75rem, 7.5vw, 5.75rem);
-      line-height: 0.98;
-      letter-spacing: -0.035em;
-      margin: 1.25rem 0 1.5rem;
-      max-width: 16ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity var(--duration-slower) var(--ease-spring),
-                  transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
-    .hero-title em {
-      font-style: normal;
-      color: var(--color-accent);
-      position: relative;
-    }
-    .hero-title em::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0; bottom: 0.08em;
-      height: 0.18em;
-      background: var(--color-accent-light);
-      z-index: -1;
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 600ms var(--ease-out) 700ms;
-    }
-    .hero.visible .hero-title em::after { transform: scaleX(1); }
-
-    .hero-sub {
-      font-size: 1.2rem;
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      margin: 0;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 540ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    .cta-row {
-      display: flex;
-      gap: 1.25rem;
-      margin-top: 2.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 720ms;
-    }
-    .hero.visible .cta-row { opacity: 1; }
-
-    .magnetic {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.55rem;
-      padding: 1.05rem 1.85rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms var(--ease-spring), background 200ms ease, box-shadow 300ms ease;
-      will-change: transform;
-      box-shadow: 0 6px 18px rgba(217, 79, 48, 0.28);
-      text-decoration: none;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); box-shadow: 0 10px 24px rgba(217, 79, 48, 0.38); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(4px); }
-
-    .secondary-link {
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: color 200ms;
-    }
-    .secondary-link:hover { color: var(--color-accent); }
-
-    /* ============ PIPELINE — THE WOW VISUAL ============ */
-    .pipeline-section {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 5rem 1.5rem 6rem;
-    }
-    .section-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-text-muted);
-      margin: 0 0 0.75rem;
-    }
-    .section-title {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4.5vw, 3.25rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      line-height: 1.05;
-      margin: 0 0 1rem;
-      max-width: 22ch;
-    }
-    .section-title em { font-style: normal; color: var(--color-accent); }
-    .section-lead {
-      color: var(--color-text-secondary);
-      max-width: 62ch;
-      font-size: 1.1rem;
-      margin: 0 0 3rem;
-    }
-
-    .pipeline-wrap {
-      position: relative;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 1.25rem;
-      padding: 3rem 2rem 2.25rem;
-      box-shadow: var(--shadow-md);
-      overflow: hidden;
-    }
-    .pipeline-wrap::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at top, rgba(217, 79, 48, 0.04), transparent 60%);
-      pointer-events: none;
-    }
-    .pipeline-input,
-    .pipeline-output {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-text-muted);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--fg-3);
+      letter-spacing: 0.02em;
       margin-bottom: 1.5rem;
     }
-    .pipeline-output {
-      margin: 1.75rem 0 0;
-      justify-content: flex-end;
-      min-height: 1.4rem;
+    .h1 {
+      font-size: clamp(2.5rem, 5.5vw, 4rem);
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+      margin: 0 0 1.5rem;
+      color: var(--fg);
     }
-    .output-caption {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.3rem 0.7rem;
-      border-radius: 999px;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 500;
-      opacity: 0;
-      transform: translateY(4px);
-      transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
-    }
-    .output-caption.show { opacity: 1; transform: translateY(0); }
-    .output-caption::before {
-      content: '';
+    .h1 .underline {
+      position: relative;
       display: inline-block;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      box-shadow: 0 0 8px var(--color-accent);
     }
-
-    .pipeline {
-      position: relative;
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 0.5rem;
-      min-height: 150px;
-    }
-
-    .stage {
-      position: relative;
-      padding: 1.25rem 0.75rem;
-      border: 1px solid var(--color-border);
-      border-radius: 0.85rem;
-      background: var(--color-bg);
-      text-align: center;
-      transition: transform var(--duration-normal) var(--ease-spring),
-                  border-color var(--duration-normal),
-                  box-shadow var(--duration-normal);
-      z-index: 2;
-    }
-    .stage.lit {
-      border-color: var(--color-accent);
-      box-shadow: 0 0 0 4px var(--color-accent-light);
-      transform: translateY(-2px);
-    }
-    .stage-label {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      margin-bottom: 0.4rem;
-    }
-    .stage-name {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 0.95rem;
-      letter-spacing: -0.01em;
-      color: var(--color-text);
-    }
-    .stage-name b { color: var(--color-accent); }
-    .stage-glyph {
-      width: 24px; height: 24px;
-      margin: 0.55rem auto 0.4rem;
-      display: block;
-      color: var(--color-accent);
-    }
-
-    /* connecting rail (sits between stages) */
-    .rail {
+    .h1 .underline::after {
+      content: '';
       position: absolute;
-      top: 50%;
-      left: 8%;
-      right: 8%;
-      height: 2px;
-      background: repeating-linear-gradient(
-        to right,
-        var(--color-accent-muted) 0 6px,
-        transparent 6px 12px
-      );
-      transform: translateY(-50%);
-      opacity: 0.5;
-      z-index: 1;
+      left: 0; right: 0;
+      bottom: -2px;
+      height: 1.5px;
+      background: var(--accent);
+      transform-origin: left;
+      animation: line-in 600ms var(--ease) 500ms both;
+    }
+    @keyframes line-in {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    .lead {
+      font-size: 1.125rem;
+      color: var(--fg-2);
+      max-width: 60ch;
+      margin: 0 0 2.5rem;
+      line-height: 1.65;
     }
 
-    /* flowing packets */
-    .packets {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 3;
-    }
-    .packet {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      transform: translate(-50%, -50%);
+    .btn-row { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+
+    .btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      padding: 0.35rem 0.7rem;
-      border-radius: 999px;
-      background: var(--color-surface);
-      border: 1.5px solid var(--color-accent);
-      box-shadow: 0 4px 14px rgba(217, 79, 48, 0.22),
-                  0 0 0 4px var(--color-accent-light);
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
+      gap: 0.5rem;
+      padding: 0.625rem 1.125rem;
+      font-family: var(--font);
+      font-size: 0.9375rem;
       font-weight: 500;
-      color: var(--color-accent);
-      white-space: nowrap;
-      will-change: left, opacity;
+      border-radius: var(--r-md);
+      background: var(--accent);
+      color: #FFFFFF;
+      border: 1px solid var(--accent);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+      box-shadow: var(--shadow-xs);
     }
-    .packet::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      box-shadow: 0 0 6px var(--color-accent);
+    .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-blue); }
+    .btn:active { transform: translateY(0); }
+    .btn .arrow { transition: transform 200ms var(--ease); }
+    .btn:hover .arrow { transform: translateX(2px); }
+
+    .btn-ghost {
+      color: var(--fg);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 150ms;
+    }
+    .btn-ghost:hover { color: var(--accent); }
+    .btn-ghost .arrow { color: var(--fg-3); margin-left: 0.25rem; }
+
+    /* ============ SECTION HEADERS ============ */
+    .sect { padding: 6rem 0; }
+    .sect-alt { background: var(--bg-alt); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .sect-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--fg-3);
+      margin: 0 0 0.875rem;
+      letter-spacing: 0.02em;
+    }
+    .h2 {
+      font-size: clamp(1.75rem, 3.4vw, 2.25rem);
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      margin: 0 0 1rem;
+      color: var(--fg);
+    }
+    .h3-sect {
+      font-size: 1.125rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: var(--fg);
+      margin: 2.5rem 0 0.75rem;
+    }
+    .sect-lead {
+      color: var(--fg-2);
+      max-width: 56ch;
+      font-size: 1.0625rem;
+      margin: 0 0 3rem;
+      line-height: 1.65;
+    }
+    .body-prose {
+      color: var(--fg-2);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 68ch;
+    }
+    .body-prose p { margin: 0 0 1.25rem; }
+    .body-prose p:last-child { margin-bottom: 0; }
+    .body-prose strong { color: var(--fg); font-weight: 600; }
+    .body-prose .kbd { font-family: var(--mono); font-size: 0.85em; background: var(--bg-alt); color: var(--fg); padding: 0.1rem 0.4rem; border-radius: var(--r-sm); border: 1px solid var(--border); }
+
+    /* ============ PIPELINE DIAGRAM ============ */
+    .pipe-frame {
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      background: var(--bg);
+      padding: 2rem 1.5rem;
+      box-shadow: var(--shadow-xs);
+    }
+    .pipe-io {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--fg-3);
+      margin-bottom: 1.25rem;
+    }
+    .pipe-io .input-val { color: var(--fg); }
+    .pipe-io .output-val {
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 250ms var(--ease);
+    }
+    .pipe-io .output-val.show { opacity: 1; }
+    .pipe-svg-wrap { width: 100%; overflow-x: auto; }
+    .pipe-svg { display: block; width: 100%; min-width: 640px; height: auto; }
+    .pipe-stage rect {
+      fill: var(--bg);
+      stroke: var(--border-strong);
+      stroke-width: 1;
+      transition: stroke 250ms ease, fill 250ms ease;
+    }
+    .pipe-stage.lit rect {
+      stroke: var(--accent);
+      fill: rgba(0, 112, 243, 0.04);
+    }
+    .pipe-stage .stage-num {
+      font-family: var(--mono);
+      font-size: 9px;
+      fill: var(--fg-3);
+    }
+    .pipe-stage .stage-label {
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      fill: var(--fg);
+    }
+    .pipe-stage.lit .stage-label { fill: var(--accent); }
+    .pipe-link { stroke: var(--border-strong); stroke-width: 1; fill: none; }
+    .pipe-packet {
+      fill: var(--accent);
+      stroke: var(--bg);
+      stroke-width: 2;
+    }
+    .pipe-note {
+      margin-top: 1.25rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--fg-3);
+      text-align: center;
+    }
+    .kbd {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: var(--bg-alt);
+      color: var(--fg);
+      padding: 0.1rem 0.4rem;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
     }
 
-    @media (max-width: 720px) {
-      .pipeline { grid-template-columns: repeat(5, minmax(78px, 1fr)); gap: 0.35rem; min-height: 130px; overflow-x: auto; }
-      .stage { padding: 0.85rem 0.4rem; }
-      .stage-name { font-size: 0.78rem; }
-      .stage-label { font-size: 0.62rem; }
-      .packet { font-size: 0.62rem; padding: 0.25rem 0.5rem; }
-    }
-
-    /* paragraphs under the pipeline */
-    .pipe-prose {
+    /* ============ PROSE BELOW DIAGRAM ============ */
+    .prose-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 3rem;
-      margin-top: 3.5rem;
+      margin-top: 3rem;
     }
-    .pipe-prose p {
-      color: var(--color-text-secondary);
-      font-size: 1.02rem;
+    .prose-grid p {
+      color: var(--fg-2);
+      font-size: 1rem;
       margin: 0;
-      line-height: 1.65;
+      line-height: 1.7;
     }
-    .pipe-prose p .pipe-key {
-      font-family: var(--font-mono);
-      background: var(--color-accent-light);
-      color: var(--color-accent-hover);
-      padding: 0.1rem 0.4rem;
-      border-radius: 6px;
-      font-size: 0.9em;
-      font-weight: 500;
-    }
-    @media (max-width: 720px) { .pipe-prose { grid-template-columns: 1fr; gap: 1.5rem; } }
+    @media (max-width: 720px) { .prose-grid { grid-template-columns: 1fr; gap: 1.5rem; } }
 
-    /* ============ RUNNABLE BENTO ============ */
-    .runnable-section {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 4rem 1.5rem 5rem;
-    }
-    .bento {
+    /* ============ RUNNABLE TILES ============ */
+    .tiles {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 1rem;
     }
     .tile {
-      position: relative;
-      padding: 2rem 1.75rem;
-      border-radius: 1rem;
-      background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
-                  rgba(217, 79, 48, 0.07), transparent 40%),
-                  var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring),
-                  box-shadow var(--duration-normal);
-      opacity: 0;
-      transform: translateY(20px);
+      padding: 1.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--bg);
+      transition: border-color 200ms ease, transform 200ms ease;
     }
-    .tile.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring),
-                  transform var(--duration-slower) var(--ease-spring),
-                  border-color var(--duration-normal); }
-    .tile.visible:nth-child(2) { transition-delay: 80ms; }
-    .tile.visible:nth-child(3) { transition-delay: 160ms; }
-    .tile.visible:nth-child(4) { transition-delay: 240ms; }
-    @media (hover: hover) {
-      .tile.visible:hover { transform: translateY(-4px); border-color: var(--color-accent-muted); box-shadow: var(--shadow-lg); }
-    }
-
+    .tile:hover { border-color: var(--border-strong); transform: translateY(-1px); }
     .tile-method {
-      font-family: var(--font-mono);
-      font-size: 1.05rem;
+      font-family: var(--mono);
+      font-size: 0.9375rem;
       font-weight: 500;
-      color: var(--color-accent);
+      color: var(--accent);
       letter-spacing: -0.01em;
+      margin-bottom: 0.875rem;
     }
-    .tile-method .dot { color: var(--color-text-muted); }
-    .tile-headline {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.1rem;
-      letter-spacing: -0.01em;
-      margin: 0.75rem 0 0.4rem;
-      color: var(--color-text);
+    .tile-method .dim { color: var(--fg-3); }
+    .tile-h {
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: -0.015em;
+      margin: 0 0 0.5rem;
+      color: var(--fg);
     }
-    .tile-body {
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
+    .tile-p {
+      color: var(--fg-2);
+      font-size: 0.9375rem;
+      line-height: 1.6;
       margin: 0;
-      line-height: 1.55;
     }
-    .tile-spark {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 1rem;
-      align-items: flex-end;
-      height: 14px;
-    }
-    .tile-spark span {
-      flex: 1;
-      background: var(--color-accent-muted);
-      border-radius: 2px;
-      opacity: 0.55;
-    }
-    .tile[data-method="invoke"] .tile-spark span:nth-child(1) { height: 100%; opacity: 1; background: var(--color-accent); }
-    .tile[data-method="invoke"] .tile-spark span:nth-child(2),
-    .tile[data-method="invoke"] .tile-spark span:nth-child(3),
-    .tile[data-method="invoke"] .tile-spark span:nth-child(4),
-    .tile[data-method="invoke"] .tile-spark span:nth-child(5) { display: none; }
-    .tile[data-method="batch"] .tile-spark span { height: 100%; opacity: 1; background: var(--color-accent); }
-    .tile[data-method="batch"] .tile-spark span:nth-child(2) { opacity: 0.8; }
-    .tile[data-method="batch"] .tile-spark span:nth-child(3) { opacity: 0.65; }
-    .tile[data-method="batch"] .tile-spark span:nth-child(4) { opacity: 0.5; }
-    .tile[data-method="batch"] .tile-spark span:nth-child(5) { opacity: 0.4; }
-    .tile[data-method="stream"] .tile-spark span { height: 50%; background: var(--color-accent); animation: stream-pulse 1.6s ease-in-out infinite; }
-    .tile[data-method="stream"] .tile-spark span:nth-child(2) { animation-delay: 0.12s; }
-    .tile[data-method="stream"] .tile-spark span:nth-child(3) { animation-delay: 0.24s; }
-    .tile[data-method="stream"] .tile-spark span:nth-child(4) { animation-delay: 0.36s; }
-    .tile[data-method="stream"] .tile-spark span:nth-child(5) { animation-delay: 0.48s; }
-    @keyframes stream-pulse {
-      0%, 100% { height: 30%; opacity: 0.4; }
-      50% { height: 100%; opacity: 1; }
-    }
-    .tile[data-method="ainvoke"] .tile-spark span { height: 60%; opacity: 0.8; }
-    .tile[data-method="ainvoke"] .tile-spark span:nth-child(1) { height: 100%; background: var(--color-accent); opacity: 1; }
-    .tile[data-method="ainvoke"] .tile-spark span:nth-child(3) { height: 80%; background: var(--color-accent); opacity: 1; }
-    .tile[data-method="ainvoke"] .tile-spark span:nth-child(5) { height: 90%; background: var(--color-accent); opacity: 1; }
-
-    @media (max-width: 920px) { .bento { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 480px) { .bento { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .tiles { grid-template-columns: 1fr; } }
 
     /* ============ CODE BLOCK ============ */
-    .code-section {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 4rem 1.5rem 5rem;
-    }
-    .code-wrap {
-      display: grid;
-      grid-template-columns: 1fr 1.15fr;
-      gap: 3rem;
-      align-items: start;
-    }
-    .code-wrap .lede h2 { margin-top: 0; }
-    .code-wrap .lede p { color: var(--color-text-secondary); margin: 0 0 1rem; }
-    .code-wrap pre {
-      background: var(--color-bg-code);
-      color: #CDD6F4;
-      border-radius: 1rem;
-      padding: 1.5rem 1.5rem 1.25rem;
-      font-family: var(--font-mono);
-      font-size: 0.86rem;
-      line-height: 1.7;
-      overflow-x: hidden;
-      white-space: pre-wrap;
-      word-break: break-word;
-      box-shadow: var(--shadow-lg);
+    .code-block {
+      background: var(--bg-code);
+      color: #E5E7EB;
+      border-radius: var(--r-lg);
+      padding: 1.5rem 1.5rem 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      line-height: 1.75;
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
       margin: 0;
     }
-    .code-wrap pre .filename {
-      display: block;
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--mono);
       font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #6C7086;
+      color: #6B7280;
       margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #1F1F1F;
     }
-    .ck-kw { color: #CBA6F7; }
-    .ck-str { color: #A6E3A1; }
-    .ck-fn { color: #89B4FA; }
-    .ck-cmt { color: #6C7086; font-style: italic; }
-    .ck-op { color: #F38BA8; }
-    .ck-num { color: #FAB387; }
-    .ck-pipe { color: #F38BA8; font-weight: 700; }
+    .code-header .dot { width: 8px; height: 8px; border-radius: 50%; background: #2A2A2A; display: inline-block; }
+    .code-header .filename { margin-left: 0.5rem; letter-spacing: 0.02em; }
+    .ck-kw  { color: #C792EA; }
+    .ck-str { color: #95E2A6; }
+    .ck-fn  { color: #82AAFF; }
+    .ck-cmt { color: #6B7280; font-style: italic; }
+    .ck-num { color: #F78C6C; }
+    .ck-pipe{ color: #0070F3; font-weight: 600; }
+    .ck-dim { color: #A8A8A8; }
 
-    @media (max-width: 920px) { .code-wrap { grid-template-columns: 1fr; gap: 1.5rem; } }
-
-    /* ============ NUMBER TICKER ============ */
-    .stats-section {
-      background: var(--color-bg-warm);
-      border-top: 1px solid var(--color-border);
-      border-bottom: 1px solid var(--color-border);
-      padding: 5rem 1.5rem;
+    /* ============ SMALL CODE STACK (mode tiles) ============ */
+    .mode-stack { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2rem; }
+    .mode-row {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 1.5rem;
+      align-items: start;
+      padding: 1.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--bg);
+      transition: border-color 200ms ease;
     }
-    .stats-inner { max-width: 1180px; margin: 0 auto; }
-    .stats-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 3rem; }
-    .stats-header h2 { font-family: var(--font-display); font-size: clamp(1.75rem, 3.2vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; margin: 0; max-width: 22ch; line-height: 1.05; }
-    .stats-header h2 em { font-style: normal; color: var(--color-accent); }
-    .stats-header p { font-family: var(--font-mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-text-muted); margin: 0; }
+    .mode-row:hover { border-color: var(--border-strong); }
+    .mode-row .mode-meta { padding-right: 0.5rem; }
+    .mode-row .mode-verb {
+      font-family: var(--mono);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .mode-row .mode-verb .dim { color: var(--fg-3); }
+    .mode-row .mode-h {
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      margin: 0 0 0.5rem;
+      color: var(--fg);
+      font-size: 1rem;
+    }
+    .mode-row p {
+      color: var(--fg-2);
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      margin: 0 0 0.5rem;
+    }
+    .mode-row .mode-latency {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--fg-3);
+      display: inline-block;
+      margin-top: 0.25rem;
+    }
+    .mode-row pre.compare-code { margin: 0; }
+    @media (max-width: 720px) {
+      .mode-row { grid-template-columns: 1fr; padding: 1.25rem; }
+    }
 
+    /* ============ LCEL BUILDING BLOCK GRID ============ */
+    .lcel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+    .lcel-card {
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--bg);
+      box-shadow: var(--shadow-xs);
+    }
+    .lcel-card .lcel-name {
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 0.625rem;
+    }
+    .lcel-card p {
+      color: var(--fg-2);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      margin: 0 0 1rem;
+    }
+    .lcel-card .lcel-code {
+      background: var(--bg-code);
+      color: #E5E7EB;
+      border-radius: var(--r-sm);
+      padding: 0.875rem 1rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      line-height: 1.75;
+      overflow-x: auto;
+      margin: 0;
+    }
+    @media (max-width: 720px) { .lcel-grid { grid-template-columns: 1fr; } }
+
+    /* ============ ANNOTATED CODE (RAG) ============ */
+    .annotated-wrap {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .annotated-side {
+      padding: 1.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--bg);
+    }
+    .annotated-side h4 {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--fg-3);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin: 0 0 0.75rem;
+      font-weight: 500;
+    }
+    .annotated-side ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+    .annotated-side ol li {
+      counter-increment: step;
+      position: relative;
+      padding: 0.625rem 0 0.625rem 2.25rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+      color: var(--fg-2);
+      line-height: 1.55;
+    }
+    .annotated-side ol li:last-child { border-bottom: none; }
+    .annotated-side ol li::before {
+      content: counter(step, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0.625rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .annotated-side ol li b { color: var(--fg); font-weight: 600; }
+    @media (max-width: 820px) { .annotated-wrap { grid-template-columns: 1fr; } }
+
+    /* ============ STATS ============ */
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
+      gap: 3rem;
+      margin-top: 3rem;
     }
     .stat {
-      padding: 1.75rem 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 1rem;
       opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+      transform: translateY(8px);
+      transition: opacity 600ms var(--ease), transform 600ms var(--ease);
     }
-    .stat.visible { opacity: 1; transform: translateY(0); }
-    .stat.visible:nth-child(2) { transition-delay: 80ms; }
-    .stat.visible:nth-child(3) { transition-delay: 160ms; }
-    .stat.visible:nth-child(4) { transition-delay: 240ms; }
+    .stat.in { opacity: 1; transform: translateY(0); }
+    .stat:nth-child(2).in { transition-delay: 80ms; }
+    .stat:nth-child(3).in { transition-delay: 160ms; }
+    .stat:nth-child(4).in { transition-delay: 240ms; }
 
-    .stat-value {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 2.85rem);
-      font-weight: 700;
+    .stat-val {
+      font-size: clamp(2.5rem, 4.5vw, 3.5rem);
+      font-weight: 600;
+      letter-spacing: -0.035em;
       line-height: 1;
-      letter-spacing: -0.02em;
+      color: var(--fg);
       font-variant-numeric: tabular-nums;
-      color: var(--color-text);
     }
-    .stat-value .unit { color: var(--color-accent); font-size: 0.65em; margin-left: 0.05em; }
-    .stat-value .plus { color: var(--color-accent); }
-    .stat-label {
-      margin-top: 0.65rem;
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
-      line-height: 1.45;
+    .stat-val .unit { color: var(--fg-3); font-weight: 500; font-size: 0.55em; margin-left: 0.05em; }
+    .stat-val .plus { color: var(--accent); font-weight: 500; }
+    .stat-lbl {
+      margin-top: 0.875rem;
+      color: var(--fg-2);
+      font-size: 0.875rem;
+      line-height: 1.55;
     }
-
-    @media (max-width: 920px) { .stats { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 920px) { .stats { grid-template-columns: 1fr 1fr; gap: 2rem; } }
     @media (max-width: 480px) { .stats { grid-template-columns: 1fr; } }
+
+    /* ============ BEFORE/AFTER ============ */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+    .compare-card {
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      background: var(--bg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-xs);
+    }
+    .compare-card.after { border-color: var(--accent); }
+    .compare-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+      color: var(--fg-3);
+      margin-bottom: 0.75rem;
+    }
+    .compare-card.after .compare-tag { color: var(--accent); }
+    .compare-h {
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      margin: 0 0 0.875rem;
+      color: var(--fg);
+    }
+    .compare-code {
+      background: var(--bg-code);
+      color: #E5E7EB;
+      border-radius: var(--r-md);
+      padding: 1rem 1.125rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      margin: 0;
+    }
+    .compare-meta {
+      margin-top: 0.875rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--fg-3);
+      display: flex;
+      justify-content: space-between;
+    }
+    .compare-meta b { color: var(--fg); font-weight: 500; }
+    .compare-card.after .compare-meta b { color: var(--accent); }
+    @media (max-width: 720px) { .compare { grid-template-columns: 1fr; } }
+
+    /* ============ SWAP TABLE ============ */
+    .swap-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      font-size: 0.9375rem;
+    }
+    .swap-table th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--fg-3);
+      letter-spacing: 0.02em;
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .swap-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--fg-2);
+      vertical-align: top;
+    }
+    .swap-table tr:last-child td { border-bottom: none; }
+    .swap-table td.label { color: var(--fg); font-weight: 500; }
+    .swap-table td .mono {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: var(--bg-alt);
+      color: var(--fg);
+      padding: 0.1rem 0.4rem;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      display: inline-block;
+    }
+    .swap-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      background: var(--bg);
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
+    }
+    .swap-wrap .swap-table th { background: var(--bg-alt); }
+
+    /* ============ FAQ / NOTES ============ */
+    .notes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem 3rem;
+      margin-top: 2.5rem;
+    }
+    .note h3 {
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: var(--fg);
+      margin: 0 0 0.5rem;
+    }
+    .note p {
+      color: var(--fg-2);
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      margin: 0;
+    }
+    @media (max-width: 720px) { .notes { grid-template-columns: 1fr; gap: 2rem; } }
+
+    /* ============ PITFALLS LIST ============ */
+    .pitfall-list { list-style: none; margin: 2rem 0 0; padding: 0; border-top: 1px solid var(--border); }
+    .pitfall-list li {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 1.25rem;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .pitfall-list .pitfall-num {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      padding-top: 0.15rem;
+    }
+    .pitfall-list .pitfall-body h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: var(--fg);
+      margin: 0 0 0.5rem;
+    }
+    .pitfall-list .pitfall-body p {
+      color: var(--fg-2);
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      margin: 0;
+    }
+    .pitfall-list .pitfall-body p .fix {
+      display: block;
+      margin-top: 0.625rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--fg-3);
+    }
+    .pitfall-list .pitfall-body p .fix b { color: var(--accent); font-weight: 500; }
+
+    /* ============ CHECKLIST ============ */
+    .checklist {
+      list-style: none;
+      margin: 2rem 0 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 2rem;
+    }
+    .checklist li {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 0.875rem;
+      padding: 0.875rem 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--fg-2);
+      font-size: 0.9375rem;
+      line-height: 1.55;
+    }
+    .checklist li b { color: var(--fg); font-weight: 600; display: block; margin-bottom: 0.1rem; }
+    .checklist .box {
+      width: 16px; height: 16px;
+      margin-top: 0.25rem;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 3px;
+      display: inline-block;
+      position: relative;
+    }
+    .checklist .box::after {
+      content: '';
+      position: absolute;
+      left: 3px; top: -1px;
+      width: 5px; height: 9px;
+      border-right: 1.5px solid var(--accent);
+      border-bottom: 1.5px solid var(--accent);
+      transform: rotate(45deg);
+    }
+    @media (max-width: 720px) { .checklist { grid-template-columns: 1fr; } }
+
+    /* ============ ECOSYSTEM PARTNERS ============ */
+    .partners-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+    .partner {
+      padding: 1.125rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--bg);
+      transition: border-color 200ms ease, transform 200ms ease;
+    }
+    .partner:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .partner .partner-name {
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      color: var(--fg);
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+    }
+    .partner .partner-blurb {
+      font-size: 0.78rem;
+      color: var(--fg-3);
+      line-height: 1.5;
+    }
+    @media (max-width: 720px) { .partners-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 460px) { .partners-grid { grid-template-columns: 1fr; } }
+
+    /* ============ COMPARISON TABLE (LCEL vs old) ============ */
+    .compare-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      background: var(--bg);
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
+      margin-top: 2rem;
+    }
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+    .compare-table th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--fg-3);
+      letter-spacing: 0.02em;
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-alt);
+    }
+    .compare-table th.win { color: var(--accent); }
+    .compare-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--fg-2);
+      vertical-align: top;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table td.label { color: var(--fg); font-weight: 500; }
+    .compare-table td.win { color: var(--fg); }
+    .compare-table .dot-on { color: var(--accent); }
+    .compare-table .dot-off { color: var(--fg-3); }
+
+    /* ============ BIBLIOGRAPHY ============ */
+    .bib { list-style: none; margin: 2rem 0 0; padding: 0; }
+    .bib li {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9375rem;
+      color: var(--fg-2);
+      line-height: 1.6;
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 1.5rem;
+    }
+    .bib li:last-child { border-bottom: none; }
+    .bib .bib-tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--fg-3);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding-top: 0.1rem;
+    }
+    .bib .bib-body a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--border-strong); transition: color 150ms, border-color 150ms; }
+    .bib .bib-body a:hover { color: var(--accent); border-color: var(--accent); }
+    .bib .bib-body .bib-meta { display: block; color: var(--fg-3); font-size: 0.8125rem; margin-top: 0.25rem; }
+    @media (max-width: 600px) { .bib li { grid-template-columns: 1fr; gap: 0.4rem; } }
 
     /* ============ FINAL CTA ============ */
     .final {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 6rem 1.5rem 7rem;
       text-align: center;
+      padding: 7rem 0 5rem;
     }
-    .final h2 {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      line-height: 1.05;
-      margin: 0 0 1rem;
-    }
-    .final h2 em { font-style: normal; color: var(--color-accent); }
+    .final .h2 { margin-bottom: 1rem; }
     .final p {
-      color: var(--color-text-secondary);
+      color: var(--fg-2);
+      max-width: 52ch;
       margin: 0 auto 2.5rem;
-      max-width: 50ch;
-      font-size: 1.1rem;
+      font-size: 1.0625rem;
+      line-height: 1.65;
     }
 
-    /* ============ FOOT ============ */
+    /* ============ FOOTER ============ */
     .foot {
-      max-width: 1180px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 3rem;
+      padding: 2rem;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       flex-wrap: wrap;
       gap: 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      border-top: 1px solid var(--color-border);
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--fg-3);
+      font-family: var(--mono);
     }
-    .foot a { color: var(--color-text-secondary); text-decoration: none; transition: color 200ms; }
-    .foot a:hover { color: var(--color-accent); }
+    .foot a { color: var(--fg-2); text-decoration: none; transition: color 150ms; }
+    .foot a:hover { color: var(--accent); }
+    .foot .marker { color: var(--fg-3); font-size: 0.6875rem; }
 
     /* ============ REDUCED MOTION ============ */
     @media (prefers-reduced-motion: reduce) {
@@ -657,221 +863,808 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-      .hero .word, .hero-sub, .cta-row, .stat, .tile, .eyebrow,
-      .hero-title em::after { opacity: 1 !important; transform: none !important; }
-      .packet { display: none; }
-      .rail { opacity: 1; }
-    }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
+      .stat { opacity: 1; transform: none; }
+      .h1 .underline::after { transform: scaleX(1); }
+      .pipe-packet { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <div class="top-strip">
-    <span class="brand"><b>CETI.AI</b> · Lookbook</span>
-    <span>LANGCHAIN · COMPOSABLE LLM PIPELINES</span>
+  <div class="strip">
+    <span class="brand">CETI Lookbook</span>
+    <span class="meta">02 / 18 · langchain</span>
   </div>
 
   <!-- HERO -->
-  <section class="hero" id="hero">
-    <p class="eyebrow">LangChain · LCEL · Composable LLM Pipelines</p>
-    <h1 class="hero-title">
-      <span class="word">Compose,</span>
-      <span class="word">don't</span>
-      <span class="word"><em>code</em></span>
-      <span class="word">the glue.</span>
-    </h1>
-    <p class="hero-sub">LangChain pipelines let you snap together prompts, retrievers, models, and parsers with a single pipe character. The pieces don't care what's on either side — that's the whole trick.</p>
-    <div class="cta-row">
-      <a class="magnetic" href="#pipeline">
-        See it flow
-        <span class="arrow">→</span>
-      </a>
-      <a class="secondary-link" href="#code">Show me the code ↓</a>
+  <section class="hero">
+    <div class="col">
+      <p class="eyebrow">LangChain · LCEL · the pipe operator</p>
+      <h1 class="h1">Compose, don't <span class="underline">code</span> the glue.</h1>
+      <p class="lead">LangChain pipelines let you snap together prompts, retrievers, models, and parsers with a single pipe character. The pieces don't care what's on either side — that's the whole trick.</p>
+      <div class="btn-row">
+        <a class="btn" href="#code">Read docs <span class="arrow">&rarr;</span></a>
+        <a class="btn-ghost" href="#pipeline">See the pipeline<span class="arrow">&darr;</span></a>
+      </div>
     </div>
   </section>
 
-  <!-- PIPELINE WOW VISUAL -->
-  <section class="pipeline-section" id="pipeline">
-    <p class="section-eyebrow">The pipe operator</p>
-    <h2 class="section-title">One vertical bar. <em>Five stages.</em> Anything in between.</h2>
-    <p class="section-lead">LangChain Expression Language (LCEL) borrows the Unix pipe: write <code style="font-family:var(--font-mono); background:var(--color-accent-light); color:var(--color-accent-hover); padding:0.1rem 0.4rem; border-radius:6px; font-size:0.9em;">prompt | retriever | format | model | parser</code> and you have a working chain. Each piece implements the same <b>Runnable</b> contract, so order, swap, and reuse are free.</p>
+  <!-- PIPELINE DIAGRAM -->
+  <section class="sect sect-alt" id="pipeline">
+    <div class="col-wide">
+      <p class="sect-eyebrow">The pipe operator</p>
+      <h2 class="h2">One vertical bar. Five stages.</h2>
+      <p class="sect-lead">LCEL borrows the Unix pipe. Write <span class="kbd">prompt | retriever | format | model | parser</span> and you have a working chain. Each piece implements the same Runnable contract, so order, swap, and reuse are free.</p>
 
-    <div class="pipeline-wrap" aria-hidden="true">
-      <div class="pipeline-input">
-        <span>INPUT</span>
-        <span style="color: var(--color-accent); font-family: var(--font-mono); text-transform: none; letter-spacing: 0;">&nbsp;"What's our return policy?"</span>
+      <div class="pipe-frame">
+        <div class="pipe-io">
+          <span>input&nbsp; <span class="input-val">"What's our return policy?"</span></span>
+          <span class="output-val" id="outVal">output&nbsp; structured JSON</span>
+        </div>
+
+        <div class="pipe-svg-wrap">
+          <svg class="pipe-svg" viewBox="0 0 1000 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- connecting links -->
+            <line class="pipe-link" x1="170" y1="70" x2="200" y2="70"/>
+            <line class="pipe-link" x1="370" y1="70" x2="400" y2="70"/>
+            <line class="pipe-link" x1="570" y1="70" x2="600" y2="70"/>
+            <line class="pipe-link" x1="770" y1="70" x2="800" y2="70"/>
+
+            <!-- stages -->
+            <g class="pipe-stage" data-idx="0">
+              <rect x="10" y="38" width="160" height="64" rx="6"/>
+              <text class="stage-num" x="24" y="60">01</text>
+              <text class="stage-label" x="24" y="84">Prompt</text>
+            </g>
+            <g class="pipe-stage" data-idx="1">
+              <rect x="210" y="38" width="160" height="64" rx="6"/>
+              <text class="stage-num" x="224" y="60">02</text>
+              <text class="stage-label" x="224" y="84">Retriever</text>
+            </g>
+            <g class="pipe-stage" data-idx="2">
+              <rect x="410" y="38" width="160" height="64" rx="6"/>
+              <text class="stage-num" x="424" y="60">03</text>
+              <text class="stage-label" x="424" y="84">Format</text>
+            </g>
+            <g class="pipe-stage" data-idx="3">
+              <rect x="610" y="38" width="160" height="64" rx="6"/>
+              <text class="stage-num" x="624" y="60">04</text>
+              <text class="stage-label" x="624" y="84">Model</text>
+            </g>
+            <g class="pipe-stage" data-idx="4">
+              <rect x="810" y="38" width="160" height="64" rx="6"/>
+              <text class="stage-num" x="824" y="60">05</text>
+              <text class="stage-label" x="824" y="84">Parser</text>
+            </g>
+
+            <!-- animated packet -->
+            <circle class="pipe-packet" id="packet" cx="-20" cy="70" r="5"/>
+          </svg>
+        </div>
+
+        <p class="pipe-note">runnable &middot; runnable &middot; runnable &middot; runnable &middot; runnable</p>
       </div>
 
-      <div class="pipeline" id="pipelineGrid">
-        <div class="rail"></div>
-
-        <div class="stage" data-idx="0">
-          <div class="stage-label">01 · Prompt</div>
-          <div class="stage-name"><b>PROMPT</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
-        </div>
-        <div class="stage" data-idx="1">
-          <div class="stage-label">02 · Retrieve</div>
-          <div class="stage-name"><b>RETRIEVER</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.3-4.3"/></svg>
-        </div>
-        <div class="stage" data-idx="2">
-          <div class="stage-label">03 · Format</div>
-          <div class="stage-name"><b>FORMAT</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
-        </div>
-        <div class="stage" data-idx="3">
-          <div class="stage-label">04 · Model</div>
-          <div class="stage-name"><b>LLM</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/><circle cx="12" cy="12" r="3.5"/></svg>
-        </div>
-        <div class="stage" data-idx="4">
-          <div class="stage-label">05 · Parse</div>
-          <div class="stage-name"><b>PARSER</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5 4 12l4 7M16 5l4 7-4 7M14 4l-4 16"/></svg>
-        </div>
-
-        <div class="packets" id="packets"></div>
+      <div class="prose-grid">
+        <p>The <span class="kbd">|</span> operator isn't a string-template hack. It's Python's <span class="kbd">__or__</span> overloaded so every Runnable composes with every other Runnable — and the result is itself a Runnable. Sequences compose into sequences compose into pipelines.</p>
+        <p>That single property is why LCEL chains support streaming, batching, async, and tracing for free. You write one definition; LangChain gives you four execution modes without a second line of code.</p>
       </div>
-
-      <div class="pipeline-output">
-        <span class="output-caption" id="outCaption">OUTPUT · structured JSON</span>
-      </div>
-    </div>
-
-    <div class="pipe-prose">
-      <p>The <span class="pipe-key">|</span> operator isn't a string-template hack. It's Python's <code style="font-family:var(--font-mono);">__or__</code> overloaded so every Runnable composes with every other Runnable — and the result is itself a Runnable. Sequences compose into sequences compose into pipelines.</p>
-      <p>That single property is why LCEL chains support streaming, batching, async, and tracing <em>for free</em>. You write one definition; LangChain gives you four execution modes without a second line of code.</p>
-    </div>
-  </section>
-
-  <!-- RUNNABLE BENTO -->
-  <section class="runnable-section">
-    <p class="section-eyebrow">The Runnable contract</p>
-    <h2 class="section-title">Four verbs. <em>Same pipeline.</em></h2>
-    <p class="section-lead">Every piece of an LCEL chain exposes the same four methods. Write your pipeline once and pick how it runs based on what you need.</p>
-
-    <div class="bento">
-      <article class="tile" data-method="invoke">
-        <div class="tile-spark"><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="tile-method"><span class="dot">.</span>invoke<span class="dot">()</span></div>
-        <h3 class="tile-headline">One question, one answer.</h3>
-        <p class="tile-body">A single synchronous call: pass an input, wait for the result. The default mode for prototypes, scripts, and CLI tools.</p>
-      </article>
-      <article class="tile" data-method="batch">
-        <div class="tile-spark"><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="tile-method"><span class="dot">.</span>batch<span class="dot">()</span></div>
-        <h3 class="tile-headline">Many inputs in parallel.</h3>
-        <p class="tile-body">Run the same pipeline across a list of inputs concurrently — the I/O-bound ones overlap, latency stays flat instead of multiplying.</p>
-      </article>
-      <article class="tile" data-method="stream">
-        <div class="tile-spark"><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="tile-method"><span class="dot">.</span>stream<span class="dot">()</span></div>
-        <h3 class="tile-headline">Token by token, as it happens.</h3>
-        <p class="tile-body">Return the answer as soon as the model starts producing it. Same chain, same code — just a different verb. Chat UIs depend on this.</p>
-      </article>
-      <article class="tile" data-method="ainvoke">
-        <div class="tile-spark"><span></span><span></span><span></span><span></span><span></span></div>
-        <div class="tile-method"><span class="dot">.</span>ainvoke<span class="dot">()</span></div>
-        <h3 class="tile-headline">Async for everything else.</h3>
-        <p class="tile-body">The same call, async — for web servers, agents, or anywhere you can't afford to block. Each verb has an <code style="font-family:var(--font-mono); font-size:0.95em;">a*</code> twin.</p>
-      </article>
     </div>
   </section>
 
-  <!-- CODE BLOCK -->
-  <section class="code-section" id="code">
-    <div class="code-wrap">
-      <div class="lede">
-        <p class="section-eyebrow">What it looks like</p>
-        <h2 class="section-title" style="font-size: clamp(1.75rem, 3.5vw, 2.5rem);">Ten lines. <em>A real RAG chain.</em></h2>
-        <p>This is the entire pipeline: take a question, pull related docs, format both into a prompt, send to the model, parse the result. Every <span class="pipe-key" style="font-family:var(--font-mono); background:var(--color-accent-light); color:var(--color-accent-hover); padding:0.1rem 0.4rem; border-radius:6px; font-size:0.9em;">|</span> is a hand-off.</p>
-        <p>Swap <code style="font-family:var(--font-mono);">ChatOpenAI</code> for <code style="font-family:var(--font-mono);">ChatAnthropic</code>? One line. Add a re-ranker? One pipe. Move from invoke to stream? Change <code style="font-family:var(--font-mono);">.invoke()</code> to <code style="font-family:var(--font-mono);">.stream()</code>.</p>
+  <!-- ============ NEW: THE COMPOSITION PRIMITIVE ============ -->
+  <section class="sect">
+    <div class="col-wide">
+      <p class="sect-eyebrow">The composition primitive</p>
+      <h2 class="h2">Why <span style="font-family: var(--mono); color: var(--accent);">__or__</span> was the key abstraction.</h2>
+      <p class="sect-lead">Most frameworks make you learn a config DSL. LCEL gives you one Python protocol — <span class="kbd">Runnable</span> — and one operator. Everything else is consequences.</p>
+
+      <div class="col" style="padding: 0; margin-left: 0;">
+        <div class="body-prose">
+          <p>Before LCEL, a LangChain pipeline was a graph object. You constructed it with named arguments, registered callbacks, and prayed that the order matched the abstract structure in the docs. The DSL was opinionated, the type system invisible, and refactoring meant rewriting the whole graph.</p>
+          <p>The <strong>Runnable interface</strong> changed that. A Runnable is any object exposing four methods — <span class="kbd">.invoke</span>, <span class="kbd">.batch</span>, <span class="kbd">.stream</span>, <span class="kbd">.ainvoke</span> — plus their async cousins. That contract is the only thing the framework requires. Everything in LangChain ships as a Runnable: prompts, models, retrievers, parsers, tools, even arbitrary Python functions wrapped in <span class="kbd">RunnableLambda</span>.</p>
+          <p>The pipe operator is just Python operator overloading. <span class="kbd">Runnable.__or__</span> returns a new <span class="kbd">RunnableSequence</span> whose input is the left operand's input and whose output is the right operand's output. Because the result is itself a Runnable, you can keep piping. The whole pipeline composes algebraically, the way functions compose in mathematics — and that algebra is what lets the framework derive streaming, batching, async, and tracing without any extra code from you.</p>
+          <p>This matters because composition is what makes systems refactorable. When every step is a Runnable, you can move a piece, swap a piece, wrap a piece in a retry, or run two pieces in parallel — and the rest of the pipeline keeps working. The contract is small enough to memorize and strict enough that it actually composes. That is the entire secret.</p>
+        </div>
+
+        <pre class="code-block" style="margin-top: 2.5rem;"><div class="code-header"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="filename">runnable_protocol.py</span></div><span class="ck-kw">from</span> typing <span class="ck-kw">import</span> Protocol, AsyncIterator, Iterator, Any
+
+<span class="ck-kw">class</span> <span class="ck-fn">Runnable</span>(Protocol):
+    <span class="ck-cmt"># synchronous</span>
+    <span class="ck-kw">def</span> <span class="ck-fn">invoke</span>(self, input: Any, config: dict <span class="ck-dim">=</span> <span class="ck-kw">None</span>) -> Any: ...
+    <span class="ck-kw">def</span> <span class="ck-fn">batch</span>(self, inputs: list, config: dict <span class="ck-dim">=</span> <span class="ck-kw">None</span>) -> list: ...
+    <span class="ck-kw">def</span> <span class="ck-fn">stream</span>(self, input: Any, config: dict <span class="ck-dim">=</span> <span class="ck-kw">None</span>) -> Iterator[Any]: ...
+
+    <span class="ck-cmt"># async</span>
+    <span class="ck-kw">async def</span> <span class="ck-fn">ainvoke</span>(self, input: Any, config: dict <span class="ck-dim">=</span> <span class="ck-kw">None</span>) -> Any: ...
+    <span class="ck-kw">async def</span> <span class="ck-fn">abatch</span>(self, inputs: list, config: dict <span class="ck-dim">=</span> <span class="ck-kw">None</span>) -> list: ...
+    <span class="ck-kw">async def</span> <span class="ck-fn">astream</span>(self, input: Any, config: dict <span class="ck-dim">=</span> <span class="ck-kw">None</span>) -> AsyncIterator[Any]: ...
+
+    <span class="ck-cmt"># the operator that makes it composable</span>
+    <span class="ck-kw">def</span> <span class="ck-fn">__or__</span>(self, other: <span class="ck-str">"Runnable"</span>) -> <span class="ck-str">"RunnableSequence"</span>: ...</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- RUNNABLE TILES -->
+  <section class="sect sect-alt">
+    <div class="col-wide">
+      <p class="sect-eyebrow">The Runnable contract</p>
+      <h2 class="h2">Four verbs. Same pipeline.</h2>
+      <p class="sect-lead">Every piece of an LCEL chain exposes the same four methods. Write your pipeline once and pick how it runs based on what you need.</p>
+
+      <div class="tiles">
+        <article class="tile">
+          <div class="tile-method"><span class="dim">.</span>invoke<span class="dim">()</span></div>
+          <h3 class="tile-h">One question, one answer.</h3>
+          <p class="tile-p">A single synchronous call: pass an input, wait for the result. The default mode for prototypes, scripts, and CLI tools.</p>
+        </article>
+        <article class="tile">
+          <div class="tile-method"><span class="dim">.</span>batch<span class="dim">()</span></div>
+          <h3 class="tile-h">Many inputs in parallel.</h3>
+          <p class="tile-p">Run the same pipeline across a list of inputs concurrently — the I/O-bound ones overlap, latency stays flat instead of multiplying.</p>
+        </article>
+        <article class="tile">
+          <div class="tile-method"><span class="dim">.</span>stream<span class="dim">()</span></div>
+          <h3 class="tile-h">Token by token, as it happens.</h3>
+          <p class="tile-p">Return the answer as soon as the model starts producing it. Same chain, same code — just a different verb. Chat UIs depend on this.</p>
+        </article>
+        <article class="tile">
+          <div class="tile-method"><span class="dim">.</span>ainvoke<span class="dim">()</span></div>
+          <h3 class="tile-h">Async for everything else.</h3>
+          <p class="tile-p">The same call, async — for web servers, agents, or anywhere you can't afford to block. Each verb has an <span class="kbd">a*</span> twin.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEW: FOUR EXECUTION MODES IN DEPTH ============ -->
+  <section class="sect">
+    <div class="col-wide">
+      <p class="sect-eyebrow">The four execution modes — in depth</p>
+      <h2 class="h2">Same chain. Four shapes of latency.</h2>
+      <p class="sect-lead">The verb you choose determines whether your user waits 4 seconds in silence, sees the first token in 200ms, or fans out a hundred queries in the time of one. Pick the wrong one and the pipeline is still correct — just slow, or rude.</p>
+
+      <div class="mode-stack">
+
+        <div class="mode-row">
+          <div class="mode-meta">
+            <div class="mode-verb"><span class="dim">chain.</span>invoke<span class="dim">(input)</span></div>
+            <h3 class="mode-h">Synchronous call. Blocks until done.</h3>
+            <p>The simplest verb. Pass an input, the pipeline runs through every stage in order, you get the final output. Use it in scripts, notebooks, batch jobs, and any context where the caller cannot proceed without the full answer. Latency is the sum of every stage's latency — typically 2–8 seconds end-to-end for a RAG chain with one LLM hop.</p>
+            <span class="mode-latency">→ p50 latency: 2000–8000ms (LLM-dominated)</span>
+          </div>
+          <pre class="compare-code"><span class="ck-cmt"># single answer, single thread</span>
+answer <span class="ck-dim">=</span> chain.<span class="ck-fn">invoke</span>(
+    {<span class="ck-str">"question"</span>: <span class="ck-str">"refund policy?"</span>}
+)
+<span class="ck-fn">print</span>(answer)</pre>
+        </div>
+
+        <div class="mode-row">
+          <div class="mode-meta">
+            <div class="mode-verb"><span class="dim">chain.</span>batch<span class="dim">(inputs)</span></div>
+            <h3 class="mode-h">Many inputs, concurrent execution.</h3>
+            <p>Pass a list, get a list back — but the framework runs them in parallel using a thread pool (or the underlying client's connection pool). Wall-clock time approaches the slowest single call rather than the sum of all calls. Use it for evals, bulk classification, daily report generation, or any time you have N independent inputs and one pipeline. The <span class="kbd">max_concurrency</span> config caps simultaneous in-flight requests so you don't get rate-limited.</p>
+            <span class="mode-latency">→ 100 inputs in ~1.2× the latency of one</span>
+          </div>
+          <pre class="compare-code"><span class="ck-cmt"># 100 questions, 1× the wall time</span>
+results <span class="ck-dim">=</span> chain.<span class="ck-fn">batch</span>(
+    questions,
+    config<span class="ck-dim">=</span>{<span class="ck-str">"max_concurrency"</span>: <span class="ck-num">10</span>}
+)</pre>
+        </div>
+
+        <div class="mode-row">
+          <div class="mode-meta">
+            <div class="mode-verb"><span class="dim">chain.</span>stream<span class="dim">(input)</span></div>
+            <h3 class="mode-h">Token-by-token. First byte fast.</h3>
+            <p>Returns an iterator that yields chunks as the model produces them. Time-to-first-token is typically 200–400ms instead of multi-second silence. Every UI that mimics ChatGPT depends on this. Streaming works because the Runnable protocol surfaces partial outputs upstream — a parser at the end can stream partial JSON, a model in the middle streams tokens, and the pipeline coordinates the flow without you writing a single callback.</p>
+            <span class="mode-latency">→ first chunk: 200–400ms; total: same as invoke</span>
+          </div>
+          <pre class="compare-code"><span class="ck-cmt"># yield chunks as they arrive</span>
+<span class="ck-kw">for</span> chunk <span class="ck-kw">in</span> chain.<span class="ck-fn">stream</span>(question):
+    <span class="ck-fn">print</span>(chunk, end<span class="ck-dim">=</span><span class="ck-str">""</span>, flush<span class="ck-dim">=</span><span class="ck-kw">True</span>)</pre>
+        </div>
+
+        <div class="mode-row">
+          <div class="mode-meta">
+            <div class="mode-verb"><span class="dim">chain.</span>ainvoke<span class="dim">(input)</span></div>
+            <h3 class="mode-h">Async / non-blocking. For web servers and agents.</h3>
+            <p>The async cousin of <span class="kbd">.invoke</span>. Drop it into any <span class="kbd">async def</span> handler — FastAPI, Starlette, an agent loop, a websocket worker — and the event loop stays free to do other work while the LLM call is in flight. Every other verb has an async twin: <span class="kbd">abatch</span>, <span class="kbd">astream</span>, <span class="kbd">astream_events</span>. Use async whenever you cannot afford to block a server thread, which is essentially anywhere outside a CLI.</p>
+            <span class="mode-latency">→ same latency, frees the event loop</span>
+          </div>
+          <pre class="compare-code"><span class="ck-cmt"># non-blocking in async contexts</span>
+<span class="ck-kw">async def</span> <span class="ck-fn">handler</span>(req):
+    out <span class="ck-dim">=</span> <span class="ck-kw">await</span> chain.<span class="ck-fn">ainvoke</span>(req.body)
+    <span class="ck-kw">return</span> JSONResponse(out)</pre>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEW: LCEL BUILDING BLOCKS ============ -->
+  <section class="sect sect-alt">
+    <div class="col-wide">
+      <p class="sect-eyebrow">LCEL building blocks</p>
+      <h2 class="h2">Four primitives shape every chain.</h2>
+      <p class="sect-lead">Beyond the basic pipe, LCEL ships a small vocabulary of Runnable wrappers that handle the three things a real pipeline always needs: parallel fan-out, pass-through plumbing, plain Python functions, and conditional routing.</p>
+
+      <div class="body-prose">
+        <p>A linear <span class="kbd">a | b | c</span> chain gets you the demo, but production pipelines have branches: retrieve docs <em>and</em> get user history at the same time, send the same draft through two models for comparison, route easy questions to a cheap model and hard ones to an expensive one. The building blocks below handle every one of those cases — and because each block is itself a Runnable, they compose with each other and with the pipe operator. There is nothing else to learn.</p>
       </div>
 
-      <pre><span class="filename">rag_chain.py</span><span class="ck-kw">from</span> langchain_core.prompts <span class="ck-kw">import</span> ChatPromptTemplate
+      <div class="lcel-grid">
+        <article class="lcel-card">
+          <div class="lcel-name">RunnableParallel</div>
+          <p>Fan out the same input to multiple branches and collect the results into a dict. Use it whenever a downstream stage needs two upstream outputs — the canonical case is RAG, where the prompt template needs both the retrieved context and the original question.</p>
+          <pre class="lcel-code">parallel <span class="ck-dim">=</span> <span class="ck-fn">RunnableParallel</span>(
+    context<span class="ck-dim">=</span>retriever,
+    question<span class="ck-dim">=</span>RunnablePassthrough(),
+)
+<span class="ck-cmt"># input → {context, question}</span></pre>
+        </article>
+
+        <article class="lcel-card">
+          <div class="lcel-name">RunnableLambda</div>
+          <p>Wrap any plain Python function so it implements the Runnable protocol. The cheapest escape hatch in the framework — drop in a one-line transform, a normalizer, a logger — without writing a class or a custom Runnable subclass.</p>
+          <pre class="lcel-code">normalize <span class="ck-dim">=</span> <span class="ck-fn">RunnableLambda</span>(
+    <span class="ck-kw">lambda</span> q: q.<span class="ck-fn">strip</span>().<span class="ck-fn">lower</span>()
+)
+chain <span class="ck-dim">=</span> normalize <span class="ck-pipe">|</span> prompt <span class="ck-pipe">|</span> model</pre>
+        </article>
+
+        <article class="lcel-card">
+          <div class="lcel-name">RunnablePassthrough</div>
+          <p>The identity function. It returns whatever it receives. Useful inside a <span class="kbd">RunnableParallel</span> when you want to forward the original input to a later stage alongside transformed copies. The <span class="kbd">.assign()</span> variant adds new keys to a dict without removing the originals.</p>
+          <pre class="lcel-code">chain <span class="ck-dim">=</span> RunnablePassthrough.<span class="ck-fn">assign</span>(
+    summary<span class="ck-dim">=</span>summarizer
+) <span class="ck-pipe">|</span> next_stage
+<span class="ck-cmt"># {x, y} → {x, y, summary}</span></pre>
+        </article>
+
+        <article class="lcel-card">
+          <div class="lcel-name">RunnableBranch</div>
+          <p>Conditional routing. Each branch is a (predicate, Runnable) pair, and the first matching predicate wins. Use it to route by intent, language, complexity, or any other dispatch you would otherwise express with a long if/elif tree — without breaking composition.</p>
+          <pre class="lcel-code">router <span class="ck-dim">=</span> <span class="ck-fn">RunnableBranch</span>(
+    (is_code, code_chain),
+    (is_math, math_chain),
+    default_chain,  <span class="ck-cmt"># fallback</span>
+)</pre>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CODE BLOCK (existing) -->
+  <section class="sect" id="code">
+    <div class="col-wide">
+      <p class="sect-eyebrow">What it looks like</p>
+      <h2 class="h2">Ten lines. A real RAG chain.</h2>
+      <p class="sect-lead">Take a question, pull related docs, format both into a prompt, send to the model, parse the result. Every <span class="kbd">|</span> is a hand-off. Swap <span class="kbd">ChatOpenAI</span> for <span class="kbd">ChatAnthropic</span>? One line. Add a re-ranker? One pipe.</p>
+
+      <pre class="code-block"><div class="code-header"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="filename">rag_chain.py</span></div><span class="ck-kw">from</span> langchain_core.prompts <span class="ck-kw">import</span> ChatPromptTemplate
 <span class="ck-kw">from</span> langchain_core.output_parsers <span class="ck-kw">import</span> StrOutputParser
 <span class="ck-kw">from</span> langchain_openai <span class="ck-kw">import</span> ChatOpenAI
 
-prompt = ChatPromptTemplate.<span class="ck-fn">from_template</span>(
+prompt <span class="ck-dim">=</span> ChatPromptTemplate.<span class="ck-fn">from_template</span>(
     <span class="ck-str">"Answer using only this context:\n{context}\n\nQ: {question}"</span>
 )
-model  = <span class="ck-fn">ChatOpenAI</span>(model=<span class="ck-str">"gpt-4o-mini"</span>)
-parser = <span class="ck-fn">StrOutputParser</span>()
+model  <span class="ck-dim">=</span> <span class="ck-fn">ChatOpenAI</span>(model<span class="ck-dim">=</span><span class="ck-str">"gpt-4o-mini"</span>)
+parser <span class="ck-dim">=</span> <span class="ck-fn">StrOutputParser</span>()
 
 <span class="ck-cmt"># the whole pipeline — five components, four pipes</span>
-chain = {<span class="ck-str">"context"</span>: retriever, <span class="ck-str">"question"</span>: passthrough} <span class="ck-pipe">|</span> prompt <span class="ck-pipe">|</span> model <span class="ck-pipe">|</span> parser
+chain <span class="ck-dim">=</span> {<span class="ck-str">"context"</span>: retriever, <span class="ck-str">"question"</span>: passthrough} <span class="ck-pipe">|</span> prompt <span class="ck-pipe">|</span> model <span class="ck-pipe">|</span> parser
 
 chain.<span class="ck-fn">invoke</span>(<span class="ck-str">"What's our return policy?"</span>)</pre>
     </div>
   </section>
 
-  <!-- STATS -->
-  <section class="stats-section">
-    <div class="stats-inner">
-      <div class="stats-header">
-        <h2>Built by thousands. <em>Used by everyone.</em></h2>
-        <p>State of LangChain · 2026</p>
+  <!-- ============ NEW: ANNOTATED FULL RAG PIPELINE ============ -->
+  <section class="sect sect-alt">
+    <div class="col-wide">
+      <p class="sect-eyebrow">A real RAG pipeline — annotated</p>
+      <h2 class="h2">Fifteen lines, six stages, one data flow.</h2>
+      <p class="sect-lead">The toy RAG chain above is the shape of the answer, but production pipelines have one or two more stages — a query rewriter at the front, a re-ranker after retrieval, a JSON parser at the end. Here is the same pattern, expanded.</p>
+
+      <div class="body-prose">
+        <p>Each piece below is independently testable. You can call <span class="kbd">retriever.invoke("...")</span> on its own to inspect what came back. You can call <span class="kbd">rewriter.invoke("...")</span> to see how the query got rephrased. Every stage of a real LCEL chain is a Runnable in its own right, so you debug by isolating, not by adding print statements. The annotated panel on the right walks the input through every transformation.</p>
+        <p>This is the productivity gain that justifies the abstraction. Once your team writes pipelines this way, swapping a vector store, adding a re-ranker, or fanning out two parallel queries is one line. The interface is small, the operations are explicit, and the data flow is visible at the top of the file rather than scattered across helper functions.</p>
       </div>
-      <div class="stats">
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="88">0</span><span class="unit">K★</span></div>
-          <p class="stat-label">GitHub stars on the core repo — top-10 AI project on GitHub.</p>
+
+      <div class="annotated-wrap">
+        <pre class="code-block"><div class="code-header"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="filename">production_rag.py</span></div><span class="ck-kw">from</span> langchain_core.runnables <span class="ck-kw">import</span> RunnablePassthrough, RunnableParallel
+<span class="ck-kw">from</span> langchain_core.output_parsers <span class="ck-kw">import</span> JsonOutputParser
+<span class="ck-kw">from</span> langchain_openai <span class="ck-kw">import</span> ChatOpenAI
+
+rewriter <span class="ck-dim">=</span> rewrite_prompt <span class="ck-pipe">|</span> ChatOpenAI(model<span class="ck-dim">=</span><span class="ck-str">"gpt-4o-mini"</span>) <span class="ck-pipe">|</span> StrOutputParser()
+retriever <span class="ck-dim">=</span> vectorstore.<span class="ck-fn">as_retriever</span>(search_kwargs<span class="ck-dim">=</span>{<span class="ck-str">"k"</span>: <span class="ck-num">12</span>})
+reranker  <span class="ck-dim">=</span> CohereRerank(top_n<span class="ck-dim">=</span><span class="ck-num">4</span>)
+
+rag_chain <span class="ck-dim">=</span> (
+    <span class="ck-fn">RunnableParallel</span>(
+        rewritten<span class="ck-dim">=</span>rewriter,
+        original<span class="ck-dim">=</span>RunnablePassthrough(),
+    )
+    <span class="ck-pipe">|</span> RunnablePassthrough.<span class="ck-fn">assign</span>(
+        docs<span class="ck-dim">=</span><span class="ck-kw">lambda</span> x: reranker.<span class="ck-fn">compress_documents</span>(
+            retriever.<span class="ck-fn">invoke</span>(x[<span class="ck-str">"rewritten"</span>]),
+            query<span class="ck-dim">=</span>x[<span class="ck-str">"original"</span>],
+        )
+    )
+    <span class="ck-pipe">|</span> answer_prompt
+    <span class="ck-pipe">|</span> ChatOpenAI(model<span class="ck-dim">=</span><span class="ck-str">"gpt-4o"</span>, temperature<span class="ck-dim">=</span><span class="ck-num">0</span>)
+    <span class="ck-pipe">|</span> JsonOutputParser()
+)
+
+rag_chain.<span class="ck-fn">invoke</span>({<span class="ck-str">"question"</span>: <span class="ck-str">"refund policy?"</span>})</pre>
+
+        <div class="annotated-side">
+          <h4>Data flow per stage</h4>
+          <ol>
+            <li><b>Rewrite</b> the user's terse question into a fuller search query.</li>
+            <li><b>Fan out</b> via RunnableParallel — keep both rewritten and original around.</li>
+            <li><b>Retrieve</b> 12 candidates from the vector store using the rewritten query.</li>
+            <li><b>Re-rank</b> candidates against the original question; keep top 4.</li>
+            <li><b>Format</b> retrieved docs + original question into the answer prompt.</li>
+            <li><b>Generate</b> the final answer with a stronger model and temperature 0.</li>
+            <li><b>Parse</b> the model's JSON output into a typed dict ready to return.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEW: STREAMING PATTERNS ============ -->
+  <section class="sect">
+    <div class="col-wide">
+      <p class="sect-eyebrow">Streaming patterns</p>
+      <h2 class="h2">First byte fast. Intermediate events visible.</h2>
+      <p class="sect-lead">Streaming isn't just about the final tokens. The Runnable protocol exposes a richer event stream that lets a UI show progress through every stage of the pipeline — query rewriting, retrieval, generation — not just the model output.</p>
+
+      <div class="body-prose">
+        <p>The simple case is <span class="kbd">chain.stream(x)</span>, which yields output chunks as soon as the model produces them. In a Server-Sent Events handler, you pipe those chunks straight into <span class="kbd">text/event-stream</span> and a browser shows tokens appearing one by one. Time-to-first-token drops from "the user is staring at a spinner for four seconds" to "the user sees the first word in 250ms." That single change reshapes how the product feels.</p>
+        <p>The richer case is <span class="kbd">chain.astream_events(x, version="v2")</span>. This yields a stream of typed events covering <em>every stage</em> of the chain: <span class="kbd">on_retriever_start</span>, <span class="kbd">on_retriever_end</span>, <span class="kbd">on_chat_model_stream</span>, <span class="kbd">on_chat_model_end</span>, and so on. You can use this to show "Searching docs..." then "Found 4 sources" then start streaming the answer — all in a single async iterator. The pattern below is what production chat UIs ship.</p>
+        <p>For structured output, partial JSON streaming is the third pattern. <span class="kbd">JsonOutputParser</span> emits partial dicts as the model produces them, so you can render a half-built object — fields filling in left to right — while the model is still generating. The combination of token streaming, intermediate events, and partial JSON is what makes modern LLM UIs feel responsive instead of laggy.</p>
+      </div>
+
+      <pre class="code-block" style="margin-top: 2.5rem;"><div class="code-header"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="filename">streaming_handler.py</span></div><span class="ck-kw">from</span> fastapi.responses <span class="ck-kw">import</span> StreamingResponse
+
+<span class="ck-kw">async def</span> <span class="ck-fn">stream_chat</span>(question: str):
+    <span class="ck-kw">async def</span> <span class="ck-fn">event_source</span>():
+        <span class="ck-kw">async for</span> event <span class="ck-kw">in</span> chain.<span class="ck-fn">astream_events</span>(question, version<span class="ck-dim">=</span><span class="ck-str">"v2"</span>):
+            kind <span class="ck-dim">=</span> event[<span class="ck-str">"event"</span>]
+
+            <span class="ck-kw">if</span> kind <span class="ck-dim">==</span> <span class="ck-str">"on_retriever_end"</span>:
+                docs <span class="ck-dim">=</span> event[<span class="ck-str">"data"</span>][<span class="ck-str">"output"</span>]
+                <span class="ck-kw">yield</span> <span class="ck-fn">sse</span>(<span class="ck-str">"sources"</span>, [d.metadata <span class="ck-kw">for</span> d <span class="ck-kw">in</span> docs])
+
+            <span class="ck-kw">elif</span> kind <span class="ck-dim">==</span> <span class="ck-str">"on_chat_model_stream"</span>:
+                chunk <span class="ck-dim">=</span> event[<span class="ck-str">"data"</span>][<span class="ck-str">"chunk"</span>].content
+                <span class="ck-kw">yield</span> <span class="ck-fn">sse</span>(<span class="ck-str">"token"</span>, chunk)
+
+            <span class="ck-kw">elif</span> kind <span class="ck-dim">==</span> <span class="ck-str">"on_chain_end"</span>:
+                <span class="ck-kw">yield</span> <span class="ck-fn">sse</span>(<span class="ck-str">"done"</span>, {})
+
+    <span class="ck-kw">return</span> StreamingResponse(<span class="ck-fn">event_source</span>(), media_type<span class="ck-dim">=</span><span class="ck-str">"text/event-stream"</span>)</pre>
+    </div>
+  </section>
+
+  <!-- BEFORE / AFTER (existing) -->
+  <section class="sect sect-alt">
+    <div class="col-wide">
+      <p class="sect-eyebrow">Before / after</p>
+      <h2 class="h2">The same RAG chain, two ways.</h2>
+      <p class="sect-lead">The first version is what most teams write on day one — orchestration by hand, error handling everywhere, no abstraction. The second is the same logic expressed as a pipeline.</p>
+
+      <div class="compare">
+        <div class="compare-card">
+          <span class="compare-tag">before · imperative</span>
+          <h3 class="compare-h">Glue code, one path through.</h3>
+          <pre class="compare-code"><span class="ck-kw">def</span> <span class="ck-fn">answer</span>(question):
+    docs <span class="ck-dim">=</span> retriever.<span class="ck-fn">get_relevant_docs</span>(question)
+    ctx  <span class="ck-dim">=</span> <span class="ck-str">"\n"</span>.<span class="ck-fn">join</span>(d.page_content <span class="ck-kw">for</span> d <span class="ck-kw">in</span> docs)
+    msg  <span class="ck-dim">=</span> prompt_template.<span class="ck-fn">format</span>(context<span class="ck-dim">=</span>ctx, question<span class="ck-dim">=</span>question)
+    resp <span class="ck-dim">=</span> openai.<span class="ck-fn">complete</span>(msg)
+    <span class="ck-kw">return</span> resp.choices[<span class="ck-num">0</span>].text.<span class="ck-fn">strip</span>()
+
+answer(<span class="ck-str">"What's our return policy?"</span>)</pre>
+          <div class="compare-meta"><span>~7 lines, 1 execution mode</span><span><b>no streaming</b></span></div>
+        </div>
+
+        <div class="compare-card after">
+          <span class="compare-tag">after · lcel</span>
+          <h3 class="compare-h">One pipeline, four execution modes.</h3>
+          <pre class="compare-code">chain <span class="ck-dim">=</span> (
+    {<span class="ck-str">"context"</span>: retriever, <span class="ck-str">"question"</span>: passthrough}
+    <span class="ck-pipe">|</span> prompt
+    <span class="ck-pipe">|</span> model
+    <span class="ck-pipe">|</span> parser
+)
+
+chain.<span class="ck-fn">invoke</span>(q)   <span class="ck-cmt"># sync</span>
+chain.<span class="ck-fn">stream</span>(q)   <span class="ck-cmt"># tokens</span>
+chain.<span class="ck-fn">batch</span>([q1, q2, q3])  <span class="ck-cmt"># parallel</span></pre>
+          <div class="compare-meta"><span>~4 lines of chain definition</span><span><b>invoke · stream · batch · async</b></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEW: LCEL vs OLD-STYLE COMPARISON TABLE ============ -->
+  <section class="sect">
+    <div class="col-wide">
+      <p class="sect-eyebrow">LCEL vs legacy chains</p>
+      <h2 class="h2">Five dimensions where the abstraction earns its keep.</h2>
+      <p class="sect-lead">Old-style LangChain (the <span class="kbd">Chain</span> base class, <span class="kbd">LLMChain</span>, <span class="kbd">SequentialChain</span>) still works — but every dimension that matters for shipping is where LCEL pulls ahead.</p>
+
+      <div class="body-prose">
+        <p>The legacy chain classes were a graph-building DSL: you instantiated a chain object, passed it sub-chains as keyword arguments, and the framework ran them in a fixed order. It worked for the demos. It did not survive contact with streaming UIs, async web servers, or production observability needs. LCEL replaces that DSL with a single algebra — and the table below is what that algebra buys you.</p>
+      </div>
+
+      <div class="compare-table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Attribute</th>
+              <th>Legacy <span class="kbd">Chain</span></th>
+              <th class="win">LCEL <span class="kbd">Runnable</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label">Composability</td>
+              <td>Hard-coded sub-chain wiring</td>
+              <td class="win">Algebraic — any Runnable pipes into any other</td>
+            </tr>
+            <tr>
+              <td class="label">Type safety</td>
+              <td>String-keyed dicts at every hop</td>
+              <td class="win">Typed I/O via Pydantic schemas + IDE inference</td>
+            </tr>
+            <tr>
+              <td class="label">Debugging</td>
+              <td>Verbose logs, no per-step trace</td>
+              <td class="win">LangSmith auto-traces every Runnable</td>
+            </tr>
+            <tr>
+              <td class="label">Streaming</td>
+              <td>Manual callback handlers</td>
+              <td class="win"><span class="kbd">.stream()</span> and <span class="kbd">.astream_events()</span> built in</td>
+            </tr>
+            <tr>
+              <td class="label">Deployment</td>
+              <td>Wrap the chain in your own FastAPI handler</td>
+              <td class="win">LangServe exposes any Runnable as a REST endpoint</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SWAP TABLE (existing) -->
+  <section class="sect sect-alt">
+    <div class="col-wide">
+      <p class="sect-eyebrow">Drop-in swaps</p>
+      <h2 class="h2">Change a component. Keep the pipeline.</h2>
+      <p class="sect-lead">Every stage of an LCEL chain is interchangeable as long as its inputs and outputs line up. Move from one provider to another, or one storage backend to another, with a single import change.</p>
+
+      <div class="swap-wrap">
+        <table class="swap-table">
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Was</th>
+              <th>Becomes</th>
+              <th>Diff</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label">Model</td>
+              <td><span class="mono">ChatOpenAI</span></td>
+              <td><span class="mono">ChatAnthropic</span></td>
+              <td>one import, one constructor</td>
+            </tr>
+            <tr>
+              <td class="label">Retriever</td>
+              <td><span class="mono">Chroma.as_retriever()</span></td>
+              <td><span class="mono">Pinecone.as_retriever()</span></td>
+              <td>one binding, same interface</td>
+            </tr>
+            <tr>
+              <td class="label">Parser</td>
+              <td><span class="mono">StrOutputParser</span></td>
+              <td><span class="mono">JsonOutputParser</span></td>
+              <td>shape of <span class="mono">.invoke()</span> changes, rest is identical</td>
+            </tr>
+            <tr>
+              <td class="label">Execution</td>
+              <td><span class="mono">chain.invoke(x)</span></td>
+              <td><span class="mono">chain.stream(x)</span></td>
+              <td>verb only — return type adjusts</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEW: INTEGRATION ECOSYSTEM ============ -->
+  <section class="sect">
+    <div class="col-wide">
+      <p class="sect-eyebrow">Integration ecosystem</p>
+      <h2 class="h2">One contract, every provider.</h2>
+      <p class="sect-lead">LangChain split its monolith into partner packages — each provider lives in its own pip-installable module that implements the Runnable contract. You depend on what you use; nothing more.</p>
+
+      <div class="body-prose">
+        <p>The architectural choice that made this scale: <strong>langchain-core</strong> holds the Runnable protocol and the base interfaces; <strong>langchain</strong> holds the high-level chains; and every model provider ships its own thin package — <span class="kbd">langchain-openai</span>, <span class="kbd">langchain-anthropic</span>, <span class="kbd">langchain-google-vertexai</span>, <span class="kbd">langchain-aws</span>, <span class="kbd">langchain-cohere</span>, <span class="kbd">langchain-mistralai</span>, and dozens more. Each package owns its own release cadence and dependency tree, so a security patch in the AWS SDK does not force a re-test of the entire framework.</p>
+        <p>The same split applies to vector stores (<span class="kbd">langchain-chroma</span>, <span class="kbd">langchain-pinecone</span>, <span class="kbd">langchain-qdrant</span>), document loaders, retrievers, and tools. The ecosystem is large — over 700 integrations as of 2026 — but you only install the leaves you need. A typical production RAG service pulls in three or four partner packages, not the whole tree.</p>
+        <p>Because every partner package implements the Runnable contract, swapping providers is genuinely one line. Migrate from OpenAI to Anthropic? Change <span class="kbd">from langchain_openai import ChatOpenAI</span> to <span class="kbd">from langchain_anthropic import ChatAnthropic</span> and update the constructor. The chain itself never moves. That is the practical payoff of having a stable interface that every integration agrees to honor.</p>
+      </div>
+
+      <div class="partners-grid">
+        <article class="partner">
+          <div class="partner-name">langchain-openai</div>
+          <div class="partner-blurb">GPT-4o, GPT-4.1, o-series. Reference implementation.</div>
         </article>
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="200">0</span><span class="plus">+</span></div>
-          <p class="stat-label">Fortune 500 enterprises building production agents on LangChain.</p>
+        <article class="partner">
+          <div class="partner-name">langchain-anthropic</div>
+          <div class="partner-blurb">Claude Sonnet, Opus, Haiku. Tool use, vision, prompt caching.</div>
         </article>
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="2">0</span><span class="unit">M/wk</span></div>
-          <p class="stat-label">npm downloads per week across the JS ecosystem alone.</p>
+        <article class="partner">
+          <div class="partner-name">langchain-google-vertexai</div>
+          <div class="partner-blurb">Gemini family on Vertex. Embeddings, multimodal, function calling.</div>
         </article>
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="600">0</span><span class="plus">+</span></div>
-          <p class="stat-label">Contributors across 50+ countries shipping integrations and parsers.</p>
+        <article class="partner">
+          <div class="partner-name">langchain-aws</div>
+          <div class="partner-blurb">Bedrock chat models, Bedrock embeddings, Kendra retriever.</div>
+        </article>
+        <article class="partner">
+          <div class="partner-name">langchain-cohere</div>
+          <div class="partner-blurb">Command-R, Cohere rerank — the production re-ranker default.</div>
+        </article>
+        <article class="partner">
+          <div class="partner-name">langchain-mistralai</div>
+          <div class="partner-blurb">Mistral Large, Mixtral, embeddings via the Mistral API.</div>
         </article>
       </div>
     </div>
   </section>
 
+  <!-- NOTES (existing) -->
+  <section class="sect sect-alt">
+    <div class="col-wide">
+      <p class="sect-eyebrow">Things people get wrong</p>
+      <h2 class="h2">What LCEL is, and isn't.</h2>
+
+      <div class="notes">
+        <div class="note">
+          <h3>It isn't magic — it's operator overloading.</h3>
+          <p>The pipe character is Python's <span class="kbd">__or__</span> dunder. LangChain implements it on the Runnable base class. Nothing more, nothing less. If you understand operator overloading, you understand LCEL.</p>
+        </div>
+        <div class="note">
+          <h3>The four execution verbs are free.</h3>
+          <p>You don't write streaming logic. You don't write batching logic. You define the chain once; LangChain derives <span class="kbd">.invoke</span>, <span class="kbd">.batch</span>, <span class="kbd">.stream</span>, and <span class="kbd">.ainvoke</span> from the composition.</p>
+        </div>
+        <div class="note">
+          <h3>Types matter at the seams.</h3>
+          <p>A chain is only as composable as its boundaries. If stage N returns a dict and stage N+1 expects a string, you'll see a runtime error. LangChain's type hints help — pay attention to them.</p>
+        </div>
+        <div class="note">
+          <h3>Tracing is the killer feature.</h3>
+          <p>Because every step is a Runnable, LangSmith can trace every hop without instrumentation. You see prompts, retrievals, tokens, latency — per node, per run. This alone justifies the abstraction.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEW: COMMON PITFALLS ============ -->
+  <section class="sect">
+    <div class="col-wide">
+      <p class="sect-eyebrow">Common pitfalls</p>
+      <h2 class="h2">Five mistakes the framework will not protect you from.</h2>
+      <p class="sect-lead">LCEL is elegant when it works and confusing when it doesn't. The errors below account for most of the support questions on the LangChain Discord — fix them once and they stop happening.</p>
+
+      <ol class="pitfall-list">
+        <li>
+          <span class="pitfall-num">01</span>
+          <div class="pitfall-body">
+            <h3>Mixing sync and async runnables in the same chain.</h3>
+            <p>If you pipe a sync Runnable into an async one and then call <span class="kbd">.ainvoke()</span>, the sync stage runs in a worker thread — which is correct, but blocks one worker per call. Latency under load suffers in a way that does not show up in single-shot benchmarks.<span class="fix"><b>fix:</b> make every stage async when you intend to call <span class="kbd">ainvoke</span>; use <span class="kbd">RunnableLambda(func).with_config(run_async=True)</span> if you must wrap a sync function.</span></p>
+          </div>
+        </li>
+        <li>
+          <span class="pitfall-num">02</span>
+          <div class="pitfall-body">
+            <h3>Forgetting to type your state with Pydantic.</h3>
+            <p>Untyped dict-passing between stages works until a refactor changes one key name and three downstream stages silently start returning empty strings. LangSmith traces will show garbled outputs but the chain never raises.<span class="fix"><b>fix:</b> declare a Pydantic <span class="kbd">BaseModel</span> for the chain's input and output and use <span class="kbd">.with_types(input_type=..., output_type=...)</span>.</span></p>
+          </div>
+        </li>
+        <li>
+          <span class="pitfall-num">03</span>
+          <div class="pitfall-body">
+            <h3>Forgetting <span class="kbd">max_concurrency</span> on <span class="kbd">.batch()</span>.</h3>
+            <p>Default concurrency is unbounded. Batch 500 inputs against a provider with a 60 RPS limit and you will get a wall of 429 errors and a partial result list with retries baked in unpredictably.<span class="fix"><b>fix:</b> always pass <span class="kbd">config={"max_concurrency": N}</span> where N is below your provider's per-second cap.</span></p>
+          </div>
+        </li>
+        <li>
+          <span class="pitfall-num">04</span>
+          <div class="pitfall-body">
+            <h3>Streaming with a parser that buffers.</h3>
+            <p>Some parsers — most commonly older custom ones, or <span class="kbd">PydanticOutputParser</span> when given a strict schema — wait for the full output before returning. You think you're streaming; users see no chunks until the entire response is done.<span class="fix"><b>fix:</b> use streaming-aware parsers (<span class="kbd">StrOutputParser</span>, <span class="kbd">JsonOutputParser</span>) and verify with <span class="kbd">astream_events</span> that <span class="kbd">on_chat_model_stream</span> events surface.</span></p>
+          </div>
+        </li>
+        <li>
+          <span class="pitfall-num">05</span>
+          <div class="pitfall-body">
+            <h3>Calling external APIs inside a <span class="kbd">RunnableLambda</span> without retries.</h3>
+            <p>Wrapping a third-party call in <span class="kbd">RunnableLambda</span> is the easiest escape hatch — and it inherits zero of the production hardening you'd get from a proper integration package. Network blips become 500s.<span class="fix"><b>fix:</b> wrap with <span class="kbd">.with_retry(retry_if_exception_type=(httpx.HTTPError,), wait_exponential_jitter=True, stop_after_attempt=3)</span>.</span></p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ NEW: PRODUCTION CHECKLIST ============ -->
+  <section class="sect sect-alt">
+    <div class="col-wide">
+      <p class="sect-eyebrow">Production checklist</p>
+      <h2 class="h2">Eight things to verify before you ship.</h2>
+      <p class="sect-lead">A working LCEL chain in a notebook is not a production system. The checklist below is the minimum bar before exposing a pipeline to real users.</p>
+
+      <div class="body-prose">
+        <p>Every item maps to a class of incident we've seen in production: rate-limit cascades, untraceable hallucinations, silent retrieval misses, cost overruns from looping agents, and chains that work fine on developer machines and fall over the moment they hit real traffic. Treat the list as gating, not aspirational.</p>
+      </div>
+
+      <ul class="checklist">
+        <li>
+          <span class="box"></span>
+          <span><b>Retries with backoff</b> on every external call (<span class="kbd">.with_retry</span> on each Runnable that hits a provider).</span>
+        </li>
+        <li>
+          <span class="box"></span>
+          <span><b>Timeouts per stage</b> via <span class="kbd">.with_config(run_timeout=...)</span> — never trust a provider to fail fast.</span>
+        </li>
+        <li>
+          <span class="box"></span>
+          <span><b>LangSmith tracing enabled</b> in production with <span class="kbd">LANGCHAIN_TRACING_V2</span>; sample if volume demands it.</span>
+        </li>
+        <li>
+          <span class="box"></span>
+          <span><b>Prompt and embedding caching</b> turned on (<span class="kbd">set_llm_cache</span>, vendor-side prompt caching for Claude / OpenAI).</span>
+        </li>
+        <li>
+          <span class="box"></span>
+          <span><b>Concurrency caps</b> on every <span class="kbd">.batch()</span> call and on the agent loop to avoid rate-limit cascades.</span>
+        </li>
+        <li>
+          <span class="box"></span>
+          <span><b>Output schema validation</b> with Pydantic so malformed model outputs raise instead of silently corrupting downstream state.</span>
+        </li>
+        <li>
+          <span class="box"></span>
+          <span><b>Cost ceilings</b> per request (max tokens, max tool calls, max agent steps) — guard against runaway loops.</span>
+        </li>
+        <li>
+          <span class="box"></span>
+          <span><b>Eval suite in CI</b> — a small, fast LangSmith dataset that runs on every PR so regressions show up before merge, not in production.</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STATS (existing) -->
+  <section class="sect">
+    <div class="col-wide">
+      <p class="sect-eyebrow">State of LangChain · 2026</p>
+      <h2 class="h2">Built by thousands. Used by everyone.</h2>
+
+      <div class="stats">
+        <article class="stat">
+          <div class="stat-val"><span class="num" data-to="88">0</span><span class="unit">K&nbsp;stars</span></div>
+          <p class="stat-lbl">on the core repo — top-10 AI project on GitHub.</p>
+        </article>
+        <article class="stat">
+          <div class="stat-val"><span class="num" data-to="200">0</span><span class="plus">+</span></div>
+          <p class="stat-lbl">Fortune 500 enterprises building production agents on LangChain.</p>
+        </article>
+        <article class="stat">
+          <div class="stat-val"><span class="num" data-to="2">0</span><span class="unit">M / wk</span></div>
+          <p class="stat-lbl">npm downloads per week across the JS ecosystem alone.</p>
+        </article>
+        <article class="stat">
+          <div class="stat-val"><span class="num" data-to="600">0</span><span class="plus">+</span></div>
+          <p class="stat-lbl">contributors across 50+ countries shipping integrations.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ NEW: BIBLIOGRAPHY ============ -->
+  <section class="sect sect-alt">
+    <div class="col-wide">
+      <p class="sect-eyebrow">Further reading</p>
+      <h2 class="h2">Where to go from here.</h2>
+      <p class="sect-lead">Official documentation, the source code itself, and a handful of write-ups from teams that have run LCEL in production at scale.</p>
+
+      <ul class="bib">
+        <li>
+          <span class="bib-tag">docs</span>
+          <span class="bib-body">
+            <a href="https://python.langchain.com/docs/concepts/lcel/" target="_blank" rel="noopener">LangChain Expression Language — Concepts</a>
+            <span class="bib-meta">python.langchain.com · the canonical reference for the Runnable contract and composition primitives.</span>
+          </span>
+        </li>
+        <li>
+          <span class="bib-tag">docs</span>
+          <span class="bib-body">
+            <a href="https://python.langchain.com/docs/how_to/streaming/" target="_blank" rel="noopener">How to stream — invoke, stream, astream_events</a>
+            <span class="bib-meta">python.langchain.com · the streaming patterns covered above, with full SSE recipes.</span>
+          </span>
+        </li>
+        <li>
+          <span class="bib-tag">source</span>
+          <span class="bib-body">
+            <a href="https://github.com/langchain-ai/langchain" target="_blank" rel="noopener">langchain-ai/langchain on GitHub</a>
+            <span class="bib-meta">the monorepo — read <span class="kbd">libs/core/langchain_core/runnables/base.py</span> to see how <span class="kbd">__or__</span> actually works.</span>
+          </span>
+        </li>
+        <li>
+          <span class="bib-tag">blog</span>
+          <span class="bib-body">
+            <a href="https://blog.langchain.dev/" target="_blank" rel="noopener">LangChain Blog</a>
+            <span class="bib-meta">blog.langchain.dev · release notes, LCEL design rationale, and case studies from partner integrations.</span>
+          </span>
+        </li>
+        <li>
+          <span class="bib-tag">docs</span>
+          <span class="bib-body">
+            <a href="https://docs.smith.langchain.com/" target="_blank" rel="noopener">LangSmith documentation</a>
+            <span class="bib-meta">docs.smith.langchain.com · tracing, evals, and the observability layer that makes LCEL chains debuggable.</span>
+          </span>
+        </li>
+        <li>
+          <span class="bib-tag">adopter</span>
+          <span class="bib-body">
+            <a href="https://blog.langchain.dev/customers/" target="_blank" rel="noopener">LangChain customer stories — Klarna, Elastic, Rakuten, Replit</a>
+            <span class="bib-meta">blog.langchain.dev/customers · real teams running LCEL chains and LangGraph agents in production.</span>
+          </span>
+        </li>
+        <li>
+          <span class="bib-tag">tool</span>
+          <span class="bib-body">
+            <a href="https://www.langchain.com/langgraph" target="_blank" rel="noopener">LangGraph — stateful, multi-agent orchestration</a>
+            <span class="bib-meta">langchain.com/langgraph · what to reach for when an LCEL chain is not enough and you need cycles, state, and human-in-the-loop.</span>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
   <!-- FINAL CTA -->
   <section class="final">
-    <h2>Want to <em>understand it</em> before you build with it?</h2>
-    <p>CETI runs hands-on LangChain workshops for engineering teams — composing real pipelines, not slide decks. Two days, your codebase, your stack.</p>
-    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
-      Book a discovery call
-      <span class="arrow">→</span>
-    </a>
+    <div class="col">
+      <h2 class="h2">Understand it before you build with it.</h2>
+      <p>CETI runs hands-on LangChain workshops for engineering teams — composing real pipelines, not slide decks. Two days, your codebase, your stack.</p>
+      <a class="btn" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">Book a discovery call <span class="arrow">&rarr;</span></a>
+    </div>
   </section>
 
   <footer class="foot">
-    <span>CETI.AI · 2026 · Confidential lookbook</span>
-    <span><a href="https://cetiai.co">cetiai.co</a> · <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a></span>
+    <span>CETI &middot; 2026</span>
+    <span class="marker">02 / 18 — ceti.lookbook</span>
+    <span><a href="https://cetiai.co">cetiai.co</a> &middot; <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a></span>
   </footer>
 
   <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-    // ============ INTERSECTION REVEALS ============
-    const reveal = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.15 });
-    document.querySelectorAll('.tile, .stat').forEach((el) => reveal.observe(el));
-
     // ============ NUMBER TICKER ============
     function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
     function animateNum(el) {
       const to = +el.dataset.to;
-      const dur = 1200;
+      const dur = 1100;
       const start = performance.now();
       function tick(now) {
         const p = Math.min((now - start) / dur, 1);
@@ -887,133 +1680,72 @@ chain.<span class="ck-fn">invoke</span>(<span class="ck-str">"What's our return 
     }, { threshold: 0.5 });
     document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
 
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 25;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
+    // ============ STAT REVEAL ============
+    const reveal = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('in'); reveal.unobserve(e.target); }
       });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.2 });
+    document.querySelectorAll('.stat').forEach((el) => reveal.observe(el));
 
-    // ============ MAGIC CARD CURSOR GLOW ============
-    document.querySelectorAll('.tile').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
-
-    // ============ THE PIPELINE — flowing packets ============
+    // ============ PIPELINE PACKET — one quiet dot, looped ============
     (function pipeline() {
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) return;
 
-      const grid = document.getElementById('pipelineGrid');
-      const packetsLayer = document.getElementById('packets');
-      const stages = [...grid.querySelectorAll('.stage')];
-      const outCaption = document.getElementById('outCaption');
+      const packet = document.getElementById('packet');
+      const outVal = document.getElementById('outVal');
+      const stages = [...document.querySelectorAll('.pipe-stage')];
+      // SVG viewBox coordinates: stages centered at x = 90, 290, 490, 690, 890
+      const centers = [90, 290, 490, 690, 890];
+      const start = -20;
+      const end = 1020;
+      const duration = 5200;
+      let t0 = null;
+      let lastLit = -1;
+      let running = false;
 
-      // packet labels per stage (the label changes as the packet transforms)
-      const labelSets = [
-        ['query', 'context', 'messages', 'tokens', 'json'],
-        ['question', 'docs', 'prompt', 'response', '{result}'],
-        ['"return?"', '[3 docs]', 'system+user', 'streamed', 'parsed'],
-        ['intent', 'evidence', 'rendered', 'reply', 'object']
-      ];
-      let setIdx = 0;
-      let busy = false;
+      function step(ts) {
+        if (!t0) t0 = ts;
+        const t = Math.min((ts - t0) / duration, 1);
+        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const x = start + (end - start) * eased;
+        packet.setAttribute('cx', x);
+        packet.setAttribute('opacity', t < 0.05 ? t / 0.05 : (t > 0.95 ? (1 - t) / 0.05 : 1));
 
-      function getStageCenters() {
-        const gridRect = grid.getBoundingClientRect();
-        return stages.map((s) => {
-          const r = s.getBoundingClientRect();
-          return r.left + r.width / 2 - gridRect.left;
-        });
-      }
-
-      function spawnPacket() {
-        if (document.hidden) return;
-        const labels = labelSets[setIdx % labelSets.length];
-        setIdx++;
-        const packet = document.createElement('div');
-        packet.className = 'packet';
-        packet.textContent = labels[0];
-        packetsLayer.appendChild(packet);
-
-        const centers = getStageCenters();
-        const totalDuration = 4200; // ms
-        const start = performance.now();
-        let lastLitIdx = -1;
-
-        function step(now) {
-          const t = Math.min((now - start) / totalDuration, 1);
-          // ease in-out cubic for smoothness
-          const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-          // total travel: from before stage 0 to after stage 4
-          const fullLeft = centers[0] - 30;
-          const fullRight = centers[centers.length - 1] + 30;
-          const x = fullLeft + (fullRight - fullLeft) * eased;
-          packet.style.left = x + 'px';
-          // fade in at start, out at end
-          packet.style.opacity = t < 0.06 ? (t / 0.06) : (t > 0.94 ? Math.max(0, (1 - t) / 0.06) : 1);
-
-          // figure out which stage the packet is on
-          let curIdx = -1;
-          for (let i = 0; i < centers.length; i++) {
-            if (Math.abs(x - centers[i]) < 36) { curIdx = i; break; }
-          }
-          if (curIdx !== lastLitIdx) {
-            if (lastLitIdx >= 0) stages[lastLitIdx].classList.remove('lit');
-            if (curIdx >= 0) {
-              stages[curIdx].classList.add('lit');
-              if (labels[curIdx]) packet.textContent = labels[curIdx];
-            }
-            lastLitIdx = curIdx;
-          }
-          if (t < 1) {
-            requestAnimationFrame(step);
-          } else {
-            if (lastLitIdx >= 0) stages[lastLitIdx].classList.remove('lit');
-            // OUTPUT caption flash
-            outCaption.classList.add('show');
-            setTimeout(() => outCaption.classList.remove('show'), 1400);
-            packet.remove();
-            busy = false;
-          }
+        // light up the nearest stage
+        let cur = -1;
+        for (let i = 0; i < centers.length; i++) {
+          if (Math.abs(x - centers[i]) < 80) { cur = i; break; }
         }
-        busy = true;
-        requestAnimationFrame(step);
+        if (cur !== lastLit) {
+          if (lastLit >= 0) stages[lastLit].classList.remove('lit');
+          if (cur >= 0) stages[cur].classList.add('lit');
+          lastLit = cur;
+        }
+
+        if (t < 1) {
+          requestAnimationFrame(step);
+        } else {
+          if (lastLit >= 0) stages[lastLit].classList.remove('lit');
+          lastLit = -1;
+          outVal.classList.add('show');
+          setTimeout(() => outVal.classList.remove('show'), 1100);
+          t0 = null;
+          setTimeout(() => requestAnimationFrame(step), 900);
+        }
       }
 
-      function loop() {
-        if (!busy) spawnPacket();
-        // stagger spawns ~ every 1.5s so up to ~3 packets are in flight
-        setTimeout(spawnPacket, 1500);
-        setTimeout(spawnPacket, 3000);
-      }
-
-      // start when in view
       const startObs = new IntersectionObserver((entries) => {
         entries.forEach((e) => {
-          if (e.isIntersecting) {
-            spawnPacket();
-            setInterval(spawnPacket, 1500);
+          if (e.isIntersecting && !running) {
+            running = true;
+            requestAnimationFrame(step);
             startObs.unobserve(e.target);
           }
         });
-      }, { threshold: 0.25 });
-      startObs.observe(document.querySelector('.pipeline-wrap'));
-
-      // pause on tab hidden — caught implicitly by spawnPacket guard
+      }, { threshold: 0.3 });
+      startObs.observe(document.querySelector('.pipe-frame'));
     })();
   </script>
   <script src="../shared/nav.js" defer></script>

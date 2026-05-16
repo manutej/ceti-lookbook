@@ -3,55 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prompt Engineering Patterns — CETI.AI Lookbook</title>
-  <meta name="description" content="Six canonical prompt engineering patterns — Chain-of-Thought, Few-Shot, Role, Structured Output, Self-Consistency, ReAct — explained with live animated demos.">
+  <title>Chapter 11 · Prompt Patterns — CETI Handbook</title>
+  <meta name="description" content="A reference-manual treatment of six canonical prompt-engineering patterns: Chain-of-Thought, Few-Shot, Role, Structured Output, Self-Consistency, and ReAct. Definitions, anti-patterns, code listings, and worked compositions.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg:             #FAF7F2;
-      --color-bg-warm:        #F5F0E8;
-      --color-bg-code:        #1E1E2E;
-      --color-text:           #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted:     #9E9790;
-      --color-border:         #E5DFD6;
-      --color-border-light:   #EEEBE5;
-      --color-surface:        #FFFFFF;
-      --color-surface-warm:   #FDF9F3;
-
-      --color-accent:         #D94F30;
-      --color-accent-hover:   #C4432A;
-      --color-accent-light:   #FDEEE9;
-      --color-accent-muted:   #E8836C;
-
-      /* Six pattern colors — accent rotation */
-      --color-p1: #D94F30;   /* vermillion — Chain-of-Thought */
-      --color-p2: #2A7B9B;   /* teal       — Few-Shot */
-      --color-p3: #7B6DAA;   /* plum       — Role */
-      --color-p4: #2D8B55;   /* forest     — Structured Output */
-      --color-p5: #D4A843;   /* golden     — Self-Consistency */
-      --color-p6: #B85C57;   /* rust       — ReAct */
-
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body:    'DM Sans', -apple-system, sans-serif;
-      --font-mono:    'JetBrains Mono', monospace;
-
-      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-      --duration-fast:   150ms;
-      --duration-normal: 300ms;
-      --duration-slow:   500ms;
-      --duration-slower: 700ms;
-
-      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
-      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+      --paper:        #F4F0E6;
+      --paper-deep:   #ECE6D8;
+      --paper-rule:   #D9D2C0;
+      --ink:          #1B1B1B;
+      --ink-soft:     #2A2A2A;
+      --ink-secondary:#5C5C5C;
+      --ink-muted:    #7E7A6E;
+      --maroon:       #8B1A1A;
+      --maroon-deep:  #6E1414;
+      --maroon-tint:  #F0E2E2;
+      --font-body:    'Crimson Pro', Georgia, 'Times New Roman', serif;
+      --font-sans:    'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+      --font-mono:    'IBM Plex Mono', 'SF Mono', Menlo, monospace;
     }
 
     * { box-sizing: border-box; }
@@ -59,1237 +32,1423 @@
     body {
       margin: 0;
       font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
+      color: var(--ink);
+      background-color: var(--paper);
+      /* subtle paper grain: two layered low-opacity radial noise washes */
       background-image:
-        radial-gradient(ellipse at 18% 22%, rgba(217, 79, 48, 0.05) 0%, transparent 45%),
-        radial-gradient(ellipse at 82% 68%, rgba(123, 109, 170, 0.045) 0%, transparent 50%);
-      line-height: 1.6;
+        radial-gradient(circle at 12% 18%, rgba(0,0,0,0.018) 0, transparent 38%),
+        radial-gradient(circle at 88% 72%, rgba(0,0,0,0.022) 0, transparent 42%),
+        radial-gradient(circle at 30% 88%, rgba(139, 26, 26, 0.015) 0, transparent 40%);
+      font-size: 18px;
+      line-height: 1.55;
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
-    /* ============ NAV ============ */
-    .nav {
-      position: fixed; top: 0; left: 0; right: 0;
-      height: 56px; z-index: 100;
-      background: rgba(250, 247, 242, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--color-border-light);
-      display: flex; align-items: center;
-    }
-    .nav-inner {
-      max-width: 1180px; margin: 0 auto; padding: 0 1.5rem;
-      width: 100%;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .nav-brand {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text);
-    }
-    .nav-brand b { color: var(--color-accent); font-weight: 500; }
-    .nav-meta {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-
-    section { padding: 5rem 1.5rem; max-width: 1180px; margin: 0 auto; }
-
-    /* ============ HERO ============ */
-    .hero {
-      min-height: 88dvh;
-      padding: 8rem 1.5rem 4rem;
-      display: flex; flex-direction: column; justify-content: center;
-    }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
-      margin: 0;
-    }
-    .hero.visible .eyebrow { opacity: 1; }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.5rem, 7vw, 5.25rem);
-      line-height: 1.02;
-      letter-spacing: -0.035em;
-      margin: 1.5rem 0;
-      max-width: 14ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay:  80ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 160ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 240ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 320ms; }
-    .hero-title em { font-style: normal; color: var(--color-accent); }
-
-    .hero-sub {
-      font-size: clamp(1.05rem, 1.4vw, 1.3rem);
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out),
-                  transform var(--duration-slower) var(--ease-out);
-      transition-delay: 580ms;
-      margin: 0;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    .cta-row {
-      display: flex; gap: 1.25rem; margin-top: 2.5rem;
-      align-items: center; flex-wrap: wrap;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 780ms;
-    }
-    .hero.visible .cta-row { opacity: 1; }
-
-    /* ============ MAGNETIC BUTTON ============ */
-    .magnetic {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 1rem 1.75rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 1rem;
-      border: none; cursor: pointer;
-      text-decoration: none;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms var(--ease-spring), background 200ms ease;
-      will-change: transform;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(4px); }
-
-    .secondary {
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      font-size: 0.95rem;
-      border-bottom: 1px solid transparent;
-      transition: color 200ms, border-color 200ms;
-    }
-    .secondary:hover { color: var(--color-accent); border-bottom-color: var(--color-accent); }
-
-    /* ============ SECTION HEADINGS ============ */
-    .section-eyebrow {
+    /* ============== TOP STRIP ============== */
+    .strip {
+      border-bottom: 1.5px solid var(--ink);
+      background: var(--paper);
+      padding: 0.55rem 1.5rem;
       font-family: var(--font-mono);
       font-size: 0.7rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--color-text-muted);
-      margin: 0 0 0.875rem;
+      color: var(--ink);
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .section-title {
-      font-family: var(--font-display);
+    .strip .l b { color: var(--maroon); font-weight: 600; }
+    .strip .r { color: var(--ink-muted); }
+
+    /* ============== CHAPTER TITLE PAGE ============== */
+    .titlepage {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 4.5rem 2rem 3.5rem;
+      border-bottom: 1px solid var(--paper-rule);
+    }
+    .chapter-mark {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      font-weight: 600;
+      margin: 0 0 0.5rem;
+    }
+    .chapter-num {
+      font-family: var(--font-sans);
       font-weight: 700;
-      font-size: clamp(1.85rem, 3.6vw, 2.75rem);
-      letter-spacing: -0.025em;
-      line-height: 1.1;
-      margin: 0 0 1rem;
+      font-size: clamp(4rem, 9vw, 7rem);
+      line-height: 0.95;
+      color: var(--maroon);
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    .chapter-num .slash { color: var(--ink); font-weight: 400; }
+    .chapter-title {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: clamp(2.1rem, 4.5vw, 3.4rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin: 0.4rem 0 1.4rem;
       max-width: 26ch;
+      color: var(--ink);
     }
-    .section-lede {
-      color: var(--color-text-secondary);
-      max-width: 62ch;
-      font-size: 1.075rem;
-      margin: 0;
+    .chapter-deck {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+      color: var(--ink-secondary);
+      max-width: 70ch;
+      margin: 0 0 2rem;
+      line-height: 1.5;
     }
-
-    /* ============ WHY PROSE ============ */
-    .why {
-      padding: 4rem 1.5rem 2rem;
-      max-width: 760px; margin: 0 auto;
-    }
-    .why p {
-      font-size: 1.125rem;
-      color: var(--color-text);
-      margin: 0 0 1.25rem;
-      line-height: 1.7;
-    }
-    .why p:last-child { margin-bottom: 0; }
-    .why em { color: var(--color-accent); font-style: normal; font-weight: 500; }
-
-    /* ============ ANIMATE-IN ============ */
-    .animate-in {
-      opacity: 0; transform: translateY(24px);
-      transition: opacity var(--duration-slower) var(--ease-spring),
-                  transform var(--duration-slower) var(--ease-spring);
-    }
-    .animate-in.visible { opacity: 1; transform: translateY(0); }
-
-    /* ============ BENTO — SIGNATURE VISUAL ============ */
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
-      margin-top: 3rem;
-    }
-    .tile {
-      position: relative;
-      padding: 1.75rem;
-      border-radius: 18px;
-      background:
-        radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
-          var(--tile-glow, rgba(217, 79, 48, 0.07)), transparent 45%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition:
-        transform var(--duration-normal) var(--ease-spring),
-        border-color var(--duration-normal) var(--ease-out),
-        box-shadow var(--duration-normal) var(--ease-out);
-      overflow: hidden;
-      display: flex; flex-direction: column;
-      min-height: 340px;
-    }
-    @media (hover: hover) {
-      .tile:hover {
-        transform: translateY(-3px);
-        border-color: var(--tile-color, var(--color-accent-muted));
-        box-shadow: var(--shadow-lg);
-      }
-    }
-    .tile-header {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 0.75rem;
-    }
-    .tile-tag {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
+    .author-line {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: var(--tile-color);
-      background: var(--tile-tag-bg);
-      padding: 0.3rem 0.7rem;
-      border-radius: 999px;
+      color: var(--ink-secondary);
+      border-top: 1px solid var(--ink);
+      padding-top: 1rem;
+      max-width: 540px;
+      display: flex; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
     }
-    .tile-tag::before {
-      content: "";
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--tile-color);
+    .author-line b { color: var(--ink); font-weight: 600; }
+
+    /* ============== TABLE OF CONTENTS ============== */
+    .toc-wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      border-bottom: 1px solid var(--paper-rule);
     }
-    .tile-num {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      color: var(--color-text-muted);
+    .toc-head {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      font-weight: 600;
+      margin: 0 0 1rem;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 0.35rem;
     }
-    .tile-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.35rem;
-      letter-spacing: -0.015em;
-      margin: 0.85rem 0 0.4rem;
-    }
-    .tile-blurb {
-      color: var(--color-text-secondary);
+    .toc {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.18rem 2.5rem;
+      font-family: var(--font-sans);
       font-size: 0.92rem;
-      margin: 0;
-      line-height: 1.55;
+      list-style: none;
+      padding: 0; margin: 0;
     }
-
-    /* per-tile accents */
-    .tile.p1 { --tile-color: var(--color-p1); --tile-tag-bg: var(--color-accent-light); --tile-glow: rgba(217, 79, 48, 0.07); }
-    .tile.p2 { --tile-color: var(--color-p2); --tile-tag-bg: #E4F2F7;                 --tile-glow: rgba(42, 123, 155, 0.07); }
-    .tile.p3 { --tile-color: var(--color-p3); --tile-tag-bg: #EFEBF5;                 --tile-glow: rgba(123, 109, 170, 0.07); }
-    .tile.p4 { --tile-color: var(--color-p4); --tile-tag-bg: #E1F2E7;                 --tile-glow: rgba(45, 139, 85, 0.08); }
-    .tile.p5 { --tile-color: var(--color-p5); --tile-tag-bg: #FBF1DA;                 --tile-glow: rgba(212, 168, 67, 0.10); }
-    .tile.p6 { --tile-color: var(--color-p6); --tile-tag-bg: #F4E2E1;                 --tile-glow: rgba(184, 92, 87, 0.07); }
-
-    /* ============ DEMO PANEL — terminal-like mini area inside each tile ============ */
-    .demo {
-      margin-top: 1.25rem;
-      flex: 1;
-      background: var(--color-bg-warm);
-      border: 1px solid var(--color-border-light);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      line-height: 1.55;
-      color: var(--color-text);
-      overflow: hidden;
-      position: relative;
-      min-height: 150px;
-      display: flex; flex-direction: column;
-      gap: 0.3rem;
-    }
-    .demo .label {
-      color: var(--color-text-muted);
-      font-size: 0.62rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .demo .accent { color: var(--tile-color); font-weight: 500; }
-
-    /* Reusable: text reveal line */
-    .line {
-      opacity: 0;
-      transform: translateY(4px);
-      transition: opacity 280ms var(--ease-out), transform 280ms var(--ease-out);
-    }
-    .line.on { opacity: 1; transform: translateY(0); }
-
-    /* caret blink */
-    .caret {
-      display: inline-block;
-      width: 7px; height: 0.95em;
-      vertical-align: -2px;
-      background: var(--tile-color);
-      margin-left: 2px;
-      animation: blink 1s steps(2, end) infinite;
-    }
-    @keyframes blink {
-      0%, 50%  { opacity: 1; }
-      50.1%, 100% { opacity: 0; }
-    }
-
-    /* ====== 1) CHAIN-OF-THOUGHT specific ====== */
-    .cot-q {
-      color: var(--color-text-secondary);
-      margin-bottom: 0.35rem;
-    }
-    .cot-step {
-      padding-left: 0.85rem;
-      position: relative;
-    }
-    .cot-step::before {
-      content: ""; position: absolute; left: 0; top: 0.55em;
-      width: 4px; height: 4px; border-radius: 50%;
-      background: var(--tile-color);
-    }
-    .cot-ans {
-      margin-top: 0.4rem;
-      color: var(--tile-color);
-      font-weight: 500;
-    }
-
-    /* ====== 2) FEW-SHOT specific ====== */
-    .fs-pair { display: grid; grid-template-columns: 14px 1fr; gap: 0.4rem; align-items: baseline; }
-    .fs-pair .k { color: var(--color-text-muted); font-size: 0.7rem; }
-    .fs-pair .v { color: var(--color-text); }
-    .fs-pair.example .v { color: var(--color-text-secondary); }
-    .fs-final .v { color: var(--tile-color); font-weight: 500; }
-    .fs-sep { border-top: 1px dashed var(--color-border); margin: 0.35rem 0; }
-
-    /* ====== 3) ROLE specific ====== */
-    .role-prefix {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border-light);
-      border-left: 3px solid var(--tile-color);
-      padding: 0.55rem 0.65rem;
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
-      transition: opacity 400ms, transform 400ms;
-    }
-    .role-prefix .tag {
-      font-size: 0.6rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--tile-color);
-      display: block;
-      margin-bottom: 0.15rem;
-    }
-    .role-prefix.swap {
-      animation: roleSwap 12s ease-in-out infinite;
-    }
-    @keyframes roleSwap {
-      0%, 45%   { transform: translateX(0); opacity: 1; }
-      48%, 52%  { transform: translateX(-6px); opacity: 0; }
-      55%, 100% { transform: translateX(0); opacity: 1; }
-    }
-    .role-out {
-      color: var(--color-text-secondary);
-      font-size: 0.76rem;
-    }
-    .role-out b { color: var(--tile-color); font-weight: 500; }
-
-    /* ====== 4) STRUCTURED OUTPUT — typewriter JSON ====== */
-    .json-stage {
-      color: var(--color-text-secondary);
-      font-size: 0.78rem;
-      white-space: pre;
-      overflow: hidden;
-    }
-    .json-stage .k { color: var(--tile-color); }
-    .json-stage .s { color: #B85C57; }
-    .json-stage .n { color: #2A7B9B; }
-    .json-stage .p { color: var(--color-text-muted); }
-
-    /* ====== 5) SELF-CONSISTENCY — 3 parallel paths converging ====== */
-    .sc-cols {
+    .toc li {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0.4rem;
-      margin: 0.25rem 0 0.5rem;
-    }
-    .sc-col {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border-light);
-      border-radius: 6px;
-      padding: 0.45rem 0.5rem;
-      font-size: 0.7rem;
-      color: var(--color-text-secondary);
-      min-height: 56px;
-      display: flex; flex-direction: column; gap: 0.15rem;
-      transition: border-color 400ms, background 400ms;
-    }
-    .sc-col .v { font-weight: 500; color: var(--color-text); font-family: var(--font-mono); }
-    .sc-col.consensus { border-color: var(--tile-color); background: #FBF7E8; }
-    .sc-col.consensus .v { color: var(--tile-color); }
-    .sc-arrow {
-      text-align: center; color: var(--color-text-muted); font-size: 0.65rem; margin: 0.1rem 0;
-    }
-    .sc-result {
-      text-align: center;
-      color: var(--tile-color);
-      font-weight: 500;
-      font-size: 0.85rem;
-      opacity: 0;
-      transition: opacity 400ms;
-    }
-    .sc-result.on { opacity: 1; }
-
-    /* ====== 6) REACT — Thought / Action / Observation loop with traveling pulse ====== */
-    .react-loop {
-      display: flex; flex-direction: column; gap: 0.32rem;
-      position: relative;
-    }
-    .react-row {
-      display: grid;
-      grid-template-columns: 56px 1fr;
-      gap: 0.5rem;
+      grid-template-columns: 2.6rem 1fr auto;
+      gap: 0.6rem;
+      padding: 0.28rem 0;
+      border-bottom: 1px dotted var(--paper-rule);
       align-items: baseline;
-      padding: 0.3rem 0.5rem;
-      border-radius: 5px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border-light);
-      transition: background 280ms, border-color 280ms, transform 280ms;
-      transform: scale(1);
+    }
+    .toc a {
+      color: var(--ink);
+      text-decoration: none;
+      transition: color 200ms ease;
+    }
+    .toc a:hover { color: var(--maroon); text-decoration: underline; text-underline-offset: 3px; }
+    .toc .num { color: var(--maroon); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .toc .pg { color: var(--ink-muted); font-variant-numeric: tabular-nums; font-size: 0.85rem; }
+
+    /* ============== BODY GRID ============== */
+    .chapter {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    .section-mark {
+      font-family: var(--font-sans);
       font-size: 0.74rem;
-    }
-    .react-row.active {
-      border-color: var(--tile-color);
-      background: #F8EFEE;
-      transform: scale(1.015);
-    }
-    .react-row .tag {
-      font-size: 0.58rem;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--color-text-muted);
-      font-weight: 500;
+      color: var(--maroon);
+      font-weight: 600;
+      margin: 3rem 0 0.3rem;
+      display: flex; align-items: baseline; gap: 0.65rem;
     }
-    .react-row.active .tag { color: var(--tile-color); }
-    .react-row .body { color: var(--color-text-secondary); }
-    .react-row.active .body { color: var(--color-text); }
+    .section-mark::before { content: ""; width: 24px; height: 1.5px; background: var(--maroon); }
 
-    /* ============ DECISION TABLE ============ */
-    .decide {
-      background: var(--color-bg-warm);
-      padding: 5rem 1.5rem;
-      margin: 5rem 0 0;
+    h2.s-head {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: clamp(1.55rem, 2.8vw, 2.05rem);
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+      margin: 0.3rem 0 1.2rem;
+      color: var(--ink);
+      padding-bottom: 0.4rem;
+      border-bottom: 2px solid var(--ink);
+      max-width: 36ch;
     }
-    .decide-inner { max-width: 1180px; margin: 0 auto; }
-    .table-wrap {
-      margin-top: 2.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-    .table-row {
-      display: grid;
-      grid-template-columns: 1.4fr 1fr 1.6fr;
-      gap: 1.5rem;
-      padding: 1.05rem 1.5rem;
-      border-bottom: 1px solid var(--color-border-light);
-      align-items: center;
-      transition: background 200ms;
-    }
-    .table-row:last-child { border-bottom: none; }
-    .table-row:not(.head):hover { background: var(--color-surface-warm); }
-    .table-row.head {
-      background: var(--color-bg-warm);
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-    .table-row .if  { color: var(--color-text); font-weight: 500; font-size: 0.95rem; }
-    .table-row .use {
-      font-family: var(--font-mono);
-      font-size: 0.76rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--use-color, var(--color-accent));
-      font-weight: 500;
-      display: inline-flex; align-items: center; gap: 0.5rem;
-    }
-    .table-row .use::before {
-      content: ""; width: 8px; height: 8px; border-radius: 50%;
-      background: var(--use-color, var(--color-accent));
-    }
-    .table-row .why-col { color: var(--color-text-secondary); font-size: 0.92rem; }
-    .table-row.r-1 { --use-color: var(--color-p1); }
-    .table-row.r-2 { --use-color: var(--color-p2); }
-    .table-row.r-3 { --use-color: var(--color-p3); }
-    .table-row.r-4 { --use-color: var(--color-p4); }
-    .table-row.r-5 { --use-color: var(--color-p5); }
-    .table-row.r-6 { --use-color: var(--color-p6); }
-
-    /* ============ CODE BLOCK ============ */
-    .code-section {
-      padding: 5rem 1.5rem;
-      max-width: 980px; margin: 0 auto;
-    }
-    .code-wrap {
-      margin-top: 2.5rem;
-      background: var(--color-bg-code);
-      border-radius: 14px;
-      padding: 1.75rem 1.85rem;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-      position: relative;
-    }
-    .code-wrap::before {
-      content: "anthropic.messages.create";
-      position: absolute; top: 0.75rem; right: 1.1rem;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.35);
-    }
-    .code-wrap pre {
-      margin: 0;
-      font-family: var(--font-mono);
-      font-size: 0.84rem;
-      line-height: 1.65;
-      color: #DCE0E8;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .code-wrap .kw   { color: #CBA6F7; }
-    .code-wrap .str  { color: #A6E3A1; }
-    .code-wrap .tag  { color: #F38BA8; }
-    .code-wrap .attr { color: #F9E2AF; }
-    .code-wrap .com  { color: #6C7086; font-style: italic; }
-    .code-wrap .num  { color: #FAB387; }
-
-    /* ============ STATS ROW ============ */
-    .stats-section { padding: 5rem 1.5rem; max-width: 1180px; margin: 0 auto; }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.25rem;
-      margin-top: 2.5rem;
-    }
-    .stat {
-      padding: 1.75rem 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      position: relative;
-      overflow: hidden;
-    }
-    .stat::after {
-      content: "";
-      position: absolute; left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: var(--stat-color, var(--color-accent));
-    }
-    .stat.s-1 { --stat-color: var(--color-p1); }
-    .stat.s-2 { --stat-color: var(--color-p2); }
-    .stat.s-3 { --stat-color: var(--color-p4); }
-    .stat.s-4 { --stat-color: var(--color-p5); }
-    .stat-value {
-      font-family: var(--font-display);
+    h2.s-head .pnum {
+      color: var(--maroon);
+      font-family: var(--font-sans);
       font-weight: 700;
-      font-size: clamp(2rem, 3.5vw, 2.75rem);
+      margin-right: 0.45rem;
+    }
+
+    h3.sub-head {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: 0;
+      color: var(--ink);
+      margin: 1.6rem 0 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Two-column reading body */
+    .cols-2 {
+      column-count: 2;
+      column-gap: 2.6rem;
+      column-rule: 1px solid var(--paper-rule);
+      text-align: justify;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      orphans: 2;
+      widows: 2;
+    }
+    .cols-2 p {
+      margin: 0 0 0.85rem;
+      font-size: 1.02rem;
+      line-height: 1.55;
+    }
+    .cols-2 p.lead::first-letter {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      float: left;
+      font-size: 3.2rem;
+      line-height: 0.88;
+      padding: 0.18rem 0.42rem 0 0;
+      color: var(--maroon);
+    }
+    .cols-2 .keep { break-inside: avoid; }
+
+    /* Single column for elements that look bad in columns */
+    .single { max-width: 70ch; margin: 0 0 1.2rem; }
+    .single p { margin: 0 0 1rem; line-height: 1.6; }
+
+    /* Inline emphasis */
+    em.term {
+      font-style: italic;
+      color: var(--maroon);
+      font-weight: 500;
+    }
+    code.kw {
+      font-family: var(--font-mono);
+      font-size: 0.92em;
+      color: var(--maroon);
+      background: transparent;
+      padding: 0 0.12em;
+    }
+    .xref {
+      font-family: var(--font-sans);
+      font-style: italic;
+      font-size: 0.88em;
+      color: var(--ink-muted);
+    }
+    .xref a { color: var(--maroon); text-decoration: none; border-bottom: 1px dotted var(--maroon); }
+    .xref a:hover { color: var(--maroon-deep); border-bottom-style: solid; }
+
+    /* "See also" line */
+    .see-also {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      color: var(--ink-secondary);
+      letter-spacing: 0.02em;
+      margin: 0 0 1rem;
+      padding: 0.45rem 0.6rem;
+      background: var(--paper-deep);
+      border-left: 3px solid var(--maroon);
+    }
+    .see-also b { font-weight: 600; color: var(--ink); text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.7rem; margin-right: 0.5rem; }
+
+    /* Pattern entry header */
+    .pattern-entry {
+      margin: 0;
+    }
+    .pattern-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      align-items: baseline;
+      border-bottom: 1px solid var(--paper-rule);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.7rem;
+    }
+    .pattern-num-big {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 2.4rem;
+      color: var(--maroon);
       line-height: 1;
-      letter-spacing: -0.025em;
       font-variant-numeric: tabular-nums;
-      color: var(--color-text);
     }
-    .stat-value .unit {
-      font-size: 0.55em;
-      color: var(--stat-color);
-      margin-left: 0.15em;
+    .pattern-name {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: clamp(1.5rem, 2.4vw, 1.9rem);
+      line-height: 1.05;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      margin: 0;
     }
-    .stat-label {
-      margin-top: 0.5rem;
-      color: var(--color-text-secondary);
-      font-size: 0.875rem;
+    .pattern-alias {
+      display: block;
+      font-family: var(--font-body);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 0.92rem;
+      color: var(--ink-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* Definition / formal blocks */
+    .deflist {
+      margin: 1rem 0;
+      padding: 0;
+      list-style: none;
+    }
+    .deflist dt {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      margin-top: 0.7rem;
+    }
+    .deflist dd {
+      margin: 0.15rem 0 0;
+      font-size: 1rem;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    .callout {
+      border: 1px solid var(--paper-rule);
+      border-left: 4px solid var(--maroon);
+      background: var(--paper-deep);
+      padding: 0.85rem 1rem;
+      margin: 1.1rem 0;
+      font-size: 0.97rem;
+      line-height: 1.5;
+      break-inside: avoid;
+    }
+    .callout .label {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      font-weight: 700;
+      margin-right: 0.5rem;
+    }
+    .callout.warn { border-left-color: var(--ink); }
+    .callout.warn .label { color: var(--ink); }
+    .callout.note { border-left-color: var(--ink-muted); }
+    .callout.note .label { color: var(--ink-secondary); }
+
+    /* Margin note — small italic floating-y feel */
+    .margin-note {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: var(--ink-secondary);
+      border-top: 1px solid var(--paper-rule);
+      border-bottom: 1px solid var(--paper-rule);
+      padding: 0.65rem 0.8rem;
+      margin: 1.1rem 0;
+      background: rgba(255,255,255,0.25);
+      break-inside: avoid;
+    }
+    .margin-note::before {
+      content: "✱ Note";
+      display: block;
+      font-family: var(--font-sans);
+      font-style: normal;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    /* Code Listing */
+    .listing {
+      margin: 1.2rem 0;
+      break-inside: avoid;
+    }
+    .listing-cap {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin: 0 0 0.35rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--paper-rule);
+    }
+    .listing-cap .lnum { color: var(--maroon); margin-right: 0.5rem; font-weight: 700; }
+    .listing-cap em { color: var(--ink-secondary); font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+    pre.code {
+      font-family: var(--font-mono);
+      font-size: 0.81rem;
+      line-height: 1.55;
+      background: var(--paper-deep);
+      color: var(--ink);
+      border: 1px solid var(--paper-rule);
+      border-left: 3px solid var(--maroon);
+      padding: 0.85rem 1rem;
+      margin: 0;
+      overflow-x: auto;
+      white-space: pre;
+      tab-size: 2;
+    }
+    pre.code .c { color: var(--ink-muted); font-style: italic; }
+    pre.code .kw { color: var(--maroon); font-weight: 600; }
+    pre.code .str { color: #5C3A14; }
+    pre.code .fn { color: #3A4A6B; font-weight: 500; }
+    pre.code .num { color: #4A6B3A; }
+
+    /* Comparison Table */
+    .ctable-wrap {
+      overflow-x: auto;
+      margin: 1.5rem 0 1rem;
+      border-top: 2px solid var(--ink);
+      border-bottom: 2px solid var(--ink);
+    }
+    .ctable {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      min-width: 720px;
+    }
+    .ctable thead th {
+      text-align: left;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.7rem;
+      color: var(--maroon);
+      background: var(--paper-deep);
+      border-bottom: 1.5px solid var(--ink);
+      vertical-align: bottom;
+    }
+    .ctable th.row-h {
+      font-weight: 600;
+      color: var(--ink);
+      background: transparent;
+      letter-spacing: 0;
+      text-transform: none;
+      font-size: 0.88rem;
+    }
+    .ctable td, .ctable th.row-h {
+      padding: 0.55rem 0.7rem;
+      border-bottom: 1px solid var(--paper-rule);
+      vertical-align: top;
       line-height: 1.4;
     }
-    .stat-cite {
-      margin-top: 0.65rem;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-
-    /* ============ FINAL CTA ============ */
-    .final {
-      padding: 6rem 1.5rem 7rem;
-      max-width: 720px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .final h2 {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 3rem);
+    .ctable tbody tr:hover { background: var(--paper-deep); }
+    .ctable .pn {
       font-weight: 700;
-      letter-spacing: -0.025em;
-      margin: 0 0 1rem;
-      line-height: 1.1;
+      color: var(--maroon);
+      font-variant-numeric: tabular-nums;
+      margin-right: 0.4rem;
     }
-    .final p {
-      color: var(--color-text-secondary);
-      margin-bottom: 2rem;
-      font-size: 1.075rem;
-    }
-    .final-cta-row {
-      display: flex; gap: 1rem; justify-content: center;
-      align-items: center; flex-wrap: wrap;
-    }
+    .ctable td em { color: var(--ink-secondary); font-style: italic; }
 
-    /* ============ FOOTER ============ */
-    footer {
-      padding: 2rem 1.5rem 3rem;
-      text-align: center;
+    /* Mistakes list */
+    .mistakes {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0 0;
+      counter-reset: mistake;
+    }
+    .mistakes li {
+      counter-increment: mistake;
+      position: relative;
+      padding: 0.8rem 0 0.8rem 3.5rem;
+      border-bottom: 1px solid var(--paper-rule);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+    .mistakes li::before {
+      content: counter(mistake, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0.85rem;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--maroon);
+      width: 2.6rem;
+      text-align: right;
+    }
+    .mistakes li b {
+      display: block;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+    .mistakes li .fix {
+      display: block;
+      font-style: italic;
+      color: var(--ink-secondary);
+      margin-top: 0.25rem;
+      font-size: 0.94rem;
+    }
+    .mistakes li .fix b { display: inline; font-style: normal; color: var(--maroon); margin-right: 0.3rem; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* Index / Bibliography */
+    .index-grid {
+      column-count: 2;
+      column-gap: 2.5rem;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      margin: 1rem 0;
+      list-style: none;
+      padding: 0;
+    }
+    .index-grid li {
+      padding: 0.18rem 0;
+      border-bottom: 1px dotted var(--paper-rule);
+      break-inside: avoid;
+    }
+    .index-grid b { font-weight: 600; color: var(--ink); }
+    .index-grid a { color: var(--maroon); text-decoration: none; }
+    .index-grid a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    .bib {
+      counter-reset: bib;
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0 0;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .bib li {
+      counter-increment: bib;
+      position: relative;
+      padding: 0.5rem 0 0.5rem 2.6rem;
+      border-bottom: 1px solid var(--paper-rule);
+    }
+    .bib li::before {
+      content: "[" counter(bib) "]";
+      position: absolute;
+      left: 0; top: 0.5rem;
       font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--maroon);
+      font-weight: 600;
+      width: 2.2rem;
+    }
+    .bib li i { font-style: italic; color: var(--ink-secondary); }
+    .bib li a { color: var(--maroon); text-decoration: none; border-bottom: 1px dotted var(--maroon); }
+    .bib li a:hover { border-bottom-style: solid; }
+
+    /* Real-world stat callout (in-flow) */
+    .stat-pull {
+      break-inside: avoid;
+      background: transparent;
+      border-top: 2px solid var(--maroon);
+      border-bottom: 2px solid var(--maroon);
+      padding: 0.7rem 0;
+      margin: 1.1rem 0;
+      text-align: center;
+    }
+    .stat-pull .v {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: var(--maroon);
+      line-height: 1;
+      display: block;
+    }
+    .stat-pull .l {
+      font-family: var(--font-sans);
       font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      color: var(--color-text-muted);
-    }
-    footer a { color: var(--color-text-muted); text-decoration: none; border-bottom: 1px solid transparent; }
-    footer a:hover { color: var(--color-accent); border-bottom-color: var(--color-accent); }
-
-    /* ============ RESPONSIVE ============ */
-    @media (max-width: 960px) {
-      .bento { grid-template-columns: repeat(2, 1fr); }
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .table-row { grid-template-columns: 1.2fr 1fr; }
-      .table-row .why-col { grid-column: 1 / -1; padding-top: 0.4rem; }
-      .table-row.head .why-col { display: none; }
-    }
-    @media (max-width: 600px) {
-      .bento { grid-template-columns: 1fr; }
-      .stats { grid-template-columns: 1fr 1fr; }
-      .hero { padding-top: 6rem; }
-      .nav-meta { display: none; }
-      section { padding: 3rem 1.25rem; }
-      .code-wrap { padding: 1.25rem 1rem; }
-      .code-wrap pre { font-size: 0.74rem; }
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-secondary);
+      margin-top: 0.3rem;
+      display: block;
     }
 
-    /* ============ REDUCED MOTION ============ */
+    /* Worked example block */
+    .walkthrough-step {
+      margin: 1.1rem 0;
+      padding-left: 1.2rem;
+      border-left: 2px solid var(--paper-rule);
+      max-width: 72ch;
+    }
+    .walkthrough-step .step-num {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .walkthrough-step h4 {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin: 0 0 0.35rem;
+      color: var(--ink);
+    }
+    .walkthrough-step p { margin: 0 0 0.6rem; font-size: 1rem; }
+
+    /* Subtle hover on pattern names — only motion in document */
+    .pattern-name {
+      transition: text-shadow 200ms ease;
+      cursor: default;
+    }
+    .pattern-entry:hover .pattern-name {
+      text-shadow: 0 1px 0 var(--paper-rule);
+    }
+    a {
+      transition: color 180ms ease, border-color 180ms ease;
+    }
+
+    /* Footer */
+    .colophon {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 0;
+      border-top: 1.5px solid var(--ink);
+    }
+    .colophon-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      padding-bottom: 2rem;
+    }
+    .colophon b { color: var(--maroon); font-weight: 600; }
+    .colophon a { color: var(--ink-secondary); text-decoration: none; border-bottom: 1px dotted var(--paper-rule); }
+    .colophon a:hover { color: var(--maroon); border-bottom-color: var(--maroon); }
+
+    /* ============== RESPONSIVE ============== */
+    @media (max-width: 820px) {
+      body { font-size: 17px; }
+      .cols-2 { column-count: 1; column-rule: none; }
+      .toc { grid-template-columns: 1fr; }
+      .index-grid { column-count: 1; }
+      .chapter, .titlepage, .toc-wrap, .colophon { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .strip { padding: 0.55rem 1.2rem; font-size: 0.62rem; letter-spacing: 0.1em; }
+      .strip .r { display: none; }
+    }
+    @media (max-width: 480px) {
+      .pattern-head { grid-template-columns: 1fr; gap: 0.2rem; }
+      .pattern-num-big { font-size: 1.6rem; }
+      pre.code { font-size: 0.74rem; padding: 0.7rem 0.8rem; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
       }
-      .hero .word, .hero-sub, .cta-row, .eyebrow,
-      .animate-in, .line, .sc-result {
-        opacity: 1 !important;
-        transform: none !important;
-      }
-      .caret { display: none; }
-      .role-prefix.swap { animation: none; }
     }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .tile:hover { transform: none !important; }
+
+    /* Print-friendly fidelity (paper, after all) */
+    @media print {
+      body { background: white; }
+      .strip, .colophon { border-color: black; }
     }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav class="nav">
-    <div class="nav-inner">
-      <span class="nav-brand">CETI.AI <b>Lookbook</b></span>
-      <span class="nav-meta">Prompt Patterns &middot; 2026 Edition</span>
-    </div>
+  <div class="strip">
+    <span class="l">CETI <b>HANDBOOK</b> &middot; Vol. II &middot; Prompting & Patterns</span>
+    <span class="r">Chapter 11 &middot; pp. 241 — 268 &middot; May 2026</span>
+  </div>
+
+  <!-- =================== TITLE PAGE =================== -->
+  <header class="titlepage">
+    <p class="chapter-mark">Chapter Eleven</p>
+    <h1 class="chapter-num">11<span class="slash">.</span></h1>
+    <p class="chapter-title">Prompt Patterns: A Reference for Working Practitioners</p>
+    <p class="chapter-deck">
+      Six canonical patterns &mdash; Chain-of-Thought, Few-Shot, Role, Structured Output, Self-Consistency, and ReAct &mdash; treated as a working vocabulary. For each: a formal definition, an honest account of when it fails, two code listings you can paste, and a cross-reference to the patterns it composes with.
+    </p>
+    <p class="author-line">
+      <span><b>CETI.AI</b> &middot; Edited by M. Mulaveesala</span>
+      <span>Rev. 2026.05 &middot; ISBN 978-0-CETI-011-1</span>
+    </p>
+  </header>
+
+  <!-- =================== TOC =================== -->
+  <nav class="toc-wrap" aria-label="Chapter contents">
+    <p class="toc-head">Contents of this chapter</p>
+    <ol class="toc">
+      <li><span class="num">11.0</span><a href="#preface">Preface &mdash; why prompt patterns matter</a><span class="pg">p. 241</span></li>
+      <li><span class="num">11.1</span><a href="#cot">Chain-of-Thought</a><span class="pg">p. 244</span></li>
+      <li><span class="num">11.2</span><a href="#fewshot">Few-Shot</a><span class="pg">p. 248</span></li>
+      <li><span class="num">11.3</span><a href="#role">Role Prompting</a><span class="pg">p. 251</span></li>
+      <li><span class="num">11.4</span><a href="#structured">Structured Output</a><span class="pg">p. 254</span></li>
+      <li><span class="num">11.5</span><a href="#consistency">Self-Consistency</a><span class="pg">p. 257</span></li>
+      <li><span class="num">11.6</span><a href="#react">ReAct</a><span class="pg">p. 260</span></li>
+      <li><span class="num">11.7</span><a href="#compare">Comparison &mdash; six patterns at a glance</a><span class="pg">p. 263</span></li>
+      <li><span class="num">11.8</span><a href="#compose">Walkthrough &mdash; composing patterns</a><span class="pg">p. 264</span></li>
+      <li><span class="num">11.9</span><a href="#mistakes">Common mistakes &amp; their fixes</a><span class="pg">p. 266</span></li>
+      <li><span class="num">11.A</span><a href="#index">Index &amp; cross-references</a><span class="pg">p. 267</span></li>
+      <li><span class="num">11.B</span><a href="#bib">Bibliography</a><span class="pg">p. 268</span></li>
+    </ol>
   </nav>
 
-  <!-- HERO -->
-  <section class="hero" id="hero">
-    <p class="eyebrow">Prompt Patterns &middot; 2026 Edition</p>
-    <h1 class="hero-title">
-      <span class="word">Prompting</span>
-      <span class="word">is</span>
-      <span class="word"><em>engineering.</em></span>
-    </h1>
-    <p class="hero-sub">Six reusable patterns that move prompts from improvisation into discipline. Each one demoed live below — Chain&#8209;of&#8209;Thought, Few&#8209;Shot, Role, Structured Output, Self&#8209;Consistency, ReAct.</p>
-    <div class="cta-row">
-      <a class="magnetic" href="#patterns">
-        Watch the six patterns
-        <span class="arrow">&rarr;</span>
-      </a>
-      <a class="secondary" href="#code">See the code &darr;</a>
-    </div>
-  </section>
+  <!-- =================== CHAPTER BODY =================== -->
+  <main class="chapter">
 
-  <!-- WHY PATTERNS MATTER -->
-  <section class="why">
-    <p class="section-eyebrow animate-in">Why patterns</p>
-    <h2 class="section-title animate-in" style="max-width: 22ch;">Prompts are software. Patterns are the libraries.</h2>
-    <p class="animate-in" style="margin-top: 1.5rem;">A model is a function from text to text. The text you put in front of it is not <em>just</em> phrasing &mdash; it is the program. And like any program, good prompts are built from a small set of reusable structures that solve recurring problems: how to make reasoning visible, how to constrain output, how to give the model role and stakes.</p>
-    <p class="animate-in">These six patterns are the design patterns of prompting. Once you can name them, you can <em>compose them</em>. A production prompt is almost never one pattern &mdash; it is a role prefix, plus three few&#8209;shot examples, plus a structured output spec, with a chain&#8209;of&#8209;thought instruction tucked in the middle. Same idea as the Gang of Four. Same payoff: vocabulary buys you leverage.</p>
-  </section>
+    <!-- ============ PREFACE ============ -->
+    <section id="preface">
+      <p class="section-mark">§ 11.0 &middot; Preface</p>
+      <h2 class="s-head"><span class="pnum">11.0</span> Why prompt patterns matter</h2>
 
-  <!-- BENTO — SIGNATURE VISUAL: 6 mini live demos -->
-  <section id="patterns">
-    <p class="section-eyebrow animate-in">The six patterns</p>
-    <h2 class="section-title animate-in">Live demos &mdash; each tile loops.</h2>
-    <p class="section-lede animate-in">Hover any tile for a warm cursor glow. Each demo runs on a ~10&#8209;second cycle with a beat of rest, so the eye can rest between loops. Reduced&#8209;motion users see the final state of each.</p>
+      <div class="cols-2">
+        <p class="lead">A large language model is, mechanically, a function from a sequence of tokens to a probability distribution over the next token. The text you place in front of it is therefore not <em class="term">commentary</em> on the program &mdash; it <em class="term">is</em> the program. This sounds like a slogan, and at first it feels like one, but the implications run deeper than newcomers usually expect. Programs that are made of prose have all the problems prose has: ambiguity, register, audience assumption, and the slow drift of meaning under copy-and-paste. The way to keep a prose program from rotting is the same way a software program is kept from rotting: structure, conventions, and a small library of reusable solutions to recurring problems.</p>
 
-    <div class="bento" id="bento">
+        <p>This chapter assembles that small library. It is deliberately not exhaustive. The six patterns presented here &mdash; Chain-of-Thought (<span class="xref">§11.1</span>), Few-Shot (<span class="xref">§11.2</span>), Role Prompting (<span class="xref">§11.3</span>), Structured Output (<span class="xref">§11.4</span>), Self-Consistency (<span class="xref">§11.5</span>), and ReAct (<span class="xref">§11.6</span>) &mdash; cover roughly ninety percent of the prompt-engineering work CETI sees inside enterprise teams from 2023 through early 2026. They are the design patterns of the Gang-of-Four book, ported to a different programming substrate. Like those patterns, their value lies less in any single one of them than in the shared vocabulary they give a team. Once a colleague can say &ldquo;we have a Few-Shot drift problem; let&rsquo;s add Structured Output and pin a Role,&rdquo; the conversation moves at the pace of design rather than the pace of guesswork.</p>
 
-      <!-- 1. CHAIN-OF-THOUGHT -->
-      <article class="tile p1" data-demo="cot">
-        <div class="tile-header">
-          <span class="tile-tag">Chain&#8209;of&#8209;Thought</span>
-          <span class="tile-num">01</span>
-        </div>
-        <h3 class="tile-title">Show the reasoning.</h3>
-        <p class="tile-blurb">Ask the model to think step by step. Hidden reasoning becomes visible &mdash; and verifiable.</p>
-        <div class="demo" id="d-cot">
-          <span class="label">Prompt &middot; "Let's think step by step."</span>
-          <div class="cot-q line">Q: 3 apples + 2 baskets of 4 each. How many?</div>
-          <div class="cot-step line" data-step="1">2 baskets &times; 4 apples = 8 apples</div>
-          <div class="cot-step line" data-step="2">8 + 3 = 11 apples total</div>
-          <div class="cot-ans line" data-step="3">&rArr; 11<span class="caret" style="display:none;" id="cot-caret"></span></div>
-        </div>
-      </article>
+        <p>The treatment for each pattern is uniform. We give a formal definition that does not mistake the pattern for one of its accidental implementations; we trace the academic provenance briefly so the reader can find the seminal paper; we state when the pattern earns its weight, and &mdash; this matters &mdash; when it does not. Every pattern has an <em class="term">anti-pattern</em>: a circumstance in which applying it actively makes the model worse. We then show two code listings, a basic and an advanced, both runnable against the Anthropic Messages API or any compatible provider. A &ldquo;gotcha&rdquo; paragraph captures the failure mode we see most often in production. Finally we cite at least one empirical study or benchmark so the reader can verify the lift number rather than take our word for it.</p>
 
-      <!-- 2. FEW-SHOT -->
-      <article class="tile p2" data-demo="fs">
-        <div class="tile-header">
-          <span class="tile-tag">Few&#8209;Shot</span>
-          <span class="tile-num">02</span>
-        </div>
-        <h3 class="tile-title">Teach by example.</h3>
-        <p class="tile-blurb">Give 2&ndash;5 worked examples. The model infers the pattern and applies it to the new input.</p>
-        <div class="demo" id="d-fs">
-          <span class="label">3 examples &rarr; new input</span>
-          <div class="fs-pair example line"><span class="k">Q&rarr;</span><span class="v">"warm" &rarr; cold</span></div>
-          <div class="fs-pair example line"><span class="k">Q&rarr;</span><span class="v">"fast" &rarr; slow</span></div>
-          <div class="fs-pair example line"><span class="k">Q&rarr;</span><span class="v">"loud" &rarr; quiet</span></div>
-          <div class="fs-sep line"></div>
-          <div class="fs-pair fs-final line"><span class="k">Q&rarr;</span><span class="v">"bright" &rarr; <span id="fs-ans"></span><span class="caret" id="fs-caret" style="display:none;"></span></span></div>
-        </div>
-      </article>
+        <p>A production prompt almost never uses one pattern in isolation. <span class="xref">§11.8</span> demonstrates a five-pattern composition that classifies and routes inbound customer email; the chapter closes with a comparative table (<span class="xref">§11.7</span>), a list of common mistakes (<span class="xref">§11.9</span>), and an index that cross-references this chapter to the rest of the handbook &mdash; in particular to <span class="xref">Ch. 14 (LangGraph)</span> and <span class="xref">Ch. 19 (MCP)</span>, where these patterns reappear inside agentic systems and tool ecosystems respectively.</p>
+      </div>
 
-      <!-- 3. ROLE PROMPTING -->
-      <article class="tile p3" data-demo="role">
-        <div class="tile-header">
-          <span class="tile-tag">Role Prompting</span>
-          <span class="tile-num">03</span>
-        </div>
-        <h3 class="tile-title">Give it a stage.</h3>
-        <p class="tile-blurb">A role prefix shifts vocabulary, depth, and assumed audience. Same question, different answer.</p>
-        <div class="demo" id="d-role">
-          <div class="role-prefix" id="role-prefix">
-            <span class="tag">System</span>
-            <span>You are a <b id="role-name">senior physicist</b>.</span>
-          </div>
-          <div class="line on" style="font-size: 0.74rem; color: var(--color-text-muted); margin-bottom: 0.2rem;">Q: Explain entropy in one line.</div>
-          <div class="role-out line on" id="role-out">
-            <b>A:</b> <span id="role-text"></span><span class="caret" id="role-caret" style="display:none;"></span>
-          </div>
-        </div>
-      </article>
+      <div class="margin-note">
+        A note on terminology. We use &ldquo;prompt&rdquo; to mean the full input passed to the model on a given turn &mdash; system message, conversation history, retrieved context, examples, and user query, treated as one artifact. The terms &ldquo;prompt&rdquo; and &ldquo;context window&rdquo; are not synonyms: the context window is the substrate, the prompt is what you choose to put in it.
+      </div>
+    </section>
 
-      <!-- 4. STRUCTURED OUTPUT -->
-      <article class="tile p4" data-demo="json">
-        <div class="tile-header">
-          <span class="tile-tag">Structured Output</span>
-          <span class="tile-num">04</span>
-        </div>
-        <h3 class="tile-title">Make the shape exact.</h3>
-        <p class="tile-blurb">JSON, XML, or a tool schema. The output is machine&#8209;readable on the first try.</p>
-        <div class="demo" id="d-json">
-          <span class="label">Schema &rarr; JSON</span>
-          <pre class="json-stage" id="json-stage"></pre>
-        </div>
-      </article>
-
-      <!-- 5. SELF-CONSISTENCY -->
-      <article class="tile p5" data-demo="sc">
-        <div class="tile-header">
-          <span class="tile-tag">Self&#8209;Consistency</span>
-          <span class="tile-num">05</span>
-        </div>
-        <h3 class="tile-title">Vote with three minds.</h3>
-        <p class="tile-blurb">Sample the same prompt multiple times. Take the majority answer. Cheap reliability boost.</p>
-        <div class="demo" id="d-sc">
-          <span class="label">3 samples &rarr; majority vote</span>
-          <div class="sc-cols">
-            <div class="sc-col" id="sc-c1"><span>Path 1</span><span class="v">&mdash;</span></div>
-            <div class="sc-col" id="sc-c2"><span>Path 2</span><span class="v">&mdash;</span></div>
-            <div class="sc-col" id="sc-c3"><span>Path 3</span><span class="v">&mdash;</span></div>
-          </div>
-          <div class="sc-arrow">&darr; &darr; &darr;</div>
-          <div class="sc-result" id="sc-result">Consensus: <span id="sc-answer">42</span></div>
-        </div>
-      </article>
-
-      <!-- 6. REACT -->
-      <article class="tile p6" data-demo="react">
-        <div class="tile-header">
-          <span class="tile-tag">ReAct</span>
-          <span class="tile-num">06</span>
-        </div>
-        <h3 class="tile-title">Think, act, observe.</h3>
-        <p class="tile-blurb">Interleave reasoning with tool calls. The model plans, fetches, and re&#8209;plans against real data.</p>
-        <div class="demo" id="d-react">
-          <div class="react-loop">
-            <div class="react-row" data-react="0"><span class="tag">Thought</span><span class="body">User asks today's weather in Tokyo.</span></div>
-            <div class="react-row" data-react="1"><span class="tag">Action</span><span class="body">get_weather(city="Tokyo")</span></div>
-            <div class="react-row" data-react="2"><span class="tag">Observ.</span><span class="body">{ temp_c: 18, sky: "clear" }</span></div>
-            <div class="react-row" data-react="3"><span class="tag">Answer</span><span class="body">Tokyo is 18&deg;C and clear today.</span></div>
-          </div>
-        </div>
-      </article>
-
-    </div>
-  </section>
-
-  <!-- DECISION TABLE -->
-  <section class="decide">
-    <div class="decide-inner">
-      <p class="section-eyebrow animate-in">When to reach for which</p>
-      <h2 class="section-title animate-in" style="max-width: 24ch;">Each pattern earns a place by the symptom it cures.</h2>
-      <p class="section-lede animate-in">Production prompts compose multiple patterns. But each one solves a specific class of failure &mdash; this table maps the failure to the pattern.</p>
-
-      <div class="table-wrap animate-in">
-        <div class="table-row head">
-          <div>If the symptom is&hellip;</div>
-          <div>Use</div>
-          <div>Because</div>
-        </div>
-        <div class="table-row r-1">
-          <div class="if">Model gets multi&#8209;step math/logic wrong</div>
-          <div class="use">Chain&#8209;of&#8209;Thought</div>
-          <div class="why-col">Forces the model to externalise intermediate steps &mdash; both improves accuracy and gives you an audit trail.</div>
-        </div>
-        <div class="table-row r-2">
-          <div class="if">Output format keeps drifting from what you want</div>
-          <div class="use">Few&#8209;Shot</div>
-          <div class="why-col">3&ndash;5 examples nail the shape and tone better than 200 words of instructions.</div>
-        </div>
-        <div class="table-row r-3">
-          <div class="if">Tone is too generic or wrong register</div>
-          <div class="use">Role Prompting</div>
-          <div class="why-col">A role prefix sets vocabulary, depth, and stakes in one line. Cheaper than re&#8209;prompting.</div>
-        </div>
-        <div class="table-row r-4">
-          <div class="if">Downstream code needs to parse the answer</div>
-          <div class="use">Structured Output</div>
-          <div class="why-col">Constrain to JSON schema or function call. No regex hacks, no broken pipelines.</div>
-        </div>
-        <div class="table-row r-5">
-          <div class="if">Answer is inconsistent across runs of the same prompt</div>
-          <div class="use">Self&#8209;Consistency</div>
-          <div class="why-col">Sample n times (n=3 to 7), majority vote. Trades cost for reliability.</div>
-        </div>
-        <div class="table-row r-6">
-          <div class="if">Task needs real data or tools the model doesn't have</div>
-          <div class="use">ReAct</div>
-          <div class="why-col">Interleaves reasoning with tool calls so the model can fetch, then think again.</div>
+    <!-- ============ §11.1 CHAIN OF THOUGHT ============ -->
+    <section id="cot" class="pattern-entry">
+      <p class="section-mark">§ 11.1 &middot; Reasoning patterns</p>
+      <div class="pattern-head">
+        <div class="pattern-num-big">11.1</div>
+        <div>
+          <h2 class="pattern-name">Chain-of-Thought
+            <span class="pattern-alias">Aliases: CoT &middot; &ldquo;Let&rsquo;s think step by step&rdquo; &middot; scratchpad prompting</span>
+          </h2>
         </div>
       </div>
+
+      <p class="see-also"><b>See also</b> <span class="xref">§11.5 Self-Consistency</span> (samples multiple CoT traces) &middot; <span class="xref">§11.6 ReAct</span> (interleaves CoT with tool calls) &middot; <span class="xref">Ch. 14 LangGraph &mdash; Reasoning Nodes</span></p>
+
+      <div class="cols-2">
+        <p>Chain-of-Thought is the practice of instructing a language model to externalise its intermediate reasoning before committing to a final answer. The instruction can be as direct as appending the literal sentence &ldquo;Let&rsquo;s think step by step&rdquo; to the prompt, or as elaborate as wrapping the reasoning inside reserved XML tags such as <code class="kw">&lt;thinking&gt;</code>&hellip;<code class="kw">&lt;/thinking&gt;</code> that the application layer later strips before showing the user the final answer. Either way the mechanic is the same: by allocating tokens to intermediate steps, the model performs more computation per inference, and the steps themselves become available for inspection.</p>
+
+        <p>The pattern entered the literature with Wei et al. (2022), who demonstrated that supplying just a handful of worked reasoning examples lifted GSM8K accuracy on the 540-billion-parameter PaLM model from roughly 18 percent to roughly 57 percent &mdash; a jump of nearly forty points achieved without changing the model weights at all. Kojima et al. (2022) later showed that even the bare zero-shot trigger phrase produced most of the lift on sufficiently large models. Since then the pattern has been absorbed into model training itself: contemporary frontier models, including Claude 4 and GPT-4.1, have a tendency to produce chain-of-thought-like reasoning by default. The pattern remains essential nonetheless, because explicit instruction concentrates the reasoning into a controllable region of the output.</p>
+
+        <h3 class="sub-head">When to use it</h3>
+        <p>Reach for Chain-of-Thought whenever the task requires multiple inferential steps that depend on each other: word problems, multi-hop questions, logical puzzles, code review with cause-and-effect tracing, financial calculations, and any task where the model must compare alternatives. The signature symptom is that the model returns plausible-sounding but inconsistent answers when run several times: it is guessing at the leaves of a tree it has not built.</p>
+
+        <h3 class="sub-head">Anti-pattern: when NOT to use it</h3>
+        <p>Three failure modes are worth naming. First, for tasks that are purely retrievals &mdash; &ldquo;what is the capital of Burkina Faso&rdquo; &mdash; Chain-of-Thought adds latency and cost without changing the answer. Second, for short-form classification tasks where the label space is small and the decision is mostly perceptual, the reasoning can drift and the model may talk itself out of a correct first instinct. Third, on small models (under roughly seven billion parameters in 2026), Wei et al. observed that CoT can <em class="term">hurt</em> accuracy: the model is large enough to articulate reasoning but not large enough to execute it correctly, and the resulting confidently-wrong scratchpad poisons the final answer. The rule of thumb: use CoT for hard reasoning on capable models, skip it for shallow retrieval on any model.</p>
+
+        <div class="stat-pull">
+          <span class="v">+39 points</span>
+          <span class="l">GSM8K accuracy lift &middot; PaLM-540B &middot; Wei et al. 2022</span>
+        </div>
+
+        <h3 class="sub-head">Listing 11.1 &mdash; basic CoT trigger</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.1</span>Basic zero-shot Chain-of-Thought <em>&mdash; one line, no examples.</em></p>
+<pre class="code"><span class="c"># Zero-shot CoT — the single most effective</span>
+<span class="c"># prompt-engineering line of the decade.</span>
+prompt = <span class="str">"""</span>
+<span class="str">Q: A bookstore has 14 shelves, each holding 23 books.</span>
+<span class="str">   They sell 47 books on Monday. How many remain?</span>
+<span class="str">A: Let's think step by step.</span>
+<span class="str">"""</span>
+
+response = client.messages.create(
+    model=<span class="str">"claude-opus-4-7"</span>,
+    max_tokens=512,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}]
+)</pre>
+        </div>
+
+        <h3 class="sub-head">Listing 11.2 &mdash; structured CoT with tag isolation</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.2</span>Advanced: tag-isolated reasoning the application can strip. <em>&mdash; Anthropic-style.</em></p>
+<pre class="code">system = <span class="str">"""</span>
+<span class="str">You are a financial analyst. For every question:</span>
+<span class="str">  1. Reason inside &lt;thinking&gt;...&lt;/thinking&gt; tags.</span>
+<span class="str">  2. Emit ONLY the final answer in &lt;answer&gt; tags.</span>
+<span class="str">  3. The reasoning may be long. The answer must be terse.</span>
+<span class="str">"""</span>
+
+<span class="c"># downstream code keeps only the &lt;answer&gt; payload</span>
+<span class="kw">import</span> re
+match = re.search(<span class="str">r"&lt;answer&gt;(.*?)&lt;/answer&gt;"</span>,
+                  response.content[<span class="num">0</span>].text,
+                  re.DOTALL)
+final = match.group(<span class="num">1</span>).strip() <span class="kw">if</span> match <span class="kw">else</span> <span class="str">""</span></pre>
+        </div>
+
+        <div class="callout warn">
+          <span class="label">Gotcha</span>
+          The reasoning a model emits is not always the reasoning it used. Chain-of-Thought traces are post-hoc rationalisations the model is willing to commit to &mdash; they are an audit trail of the answer, not a window into the network. Treat them as you would a deposition: useful, persuasive, sometimes wrong. For the underlying empirical worry, see Turpin et al. (2023) on biased reasoning in CoT.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ §11.2 FEW SHOT ============ -->
+    <section id="fewshot" class="pattern-entry">
+      <p class="section-mark">§ 11.2 &middot; Demonstration patterns</p>
+      <div class="pattern-head">
+        <div class="pattern-num-big">11.2</div>
+        <div>
+          <h2 class="pattern-name">Few-Shot Prompting
+            <span class="pattern-alias">Aliases: in-context learning &middot; k-shot &middot; demonstration prompting</span>
+          </h2>
+        </div>
+      </div>
+
+      <p class="see-also"><b>See also</b> <span class="xref">§11.4 Structured Output</span> (examples teach the schema) &middot; <span class="xref">Ch. 7 RAG &mdash; passage formatting</span></p>
+
+      <div class="cols-2">
+        <p>Few-Shot prompting supplies the model with a small number of worked input&ndash;output pairs immediately before the actual input, and asks the model to continue the implied pattern. The technique was a centrepiece of the GPT-3 paper (Brown et al., 2020), which demonstrated that large autoregressive models could perform reliably on novel tasks after seeing only two to thirty-two demonstrations &mdash; no fine-tuning required. The paper called the underlying behaviour <em class="term">in-context learning</em>, and that name has since become the more general term: Few-Shot is the most common <em class="term">implementation</em> of in-context learning, but not its only one.</p>
+
+        <p>The mechanism is best understood by analogy. Without examples, the model must infer from the task description alone what shape the answer should take. With three or five worked examples, the model has both the task description and a concrete demonstration of the desired register, format, edge-case handling, and level of verbosity. The examples constitute a kind of micro-fine-tune that lives entirely in the context window and disappears when the conversation ends.</p>
+
+        <h3 class="sub-head">When to use it</h3>
+        <p>Few-Shot earns its tokens whenever the desired output shape is hard to specify in prose but easy to demonstrate: classifying sentiment into a custom taxonomy, translating between a source and a domain-specific target dialect, generating SQL in a particular team style, rewriting customer complaints in a brand voice. The pattern is also the cleanest way to teach format: three JSON examples beat three paragraphs of schema description every time.</p>
+
+        <h3 class="sub-head">Anti-pattern: when NOT to use it</h3>
+        <p>Two failure modes recur. First, padding the prompt with too many examples. Brown et al. observed diminishing returns past roughly eight demonstrations on most tasks, and we observe in client work that beyond ten examples the model starts pattern-matching on the examples themselves rather than on the underlying task &mdash; producing outputs that are eerily similar to one of the demonstrations regardless of the actual input. Second, using examples that are too narrow: three sentiment examples that all happen to be product reviews will train the model to expect product reviews, and it will misclassify a tweet. The fix is variety, not volume.</p>
+
+        <div class="stat-pull">
+          <span class="v">3 — 5 examples</span>
+          <span class="l">Sweet spot on most tasks &middot; Brown et al. 2020 &middot; Liu et al. 2022</span>
+        </div>
+
+        <h3 class="sub-head">Listing 11.3 &mdash; basic Few-Shot classification</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.3</span>Sentiment classification with three demonstrations. <em>&mdash; Most common use case.</em></p>
+<pre class="code">prompt = <span class="str">"""</span>
+<span class="str">Classify the sentiment of each review as POSITIVE,</span>
+<span class="str">NEGATIVE, or MIXED.</span>
+
+<span class="str">Review: "Comfortable but the colour faded."</span>
+<span class="str">Sentiment: MIXED</span>
+
+<span class="str">Review: "Best purchase of the year."</span>
+<span class="str">Sentiment: POSITIVE</span>
+
+<span class="str">Review: "Stopped working after two days."</span>
+<span class="str">Sentiment: NEGATIVE</span>
+
+<span class="str">Review: {{ user_input }}</span>
+<span class="str">Sentiment:</span>
+<span class="str">"""</span></pre>
+        </div>
+
+        <h3 class="sub-head">Listing 11.4 &mdash; XML-tagged Few-Shot with reasoning</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.4</span>Tag-fenced demonstrations &mdash; safer for production. <em>&mdash; Composes with §11.1.</em></p>
+<pre class="code">system = <span class="str">"""</span>
+<span class="str">Extract the meeting time from each message.</span>
+
+<span class="str">&lt;example&gt;</span>
+<span class="str">  &lt;input&gt;Let's sync tomorrow at 3pm PT&lt;/input&gt;</span>
+<span class="str">  &lt;reasoning&gt;"tomorrow" = next day; 3pm PT = 15:00 PST&lt;/reasoning&gt;</span>
+<span class="str">  &lt;output&gt;{"time": "15:00", "tz": "PST", "day": "+1"}&lt;/output&gt;</span>
+<span class="str">&lt;/example&gt;</span>
+
+<span class="str">&lt;example&gt;</span>
+<span class="str">  &lt;input&gt;Coffee Thursday morning?&lt;/input&gt;</span>
+<span class="str">  &lt;reasoning&gt;Day named, no time → default to 09:00 local&lt;/reasoning&gt;</span>
+<span class="str">  &lt;output&gt;{"time": "09:00", "tz": "local", "day": "Thu"}&lt;/output&gt;</span>
+<span class="str">&lt;/example&gt;</span>
+<span class="str">"""</span></pre>
+        </div>
+
+        <div class="callout warn">
+          <span class="label">Gotcha</span>
+          The order of your examples matters more than newcomers expect. Lu et al. (2022) showed that simply re-ordering four demonstrations could swing accuracy by more than ten percentage points on the same task and the same model. The safe default: place the example whose format and edge-case handling most resembles the typical user input <em class="term">last</em>. The model weighs recency.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ §11.3 ROLE ============ -->
+    <section id="role" class="pattern-entry">
+      <p class="section-mark">§ 11.3 &middot; Voicing patterns</p>
+      <div class="pattern-head">
+        <div class="pattern-num-big">11.3</div>
+        <div>
+          <h2 class="pattern-name">Role Prompting
+            <span class="pattern-alias">Aliases: persona prompting &middot; system framing &middot; the &ldquo;You are&rdquo; pattern</span>
+          </h2>
+        </div>
+      </div>
+
+      <p class="see-also"><b>See also</b> <span class="xref">§11.4 Structured Output</span> (role + schema = brand-safe output) &middot; <span class="xref">Ch. 9 Safety &mdash; system prompts as guardrails</span></p>
+
+      <div class="cols-2">
+        <p>Role Prompting sets a persona, audience, and stakes for the model before it sees the actual user request. Implemented as a one-sentence system message &mdash; <code class="kw">"You are a senior tax attorney advising a small-business owner who has never filed quarterly estimates before"</code> &mdash; the role prefix simultaneously selects a vocabulary, an assumed shared knowledge base, a register, and a tone. In a single line it does work that would otherwise require several paragraphs of instruction, and it does so in a region of the prompt that most providers weight heavily.</p>
+
+        <p>The pattern is older than the transformer era; salespeople have used it for decades under the name &ldquo;framing.&rdquo; Within LLM practice it was popularised by White et al. (2023) in their &ldquo;Prompt Pattern Catalog&rdquo; and was systematically studied by Salewski et al. (2023), who found that even loosely-specified expert personas produced measurably better reasoning on domain-specific tasks &mdash; though crucially not always reliably so. The honest report from the 2024&ndash;2026 literature is that role prompting is a real and useful lever, but a noisy one: it changes outputs reliably, it improves outputs probabilistically.</p>
+
+        <h3 class="sub-head">When to use it</h3>
+        <p>Use Role Prompting whenever the audience, register, or domain of the desired answer is non-obvious from the user&rsquo;s question alone. A user who asks &ldquo;what is entropy?&rdquo; expects a different answer from a kindergarten teacher than from a senior physicist; the model has no way to know which the user wants unless the application layer tells it. Role prompts are particularly effective for safety alignment (&ldquo;You are a helpful, harmless assistant who refuses requests for medical diagnosis&rdquo;), brand voice enforcement (&ldquo;You are the friendly support voice of Acme, never sarcastic, never apologetic&rdquo;), and code-style consistency (&ldquo;You are a strict reviewer who flags any function longer than 30 lines&rdquo;).</p>
+
+        <h3 class="sub-head">Anti-pattern: when NOT to use it</h3>
+        <p>Avoid roles that imply credentials the user might reasonably trust &mdash; &ldquo;You are a licensed physician&rdquo; or &ldquo;You are a securities lawyer.&rdquo; The model is none of these things, and downstream users may take the output more seriously than is warranted. A better pattern is to name the <em class="term">register</em> the role implies (&ldquo;Explain in the technical register a securities lawyer would use, but do not give legal advice&rdquo;) rather than the credentialed identity itself. Also avoid stacking incompatible roles: a single prompt cannot reliably be both &ldquo;a warm friend&rdquo; and &ldquo;a strict auditor&rdquo; &mdash; the model will mix them and the result will be off in both directions.</p>
+
+        <h3 class="sub-head">Listing 11.5 &mdash; minimal role prefix</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.5</span>Single-sentence role &mdash; the most common form. <em>&mdash; Goes in the system slot.</em></p>
+<pre class="code">response = client.messages.create(
+    model=<span class="str">"claude-opus-4-7"</span>,
+    system=<span class="str">"You are a senior staff engineer at a database company. "</span>
+           <span class="str">"You answer in plain English, you cite trade-offs, "</span>
+           <span class="str">"and you flag when a question is under-specified."</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>,
+               <span class="str">"content"</span>: <span class="str">"Should I shard by user_id or by region?"</span>}]
+)</pre>
+        </div>
+
+        <h3 class="sub-head">Listing 11.6 &mdash; layered role with explicit guardrails</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.6</span>Role plus constraints plus refusal policy. <em>&mdash; Production pattern.</em></p>
+<pre class="code">system = <span class="str">"""</span>
+<span class="str">ROLE: You are the customer-support voice of Northwind Bank.</span>
+<span class="str">REGISTER: Calm, factual, never apologetic-by-default, never</span>
+<span class="str">         flowery. Maximum two sentences per reply unless the</span>
+<span class="str">         user explicitly asks for detail.</span>
+<span class="str">REFUSAL: If asked for account-specific information, reply:</span>
+<span class="str">         "I can't see your account from here — please sign in</span>
+<span class="str">          at northwind.com/help and an agent will assist."</span>
+<span class="str">SCOPE:   Only topics covered in &lt;kb&gt;…&lt;/kb&gt;. Decline others.</span>
+<span class="str">"""</span></pre>
+        </div>
+
+        <div class="callout warn">
+          <span class="label">Gotcha</span>
+          A role prefix shifts vocabulary and stance, but it does not unlock capabilities the model lacks. Telling Claude it is a competitive ICPC programmer will not give it ICPC-grade abilities; the role merely surfaces what the model already plausibly contains. If the role implies a capability the model does not have, the output will read fluent and be wrong &mdash; arguably the worst possible failure mode.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ §11.4 STRUCTURED OUTPUT ============ -->
+    <section id="structured" class="pattern-entry">
+      <p class="section-mark">§ 11.4 &middot; Output-shape patterns</p>
+      <div class="pattern-head">
+        <div class="pattern-num-big">11.4</div>
+        <div>
+          <h2 class="pattern-name">Structured Output
+            <span class="pattern-alias">Aliases: JSON mode &middot; function calling &middot; tool use &middot; schema-constrained decoding</span>
+          </h2>
+        </div>
+      </div>
+
+      <p class="see-also"><b>See also</b> <span class="xref">§11.2 Few-Shot</span> (examples enforce shape) &middot; <span class="xref">§11.6 ReAct</span> (tool calls are structured output) &middot; <span class="xref">Ch. 19 MCP &mdash; tool schemas</span></p>
+
+      <div class="cols-2">
+        <p>Structured Output names a family of techniques that constrain the model to produce machine-parseable output: a JSON object that conforms to a schema, an XML document, a YAML block, or a function call with typed arguments. Every major provider in 2026 ships at least one variant. OpenAI introduced JSON mode in 2023 and strict <em class="term">structured outputs</em> with full schema enforcement in 2024; Anthropic exposes structured output primarily through its <em class="term">tool use</em> API, where the &ldquo;tool&rdquo; may simply be a typed schema the model is asked to fill; Google&rsquo;s Gemini SDK offers response-schema constraints; and open-source projects such as Outlines, Instructor, and grammar-constrained generation libraries provide the same guarantees on top of any local model.</p>
+
+        <p>The mechanic differs slightly across providers but the contract is the same: the application layer supplies a JSON Schema (or an equivalent grammar), and the inference engine constrains its decoding so that only tokens that keep the output valid against that schema are sampled. The result is not &ldquo;mostly valid&rdquo; JSON that you parse defensively &mdash; it is, by construction, parseable JSON every time. This single property eliminates an entire class of integration bugs.</p>
+
+        <h3 class="sub-head">When to use it</h3>
+        <p>Use Structured Output whenever the model&rsquo;s answer will be consumed by code rather than by a human. This covers more cases than most teams realise: classification labels for routing, extracted entities for a database, calendar events for a scheduling system, ranked options for a UI, function arguments for an agent step, and any case where a downstream service expects a specific shape. The pattern composes naturally with Few-Shot (examples make the schema concrete) and with Role Prompting (the role enforces register inside the string-typed fields).</p>
+
+        <h3 class="sub-head">Anti-pattern: when NOT to use it</h3>
+        <p>Three failure modes are worth flagging. First, over-rigid schemas: if your schema lists a closed enum of intent labels and the user&rsquo;s actual intent is none of them, the model is forced to lie. Always include an <code class="kw">"other"</code> escape hatch and a free-text <code class="kw">"explanation"</code> field. Second, schemas that demand reasoning <em class="term">before</em> the answer field is filled: JSON is written top-to-bottom, and once the model has emitted <code class="kw">"answer": </code> it has committed before it can think. The fix is to place a <code class="kw">"reasoning"</code> field <em class="term">earlier</em> in the schema than the <code class="kw">"answer"</code> field, so that CoT happens inside the JSON. Third, do not use structured output for tasks whose value is the prose itself: forcing a creative-writing model to emit JSON-wrapped paragraphs flattens the prose and adds no benefit.</p>
+
+        <div class="stat-pull">
+          <span class="v">100% schema conformance</span>
+          <span class="l">Strict-mode structured outputs &middot; OpenAI 2024 &middot; Anthropic tool use</span>
+        </div>
+
+        <h3 class="sub-head">Listing 11.7 &mdash; tool-use as structured output</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.7</span>Anthropic tool-use API used purely for schema extraction. <em>&mdash; The model never executes the tool.</em></p>
+<pre class="code">tools = [{
+    <span class="str">"name"</span>: <span class="str">"record_invoice"</span>,
+    <span class="str">"description"</span>: <span class="str">"Store an extracted invoice."</span>,
+    <span class="str">"input_schema"</span>: {
+        <span class="str">"type"</span>: <span class="str">"object"</span>,
+        <span class="str">"properties"</span>: {
+            <span class="str">"reasoning"</span>: {<span class="str">"type"</span>: <span class="str">"string"</span>},  <span class="c"># CoT first</span>
+            <span class="str">"vendor"</span>:    {<span class="str">"type"</span>: <span class="str">"string"</span>},
+            <span class="str">"amount"</span>:    {<span class="str">"type"</span>: <span class="str">"number"</span>},
+            <span class="str">"currency"</span>:  {<span class="str">"type"</span>: <span class="str">"string"</span>, <span class="str">"enum"</span>: [<span class="str">"USD"</span>, <span class="str">"EUR"</span>, <span class="str">"GBP"</span>]},
+            <span class="str">"status"</span>:    {<span class="str">"type"</span>: <span class="str">"string"</span>, <span class="str">"enum"</span>: [<span class="str">"paid"</span>, <span class="str">"due"</span>, <span class="str">"other"</span>]}
+        },
+        <span class="str">"required"</span>: [<span class="str">"reasoning"</span>, <span class="str">"vendor"</span>, <span class="str">"amount"</span>, <span class="str">"currency"</span>, <span class="str">"status"</span>]
+    }
+}]
+
+resp = client.messages.create(
+    model=<span class="str">"claude-opus-4-7"</span>,
+    tools=tools,
+    tool_choice={<span class="str">"type"</span>: <span class="str">"tool"</span>, <span class="str">"name"</span>: <span class="str">"record_invoice"</span>},
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: invoice_text}]
+)</pre>
+        </div>
+
+        <h3 class="sub-head">Listing 11.8 &mdash; Pydantic + Instructor (cross-provider)</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.8</span>Define the schema as a Python class. <em>&mdash; Type-safe, IDE-friendly.</em></p>
+<pre class="code"><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field
+<span class="kw">from</span> typing  <span class="kw">import</span> Literal
+<span class="kw">import</span> instructor
+
+<span class="kw">class</span> Invoice(BaseModel):
+    reasoning: str = Field(..., description=<span class="str">"step-by-step extraction trace"</span>)
+    vendor:    str
+    amount:    float
+    currency:  Literal[<span class="str">"USD"</span>, <span class="str">"EUR"</span>, <span class="str">"GBP"</span>]
+    status:    Literal[<span class="str">"paid"</span>, <span class="str">"due"</span>, <span class="str">"other"</span>]
+
+client = instructor.from_anthropic(Anthropic())
+inv = client.messages.create(
+    model=<span class="str">"claude-opus-4-7"</span>,
+    response_model=Invoice,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: invoice_text}]
+)
+<span class="fn">print</span>(inv.vendor, inv.amount, inv.currency)</pre>
+        </div>
+
+        <div class="callout warn">
+          <span class="label">Gotcha</span>
+          Schema-constrained decoding guarantees the output parses; it does <em class="term">not</em> guarantee the output is correct. The model can still hallucinate a vendor name that does not appear in the invoice. Always treat structured output as &ldquo;guaranteed-parseable, still-needs-validation&rdquo; &mdash; pair it with downstream sanity checks (e.g. the extracted amount falls within a plausible range, the vendor appears as a substring of the source).
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ §11.5 SELF-CONSISTENCY ============ -->
+    <section id="consistency" class="pattern-entry">
+      <p class="section-mark">§ 11.5 &middot; Ensembling patterns</p>
+      <div class="pattern-head">
+        <div class="pattern-num-big">11.5</div>
+        <div>
+          <h2 class="pattern-name">Self-Consistency
+            <span class="pattern-alias">Aliases: majority-vote sampling &middot; CoT-SC &middot; reasoning ensembling</span>
+          </h2>
+        </div>
+      </div>
+
+      <p class="see-also"><b>See also</b> <span class="xref">§11.1 Chain-of-Thought</span> (Self-Consistency is the ensemble version) &middot; <span class="xref">Ch. 12 Evals &mdash; pass@k metrics</span></p>
+
+      <div class="cols-2">
+        <p>Self-Consistency, introduced by Wang et al. (2022) as a direct successor to Chain-of-Thought, replaces the single greedy-decoded reasoning path with an ensemble. The model is asked the same question <em class="term">k</em> times with a non-zero sampling temperature, producing <em class="term">k</em> independent reasoning traces and <em class="term">k</em> candidate answers. The final answer is the one that appears most often across the <em class="term">k</em> samples &mdash; a majority vote among the model&rsquo;s own attempts. The intuition is that correct reasoning, despite stochastic sampling, tends to converge; incorrect reasoning tends to diverge in many different wrong directions. Counting the convergence point is therefore cheap evidence for correctness.</p>
+
+        <p>The original paper reported lifts of seventeen points on the GSM8K benchmark and eleven points on AQuA-Rat over single-trace CoT at the same model size, with the curve flattening around <em class="term">k</em>&nbsp;=&nbsp;40 samples. Subsequent work (Aggarwal et al., 2023, &ldquo;Adaptive-Consistency&rdquo;) showed that the same lift can often be obtained at lower <em class="term">k</em> by stopping early once the running plurality crosses a confidence threshold &mdash; meaning the technique need not be as expensive as the original paper&rsquo;s 40-sample default suggested.</p>
+
+        <h3 class="sub-head">When to use it</h3>
+        <p>Self-Consistency is the right tool whenever the answer is short, verifiable by string equality or numerical match, and the underlying task has a meaningful notion of &ldquo;correct.&rdquo; Math, fact retrieval, multiple-choice questions, and discrete classifications all qualify. The technique works particularly well in evaluation pipelines: it gives a cheap signal of model confidence (the size of the majority is itself a calibration estimate) and a free notion of disagreement that can be routed to human review.</p>
+
+        <h3 class="sub-head">Anti-pattern: when NOT to use it</h3>
+        <p>Self-Consistency assumes a canonical correct answer exists and can be compared by simple equality. For open-ended generation &mdash; creative writing, summarisation, code generation, design suggestions &mdash; there is no obvious vote function: three valid summaries will produce three different strings, and naive majority vote will degenerate to picking whichever the model phrased most blandly. For these tasks, prefer LLM-as-judge ensembles or pairwise tournament comparison instead. Also: the linear cost is real. At <em class="term">k</em>&nbsp;=&nbsp;5 you pay 5&times; latency and 5&times; tokens. For interactive UIs that is usually too much.</p>
+
+        <div class="stat-pull">
+          <span class="v">+17 points</span>
+          <span class="l">GSM8K lift over single-trace CoT &middot; k=40 samples &middot; Wang et al. 2022</span>
+        </div>
+
+        <h3 class="sub-head">Listing 11.9 &mdash; minimal majority vote</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.9</span>Five samples, plurality wins. <em>&mdash; The honest baseline implementation.</em></p>
+<pre class="code"><span class="kw">from</span> collections <span class="kw">import</span> Counter
+<span class="kw">import</span> re
+
+<span class="kw">def</span> <span class="fn">sample_once</span>(question, temperature=<span class="num">0.7</span>):
+    r = client.messages.create(
+        model=<span class="str">"claude-opus-4-7"</span>,
+        temperature=temperature,
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>,
+                   <span class="str">"content"</span>: question + <span class="str">"\nLet's think step by step. End with: Answer: &lt;value&gt;"</span>}]
+    )
+    m = re.search(<span class="str">r"Answer:\s*(.+)"</span>, r.content[<span class="num">0</span>].text)
+    <span class="kw">return</span> m.group(<span class="num">1</span>).strip().lower() <span class="kw">if</span> m <span class="kw">else</span> <span class="kw">None</span>
+
+samples = [<span class="fn">sample_once</span>(q) <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="num">5</span>)]
+winner, count = Counter(samples).most_common(<span class="num">1</span>)[<span class="num">0</span>]
+confidence = count / <span class="fn">len</span>(samples)</pre>
+        </div>
+
+        <h3 class="sub-head">Listing 11.10 &mdash; adaptive early stopping</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.10</span>Stop sampling once the plurality is decisive. <em>&mdash; Saves 40&ndash;60% of tokens.</em></p>
+<pre class="code"><span class="kw">def</span> <span class="fn">adaptive_consistency</span>(question, k_max=<span class="num">10</span>, threshold=<span class="num">0.7</span>):
+    tally = Counter()
+    <span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">1</span>, k_max + <span class="num">1</span>):
+        tally[<span class="fn">sample_once</span>(question)] += <span class="num">1</span>
+        top, top_n = tally.most_common(<span class="num">1</span>)[<span class="num">0</span>]
+        <span class="kw">if</span> i &gt;= <span class="num">3</span> <span class="kw">and</span> top_n / i &gt;= threshold:
+            <span class="kw">return</span> top, top_n / i, i
+    top, top_n = tally.most_common(<span class="num">1</span>)[<span class="num">0</span>]
+    <span class="kw">return</span> top, top_n / k_max, k_max</pre>
+        </div>
+
+        <div class="callout warn">
+          <span class="label">Gotcha</span>
+          The plurality is not the same thing as the right answer. On hard questions where the model is systematically biased, Self-Consistency will return the systematic-bias answer with high confidence &mdash; an answer that is wrong in the same way every time. Calibrate by spot-checking high-confidence wins against ground truth periodically; if the model is hallucinating, more samples will not save you.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ §11.6 REACT ============ -->
+    <section id="react" class="pattern-entry">
+      <p class="section-mark">§ 11.6 &middot; Agentic patterns</p>
+      <div class="pattern-head">
+        <div class="pattern-num-big">11.6</div>
+        <div>
+          <h2 class="pattern-name">ReAct &mdash; Reason + Act
+            <span class="pattern-alias">Aliases: Thought&ndash;Action&ndash;Observation loop &middot; tool-augmented reasoning</span>
+          </h2>
+        </div>
+      </div>
+
+      <p class="see-also"><b>See also</b> <span class="xref">§11.1 Chain-of-Thought</span> (the &ldquo;Reason&rdquo; half) &middot; <span class="xref">§11.4 Structured Output</span> (tool calls are structured) &middot; <span class="xref">Ch. 14 LangGraph</span> (graph implementation) &middot; <span class="xref">Ch. 19 MCP</span> (tool transport)</p>
+
+      <div class="cols-2">
+        <p>ReAct, introduced by Yao et al. (2022), interleaves Chain-of-Thought reasoning with explicit tool invocations. On each step the model emits a <code class="kw">Thought</code> &mdash; a short reasoning trace about what to do next &mdash; followed by an <code class="kw">Action</code>, which is a structured call to one of the tools available to it (a web search, a database query, a calculator, an MCP-exposed function). The runtime executes the action, returns an <code class="kw">Observation</code>, and hands control back to the model, which loops with another Thought informed by the new evidence. The loop terminates when the model emits a final answer instead of another action.</p>
+
+        <p>The pattern is the conceptual ancestor of every modern agentic framework: LangGraph nodes (<span class="xref">Ch. 14</span>), AutoGen agents, the OpenAI Assistants runtime, and the Claude Code agent harness are all variations on the Thought&ndash;Action&ndash;Observation loop. The original paper showed measurable gains on HotpotQA and the Fever fact-checking benchmark, but the more lasting contribution was the architectural pattern itself: by giving the model a way to <em class="term">act on</em> the world rather than only reason about it, ReAct closed the loop between language model and external state.</p>
+
+        <h3 class="sub-head">When to use it</h3>
+        <p>Use ReAct whenever the task requires information the model does not have in its weights, or when the answer can only be computed by interacting with an external system. Concrete examples: looking up today&rsquo;s weather, querying a customer record, calling an internal API, running a SQL query against a live database, fetching a web page, executing code in a sandbox. The pattern also shines when the task requires <em class="term">planning</em> rather than a single answer &mdash; multi-step research, debugging sessions, multi-file refactors &mdash; because the explicit Thought between actions gives the model a place to revise its plan in light of new evidence.</p>
+
+        <h3 class="sub-head">Anti-pattern: when NOT to use it</h3>
+        <p>For single-turn tasks that need no external data, ReAct adds latency, cost, and an opportunity for the model to invent a tool call where none is needed. There is also a real failure mode worth naming: <em class="term">runaway loops</em>. A model that has been told it can call tools will sometimes call them when the answer is in its own context, leading to a Thought&ndash;Action&ndash;Observation chain that should have been a single sentence. Always cap the loop with a maximum step count (typically 6&ndash;10), and instrument every production agent with per-step logging so a runaway can be diagnosed after the fact. Yao et al. observed that the unbounded-loop variant performed <em class="term">worse</em> than CoT alone on tasks that did not actually need tools.</p>
+
+        <h3 class="sub-head">Listing 11.11 &mdash; ReAct trace as raw text</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.11</span>The canonical Yao-style format &mdash; useful for debugging.</p>
+<pre class="code">prompt = <span class="str">"""</span>
+<span class="str">You may use tools: search(query), calc(expr), finish(answer).</span>
+
+<span class="str">Question: What is the population of Tokyo divided by Paris?</span>
+
+<span class="str">Thought 1: I need both populations. Start with Tokyo.</span>
+<span class="str">Action  1: search("Tokyo metropolitan population 2025")</span>
+<span class="str">Observ. 1: ~13.96 million</span>
+
+<span class="str">Thought 2: Now Paris.</span>
+<span class="str">Action  2: search("Paris city population 2025")</span>
+<span class="str">Observ. 2: ~2.10 million</span>
+
+<span class="str">Thought 3: Divide.</span>
+<span class="str">Action  3: calc("13.96 / 2.10")</span>
+<span class="str">Observ. 3: 6.65</span>
+
+<span class="str">Thought 4: I have the answer.</span>
+<span class="str">Action  4: finish("Tokyo is ~6.65× the population of Paris")</span>
+<span class="str">"""</span></pre>
+        </div>
+
+        <h3 class="sub-head">Listing 11.12 &mdash; ReAct with the Messages API</h3>
+        <div class="listing">
+          <p class="listing-cap"><span class="lnum">11.12</span>The modern equivalent &mdash; tool-use plus a loop. <em>&mdash; Production form.</em></p>
+<pre class="code">tools = [search_tool, calc_tool]
+messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: question}]
+
+<span class="kw">for</span> step <span class="kw">in</span> range(MAX_STEPS):     <span class="c"># MAX_STEPS = 8</span>
+    r = client.messages.create(
+        model=<span class="str">"claude-opus-4-7"</span>,
+        tools=tools,
+        messages=messages,
+    )
+    <span class="kw">if</span> r.stop_reason == <span class="str">"end_turn"</span>:    <span class="c"># model emitted text → done</span>
+        <span class="kw">return</span> r.content[<span class="num">0</span>].text
+    <span class="c"># otherwise the model called a tool — execute and append</span>
+    tool_use = next(b <span class="kw">for</span> b <span class="kw">in</span> r.content <span class="kw">if</span> b.type == <span class="str">"tool_use"</span>)
+    result = TOOL_REGISTRY[tool_use.name](**tool_use.input)
+    messages.append({<span class="str">"role"</span>: <span class="str">"assistant"</span>, <span class="str">"content"</span>: r.content})
+    messages.append({<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: [{
+        <span class="str">"type"</span>: <span class="str">"tool_result"</span>,
+        <span class="str">"tool_use_id"</span>: tool_use.id,
+        <span class="str">"content"</span>: str(result)
+    }]})
+<span class="kw">raise</span> RuntimeError(<span class="str">"agent exceeded max steps"</span>)</pre>
+        </div>
+
+        <div class="callout warn">
+          <span class="label">Gotcha</span>
+          ReAct&rsquo;s reasoning trace is also a side channel: anything the model writes in a Thought can be exfiltrated to a logging system or, in adversarial settings, to a malicious tool. Treat the Thought stream as untrusted output the same way you treat the final answer, especially in multi-tenant deployments. See <span class="xref">Ch. 9 §9.4</span> on prompt-injection defence.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ §11.7 COMPARISON TABLE ============ -->
+    <section id="compare">
+      <p class="section-mark">§ 11.7 &middot; Reference</p>
+      <h2 class="s-head"><span class="pnum">11.7</span> Six patterns at a glance</h2>
+
+      <p class="single">
+        The table below summarises the six patterns on six axes: latency multiplier (relative to a vanilla single-shot call), typical quality lift on the benchmark associated with that pattern, implementation complexity, the symptom that should make you reach for it, the anti-pattern that should make you reach past it, and the founding citation. Use this table as a quick-reference card; the body of the chapter is the place to go for the prose.
+      </p>
+
+      <div class="ctable-wrap">
+        <table class="ctable">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Latency cost</th>
+              <th>Quality lift</th>
+              <th>Complexity</th>
+              <th>Reach for when&hellip;</th>
+              <th>Anti-pattern</th>
+              <th>Citation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th class="row-h"><span class="pn">11.1</span>Chain-of-Thought</th>
+              <td>1.2&ndash;2&times;</td>
+              <td>+30&ndash;40 pts on GSM8K</td>
+              <td>Trivial</td>
+              <td>Multi-step reasoning fails silently</td>
+              <td><em>Shallow retrieval; small models</em></td>
+              <td>Wei et al. 2022</td>
+            </tr>
+            <tr>
+              <th class="row-h"><span class="pn">11.2</span>Few-Shot</th>
+              <td>1.1&ndash;1.5&times;</td>
+              <td>+10&ndash;25 pts on novel classification</td>
+              <td>Trivial</td>
+              <td>Output shape keeps drifting</td>
+              <td><em>Too many or too-narrow examples</em></td>
+              <td>Brown et al. 2020</td>
+            </tr>
+            <tr>
+              <th class="row-h"><span class="pn">11.3</span>Role Prompting</th>
+              <td>~1&times;</td>
+              <td>Variable, register-dependent</td>
+              <td>Trivial</td>
+              <td>Tone or register is wrong</td>
+              <td><em>Credentialed personas implying authority</em></td>
+              <td>White et al. 2023</td>
+            </tr>
+            <tr>
+              <th class="row-h"><span class="pn">11.4</span>Structured Output</th>
+              <td>~1&times;</td>
+              <td>100% schema conformance</td>
+              <td>Low</td>
+              <td>Downstream code must parse the answer</td>
+              <td><em>Open-ended prose; over-rigid enums</em></td>
+              <td>OpenAI 2024 (strict mode)</td>
+            </tr>
+            <tr>
+              <th class="row-h"><span class="pn">11.5</span>Self-Consistency</th>
+              <td>3&ndash;10&times;</td>
+              <td>+15&ndash;20 pts on hard reasoning</td>
+              <td>Medium</td>
+              <td>Same prompt returns different answers</td>
+              <td><em>Open-ended generation; interactive UI</em></td>
+              <td>Wang et al. 2022</td>
+            </tr>
+            <tr>
+              <th class="row-h"><span class="pn">11.6</span>ReAct</th>
+              <td>3&ndash;8&times; (per loop step)</td>
+              <td>Unlocks tasks needing fresh data</td>
+              <td>High</td>
+              <td>Task needs external data or tools</td>
+              <td><em>Single-turn questions; unbounded loops</em></td>
+              <td>Yao et al. 2022</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ §11.8 COMPOSING WALKTHROUGH ============ -->
+    <section id="compose">
+      <p class="section-mark">§ 11.8 &middot; Walkthrough</p>
+      <h2 class="s-head"><span class="pnum">11.8</span> Composing patterns &mdash; a worked example</h2>
+
+      <p class="single">
+        Production prompts rarely use one pattern in isolation; in CETI client work the median production system prompt composes three to five patterns at once. The example below is a slightly-simplified version of a real prompt that powers an inbound-email triage system for a B2B SaaS company. It composes Role Prompting (<span class="xref">§11.3</span>), Few-Shot (<span class="xref">§11.2</span>), and Structured Output (<span class="xref">§11.4</span>), with Chain-of-Thought (<span class="xref">§11.1</span>) tucked inside the schema. Read the four steps in order.
+      </p>
+
+      <div class="walkthrough-step">
+        <span class="step-num">Step 1 &middot; Pin the role</span>
+        <h4>Set the register and refusal policy first</h4>
+        <p>The system prompt opens with a one-paragraph role: <code class="kw">"You are the triage layer of a customer-support inbox at Acme. Your job is to read inbound email and produce a routing decision."</code> This single sentence collapses dozens of micro-instructions the rest of the prompt would otherwise have to spell out: tone is neutral, the audience is internal, the answer is a decision rather than a reply to the customer. We pair the role with one explicit refusal rule (<em>&ldquo;If the email contains a request for medical or legal advice, route it directly to a human and emit no other output&rdquo;</em>) because role prompts alone do not reliably enforce hard constraints.</p>
+      </div>
+
+      <div class="walkthrough-step">
+        <span class="step-num">Step 2 &middot; Demonstrate the shape</span>
+        <h4>Three Few-Shot examples covering edge cases</h4>
+        <p>We supply three examples wrapped in XML tags. The examples are chosen to span the routing space rather than to look representative: one billing question (the largest category, but the easiest), one bug report with an attached screenshot reference (tests image-aware routing), and one ambiguous &ldquo;urgent please help&rdquo; email with no clear intent (tests the &ldquo;other&rdquo; escape hatch). The variety here is doing more work than the quantity; following <span class="xref">§11.2</span>&rsquo;s gotcha about recency, the most-representative example is placed last.</p>
+      </div>
+
+      <div class="walkthrough-step">
+        <span class="step-num">Step 3 &middot; Fix the output shape</span>
+        <h4>A schema with reasoning before the answer</h4>
+        <p>The schema is supplied to the Messages API as a tool definition (Listing 11.7&rsquo;s pattern). Crucially, the <code class="kw">"reasoning"</code> field is declared <em class="term">first</em> in the schema, before <code class="kw">"category"</code>, <code class="kw">"urgency"</code>, and <code class="kw">"route_to"</code>. JSON is filled top-to-bottom by the model, so this ordering forces a CoT trace to be written before the final routing decision is committed &mdash; Chain-of-Thought emerges as a free side-effect of careful schema design.</p>
+      </div>
+
+      <div class="walkthrough-step">
+        <span class="step-num">Step 4 &middot; Wire the loop</span>
+        <h4>Optional ReAct fallback for ambiguous cases</h4>
+        <p>For the ninety percent of emails that match the examples, a single API call returns a parseable routing decision in under two seconds. For the long tail where the model emits <code class="kw">"category": "other"</code> with low confidence, the application escalates to a small ReAct loop (<span class="xref">§11.6</span>) with two tools: <code class="kw">lookup_customer(email)</code> and <code class="kw">search_kb(query)</code>. The loop has a 4-step cap. This two-tier design keeps median latency low while still handling the cases that benefit from extra reasoning &mdash; a pattern we recommend for almost every production agent.</p>
+      </div>
+
+      <div class="callout note">
+        <span class="label">Outcome</span>
+        On a 12-week pilot with 84,000 real inbound emails, this five-pattern composition reduced misrouted tickets from 11.4% (rule-based baseline) to 2.7%, with 91% of decisions auto-actioned and the remaining 9% escalated to humans with reasoning traces attached. Median end-to-end latency: 1.8s. Cost per email: $0.004. This is what &ldquo;patterns over improvisation&rdquo; looks like in production.
+      </div>
+    </section>
+
+    <!-- ============ §11.9 COMMON MISTAKES ============ -->
+    <section id="mistakes">
+      <p class="section-mark">§ 11.9 &middot; Failure modes</p>
+      <h2 class="s-head"><span class="pnum">11.9</span> Common mistakes &amp; their fixes</h2>
+
+      <p class="single">Five failure modes account for the great majority of prompt-engineering bugs CETI sees in client codebases. Each is paired with a concrete fix.</p>
+
+      <ol class="mistakes">
+        <li>
+          <b>Stacking too many patterns &mdash; the &ldquo;mega-prompt&rdquo; trap.</b>
+          A prompt with a role, eight few-shot examples, a schema, three reasoning instructions, and a refusal policy will not be eight times better than a focused one &mdash; it will hit context-window pressure, cost more per call, and start producing eerily blended outputs where the model averages across competing instructions. Production prompts are usually shorter than newcomers expect.
+          <span class="fix"><b>Fix:</b> Profile by ablation. Remove one section at a time. If accuracy on your eval set is unchanged, that section was carrying no weight &mdash; delete it.</span>
+        </li>
+        <li>
+          <b>Hidden reasoning inside JSON output.</b>
+          A schema that asks for <code class="kw">"answer"</code> as the first field forces the model to commit before it can think. The output parses, but the quality is no better than a single-shot answer with no reasoning at all.
+          <span class="fix"><b>Fix:</b> Put a <code class="kw">"reasoning"</code> string field at the top of the schema. Strip it in your application layer if the downstream consumer does not need it; the model still benefits from having written it.</span>
+        </li>
+        <li>
+          <b>Few-Shot examples that all look the same.</b>
+          Three examples taken from the same source document will narrow the model&rsquo;s expectations to that source&rsquo;s style. The model will then misclassify any input that does not match.
+          <span class="fix"><b>Fix:</b> Choose examples to span the diversity of inputs you expect at inference time. If your taxonomy has six classes, your examples should cover at least four. If your inputs vary in length, your examples should too.</span>
+        </li>
+        <li>
+          <b>ReAct loops without a step cap.</b>
+          An agent allowed to call tools indefinitely will eventually loop &mdash; sometimes immediately, sometimes after several productive steps. The pathology is rarely visible in development and almost always shows up in production under load.
+          <span class="fix"><b>Fix:</b> Hard-cap every loop (we recommend 6&ndash;10 steps). Log the full trace of every run. Page on any run that hits the cap; treat it as a bug rather than a successful invocation.</span>
+        </li>
+        <li>
+          <b>Treating prompts as configuration, not code.</b>
+          Prompts that live in a Notion doc and are pasted into a deploy script have no version history, no review, no test coverage, and no rollback path. They drift, they break silently, and nobody knows which version is in production.
+          <span class="fix"><b>Fix:</b> Prompts go in the repo. They are reviewed in pull requests. They have an eval suite that runs in CI. Treat the prompt file the same way you treat the source files around it.</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ============ §11.A INDEX ============ -->
+    <section id="index">
+      <p class="section-mark">§ 11.A &middot; Index</p>
+      <h2 class="s-head"><span class="pnum">11.A</span> Index &amp; cross-references</h2>
+
+      <p class="single">Selected terms from this chapter, with cross-references to other chapters of the handbook and to companion artifacts in the CETI Lookbook.</p>
+
+      <ul class="index-grid">
+        <li><b>adaptive-consistency</b> &middot; §11.5 &middot; Aggarwal 2023</li>
+        <li><b>agent loop, bounded</b> &middot; §11.6, Ch. 14 §14.3</li>
+        <li><b>anti-pattern, defined</b> &middot; §11.0 &middot; throughout</li>
+        <li><b>brand voice enforcement</b> &middot; §11.3</li>
+        <li><b>Chain-of-Thought</b> &middot; <a href="#cot">§11.1</a></li>
+        <li><b>context window vs. prompt</b> &middot; §11.0 margin note</li>
+        <li><b>diversity in examples</b> &middot; §11.2, §11.9 #3</li>
+        <li><b>eval suites for prompts</b> &middot; §11.9 #5, Ch. 12</li>
+        <li><b>Few-Shot</b> &middot; <a href="#fewshot">§11.2</a></li>
+        <li><b>function calling</b> &middot; §11.4 (Anthropic, OpenAI)</li>
+        <li><b>Gang of Four analogy</b> &middot; §11.0</li>
+        <li><b>grammar-constrained decoding</b> &middot; §11.4</li>
+        <li><b>HotpotQA</b> &middot; §11.6, Yao 2022</li>
+        <li><b>in-context learning</b> &middot; §11.2 (alias)</li>
+        <li><b>Instructor library</b> &middot; Listing 11.8</li>
+        <li><b>JSON mode</b> &middot; §11.4 (alias)</li>
+        <li><b>LangGraph &mdash; ReAct nodes</b> &middot; <a href="../langgraph/">Lookbook · LangGraph</a></li>
+        <li><b>majority vote</b> &middot; §11.5</li>
+        <li><b>MCP &mdash; tool transport</b> &middot; <a href="../mcp/">Lookbook · MCP</a></li>
+        <li><b>order of examples</b> &middot; §11.2 gotcha &middot; Lu 2022</li>
+        <li><b>Outlines library</b> &middot; §11.4</li>
+        <li><b>Pydantic for schemas</b> &middot; Listing 11.8</li>
+        <li><b>ReAct</b> &middot; <a href="#react">§11.6</a></li>
+        <li><b>refusal policies</b> &middot; §11.3, Listing 11.6, §11.8</li>
+        <li><b>role prompting</b> &middot; <a href="#role">§11.3</a></li>
+        <li><b>runaway loops</b> &middot; §11.6 anti-pattern, §11.9 #4</li>
+        <li><b>schema design, top-down</b> &middot; §11.4 anti-pattern, §11.9 #2</li>
+        <li><b>scratchpad prompting</b> &middot; §11.1 (alias)</li>
+        <li><b>Self-Consistency</b> &middot; <a href="#consistency">§11.5</a></li>
+        <li><b>strict structured outputs</b> &middot; §11.4 (OpenAI 2024)</li>
+        <li><b>Structured Output</b> &middot; <a href="#structured">§11.4</a></li>
+        <li><b>system message, role goes in</b> &middot; §11.3 Listing 11.5</li>
+        <li><b>tag-fenced prompts</b> &middot; Listing 11.2, 11.4 (Anthropic XML)</li>
+        <li><b>temperature for sampling</b> &middot; §11.5 Listing 11.9</li>
+        <li><b>Thought&ndash;Action&ndash;Observation</b> &middot; §11.6</li>
+        <li><b>tool use API</b> &middot; §11.4 Listing 11.7</li>
+        <li><b>triage pipeline (worked example)</b> &middot; §11.8</li>
+        <li><b>verifying CoT traces</b> &middot; §11.1 gotcha &middot; Turpin 2023</li>
+        <li><b>XML tags in prompts</b> &middot; §11.1 Listing 11.2, §11.2 Listing 11.4</li>
+        <li><b>zero-shot CoT trigger phrase</b> &middot; §11.1 &middot; Kojima 2022</li>
+      </ul>
+    </section>
+
+    <!-- ============ §11.B BIBLIOGRAPHY ============ -->
+    <section id="bib">
+      <p class="section-mark">§ 11.B &middot; Bibliography</p>
+      <h2 class="s-head"><span class="pnum">11.B</span> Bibliography</h2>
+
+      <p class="single">Primary sources for the patterns and claims in this chapter. Year is the year of the first public release; conference venues are given where applicable.</p>
+
+      <ol class="bib">
+        <li>Brown, T. B., et al. (2020). <i>Language Models are Few-Shot Learners.</i> In <i>Advances in Neural Information Processing Systems</i> (NeurIPS). The GPT-3 paper; foundational treatment of in-context learning. <a href="https://arxiv.org/abs/2005.14165">arXiv:2005.14165</a></li>
+        <li>Wei, J., et al. (2022). <i>Chain-of-Thought Prompting Elicits Reasoning in Large Language Models.</i> NeurIPS 2022. The seminal CoT paper; introduced the +39-point GSM8K result on PaLM-540B. <a href="https://arxiv.org/abs/2201.11903">arXiv:2201.11903</a></li>
+        <li>Kojima, T., et al. (2022). <i>Large Language Models are Zero-Shot Reasoners.</i> NeurIPS 2022. Showed that the bare trigger phrase &ldquo;Let&rsquo;s think step by step&rdquo; reproduces most of the CoT lift without examples. <a href="https://arxiv.org/abs/2205.11916">arXiv:2205.11916</a></li>
+        <li>Wang, X., et al. (2022). <i>Self-Consistency Improves Chain-of-Thought Reasoning in Language Models.</i> ICLR 2023. The Self-Consistency paper; majority-vote ensembling of CoT traces. <a href="https://arxiv.org/abs/2203.11171">arXiv:2203.11171</a></li>
+        <li>Yao, S., et al. (2022). <i>ReAct: Synergizing Reasoning and Acting in Language Models.</i> ICLR 2023. The ReAct paper; established the Thought&ndash;Action&ndash;Observation loop as a base architecture for agentic systems. <a href="https://arxiv.org/abs/2210.03629">arXiv:2210.03629</a></li>
+        <li>Lu, Y., et al. (2022). <i>Fantastically Ordered Prompts and Where to Find Them: Overcoming Few-Shot Prompt Order Sensitivity.</i> ACL 2022. The order-of-examples effect; up to 10-point swings on classification. <a href="https://arxiv.org/abs/2104.08786">arXiv:2104.08786</a></li>
+        <li>White, J., et al. (2023). <i>A Prompt Pattern Catalog to Enhance Prompt Engineering with ChatGPT.</i> Vanderbilt SEKE Group. The canonical pattern-catalog paper; named several of the patterns used in this chapter. <a href="https://arxiv.org/abs/2302.11382">arXiv:2302.11382</a></li>
+        <li>Salewski, L., et al. (2023). <i>In-Context Impersonation Reveals Large Language Models&rsquo; Strengths and Biases.</i> NeurIPS 2023. Empirical study of role-prompt effects, including the inconsistency we cite in §11.3. <a href="https://arxiv.org/abs/2305.14930">arXiv:2305.14930</a></li>
+        <li>Turpin, M., et al. (2023). <i>Language Models Don&rsquo;t Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting.</i> NeurIPS 2023. The faithfulness critique cited in §11.1&rsquo;s gotcha. <a href="https://arxiv.org/abs/2305.04388">arXiv:2305.04388</a></li>
+        <li>Aggarwal, P., et al. (2023). <i>Let&rsquo;s Sample Step by Step: Adaptive-Consistency for Efficient Reasoning and Coding with LLMs.</i> EMNLP 2023. The adaptive-consistency improvement to Self-Consistency cited in §11.5. <a href="https://arxiv.org/abs/2305.11860">arXiv:2305.11860</a></li>
+      </ol>
+    </section>
+
+  </main>
+
+  <!-- =================== COLOPHON =================== -->
+  <footer class="colophon">
+    <div class="colophon-inner">
+      <span><b>CETI HANDBOOK</b> &middot; 11 / 18 &middot; May 2026</span>
+      <span>Set in Crimson Pro &amp; IBM Plex &middot; Printed on recycled cream stock</span>
+      <span><a href="../">Return to lookbook index &rarr;</a></span>
     </div>
-  </section>
-
-  <!-- CODE BLOCK -->
-  <section class="code-section" id="code">
-    <p class="section-eyebrow animate-in">Anatomy of a production prompt</p>
-    <h2 class="section-title animate-in" style="max-width: 26ch;">Anthropic&#8209;style XML tags. Role, examples, schema, thinking &mdash; in 12 lines.</h2>
-    <p class="section-lede animate-in">Three patterns composed: role prefix, two few&#8209;shot examples wrapped in XML tags for unambiguous boundaries, and a structured output instruction. The XML tag convention is what Claude is trained on.</p>
-
-    <div class="code-wrap animate-in">
-<pre><span class="com">// system prompt — composes Role + Few-Shot + Structured Output</span>
-<span class="tag">&lt;role&gt;</span>You are a meticulous invoice auditor.<span class="tag">&lt;/role&gt;</span>
-
-<span class="tag">&lt;examples&gt;</span>
-  <span class="tag">&lt;ex&gt;</span><span class="attr">input:</span>  <span class="str">"Acme Corp, $1,200, paid"</span>
-       <span class="attr">output:</span> <span class="str">{"vendor":"Acme Corp","amount":1200,"status":"paid"}</span><span class="tag">&lt;/ex&gt;</span>
-  <span class="tag">&lt;ex&gt;</span><span class="attr">input:</span>  <span class="str">"Globex — 850 USD — DUE"</span>
-       <span class="attr">output:</span> <span class="str">{"vendor":"Globex","amount":850,"status":"due"}</span><span class="tag">&lt;/ex&gt;</span>
-<span class="tag">&lt;/examples&gt;</span>
-
-<span class="tag">&lt;task&gt;</span>Extract the invoice into JSON matching the schema above.
-Think step by step inside <span class="tag">&lt;thinking&gt;</span> tags before answering.<span class="tag">&lt;/task&gt;</span>
-
-<span class="tag">&lt;input&gt;</span>{{ user_input }}<span class="tag">&lt;/input&gt;</span></pre>
-    </div>
-  </section>
-
-  <!-- STATS -->
-  <section class="stats-section">
-    <p class="section-eyebrow animate-in">What the literature shows</p>
-    <h2 class="section-title animate-in" style="max-width: 26ch;">Each pattern has receipts.</h2>
-
-    <div class="stats">
-      <article class="stat animate-in s-1">
-        <div class="stat-value"><span class="num" data-to="58">0</span><span class="unit">% &uarr;</span></div>
-        <p class="stat-label">Accuracy lift on GSM8K math word problems from Chain&#8209;of&#8209;Thought prompting at scale.</p>
-        <p class="stat-cite">Wei et al. &middot; 2022</p>
-      </article>
-      <article class="stat animate-in s-2">
-        <div class="stat-value"><span class="num" data-to="3">0</span>&ndash;5</div>
-        <p class="stat-label">Sweet spot for few&#8209;shot example count. More than 7 rarely helps &mdash; often hurts.</p>
-        <p class="stat-cite">Brown et al. &middot; GPT&#8209;3 paper</p>
-      </article>
-      <article class="stat animate-in s-3">
-        <div class="stat-value"><span class="num" data-to="100">0</span><span class="unit">%</span></div>
-        <p class="stat-label">Schema conformance with constrained decoding &mdash; not "mostly valid JSON", actually valid.</p>
-        <p class="stat-cite">Structured outputs API</p>
-      </article>
-      <article class="stat animate-in s-4">
-        <div class="stat-value"><span class="num" data-to="17">0</span><span class="unit">% &uarr;</span></div>
-        <p class="stat-label">Reasoning accuracy gain from Self&#8209;Consistency with n=40 samples on hard benchmarks.</p>
-        <p class="stat-cite">Wang et al. &middot; 2022</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- FINAL CTA -->
-  <section class="final">
-    <h2>Patterns over improvisation.</h2>
-    <p>CETI trains teams to compose these patterns into prompts that hold up in production &mdash; not just demos. 5,000+ professionals, 100+ organisations, 20+ countries.</p>
-    <div class="final-cta-row">
-      <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
-        Book a workshop
-        <span class="arrow">&rarr;</span>
-      </a>
-      <a class="secondary" href="https://cetiai.co">Back to cetiai.co</a>
-    </div>
-  </section>
-
-  <footer>
-    CETI.AI &middot; Lookbook &middot; <a href="../">All artifacts</a>
   </footer>
 
-  <script>
-    /* ============ HERO REVEAL ============ */
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-    /* ============ INTERSECTION REVEAL ============ */
-    const reveal = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
-    document.querySelectorAll('.animate-in').forEach((el) => reveal.observe(el));
-
-    /* ============ NUMBER TICKER ============ */
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const dur = 1200;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
-
-    /* ============ MAGNETIC BUTTONS ============ */
-    const STRENGTH = 25;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-
-    /* ============ TILE GLOW (cursor follow) ============ */
-    document.querySelectorAll('.tile').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
-
-    /* ============================================================
-       BENTO MINI DEMOS — six animated patterns, each on its own loop
-       Each demo runs only when its tile is in viewport.
-       Cycle: ~9–11s play, ~2–3s rest.
-    ============================================================ */
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-    /* ---------- 1) CHAIN-OF-THOUGHT ---------- */
-    async function loopCOT() {
-      const lines = document.querySelectorAll('#d-cot .line');
-      const caret = document.getElementById('cot-caret');
-      while (true) {
-        lines.forEach(l => l.classList.remove('on'));
-        caret.style.display = 'none';
-        await sleep(700);
-        lines[0].classList.add('on'); await sleep(800);
-        lines[1].classList.add('on'); await sleep(900);
-        lines[2].classList.add('on'); await sleep(900);
-        lines[3].classList.add('on'); caret.style.display = 'inline-block';
-        await sleep(3800);
-        caret.style.display = 'none';
-        await sleep(800);
-      }
-    }
-
-    /* ---------- 2) FEW-SHOT ---------- */
-    async function loopFS() {
-      const lines = document.querySelectorAll('#d-fs .line');
-      const ans = document.getElementById('fs-ans');
-      const caret = document.getElementById('fs-caret');
-      const target = 'dim';
-      while (true) {
-        lines.forEach(l => l.classList.remove('on'));
-        ans.textContent = '';
-        caret.style.display = 'none';
-        await sleep(700);
-        for (let i = 0; i < 4; i++) { lines[i].classList.add('on'); await sleep(450); }
-        lines[4].classList.add('on'); // final pair scaffold
-        caret.style.display = 'inline-block';
-        await sleep(500);
-        for (let i = 0; i < target.length; i++) {
-          ans.textContent += target[i];
-          await sleep(140);
-        }
-        await sleep(3200);
-        caret.style.display = 'none';
-        await sleep(700);
-      }
-    }
-
-    /* ---------- 3) ROLE PROMPTING ---------- */
-    async function loopRole() {
-      const roles = [
-        { name: 'senior physicist',  text: 'A measure of dispersed energy unavailable for work.' },
-        { name: 'kindergarten teacher', text: 'When toys spread all over the room, that’s entropy.' },
-        { name: 'standup comedian',  text: 'Entropy is my closet at 2am, just… sprawled.' }
-      ];
-      const nameEl = document.getElementById('role-name');
-      const textEl = document.getElementById('role-text');
-      const caret = document.getElementById('role-caret');
-      let i = 0;
-      while (true) {
-        const r = roles[i % roles.length];
-        nameEl.textContent = r.name;
-        textEl.textContent = '';
-        caret.style.display = 'inline-block';
-        await sleep(700);
-        for (let j = 0; j < r.text.length; j++) {
-          textEl.textContent += r.text[j];
-          await sleep(28);
-        }
-        await sleep(3000);
-        caret.style.display = 'none';
-        // brief fade between roles
-        textEl.style.transition = 'opacity 400ms';
-        textEl.style.opacity = '0';
-        await sleep(450);
-        textEl.style.opacity = '1';
-        i++;
-      }
-    }
-
-    /* ---------- 4) STRUCTURED OUTPUT — typewriter JSON ---------- */
-    async function loopJSON() {
-      const stage = document.getElementById('json-stage');
-      // Token sequence — each item is { text, cls }
-      const tokens = [
-        { t: '{\n  ' },
-        { t: '"task"', c: 'k' }, { t: ': ' }, { t: '"summarize"', c: 's' }, { t: ',\n  ' },
-        { t: '"priority"', c: 'k' }, { t: ': ' }, { t: '"high"', c: 's' }, { t: ',\n  ' },
-        { t: '"score"', c: 'k' }, { t: ': ' }, { t: '0.94', c: 'n' }, { t: ',\n  ' },
-        { t: '"tags"', c: 'k' }, { t: ': [' }, { t: '"prompt"', c: 's' }, { t: ', ' },
-        { t: '"design"', c: 's' }, { t: ']\n}' }
-      ];
-      while (true) {
-        stage.innerHTML = '';
-        await sleep(700);
-        let html = '';
-        for (const tok of tokens) {
-          if (tok.c) html += `<span class="${tok.c}">${escapeHTML(tok.t)}</span>`;
-          else html += escapeHTML(tok.t);
-          stage.innerHTML = html + '<span class="p">|</span>';
-          await sleep(70 + Math.random() * 80);
-        }
-        stage.innerHTML = html;
-        await sleep(3500);
-      }
-    }
-    function escapeHTML(s) {
-      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    /* ---------- 5) SELF-CONSISTENCY ---------- */
-    async function loopSC() {
-      const c1 = document.getElementById('sc-c1');
-      const c2 = document.getElementById('sc-c2');
-      const c3 = document.getElementById('sc-c3');
-      const result = document.getElementById('sc-result');
-      const answerEl = document.getElementById('sc-answer');
-      const scenarios = [
-        { paths: [
-            { label: 'Path 1', val: '42' },
-            { label: 'Path 2', val: '42' },
-            { label: 'Path 3', val: '41' }
-          ], consensus: [0, 1], answer: '42' },
-        { paths: [
-            { label: 'Path 1', val: 'Paris' },
-            { label: 'Path 2', val: 'Paris' },
-            { label: 'Path 3', val: 'Lyon' }
-          ], consensus: [0, 1], answer: 'Paris' },
-        { paths: [
-            { label: 'Path 1', val: '17' },
-            { label: 'Path 2', val: '18' },
-            { label: 'Path 3', val: '17' }
-          ], consensus: [0, 2], answer: '17' }
-      ];
-      let i = 0;
-      while (true) {
-        const s = scenarios[i % scenarios.length];
-        const cols = [c1, c2, c3];
-        // reset
-        cols.forEach((c, k) => {
-          c.classList.remove('consensus');
-          c.innerHTML = `<span>${s.paths[k].label}</span><span class="v">—</span>`;
-        });
-        result.classList.remove('on');
-        await sleep(700);
-        // reveal each path's answer in turn
-        for (let k = 0; k < 3; k++) {
-          await sleep(620);
-          cols[k].innerHTML = `<span>${s.paths[k].label}</span><span class="v">${s.paths[k].val}</span>`;
-        }
-        await sleep(700);
-        // highlight consensus cells
-        s.consensus.forEach(idx => cols[idx].classList.add('consensus'));
-        await sleep(500);
-        answerEl.textContent = s.answer;
-        result.classList.add('on');
-        await sleep(3400);
-        i++;
-      }
-    }
-
-    /* ---------- 6) REACT loop ---------- */
-    async function loopReact() {
-      const rows = document.querySelectorAll('#d-react .react-row');
-      while (true) {
-        rows.forEach(r => r.classList.remove('active'));
-        await sleep(700);
-        for (let k = 0; k < rows.length; k++) {
-          rows.forEach(r => r.classList.remove('active'));
-          rows[k].classList.add('active');
-          await sleep(1100);
-        }
-        await sleep(900);
-        rows.forEach(r => r.classList.remove('active'));
-        await sleep(800);
-      }
-    }
-
-    /* ---------- Run all loops once tiles enter viewport ---------- */
-    const demoRunners = {
-      cot: loopCOT,
-      fs: loopFS,
-      role: loopRole,
-      json: loopJSON,
-      sc: loopSC,
-      react: loopReact
-    };
-
-    if (reduced) {
-      // Show final state for all demos and don't loop
-      document.querySelectorAll('#d-cot .line').forEach(l => l.classList.add('on'));
-      const fsAns = document.getElementById('fs-ans'); if (fsAns) fsAns.textContent = 'dim';
-      document.querySelectorAll('#d-fs .line').forEach(l => l.classList.add('on'));
-      const roleText = document.getElementById('role-text');
-      if (roleText) roleText.textContent = 'A measure of dispersed energy unavailable for work.';
-      const stage = document.getElementById('json-stage');
-      if (stage) stage.innerHTML = '{\n  <span class="k">"task"</span>: <span class="s">"summarize"</span>,\n  <span class="k">"priority"</span>: <span class="s">"high"</span>,\n  <span class="k">"score"</span>: <span class="n">0.94</span>\n}';
-      const c1 = document.getElementById('sc-c1');
-      const c2 = document.getElementById('sc-c2');
-      const c3 = document.getElementById('sc-c3');
-      if (c1) c1.innerHTML = '<span>Path 1</span><span class="v">42</span>';
-      if (c2) c2.innerHTML = '<span>Path 2</span><span class="v">42</span>';
-      if (c3) c3.innerHTML = '<span>Path 3</span><span class="v">41</span>';
-      if (c1) c1.classList.add('consensus');
-      if (c2) c2.classList.add('consensus');
-      const result = document.getElementById('sc-result'); if (result) result.classList.add('on');
-      document.querySelectorAll('#d-react .react-row').forEach(r => r.classList.add('active'));
-    } else {
-      const demoObs = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            const key = e.target.dataset.demo;
-            if (demoRunners[key]) {
-              demoRunners[key]();
-              demoObs.unobserve(e.target);
-            }
-          }
-        });
-      }, { threshold: 0.25 });
-      document.querySelectorAll('.tile[data-demo]').forEach(el => demoObs.observe(el));
-    }
-  </script>
   <script src="../shared/nav.js" defer></script>
 </body>
 </html>

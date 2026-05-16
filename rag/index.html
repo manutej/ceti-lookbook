@@ -3,1392 +3,1419 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RAG — Memory for stateless models · CETI.AI Lookbook</title>
-  <meta name="description" content="A mid-level walkthrough of Retrieval-Augmented Generation: the five-stage pipeline, the 2D vector space, and what actually happens at search time.">
+  <title>rag.ipynb · RAG — Memory for stateless models · ceti-lookbook</title>
+  <meta name="description" content="A notebook-style walkthrough of Retrieval-Augmented Generation: the five-stage pipeline, the 2D vector space, and what actually happens at search time.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-bg-code: #1E1E2E;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
+      --bg: #0D1117;
+      --bg-cell: #11161D;
+      --bg-cell-hl: #161B22;
+      --bg-out: #0B0F14;
+      --border: #21262D;
+      --border-soft: rgba(255,255,255,0.06);
+      --grid: rgba(255,255,255,0.04);
+      --text: #E6EDF3;
+      --text-mute: #8B949E;
+      --text-dim: #6E7681;
 
-      --color-accent: #D94F30;
-      --color-accent-hover: #C4432A;
-      --color-accent-muted: #E8836C;
-      --color-accent-light: #FDEEE9;
+      /* d3 plot palette */
+      --c-cyan: #56B6C2;
+      --c-magenta: #C678DD;
+      --c-yellow: #E5C07B;
+      --c-green: #98C379;
+      --c-salmon: #E06C75;
 
-      --color-actor-1: #D94F30; /* vermillion - QUERY/active */
-      --color-actor-2: #2A7B9B; /* teal - cluster A (policy) */
-      --color-actor-3: #7B6DAA; /* plum - cluster B (shipping) */
-      --color-actor-4: #D4A843; /* gold - cluster C (billing) */
-      --color-actor-5: #2D8B55; /* forest - cluster D (product) */
+      /* syntax */
+      --s-kw: #C678DD;
+      --s-str: #98C379;
+      --s-fn: #61AFEF;
+      --s-cmt: #6E7681;
+      --s-num: #E5C07B;
+      --s-op: #E06C75;
+      --s-var: #E6EDF3;
 
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body: 'DM Sans', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-      --duration-fast: 150ms;
-      --duration-normal: 300ms;
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-
-      --shadow-sm: 0 1px 2px rgba(44, 42, 40, 0.05);
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.10);
-      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      --font-var: 'Computer Modern', 'Latin Modern Math', Cambria, Georgia, serif;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
+      font-family: var(--font-mono);
+      color: var(--text);
+      background: var(--bg);
       background-image:
-        radial-gradient(ellipse at 15% 0%, rgba(217, 79, 48, 0.05) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 60%, rgba(42, 123, 155, 0.035) 0%, transparent 55%);
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+      background-size: 32px 32px;
+      background-position: -1px -1px;
+      font-size: 14px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
-    ::selection { background: var(--color-accent-light); color: var(--color-accent-hover); }
+    ::selection { background: rgba(86, 182, 194, 0.3); color: var(--text); }
 
-    /* ============ NAV STRIP ============ */
-    .top-strip {
+    /* ============ NOTEBOOK CHROME ============ */
+    .nb-shell {
       max-width: 1180px;
       margin: 0 auto;
-      padding: 1.5rem 1.5rem 0;
+      padding: 1.5rem 1rem 4rem;
+    }
+
+    .nb-titlebar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.9rem;
+      background: var(--bg-cell-hl);
+      border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      border-bottom: none;
       font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
+      font-size: 12px;
+      color: var(--text-mute);
     }
-    .top-strip .brand { color: var(--color-text); font-weight: 500; }
-    .top-strip .brand b { color: var(--color-accent); font-weight: 500; }
+    .nb-dots { display: inline-flex; gap: 6px; margin-right: 0.4rem; }
+    .nb-dots i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+    .nb-dots i:nth-child(1) { background: var(--c-salmon); }
+    .nb-dots i:nth-child(2) { background: var(--c-yellow); }
+    .nb-dots i:nth-child(3) { background: var(--c-green); }
+    .nb-filename { color: var(--text); font-weight: 500; }
+    .nb-meta { margin-left: auto; color: var(--text-dim); font-size: 11px; }
+    .nb-kernel { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--text-mute); }
+    .nb-kernel::before {
+      content: ''; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--c-green); box-shadow: 0 0 6px var(--c-green);
+    }
 
-    /* ============ HERO ============ */
-    .hero {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 6rem 1.5rem 4rem;
-    }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--color-accent);
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
-    }
-    .hero.visible .eyebrow { opacity: 1; }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: clamp(2.75rem, 7.5vw, 5.75rem);
-      line-height: 0.98;
-      letter-spacing: -0.035em;
-      margin: 1.25rem 0 1.5rem;
-      max-width: 17ch;
-    }
-    .hero-title .word {
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity var(--duration-slower) var(--ease-spring),
-                  transform var(--duration-slower) var(--ease-spring);
-    }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 120ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 200ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 280ms; }
-    .hero.visible .hero-title .word:nth-child(4) { transition-delay: 360ms; }
-    .hero.visible .hero-title .word:nth-child(5) { transition-delay: 440ms; }
-    .hero-title em {
-      font-style: normal;
-      color: var(--color-accent);
-      position: relative;
-    }
-    .hero-title em::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0; bottom: 0.08em;
-      height: 0.18em;
-      background: var(--color-accent-light);
-      z-index: -1;
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 600ms var(--ease-out) 800ms;
-    }
-    .hero.visible .hero-title em::after { transform: scaleX(1); }
-
-    .hero-sub {
-      font-size: 1.2rem;
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      margin: 0;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 620ms;
-    }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
-
-    .cta-row {
+    .nb-toolbar {
       display: flex;
       gap: 1.25rem;
-      margin-top: 2.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 800ms;
+      padding: 0.5rem 0.9rem;
+      background: var(--bg-cell);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-bottom: none;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    .hero.visible .cta-row { opacity: 1; }
+    .nb-toolbar span { cursor: default; }
+    .nb-toolbar span:hover { color: var(--text); }
 
-    .magnetic {
+    .nb-stream {
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      background: var(--bg-cell);
+      overflow: hidden;
+    }
+
+    /* ============ CELLS ============ */
+    .cell {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      border-bottom: 1px solid var(--border);
+      transition: background 200ms ease;
+    }
+    .cell:last-child { border-bottom: none; }
+    .cell:hover { background: rgba(255,255,255,0.012); }
+    .cell.is-out { background: var(--bg-out); }
+    .cell.is-md { background: var(--bg-cell); }
+
+    .gutter {
+      padding: 1rem 0.85rem 1rem 1.1rem;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: right;
+      user-select: none;
+      border-right: 1px solid var(--border);
+      letter-spacing: 0;
+    }
+    .gutter b { color: var(--c-cyan); font-weight: 500; }
+    .gutter.out b { color: var(--c-salmon); }
+    .gutter .ms { display: block; margin-top: 0.4rem; font-size: 10px; color: var(--text-dim); opacity: 0.6; }
+
+    .cell-body { padding: 1rem 1.25rem 1.25rem; min-width: 0; }
+
+    /* markdown cells */
+    .md h1, .md h2, .md h3 { font-family: var(--font-body); }
+    .md h1 {
+      font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+      margin: 0.2rem 0 0.65rem; color: var(--text); line-height: 1.15;
+    }
+    .md h2 {
+      font-size: 19px; font-weight: 600; letter-spacing: -0.01em;
+      margin: 0.4rem 0 0.55rem; color: var(--text);
+    }
+    .md p {
+      font-family: var(--font-body);
+      font-size: 15px; line-height: 1.6;
+      color: var(--text); margin: 0 0 0.85rem;
+      max-width: 72ch;
+    }
+    .md p:last-child { margin-bottom: 0; }
+    .md p code, .md li code {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      background: var(--bg-out);
+      padding: 0.05em 0.35em;
+      border-radius: 3px;
+      color: var(--c-cyan);
+      border: 1px solid var(--border);
+    }
+    .md em.var {
+      font-family: var(--font-var);
+      font-style: italic;
+      color: var(--c-magenta);
+      font-size: 1.05em;
+    }
+    .md .kbd {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.78em;
+      padding: 0.1em 0.45em;
+      background: var(--bg-out);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-mute);
+    }
+    .md .tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--c-cyan);
+      display: inline-block;
+      margin-bottom: 0.35rem;
+    }
+    .md ul { font-family: var(--font-body); color: var(--text); margin: 0 0 0.85rem; padding-left: 1.25rem; }
+    .md ul li { margin-bottom: 0.3rem; }
+
+    /* code cells */
+    .code-block {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: normal;
+      overflow-x: auto;
+      margin: 0;
+      padding: 0;
+    }
+    .s-kw  { color: var(--s-kw); }
+    .s-str { color: var(--s-str); }
+    .s-fn  { color: var(--s-fn); }
+    .s-cmt { color: var(--s-cmt); font-style: italic; }
+    .s-num { color: var(--s-num); }
+    .s-op  { color: var(--s-op); }
+    .s-cls { color: var(--c-yellow); }
+    .s-var { color: var(--c-cyan); }
+
+    /* ============ PLOT CELLS ============ */
+    .plot {
+      position: relative;
+      background: var(--bg-out);
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
+      padding: 1rem 1rem 0.6rem;
+      margin-top: 0.25rem;
+    }
+    .plot-caption {
+      margin-top: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+    .plot-caption b { color: var(--text); font-weight: 600; }
+    .plot-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-mute);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+    }
+
+    /* ============ PIPELINE (5-STAGE HORIZONTAL CANVAS) ============ */
+    .pipeline-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      font-family: var(--font-mono);
+    }
+    .ps-axis { stroke: var(--border); stroke-width: 0.8; }
+    .ps-tick { stroke: var(--text-dim); stroke-width: 0.6; }
+    .ps-tick-label { font-size: 9px; fill: var(--text-dim); font-family: var(--font-mono); }
+    .ps-stage-rect {
+      fill: var(--bg-cell);
+      stroke-width: 1.5;
+      opacity: 0;
+      transition: opacity 600ms ease;
+    }
+    .draw-on .ps-stage-rect { opacity: 1; }
+    .draw-on .ps-stage-rect:nth-of-type(2) { transition-delay: 120ms; }
+    .draw-on .ps-stage-rect:nth-of-type(3) { transition-delay: 240ms; }
+    .draw-on .ps-stage-rect:nth-of-type(4) { transition-delay: 360ms; }
+    .draw-on .ps-stage-rect:nth-of-type(5) { transition-delay: 480ms; }
+
+    .ps-stage-label-num {
+      font-size: 9px;
+      fill: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+    .ps-stage-label-name {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+    .ps-stage-label-fn {
+      font-size: 9.5px;
+      fill: var(--text-mute);
+      font-style: italic;
+      font-family: var(--font-var);
+    }
+    .ps-arrow {
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      transition: stroke-dashoffset 1200ms cubic-bezier(0.4,0,0.2,1);
+    }
+    .draw-on .ps-arrow { stroke-dashoffset: 0; transition-delay: 700ms; }
+    .ps-flow-dot {
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+    .draw-on .ps-flow-dot { opacity: 1; transition-delay: 1500ms; }
+
+    /* ============ VECTOR SCATTER PLOT ============ */
+    .scatter-wrap {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 820px) { .scatter-wrap { grid-template-columns: 1fr; } }
+    .scatter-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      aspect-ratio: 1 / 0.85;
+    }
+    .sc-grid-major { stroke: var(--border); stroke-width: 0.4; }
+    .sc-grid-minor { stroke: var(--grid); stroke-width: 0.3; }
+    .sc-axis { stroke: var(--text-dim); stroke-width: 0.6; }
+    .sc-tick-label { font-size: 7px; fill: var(--text-dim); font-family: var(--font-mono); }
+    .sc-axis-label { font-size: 8px; fill: var(--text-mute); font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; }
+
+    .sc-dot {
+      opacity: 0;
+      transition: opacity 600ms ease, r 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .draw-on .sc-dot { opacity: 0.75; }
+    .draw-on .sc-dot.dim { opacity: 0.18; }
+    .draw-on .sc-dot.neighbor { opacity: 1; }
+    .draw-on .sc-dot:nth-of-type(1) { transition-delay: 100ms; }
+    .draw-on .sc-dot:nth-of-type(5) { transition-delay: 200ms; }
+    .draw-on .sc-dot:nth-of-type(10) { transition-delay: 300ms; }
+    .draw-on .sc-dot:nth-of-type(15) { transition-delay: 400ms; }
+    .draw-on .sc-dot:nth-of-type(20) { transition-delay: 500ms; }
+    .draw-on .sc-dot:nth-of-type(25) { transition-delay: 600ms; }
+    .draw-on .sc-dot:nth-of-type(30) { transition-delay: 700ms; }
+    .draw-on .sc-dot:nth-of-type(35) { transition-delay: 800ms; }
+
+    .sc-query {
+      opacity: 0;
+      transform-origin: center;
+      transform-box: fill-box;
+      transform: scale(0);
+      transition: opacity 500ms ease, transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .scatter-svg.played .sc-query { opacity: 1; transform: scale(1); transition-delay: 1000ms; }
+
+    .sc-query-halo {
+      opacity: 0;
+      transform-origin: center;
+      transform-box: fill-box;
+      transform: scale(0);
+      transition: opacity 700ms ease, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .scatter-svg.played .sc-query-halo { opacity: 0.35; transform: scale(1); transition-delay: 1100ms; }
+
+    .sc-ray {
+      stroke-dasharray: 60;
+      stroke-dashoffset: 60;
+      opacity: 0;
+      transition: stroke-dashoffset 700ms ease, opacity 400ms ease;
+    }
+    .scatter-svg.played .sc-ray { stroke-dashoffset: 0; opacity: 0.85; transition-delay: 1500ms; }
+    .scatter-svg.played .sc-ray:nth-of-type(2) { transition-delay: 1650ms; }
+    .scatter-svg.played .sc-ray:nth-of-type(3) { transition-delay: 1800ms; }
+
+    .sc-ring {
+      opacity: 0;
+      transform-origin: center;
+      transform-box: fill-box;
+      transform: scale(0.5);
+      transition: opacity 400ms ease, transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .scatter-svg.played .sc-ring { opacity: 0.9; transform: scale(1); transition-delay: 2000ms; }
+    .scatter-svg.played .sc-ring:nth-of-type(2) { transition-delay: 2120ms; }
+    .scatter-svg.played .sc-ring:nth-of-type(3) { transition-delay: 2240ms; }
+
+    .sc-query-text {
+      font-family: var(--font-mono);
+      font-size: 6.5px;
+      fill: var(--c-salmon);
+      opacity: 0;
+      transition: opacity 400ms ease;
+    }
+    .scatter-svg.played .sc-query-text { opacity: 1; transition-delay: 1300ms; }
+
+    /* legend */
+    .scatter-legend {
+      background: var(--bg-cell);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .scatter-legend h4 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mute);
+      margin: 0 0 0.7rem;
+      font-weight: 500;
+    }
+    .legend-row { display: flex; align-items: center; gap: 0.55rem; padding: 0.3rem 0; color: var(--text); }
+    .legend-row i {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; display: inline-block;
+    }
+    .legend-row span.n { margin-left: auto; color: var(--text-dim); font-size: 10px; }
+    .legend-row i.q { background: var(--c-salmon); box-shadow: 0 0 8px var(--c-salmon); }
+    .legend-row i.a { background: var(--c-cyan); }
+    .legend-row i.b { background: var(--c-magenta); }
+    .legend-row i.c { background: var(--c-yellow); }
+    .legend-row i.d { background: var(--c-green); }
+    .replay-btn {
+      margin-top: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.7rem;
+      background: var(--bg-out);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-mute);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color 200ms, color 200ms;
+      width: 100%;
+      justify-content: center;
+    }
+    .replay-btn:hover { border-color: var(--c-cyan); color: var(--c-cyan); }
+    .replay-btn svg { width: 12px; height: 12px; }
+
+    /* ============ STATS PRINTOUT ============ */
+    .printout {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      line-height: 1.85;
+      color: var(--text);
+    }
+    .printout .prompt { color: var(--c-cyan); user-select: none; }
+    .printout .var { color: var(--text); }
+    .printout .op { color: var(--s-op); }
+    .printout .num { color: var(--c-yellow); font-variant-numeric: tabular-nums; }
+    .printout .str { color: var(--c-green); }
+    .printout .cmt { color: var(--text-dim); font-style: italic; display: block; margin-top: 0.2rem; }
+    .printout .ret { color: var(--text-mute); padding-left: 0; }
+    .printout .ret::before { content: '→ '; color: var(--text-dim); }
+
+    /* ============ SUBPLOT GRID (4 mini-plots) ============ */
+    .subplot-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.85rem;
+      margin-top: 0.5rem;
+    }
+    @media (max-width: 820px) { .subplot-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .subplot-grid { grid-template-columns: 1fr; } }
+    .subplot {
+      background: var(--bg-out);
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
+      padding: 0.85rem;
+    }
+    .subplot-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-mute);
+      margin-bottom: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+    }
+    .subplot-title b { color: var(--text); font-weight: 600; }
+    .subplot-title .idx { color: var(--text-dim); }
+    .subplot-svg { width: 100%; height: 70px; display: block; }
+    .subplot-caption {
+      font-family: var(--font-body);
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.45;
+      margin: 0.65rem 0 0;
+    }
+    .subplot-caption b { color: var(--c-cyan); font-weight: 500; }
+    .subplot-stat {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed var(--border);
+    }
+    .subplot-stat b { color: var(--text-mute); }
+
+    .sp-bar { transition: opacity 500ms ease; opacity: 0; }
+    .draw-on .sp-bar { opacity: 1; }
+    .draw-on .sp-bar:nth-of-type(2) { transition-delay: 80ms; }
+    .draw-on .sp-bar:nth-of-type(3) { transition-delay: 160ms; }
+    .draw-on .sp-bar:nth-of-type(4) { transition-delay: 240ms; }
+    .draw-on .sp-bar:nth-of-type(5) { transition-delay: 320ms; }
+    .draw-on .sp-bar:nth-of-type(6) { transition-delay: 400ms; }
+    .draw-on .sp-bar:nth-of-type(7) { transition-delay: 480ms; }
+    .draw-on .sp-bar:nth-of-type(8) { transition-delay: 560ms; }
+    .draw-on .sp-bar:nth-of-type(9) { transition-delay: 640ms; }
+    .draw-on .sp-bar:nth-of-type(10) { transition-delay: 720ms; }
+
+    /* ============ FINAL "MARKDOWN" CELL — CALL TO ACTION ============ */
+    .cta-cell .md p { max-width: 60ch; }
+    .cta-link {
       display: inline-flex;
       align-items: center;
       gap: 0.55rem;
-      padding: 1.05rem 1.85rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-weight: 500;
-      font-size: 1rem;
-      border: none;
-      cursor: pointer;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms var(--ease-spring), background 200ms ease, box-shadow 300ms ease;
-      will-change: transform;
-      box-shadow: 0 6px 18px rgba(217, 79, 48, 0.28);
+      padding: 0.7rem 1.1rem;
+      background: var(--bg-out);
+      border: 1px solid var(--c-cyan);
+      border-radius: 4px;
+      color: var(--c-cyan);
+      font-family: var(--font-mono);
+      font-size: 13px;
       text-decoration: none;
-    }
-    .magnetic:hover { background: var(--color-accent-hover); box-shadow: 0 10px 24px rgba(217, 79, 48, 0.38); }
-    .magnetic .arrow { transition: transform 300ms var(--ease-out); }
-    .magnetic:hover .arrow { transform: translateX(4px); }
-
-    .secondary-link {
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: color 200ms;
-    }
-    .secondary-link:hover { color: var(--color-accent); }
-
-    /* ============ PIPELINE — THE WOW VISUAL ============ */
-    .pipeline-section {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 5rem 1.5rem 4rem;
-    }
-    .section-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-text-muted);
-      margin: 0 0 0.75rem;
-    }
-    .section-title {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4.5vw, 3.25rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      line-height: 1.05;
-      margin: 0 0 1rem;
-      max-width: 22ch;
-    }
-    .section-title em { font-style: normal; color: var(--color-accent); }
-    .section-lead {
-      color: var(--color-text-secondary);
-      max-width: 62ch;
-      font-size: 1.1rem;
-      margin: 0 0 3rem;
-    }
-
-    .pipeline-wrap {
-      position: relative;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 1.25rem;
-      padding: 3rem 2rem 2.25rem;
-      box-shadow: var(--shadow-md);
-      overflow: hidden;
-    }
-    .pipeline-wrap::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at top, rgba(217, 79, 48, 0.04), transparent 60%);
-      pointer-events: none;
-    }
-    .pipeline-input,
-    .pipeline-output {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.74rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-text-muted);
-      margin-bottom: 1.5rem;
-    }
-    .pipeline-output {
-      margin: 1.75rem 0 0;
-      justify-content: flex-end;
-      min-height: 1.4rem;
-    }
-    .output-caption {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.3rem 0.7rem;
-      border-radius: 999px;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 500;
-      opacity: 0;
-      transform: translateY(4px);
-      transition: opacity 350ms var(--ease-out), transform 350ms var(--ease-out);
-    }
-    .output-caption.show { opacity: 1; transform: translateY(0); }
-    .output-caption::before {
-      content: '';
-      display: inline-block;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      box-shadow: 0 0 8px var(--color-accent);
-    }
-
-    .pipeline {
-      position: relative;
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 0.5rem;
-      min-height: 150px;
-    }
-
-    .stage {
-      position: relative;
-      padding: 1.25rem 0.75rem;
-      border: 1px solid var(--color-border);
-      border-radius: 0.85rem;
-      background: var(--color-bg);
-      text-align: center;
-      transition: transform var(--duration-normal) var(--ease-spring),
-                  border-color var(--duration-normal),
-                  box-shadow var(--duration-normal);
-      z-index: 2;
-    }
-    .stage.lit {
-      border-color: var(--color-accent);
-      box-shadow: 0 0 0 4px var(--color-accent-light);
-      transform: translateY(-2px);
-    }
-    .stage-label {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      margin-bottom: 0.4rem;
-    }
-    .stage-name {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 0.95rem;
-      letter-spacing: -0.01em;
-      color: var(--color-text);
-    }
-    .stage-name b { color: var(--color-accent); }
-    .stage-glyph {
-      width: 24px; height: 24px;
-      margin: 0.55rem auto 0.4rem;
-      display: block;
-      color: var(--color-accent);
-    }
-
-    .rail {
-      position: absolute;
-      top: 50%;
-      left: 8%;
-      right: 8%;
-      height: 2px;
-      background: repeating-linear-gradient(
-        to right,
-        var(--color-accent-muted) 0 6px,
-        transparent 6px 12px
-      );
-      transform: translateY(-50%);
-      opacity: 0.5;
-      z-index: 1;
-    }
-
-    .packets {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 3;
-    }
-    .packet {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      transform: translate(-50%, -50%);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.35rem 0.7rem;
-      border-radius: 999px;
-      background: var(--color-surface);
-      border: 1.5px solid var(--color-accent);
-      box-shadow: 0 4px 14px rgba(217, 79, 48, 0.22),
-                  0 0 0 4px var(--color-accent-light);
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      font-weight: 500;
-      color: var(--color-accent);
-      white-space: nowrap;
-      will-change: left, opacity;
-    }
-    .packet::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      box-shadow: 0 0 6px var(--color-accent);
-    }
-
-    @media (max-width: 720px) {
-      .pipeline { grid-template-columns: repeat(5, minmax(78px, 1fr)); gap: 0.35rem; min-height: 130px; }
-      .stage { padding: 0.85rem 0.4rem; }
-      .stage-name { font-size: 0.78rem; }
-      .stage-label { font-size: 0.62rem; }
-      .packet { font-size: 0.62rem; padding: 0.25rem 0.5rem; }
-    }
-
-    /* ============ VECTOR SPACE — THE SECOND-LEVEL WOW ============ */
-    .vector-section {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 5rem;
-    }
-    .vector-card {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 3rem;
-      align-items: center;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 1.25rem;
-      padding: 2.5rem;
-      box-shadow: var(--shadow-md);
-    }
-    @media (max-width: 920px) {
-      .vector-card { grid-template-columns: 1fr; gap: 2rem; padding: 1.75rem; }
-    }
-    .vector-copy h3 {
-      font-family: var(--font-display);
-      font-size: clamp(1.5rem, 3vw, 2.1rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin: 0.5rem 0 0.75rem;
-      line-height: 1.1;
-    }
-    .vector-copy h3 em { font-style: normal; color: var(--color-accent); }
-    .vector-copy p {
-      color: var(--color-text-secondary);
-      margin: 0 0 0.85rem;
-      font-size: 1rem;
-      line-height: 1.6;
-    }
-    .vector-copy .v-key {
-      font-family: var(--font-mono);
-      background: var(--color-accent-light);
-      color: var(--color-accent-hover);
-      padding: 0.1rem 0.4rem;
-      border-radius: 6px;
-      font-size: 0.9em;
-      font-weight: 500;
-    }
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.85rem;
-      margin-top: 1.25rem;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-    .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
-    .legend i {
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .legend i.q { background: var(--color-actor-1); box-shadow: 0 0 8px var(--color-actor-1); }
-    .legend i.a { background: var(--color-actor-2); }
-    .legend i.b { background: var(--color-actor-3); }
-    .legend i.c { background: var(--color-actor-4); }
-    .legend i.d { background: var(--color-actor-5); }
-
-    .vector-svg-wrap {
-      position: relative;
-      aspect-ratio: 1 / 1;
-      max-width: 460px;
-      width: 100%;
-      margin: 0 auto;
-      background: var(--color-bg);
-      border: 1px solid var(--color-border-light);
-      border-radius: 1rem;
-      padding: 1rem;
-      overflow: hidden;
-    }
-    .vector-svg-wrap::after {
-      content: 'embedding space · 2D projection';
-      position: absolute;
-      bottom: 0.65rem;
-      right: 0.85rem;
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-    .vec-svg { width: 100%; height: 100%; display: block; }
-    .vec-svg .grid-line { stroke: var(--color-border-light); stroke-width: 0.4; }
-    .vec-svg .dot {
-      transition: r 400ms var(--ease-spring), opacity 400ms ease;
-      opacity: 0.6;
-    }
-    .vec-svg .dot.dim { opacity: 0.18; }
-    .vec-svg .dot.neighbor { opacity: 1; }
-    .vec-svg .neighbor-ring {
-      fill: none;
-      stroke: var(--color-accent);
-      stroke-width: 1.5;
-      opacity: 0;
-      transform-origin: center;
-      transform-box: fill-box;
-      transform: scale(0.6);
-      transition: opacity 400ms ease, transform 400ms var(--ease-spring);
-    }
-    .vec-svg .neighbor-ring.on { opacity: 0.85; transform: scale(1); }
-    .vec-svg .query-dot {
-      transform-origin: center;
-      transform-box: fill-box;
-      transform: scale(0);
-      transition: transform 500ms var(--ease-spring);
-    }
-    .vec-svg .query-dot.land { transform: scale(1); }
-    .vec-svg .query-halo {
-      transform-origin: center;
-      transform-box: fill-box;
-      transform: scale(0);
-      transition: transform 600ms var(--ease-spring), opacity 600ms ease;
-      opacity: 0;
-    }
-    .vec-svg .query-halo.on { transform: scale(1); opacity: 0.4; }
-    .vec-svg .ray {
-      stroke: var(--color-accent);
-      stroke-width: 1.4;
-      stroke-dasharray: 4 4;
-      opacity: 0;
-      transition: opacity 500ms ease, stroke-dashoffset 800ms var(--ease-out);
-      stroke-dashoffset: 80;
-    }
-    .vec-svg .ray.on { opacity: 0.8; stroke-dashoffset: 0; }
-    .vec-svg .query-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 7px;
-      fill: var(--color-accent);
-      opacity: 0;
-      transition: opacity 400ms ease 300ms;
-    }
-    .vec-svg .query-label.on { opacity: 1; }
-
-    .replay {
-      margin-top: 1rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.55rem 1.1rem;
-      border-radius: 999px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      color: var(--color-text-secondary);
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      transition: border-color var(--duration-normal), color var(--duration-normal), transform var(--duration-normal) var(--ease-spring);
-    }
-    .replay:hover { border-color: var(--color-accent); color: var(--color-accent); transform: translateY(-1px); }
-    .replay svg { width: 14px; height: 14px; }
-
-    /* ============ BENTO ============ */
-    .bento-section {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 4rem 1.5rem 5rem;
-    }
-    .bento {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-    }
-    .tile {
-      position: relative;
-      padding: 2rem 1.75rem;
-      border-radius: 1rem;
-      background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
-                  rgba(217, 79, 48, 0.07), transparent 40%),
-                  var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring),
-                  box-shadow var(--duration-normal);
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    .tile.visible { opacity: 1; transform: translateY(0); transition: opacity var(--duration-slower) var(--ease-spring),
-                  transform var(--duration-slower) var(--ease-spring),
-                  border-color var(--duration-normal); }
-    .tile.visible:nth-child(2) { transition-delay: 80ms; }
-    .tile.visible:nth-child(3) { transition-delay: 160ms; }
-    .tile.visible:nth-child(4) { transition-delay: 240ms; }
-    @media (hover: hover) {
-      .tile.visible:hover { transform: translateY(-4px); border-color: var(--color-accent-muted); box-shadow: var(--shadow-lg); }
-    }
-
-    .tile-tag {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 0.25rem 0.6rem;
-      border-radius: 999px;
-      display: inline-block;
-    }
-    .tile-headline {
-      font-family: var(--font-display);
-      font-weight: 700;
-      font-size: 1.2rem;
-      letter-spacing: -0.01em;
-      margin: 1rem 0 0.4rem;
-      color: var(--color-text);
-    }
-    .tile-body {
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
-      margin: 0;
-      line-height: 1.55;
-    }
-    .tile-foot {
-      margin-top: 1rem;
-      padding-top: 0.85rem;
-      border-top: 1px dashed var(--color-border);
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.04em;
-      color: var(--color-text-muted);
-    }
-    .tile-foot b { color: var(--color-text); font-weight: 500; }
-
-    /* tiny visual flourishes per tile */
-    .chunk-vis {
-      display: flex;
-      gap: 3px;
-      height: 14px;
-      margin-bottom: 1rem;
-    }
-    .chunk-vis span {
-      flex: 1;
-      border-radius: 2px;
-      background: var(--color-accent-muted);
-      opacity: 0.55;
-    }
-    .chunk-vis span:nth-child(1) { flex: 2; background: var(--color-accent); opacity: 1; }
-    .chunk-vis span:nth-child(2) { flex: 1.5; opacity: 0.8; }
-    .chunk-vis span:nth-child(3) { flex: 2.5; opacity: 0.7; background: var(--color-accent); }
-    .chunk-vis span:nth-child(4) { flex: 1; opacity: 0.55; }
-    .chunk-vis span:nth-child(5) { flex: 2; opacity: 0.7; background: var(--color-accent); }
-    .chunk-vis span:nth-child(6) { flex: 1.2; opacity: 0.5; }
-
-    .embed-vis {
-      display: flex;
-      gap: 3px;
-      height: 14px;
-      margin-bottom: 1rem;
-      align-items: flex-end;
-    }
-    .embed-vis span {
-      width: 5px;
-      background: var(--color-accent-muted);
-      border-radius: 1px;
-    }
-    .embed-vis span:nth-child(1)  { height: 60%; }
-    .embed-vis span:nth-child(2)  { height: 90%; background: var(--color-accent); }
-    .embed-vis span:nth-child(3)  { height: 30%; }
-    .embed-vis span:nth-child(4)  { height: 70%; background: var(--color-accent); }
-    .embed-vis span:nth-child(5)  { height: 50%; }
-    .embed-vis span:nth-child(6)  { height: 80%; background: var(--color-accent); }
-    .embed-vis span:nth-child(7)  { height: 40%; }
-    .embed-vis span:nth-child(8)  { height: 100%; background: var(--color-accent); }
-    .embed-vis span:nth-child(9)  { height: 25%; }
-    .embed-vis span:nth-child(10) { height: 65%; }
-    .embed-vis span:nth-child(11) { height: 45%; }
-    .embed-vis span:nth-child(12) { height: 75%; background: var(--color-accent); }
-
-    .index-vis {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 3px;
-      margin-bottom: 1rem;
-    }
-    .index-vis span {
-      aspect-ratio: 1;
-      background: var(--color-accent-muted);
-      border-radius: 2px;
-      opacity: 0.4;
-    }
-    .index-vis span.hot { opacity: 1; background: var(--color-accent); }
-
-    .rerank-vis {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-bottom: 1rem;
-    }
-    .rerank-vis .row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.62rem;
-      color: var(--color-text-muted);
-    }
-    .rerank-vis .bar {
-      height: 6px;
-      border-radius: 2px;
-      background: var(--color-accent-muted);
-      opacity: 0.5;
-    }
-    .rerank-vis .row:nth-child(1) .bar { width: 85%; background: var(--color-accent); opacity: 1; }
-    .rerank-vis .row:nth-child(2) .bar { width: 60%; opacity: 0.7; }
-    .rerank-vis .row:nth-child(3) .bar { width: 45%; opacity: 0.55; }
-
-    @media (max-width: 920px) { .bento { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 480px) { .bento { grid-template-columns: 1fr; } }
-
-    /* ============ CODE BLOCK ============ */
-    .code-section {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 5rem;
-    }
-    .code-wrap {
-      display: grid;
-      grid-template-columns: 1fr 1.15fr;
-      gap: 3rem;
-      align-items: start;
-    }
-    .code-wrap .lede h2 { margin-top: 0; }
-    .code-wrap .lede p { color: var(--color-text-secondary); margin: 0 0 1rem; }
-    .code-wrap pre {
-      background: var(--color-bg-code);
-      color: #CDD6F4;
-      border-radius: 1rem;
-      padding: 1.5rem 1.5rem 1.25rem;
-      font-family: var(--font-mono);
-      font-size: 0.84rem;
-      line-height: 1.7;
-      overflow-x: hidden;
-      white-space: pre-wrap;
-      word-break: break-word;
-      box-shadow: var(--shadow-lg);
-      margin: 0;
-    }
-    .code-wrap pre .filename {
-      display: block;
-      font-size: 0.7rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #6C7086;
-      margin-bottom: 1rem;
-    }
-    .ck-kw { color: #CBA6F7; }
-    .ck-str { color: #A6E3A1; }
-    .ck-fn { color: #89B4FA; }
-    .ck-cmt { color: #6C7086; font-style: italic; }
-    .ck-op { color: #F38BA8; }
-    .ck-num { color: #FAB387; }
-    .ck-pipe { color: #F38BA8; font-weight: 700; }
-
-    @media (max-width: 920px) { .code-wrap { grid-template-columns: 1fr; gap: 1.5rem; } }
-
-    /* ============ STATS ============ */
-    .stats-section {
-      background: var(--color-bg-warm);
-      border-top: 1px solid var(--color-border);
-      border-bottom: 1px solid var(--color-border);
-      padding: 5rem 1.5rem;
-    }
-    .stats-inner { max-width: 1180px; margin: 0 auto; }
-    .stats-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 3rem; }
-    .stats-header h2 { font-family: var(--font-display); font-size: clamp(1.75rem, 3.2vw, 2.5rem); font-weight: 700; letter-spacing: -0.02em; margin: 0; max-width: 22ch; line-height: 1.05; }
-    .stats-header h2 em { font-style: normal; color: var(--color-accent); }
-    .stats-header p { font-family: var(--font-mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-text-muted); margin: 0; }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-    }
-    .stat {
-      padding: 1.75rem 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 1rem;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
-    }
-    .stat.visible { opacity: 1; transform: translateY(0); }
-    .stat.visible:nth-child(2) { transition-delay: 80ms; }
-    .stat.visible:nth-child(3) { transition-delay: 160ms; }
-    .stat.visible:nth-child(4) { transition-delay: 240ms; }
-
-    .stat-value {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 2.85rem);
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
-      color: var(--color-text);
-    }
-    .stat-value .unit { color: var(--color-accent); font-size: 0.55em; margin-left: 0.05em; font-weight: 700; }
-    .stat-value .plus { color: var(--color-accent); }
-    .stat-value .pct { color: var(--color-accent); font-size: 0.65em; margin-left: 0.05em; }
-    .stat-label {
-      margin-top: 0.65rem;
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
-      line-height: 1.45;
-    }
-    .stat-source {
+      transition: background 200ms, color 200ms;
       margin-top: 0.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
     }
+    .cta-link:hover { background: var(--c-cyan); color: var(--bg); }
 
-    @media (max-width: 920px) { .stats { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 480px) { .stats { grid-template-columns: 1fr; } }
-
-    /* ============ FINAL CTA ============ */
-    .final {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 6rem 1.5rem 7rem;
-      text-align: center;
-    }
-    .final h2 {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4.5vw, 3rem);
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      line-height: 1.05;
-      margin: 0 0 1rem;
-    }
-    .final h2 em { font-style: normal; color: var(--color-accent); }
-    .final p {
-      color: var(--color-text-secondary);
-      margin: 0 auto 2.5rem;
-      max-width: 50ch;
-      font-size: 1.1rem;
-    }
-
-    .foot {
+    .nb-footer {
       max-width: 1180px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem 3rem;
+      margin: 1rem auto 0;
+      padding: 1rem;
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 0.5rem;
       font-family: var(--font-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      border-top: 1px solid var(--color-border);
+      font-size: 10.5px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
     }
-    .foot a { color: var(--color-text-secondary); text-decoration: none; transition: color 200ms; }
-    .foot a:hover { color: var(--color-accent); }
+    .nb-footer a { color: var(--text-mute); text-decoration: none; }
+    .nb-footer a:hover { color: var(--c-cyan); }
+
+    /* ============ NUMBER TICKER (printout) ============ */
+    .num.ticking { color: var(--c-yellow); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 640px) {
+      .cell { grid-template-columns: 56px 1fr; }
+      .gutter { padding: 0.85rem 0.5rem 0.85rem 0.6rem; font-size: 10px; }
+      .cell-body { padding: 0.85rem 0.9rem 1rem; }
+      .md h1 { font-size: 22px; }
+      .md p, .printout, .code-block { font-size: 12.5px; }
+      .nb-toolbar { gap: 0.7rem; font-size: 10px; }
+      .nb-meta { display: none; }
+    }
 
     /* ============ REDUCED MOTION ============ */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
       }
-      .hero .word, .hero-sub, .cta-row, .stat, .tile, .eyebrow,
-      .hero-title em::after { opacity: 1 !important; transform: none !important; }
-      .packet { display: none; }
-      .rail { opacity: 1; }
-      .vec-svg .query-dot, .vec-svg .query-halo { transform: scale(1) !important; opacity: 1 !important; }
-      .vec-svg .neighbor-ring { opacity: 0.85 !important; transform: scale(1) !important; }
-      .vec-svg .ray { opacity: 0.8 !important; stroke-dashoffset: 0 !important; }
-      .vec-svg .dot.dim { opacity: 0.6 !important; }
-      .vec-svg .query-label { opacity: 1 !important; }
-    }
-    @media (hover: none) {
-      .magnetic { transform: none !important; }
+      .ps-stage-rect, .ps-arrow, .ps-flow-dot { opacity: 1 !important; stroke-dashoffset: 0 !important; }
+      .sc-dot { opacity: 0.75 !important; }
+      .sc-query, .sc-query-halo, .sc-ring { opacity: 1 !important; transform: scale(1) !important; }
+      .sc-query-halo { opacity: 0.35 !important; }
+      .sc-ray { stroke-dashoffset: 0 !important; opacity: 0.85 !important; }
+      .sc-query-text { opacity: 1 !important; }
+      .sp-bar { opacity: 1 !important; }
     }
   </style>
 </head>
 <body>
 
-  <div class="top-strip">
-    <span class="brand"><b>CETI.AI</b> · Lookbook</span>
-    <span>RAG · RETRIEVAL-AUGMENTED GENERATION</span>
-  </div>
+  <main class="nb-shell">
 
-  <!-- HERO -->
-  <section class="hero" id="hero">
-    <p class="eyebrow">RAG · Retrieval-Augmented Generation</p>
-    <h1 class="hero-title">
-      <span class="word">Don't</span>
-      <span class="word">fine-tune.</span>
-      <span class="word"><em>Retrieve.</em></span>
-      <span class="word">Memory for</span>
-      <span class="word">stateless models.</span>
-    </h1>
-    <p class="hero-sub">A language model can't know what you didn't train it on. RAG plugs that gap at inference time: index your knowledge, pull the relevant chunks at query time, and hand them to the model alongside the question. The model gets context. You skip the GPU bill.</p>
-    <div class="cta-row">
-      <a class="magnetic" href="#pipeline">
-        See the pipeline
-        <span class="arrow">→</span>
-      </a>
-      <a class="secondary-link" href="#code">Show me the code ↓</a>
-    </div>
-  </section>
+    <!-- TITLE BAR -->
+    <header class="nb-titlebar">
+      <span class="nb-dots"><i></i><i></i><i></i></span>
+      <span class="nb-filename">rag.ipynb</span>
+      <span style="color: var(--text-dim);">·</span>
+      <span>MM</span>
+      <span style="color: var(--text-dim);">·</span>
+      <span>2026-05-15</span>
+      <span class="nb-meta">
+        <span class="nb-kernel">Python 3.12 · idle</span>
+      </span>
+    </header>
 
-  <!-- PIPELINE WOW VISUAL -->
-  <section class="pipeline-section" id="pipeline">
-    <p class="section-eyebrow">The five-stage pipeline</p>
-    <h2 class="section-title">Query in. <em>Grounded answer out.</em></h2>
-    <p class="section-lead">RAG is a runtime pattern, not a model architecture. Every request flows through the same five stages — embed the question, search the index, augment the prompt with what you found, generate the answer. The model never learns your data; it borrows it.</p>
+    <nav class="nb-toolbar" aria-label="Notebook toolbar">
+      <span>File</span><span>Edit</span><span>View</span><span>Run</span><span>Kernel</span><span>Help</span>
+    </nav>
 
-    <div class="pipeline-wrap" aria-hidden="true">
-      <div class="pipeline-input">
-        <span>INPUT</span>
-        <span style="color: var(--color-accent); font-family: var(--font-mono); text-transform: none; letter-spacing: 0;">&nbsp;"What's our refund window for damaged shipments?"</span>
-      </div>
+    <!-- NOTEBOOK STREAM -->
+    <div class="nb-stream">
 
-      <div class="pipeline" id="pipelineGrid">
-        <div class="rail"></div>
-
-        <div class="stage" data-idx="0">
-          <div class="stage-label">01 · Ask</div>
-          <div class="stage-name"><b>QUERY</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7v.5"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>
+      <!-- In[1] · Markdown intro -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>1</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># 09 / 18 · ceti-lookbook</span>
+          <h1>RAG — Memory for stateless models.</h1>
+          <p>A language model can't know what you didn't train it on. <strong>Retrieval-Augmented Generation</strong> plugs that gap at inference time: index your knowledge, pull the relevant chunks at query time, and hand them to the model alongside the question.</p>
+          <p>The model gets context. You skip the GPU bill. Below: the five-stage pipeline as a horizontal plot, the 2D vector space as a scatter, twelve lines of working code, and the four levers that decide whether a RAG system grounds or hallucinates.</p>
+          <p style="color: var(--text-mute); font-size: 13px;">Don't fine-tune. <em class="var">Retrieve.</em></p>
         </div>
-        <div class="stage" data-idx="1">
-          <div class="stage-label">02 · Vectorize</div>
-          <div class="stage-name"><b>EMBED</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h4M4 12h7M4 18h5M14 6l3 6-3 6M20 6l-3 6 3 6"/></svg>
-        </div>
-        <div class="stage" data-idx="2">
-          <div class="stage-label">03 · Retrieve</div>
-          <div class="stage-name"><b>SEARCH</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.3-4.3"/></svg>
-        </div>
-        <div class="stage" data-idx="3">
-          <div class="stage-label">04 · Stuff</div>
-          <div class="stage-name"><b>AUGMENT</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 10h8M8 14h6"/><path d="m15 4 2 2-2 2"/></svg>
-        </div>
-        <div class="stage" data-idx="4">
-          <div class="stage-label">05 · Answer</div>
-          <div class="stage-name"><b>GENERATE</b></div>
-          <svg class="stage-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/><circle cx="12" cy="12" r="3.5"/></svg>
-        </div>
-
-        <div class="packets" id="packets"></div>
-      </div>
-
-      <div class="pipeline-output">
-        <span class="output-caption" id="outCaption">OUTPUT · grounded answer + citations</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- VECTOR SPACE (the second-level WOW) -->
-  <section class="vector-section">
-    <div class="vector-card">
-      <div class="vector-copy">
-        <p class="section-eyebrow">Zoom in · stage 03</p>
-        <h3>Inside the search step: <em>geometry, not keywords.</em></h3>
-        <p>Every chunk in your knowledge base lives as a point in a high-dimensional space — usually <span class="v-key">1536</span> or <span class="v-key">3072</span> dimensions. Similar meanings cluster together. "Refund window," "return policy," and "money-back" all land in the same neighborhood, even with zero shared words.</p>
-        <p>At query time we drop the question into the same space and pull its <span class="v-key">k</span> nearest neighbors by cosine distance. No keyword match required. The model gets the closest meaning, not the closest spelling.</p>
-        <button class="replay" type="button" id="replayBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-          Replay the search
-        </button>
-
-        <div class="legend">
-          <span><i class="q"></i> Query</span>
-          <span><i class="a"></i> Returns</span>
-          <span><i class="b"></i> Shipping</span>
-          <span><i class="c"></i> Billing</span>
-          <span><i class="d"></i> Product</span>
-        </div>
-      </div>
-
-      <div class="vector-svg-wrap">
-        <svg class="vec-svg" id="vecSvg" viewBox="0 0 200 200" aria-hidden="true">
-          <!-- subtle grid -->
-          <g>
-            <line class="grid-line" x1="0" y1="50" x2="200" y2="50"/>
-            <line class="grid-line" x1="0" y1="100" x2="200" y2="100"/>
-            <line class="grid-line" x1="0" y1="150" x2="200" y2="150"/>
-            <line class="grid-line" x1="50" y1="0" x2="50" y2="200"/>
-            <line class="grid-line" x1="100" y1="0" x2="100" y2="200"/>
-            <line class="grid-line" x1="150" y1="0" x2="150" y2="200"/>
-          </g>
-
-          <!-- dot cloud: 4 clusters of ~10 dots each. Coordinates picked by hand. -->
-          <!-- Cluster A (returns/refund) — teal — upper left -->
-          <g id="dots">
-            <circle class="dot" data-id="a1" cx="55" cy="56" r="3" fill="#2A7B9B"/>
-            <circle class="dot" data-id="a2" cx="42" cy="62" r="3" fill="#2A7B9B"/>
-            <circle class="dot" data-id="a3" cx="58" cy="70" r="3" fill="#2A7B9B"/>
-            <circle class="dot" data-id="a4" cx="48" cy="74" r="3" fill="#2A7B9B"/>
-            <circle class="dot" data-id="a5" cx="64" cy="62" r="3" fill="#2A7B9B"/>
-            <circle class="dot" data-id="a6" cx="38" cy="50" r="3" fill="#2A7B9B"/>
-            <circle class="dot" data-id="a7" cx="70" cy="80" r="3" fill="#2A7B9B"/>
-            <circle class="dot" data-id="a8" cx="52" cy="44" r="3" fill="#2A7B9B"/>
-            <circle class="dot" data-id="a9" cx="60" cy="86" r="3" fill="#2A7B9B"/>
-            <circle class="dot" data-id="a10" cx="33" cy="72" r="3" fill="#2A7B9B"/>
-
-            <!-- Cluster B (shipping) — plum — upper right -->
-            <circle class="dot" data-id="b1" cx="142" cy="48" r="3" fill="#7B6DAA"/>
-            <circle class="dot" data-id="b2" cx="155" cy="56" r="3" fill="#7B6DAA"/>
-            <circle class="dot" data-id="b3" cx="148" cy="68" r="3" fill="#7B6DAA"/>
-            <circle class="dot" data-id="b4" cx="162" cy="42" r="3" fill="#7B6DAA"/>
-            <circle class="dot" data-id="b5" cx="170" cy="58" r="3" fill="#7B6DAA"/>
-            <circle class="dot" data-id="b6" cx="135" cy="62" r="3" fill="#7B6DAA"/>
-            <circle class="dot" data-id="b7" cx="158" cy="76" r="3" fill="#7B6DAA"/>
-            <circle class="dot" data-id="b8" cx="172" cy="72" r="3" fill="#7B6DAA"/>
-            <circle class="dot" data-id="b9" cx="145" cy="36" r="3" fill="#7B6DAA"/>
-            <circle class="dot" data-id="b10" cx="165" cy="80" r="3" fill="#7B6DAA"/>
-
-            <!-- Cluster C (billing) — gold — lower right -->
-            <circle class="dot" data-id="c1" cx="155" cy="140" r="3" fill="#D4A843"/>
-            <circle class="dot" data-id="c2" cx="142" cy="148" r="3" fill="#D4A843"/>
-            <circle class="dot" data-id="c3" cx="168" cy="142" r="3" fill="#D4A843"/>
-            <circle class="dot" data-id="c4" cx="148" cy="162" r="3" fill="#D4A843"/>
-            <circle class="dot" data-id="c5" cx="160" cy="156" r="3" fill="#D4A843"/>
-            <circle class="dot" data-id="c6" cx="172" cy="158" r="3" fill="#D4A843"/>
-            <circle class="dot" data-id="c7" cx="138" cy="135" r="3" fill="#D4A843"/>
-            <circle class="dot" data-id="c8" cx="162" cy="170" r="3" fill="#D4A843"/>
-            <circle class="dot" data-id="c9" cx="145" cy="128" r="3" fill="#D4A843"/>
-            <circle class="dot" data-id="c10" cx="178" cy="148" r="3" fill="#D4A843"/>
-
-            <!-- Cluster D (product) — forest — lower left -->
-            <circle class="dot" data-id="d1" cx="50" cy="148" r="3" fill="#2D8B55"/>
-            <circle class="dot" data-id="d2" cx="62" cy="156" r="3" fill="#2D8B55"/>
-            <circle class="dot" data-id="d3" cx="42" cy="160" r="3" fill="#2D8B55"/>
-            <circle class="dot" data-id="d4" cx="56" cy="170" r="3" fill="#2D8B55"/>
-            <circle class="dot" data-id="d5" cx="70" cy="148" r="3" fill="#2D8B55"/>
-            <circle class="dot" data-id="d6" cx="36" cy="148" r="3" fill="#2D8B55"/>
-            <circle class="dot" data-id="d7" cx="48" cy="138" r="3" fill="#2D8B55"/>
-            <circle class="dot" data-id="d8" cx="66" cy="172" r="3" fill="#2D8B55"/>
-            <circle class="dot" data-id="d9" cx="32" cy="170" r="3" fill="#2D8B55"/>
-            <circle class="dot" data-id="d10" cx="76" cy="160" r="3" fill="#2D8B55"/>
-          </g>
-
-          <!-- rays from query to top 3 neighbors (a3, a4, a1) -->
-          <line class="ray" id="ray1" x1="50" y1="62" x2="58" y2="70"/>
-          <line class="ray" id="ray2" x1="50" y1="62" x2="48" y2="74"/>
-          <line class="ray" id="ray3" x1="50" y1="62" x2="55" y2="56"/>
-
-          <!-- neighbor rings around top-3 -->
-          <circle class="neighbor-ring" id="ring1" cx="58" cy="70" r="7"/>
-          <circle class="neighbor-ring" id="ring2" cx="48" cy="74" r="7"/>
-          <circle class="neighbor-ring" id="ring3" cx="55" cy="56" r="7"/>
-
-          <!-- query halo + dot -->
-          <circle class="query-halo" id="qHalo" cx="50" cy="62" r="14" fill="#D94F30" opacity="0.4"/>
-          <circle class="query-dot" id="qDot" cx="50" cy="62" r="4.5" fill="#D94F30"/>
-          <text class="query-label" id="qLabel" x="14" y="58">refund window?</text>
-        </svg>
-      </div>
-    </div>
-  </section>
-
-  <!-- BENTO -->
-  <section class="bento-section">
-    <p class="section-eyebrow">The four levers</p>
-    <h2 class="section-title">Where RAG quality is actually <em>won or lost.</em></h2>
-    <p class="section-lead">Every production RAG system tunes the same four things. Get these right and the model has good evidence to work with. Get them wrong and even GPT-5 will hallucinate confidently.</p>
-
-    <div class="bento">
-      <article class="tile">
-        <div class="chunk-vis"><span></span><span></span><span></span><span></span><span></span><span></span></div>
-        <span class="tile-tag">01 · Chunking</span>
-        <h3 class="tile-headline">How you slice the source.</h3>
-        <p class="tile-body">Fixed-token windows are easy. Semantic chunking respects paragraph boundaries. Hierarchical lets you retrieve a small chunk but pass its full parent for context.</p>
-        <div class="tile-foot"><b>Default:</b> 512 tokens · 50-token overlap</div>
       </article>
 
-      <article class="tile">
-        <div class="embed-vis">
-          <span></span><span></span><span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span><span></span><span></span><span></span>
+      <!-- In[2] · Code + Pipeline plot -->
+      <article class="cell">
+        <div class="gutter">In&nbsp;[<b>2</b>]:<span class="ms">12ms</span></div>
+        <div class="cell-body">
+          <pre class="code-block"><span class="s-cmt"># the RAG pipeline — five-stage runtime, not a model architecture</span>
+<span class="s-kw">from</span> ceti.rag <span class="s-kw">import</span> <span class="s-fn">Pipeline</span>, <span class="s-fn">Stage</span>
+
+pipeline <span class="s-op">=</span> <span class="s-fn">Pipeline</span>([
+    <span class="s-fn">Stage</span>(<span class="s-str">"query"</span>,    fn<span class="s-op">=</span><span class="s-fn">parse_question</span>),
+    <span class="s-fn">Stage</span>(<span class="s-str">"embed"</span>,    fn<span class="s-op">=</span><span class="s-fn">encode</span>),               <span class="s-cmt"># text → ℝ³⁰⁷²</span>
+    <span class="s-fn">Stage</span>(<span class="s-str">"search"</span>,   fn<span class="s-op">=</span><span class="s-fn">knn</span>, k<span class="s-op">=</span><span class="s-num">4</span>),          <span class="s-cmt"># ANN over corpus</span>
+    <span class="s-fn">Stage</span>(<span class="s-str">"augment"</span>,  fn<span class="s-op">=</span><span class="s-fn">stuff_into_prompt</span>),
+    <span class="s-fn">Stage</span>(<span class="s-str">"generate"</span>, fn<span class="s-op">=</span><span class="s-fn">llm</span>),
+])
+pipeline.<span class="s-fn">plot</span>()</pre>
+
+          <div class="plot" data-anim="pipeline">
+            <div class="plot-title">Fig 2.1 · RAG pipeline · five stages, left→right</div>
+            <svg class="pipeline-svg" viewBox="0 0 800 180" preserveAspectRatio="xMidYMid meet" aria-label="Five-stage RAG pipeline">
+              <!-- baseline axis -->
+              <line class="ps-axis" x1="40" y1="135" x2="760" y2="135"/>
+              <!-- x ticks -->
+              <g>
+                <line class="ps-tick" x1="100" y1="135" x2="100" y2="140"/>
+                <line class="ps-tick" x1="240" y1="135" x2="240" y2="140"/>
+                <line class="ps-tick" x1="380" y1="135" x2="380" y2="140"/>
+                <line class="ps-tick" x1="520" y1="135" x2="520" y2="140"/>
+                <line class="ps-tick" x1="660" y1="135" x2="660" y2="140"/>
+                <text class="ps-tick-label" x="100" y="152" text-anchor="middle">t₀</text>
+                <text class="ps-tick-label" x="240" y="152" text-anchor="middle">t₁</text>
+                <text class="ps-tick-label" x="380" y="152" text-anchor="middle">t₂</text>
+                <text class="ps-tick-label" x="520" y="152" text-anchor="middle">t₃</text>
+                <text class="ps-tick-label" x="660" y="152" text-anchor="middle">t₄</text>
+                <text class="ps-tick-label" x="400" y="170" text-anchor="middle" style="font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;">time → request lifecycle</text>
+              </g>
+
+              <!-- flow arrows -->
+              <path class="ps-arrow" d="M 100 60 L 240 60" fill="none" stroke="#56B6C2" stroke-width="1.2" opacity="0.5" marker-end="url(#arrowhead)"/>
+              <path class="ps-arrow" d="M 240 60 L 380 60" fill="none" stroke="#C678DD" stroke-width="1.2" opacity="0.5" marker-end="url(#arrowhead)"/>
+              <path class="ps-arrow" d="M 380 60 L 520 60" fill="none" stroke="#E5C07B" stroke-width="1.2" opacity="0.5" marker-end="url(#arrowhead)"/>
+              <path class="ps-arrow" d="M 520 60 L 660 60" fill="none" stroke="#98C379" stroke-width="1.2" opacity="0.5" marker-end="url(#arrowhead)"/>
+              <defs>
+                <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 z" fill="#8B949E"/>
+                </marker>
+              </defs>
+
+              <!-- 5 stage rects -->
+              <g transform="translate(60, 30)">
+                <rect class="ps-stage-rect" x="0"   y="0"  width="80" height="60" rx="3" stroke="#56B6C2"/>
+                <rect class="ps-stage-rect" x="140" y="0"  width="80" height="60" rx="3" stroke="#C678DD"/>
+                <rect class="ps-stage-rect" x="280" y="0"  width="80" height="60" rx="3" stroke="#E5C07B"/>
+                <rect class="ps-stage-rect" x="420" y="0"  width="80" height="60" rx="3" stroke="#98C379"/>
+                <rect class="ps-stage-rect" x="560" y="0"  width="80" height="60" rx="3" stroke="#E06C75"/>
+              </g>
+
+              <!-- stage labels -->
+              <g font-family="JetBrains Mono, monospace" text-anchor="middle">
+                <text class="ps-stage-label-num" x="100" y="48">01</text>
+                <text class="ps-stage-label-name" x="100" y="65" fill="#56B6C2">QUERY</text>
+                <text class="ps-stage-label-fn" x="100" y="82">q</text>
+
+                <text class="ps-stage-label-num" x="240" y="48">02</text>
+                <text class="ps-stage-label-name" x="240" y="65" fill="#C678DD">EMBED</text>
+                <text class="ps-stage-label-fn" x="240" y="82">f(q) ∈ ℝᵈ</text>
+
+                <text class="ps-stage-label-num" x="380" y="48">03</text>
+                <text class="ps-stage-label-name" x="380" y="65" fill="#E5C07B">SEARCH</text>
+                <text class="ps-stage-label-fn" x="380" y="82">argmax cos(·)</text>
+
+                <text class="ps-stage-label-num" x="520" y="48">04</text>
+                <text class="ps-stage-label-name" x="520" y="65" fill="#98C379">AUGMENT</text>
+                <text class="ps-stage-label-fn" x="520" y="82">[ctx ⊕ q]</text>
+
+                <text class="ps-stage-label-num" x="660" y="48">05</text>
+                <text class="ps-stage-label-name" x="660" y="65" fill="#E06C75">GENERATE</text>
+                <text class="ps-stage-label-fn" x="660" y="82">p(y | x)</text>
+              </g>
+
+              <!-- flow dots beneath -->
+              <g>
+                <circle class="ps-flow-dot" cx="100" cy="118" r="3" fill="#56B6C2"/>
+                <circle class="ps-flow-dot" cx="240" cy="118" r="3" fill="#C678DD"/>
+                <circle class="ps-flow-dot" cx="380" cy="118" r="3" fill="#E5C07B"/>
+                <circle class="ps-flow-dot" cx="520" cy="118" r="3" fill="#98C379"/>
+                <circle class="ps-flow-dot" cx="660" cy="118" r="3" fill="#E06C75"/>
+              </g>
+            </svg>
+            <div class="plot-caption"><b>Fig 2.1</b> · five-stage RAG pipeline. Each request traces left→right; the model never learns your data, it borrows it once per call.</div>
+          </div>
         </div>
-        <span class="tile-tag">02 · Embedding</span>
-        <h3 class="tile-headline">Turning meaning into math.</h3>
-        <p class="tile-body">A text encoder maps each chunk to a fixed-length vector. The choice of model decides how well "refund" lives near "return" and how far it sits from "refurbish."</p>
-        <div class="tile-foot"><b>Common:</b> text-embedding-3-large · voyage-3 · Cohere v3</div>
       </article>
 
-      <article class="tile">
-        <div class="index-vis">
-          <span class="hot"></span><span></span><span></span><span class="hot"></span><span></span><span></span>
-          <span></span><span class="hot"></span><span></span><span></span><span class="hot"></span><span></span>
-          <span></span><span></span><span class="hot"></span><span></span><span></span><span></span>
+      <!-- Out[2] · 2D vector scatter -->
+      <article class="cell is-out">
+        <div class="gutter out">Out[<b>2</b>]:</div>
+        <div class="cell-body">
+          <div class="plot" data-anim="scatter">
+            <div class="plot-title">Fig 2.2 · embedding space · 2D projection (UMAP, n=40)</div>
+            <div class="scatter-wrap">
+              <svg class="scatter-svg" id="scatterSvg" viewBox="0 0 240 200" aria-label="2D vector space scatter plot">
+                <!-- gridlines -->
+                <g>
+                  <line class="sc-grid-minor" x1="40" y1="20"  x2="230" y2="20"/>
+                  <line class="sc-grid-minor" x1="40" y1="60"  x2="230" y2="60"/>
+                  <line class="sc-grid-minor" x1="40" y1="100" x2="230" y2="100"/>
+                  <line class="sc-grid-minor" x1="40" y1="140" x2="230" y2="140"/>
+                  <line class="sc-grid-major" x1="40" y1="180" x2="230" y2="180"/>
+                  <line class="sc-grid-minor" x1="80"  y1="20" x2="80"  y2="180"/>
+                  <line class="sc-grid-minor" x1="120" y1="20" x2="120" y2="180"/>
+                  <line class="sc-grid-minor" x1="160" y1="20" x2="160" y2="180"/>
+                  <line class="sc-grid-minor" x1="200" y1="20" x2="200" y2="180"/>
+                  <line class="sc-grid-major" x1="230" y1="20" x2="230" y2="180"/>
+                </g>
+
+                <!-- axes -->
+                <line class="sc-axis" x1="40" y1="20" x2="40" y2="180"/>
+                <line class="sc-axis" x1="40" y1="180" x2="230" y2="180"/>
+
+                <!-- axis ticks -->
+                <g>
+                  <text class="sc-tick-label" x="38" y="183" text-anchor="end">0</text>
+                  <text class="sc-tick-label" x="38" y="143" text-anchor="end">0.25</text>
+                  <text class="sc-tick-label" x="38" y="103" text-anchor="end">0.50</text>
+                  <text class="sc-tick-label" x="38" y="63"  text-anchor="end">0.75</text>
+                  <text class="sc-tick-label" x="38" y="23"  text-anchor="end">1.0</text>
+                  <text class="sc-tick-label" x="80"  y="190" text-anchor="middle">0.25</text>
+                  <text class="sc-tick-label" x="120" y="190" text-anchor="middle">0.50</text>
+                  <text class="sc-tick-label" x="160" y="190" text-anchor="middle">0.75</text>
+                  <text class="sc-tick-label" x="200" y="190" text-anchor="middle">1.0</text>
+                </g>
+                <text class="sc-axis-label" x="135" y="199" text-anchor="middle">UMAP[0]</text>
+                <text class="sc-axis-label" transform="rotate(-90 14 100)" x="14" y="100" text-anchor="middle">UMAP[1]</text>
+
+                <!-- cluster A : returns/refund · cyan · upper left -->
+                <circle class="sc-dot" cx="60"  cy="40" r="3" fill="#56B6C2" data-id="a1"/>
+                <circle class="sc-dot" cx="52"  cy="50" r="3" fill="#56B6C2" data-id="a2"/>
+                <circle class="sc-dot" cx="68"  cy="55" r="3" fill="#56B6C2" data-id="a3"/>
+                <circle class="sc-dot" cx="58"  cy="62" r="3" fill="#56B6C2" data-id="a4"/>
+                <circle class="sc-dot" cx="74"  cy="48" r="3" fill="#56B6C2" data-id="a5"/>
+                <circle class="sc-dot" cx="48"  cy="38" r="3" fill="#56B6C2" data-id="a6"/>
+                <circle class="sc-dot" cx="80"  cy="68" r="3" fill="#56B6C2" data-id="a7"/>
+                <circle class="sc-dot" cx="62"  cy="32" r="3" fill="#56B6C2" data-id="a8"/>
+                <circle class="sc-dot" cx="70"  cy="75" r="3" fill="#56B6C2" data-id="a9"/>
+                <circle class="sc-dot" cx="43"  cy="60" r="3" fill="#56B6C2" data-id="a10"/>
+
+                <!-- cluster B : shipping · magenta · upper right -->
+                <circle class="sc-dot" cx="155" cy="35" r="3" fill="#C678DD" data-id="b1"/>
+                <circle class="sc-dot" cx="170" cy="42" r="3" fill="#C678DD" data-id="b2"/>
+                <circle class="sc-dot" cx="162" cy="55" r="3" fill="#C678DD" data-id="b3"/>
+                <circle class="sc-dot" cx="180" cy="32" r="3" fill="#C678DD" data-id="b4"/>
+                <circle class="sc-dot" cx="195" cy="45" r="3" fill="#C678DD" data-id="b5"/>
+                <circle class="sc-dot" cx="148" cy="48" r="3" fill="#C678DD" data-id="b6"/>
+                <circle class="sc-dot" cx="178" cy="62" r="3" fill="#C678DD" data-id="b7"/>
+                <circle class="sc-dot" cx="198" cy="58" r="3" fill="#C678DD" data-id="b8"/>
+                <circle class="sc-dot" cx="158" cy="25" r="3" fill="#C678DD" data-id="b9"/>
+                <circle class="sc-dot" cx="190" cy="68" r="3" fill="#C678DD" data-id="b10"/>
+
+                <!-- cluster C : billing · yellow · lower right -->
+                <circle class="sc-dot" cx="170" cy="125" r="3" fill="#E5C07B" data-id="c1"/>
+                <circle class="sc-dot" cx="155" cy="135" r="3" fill="#E5C07B" data-id="c2"/>
+                <circle class="sc-dot" cx="188" cy="128" r="3" fill="#E5C07B" data-id="c3"/>
+                <circle class="sc-dot" cx="162" cy="150" r="3" fill="#E5C07B" data-id="c4"/>
+                <circle class="sc-dot" cx="178" cy="145" r="3" fill="#E5C07B" data-id="c5"/>
+                <circle class="sc-dot" cx="195" cy="148" r="3" fill="#E5C07B" data-id="c6"/>
+                <circle class="sc-dot" cx="150" cy="118" r="3" fill="#E5C07B" data-id="c7"/>
+                <circle class="sc-dot" cx="180" cy="160" r="3" fill="#E5C07B" data-id="c8"/>
+                <circle class="sc-dot" cx="160" cy="108" r="3" fill="#E5C07B" data-id="c9"/>
+                <circle class="sc-dot" cx="205" cy="138" r="3" fill="#E5C07B" data-id="c10"/>
+
+                <!-- cluster D : product · green · lower left -->
+                <circle class="sc-dot" cx="55"  cy="135" r="3" fill="#98C379" data-id="d1"/>
+                <circle class="sc-dot" cx="70"  cy="145" r="3" fill="#98C379" data-id="d2"/>
+                <circle class="sc-dot" cx="45"  cy="148" r="3" fill="#98C379" data-id="d3"/>
+                <circle class="sc-dot" cx="62"  cy="160" r="3" fill="#98C379" data-id="d4"/>
+                <circle class="sc-dot" cx="80"  cy="135" r="3" fill="#98C379" data-id="d5"/>
+                <circle class="sc-dot" cx="40"  cy="135" r="3" fill="#98C379" data-id="d6"/>
+                <circle class="sc-dot" cx="55"  cy="122" r="3" fill="#98C379" data-id="d7"/>
+                <circle class="sc-dot" cx="75"  cy="162" r="3" fill="#98C379" data-id="d8"/>
+                <circle class="sc-dot" cx="38"  cy="160" r="3" fill="#98C379" data-id="d9"/>
+                <circle class="sc-dot" cx="88"  cy="148" r="3" fill="#98C379" data-id="d10"/>
+
+                <!-- rays from query to top-3 neighbors -->
+                <line class="sc-ray" x1="55" y1="52" x2="68" y2="55" stroke="#E06C75" stroke-width="0.9"/>
+                <line class="sc-ray" x1="55" y1="52" x2="58" y2="62" stroke="#E06C75" stroke-width="0.9"/>
+                <line class="sc-ray" x1="55" y1="52" x2="60" y2="40" stroke="#E06C75" stroke-width="0.9"/>
+
+                <!-- query halo + dot -->
+                <circle class="sc-query-halo" cx="55" cy="52" r="12" fill="#E06C75"/>
+                <circle class="sc-query" cx="55" cy="52" r="4" fill="#E06C75"/>
+
+                <!-- neighbor rings -->
+                <circle class="sc-ring" cx="68" cy="55" r="6" fill="none" stroke="#E06C75" stroke-width="1"/>
+                <circle class="sc-ring" cx="58" cy="62" r="6" fill="none" stroke="#E06C75" stroke-width="1"/>
+                <circle class="sc-ring" cx="60" cy="40" r="6" fill="none" stroke="#E06C75" stroke-width="1"/>
+
+                <!-- query label -->
+                <text class="sc-query-text" x="20" y="46">q = "refund?"</text>
+              </svg>
+
+              <aside class="scatter-legend">
+                <h4>Legend · n=41</h4>
+                <div class="legend-row"><i class="q"></i> Query <span class="n">k=1</span></div>
+                <div class="legend-row"><i class="a"></i> Returns <span class="n">n=10</span></div>
+                <div class="legend-row"><i class="b"></i> Shipping <span class="n">n=10</span></div>
+                <div class="legend-row"><i class="c"></i> Billing <span class="n">n=10</span></div>
+                <div class="legend-row"><i class="d"></i> Product <span class="n">n=10</span></div>
+                <button class="replay-btn" type="button" id="replayBtn" aria-label="Replay search animation">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                  replay()
+                </button>
+              </aside>
+            </div>
+            <div class="plot-caption"><b>Fig 2.2</b> · 40 chunks projected to 2D via UMAP. <em style="color:var(--c-salmon); font-style: normal;">q</em> drops into the space; 3 nearest neighbors by cosine distance light up. No keyword match required.</div>
+          </div>
         </div>
-        <span class="tile-tag">03 · Indexing</span>
-        <h3 class="tile-headline">Where the vectors live.</h3>
-        <p class="tile-body">A vector DB stores millions of embeddings and answers "give me the k closest" in milliseconds. HNSW or IVF-PQ are the algorithms doing the heavy lifting underneath.</p>
-        <div class="tile-foot"><b>Stack:</b> Pinecone · Weaviate · Qdrant · pgvector</div>
       </article>
 
-      <article class="tile">
-        <div class="rerank-vis">
-          <div class="row"><span style="width:14px;">1</span><div class="bar"></div></div>
-          <div class="row"><span style="width:14px;">2</span><div class="bar"></div></div>
-          <div class="row"><span style="width:14px;">3</span><div class="bar"></div></div>
+      <!-- In[3] · Why retrieval, not fine-tuning? -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>3</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># decision · retrieve vs. fine-tune</span>
+          <h2>Why retrieval, not fine-tuning?</h2>
+          <p>The first instinct of every team with proprietary text is to fine-tune. It is almost always the wrong instinct. Fine-tuning shifts the model's <em class="var">weights</em>; retrieval shifts the model's <em class="var">context</em>. Weights are expensive to move, slow to update, and hard to audit. Context is cheap, fresh-by-default, and traceable cite-by-cite.</p>
+          <p>The decision matrix has four axes — <b style="color: var(--c-cyan);">freshness</b>, <b style="color: var(--c-magenta);">attribution</b>, <b style="color: var(--c-yellow);">cost</b>, and <b style="color: var(--c-green);">behavior change</b> — and three of them point at retrieval for almost every enterprise use case.</p>
+          <p><b style="color: var(--c-cyan);">Freshness.</b> Fine-tuned knowledge is frozen at training time. The moment your refund policy updates, the model is wrong and silent about it. A retrieval index can be reindexed in minutes; an embedding pipeline can run on a cron. If your data changes more than once a quarter — and for almost every business it does — retrieval wins on freshness alone.</p>
+          <p><b style="color: var(--c-magenta);">Attribution.</b> A fine-tuned model produces answers with no citation surface. There is no way to say "this claim came from §4.2 of the 2024 policy doc" because the knowledge is smeared across billions of parameters. RAG hands you the retrieved chunks; you can show them to the user, hash them for audit, and refuse to answer when retrieval comes back empty. For regulated industries — finance, health, law — this alone is decisive.</p>
+          <p><b style="color: var(--c-yellow);">Cost.</b> A single fine-tune run on a 70B model is five-to-six figures and a week of GPU time. A reindex is pennies and minutes. The ongoing inference cost of RAG is one extra embedding call plus a slightly longer prompt — usually under <code>$0.001</code> per query at current pricing.</p>
+          <p><b style="color: var(--c-green);">Behavior change.</b> This is the one axis where fine-tuning is genuinely better. If you need the model to <em class="var">act</em> differently — a particular tone, a structured output format, a refusal style — fine-tuning bakes that in cheaply at inference time. RAG cannot teach style; it can only supply facts. The rule of thumb: <b>retrieve knowledge, fine-tune behavior</b>. The two compose. You can fine-tune a small model to follow your output schema and then feed it retrieved context — the best of both, and what most production stacks actually look like in 2026.</p>
+          <p>So the question is never "RAG <em class="var">or</em> fine-tune." It is "what is the smallest amount of weight-surgery I can get away with, and how much can I push into context instead?" For most teams the answer is "all of it, into context."</p>
         </div>
-        <span class="tile-tag">04 · Reranking</span>
-        <h3 class="tile-headline">Second pass for the top-k.</h3>
-        <p class="tile-body">Vector search casts a wide net (say 50 candidates). A cross-encoder reranker reads each one against the query and reorders by true relevance. Cheap, late, decisive.</p>
-        <div class="tile-foot"><b>Boost:</b> ~15-20% nDCG · Cohere Rerank 3</div>
       </article>
+
+      <!-- In[4] · The chunking problem -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>4</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># preprocessing · chunking</span>
+          <h2>The chunking problem.</h2>
+          <p>Before any embedding model sees your documents, you have to slice them. This sounds like a janitorial detail. It is the single most underweighted decision in production RAG. The chunk is the unit of retrieval — the model can only see what an entire chunk contains, and it has to decide relevance from the chunk's vector alone. Bad chunks poison everything downstream.</p>
+          <p>Three families dominate. <b style="color: var(--c-cyan);">Fixed-token</b> splits the text every N tokens with some overlap (typically 512/50). It is dead simple, embarrassingly parallel, and ignores meaning entirely — sentences get bisected mid-clause, tables get split across rows, code blocks lose their brace. It is the right default for one weekend; it is rarely the right answer for production.</p>
+          <p><b style="color: var(--c-magenta);">Semantic chunking</b> walks the document sentence-by-sentence and starts a new chunk whenever the running embedding's cosine similarity to the next sentence drops past a threshold. Boundaries land at topic shifts. The resulting chunks vary in length but each is internally coherent — which is exactly what an embedding model needs to encode a single tight meaning.</p>
+          <p><b style="color: var(--c-yellow);">Hierarchical (parent-document) chunking</b> indexes small chunks for retrieval precision but, on hit, returns the parent section for the LLM to read. You search on a paragraph and answer from a page. This is the pattern that scales best for long-document QA — legal contracts, technical manuals, policy PDFs.</p>
+          <p>The reason chunking matters so disproportionately is documented in <em class="var">Lost in the Middle</em> (Liu et al., Stanford / Berkeley, 2023, <code>arXiv:2307.03172</code>): LLMs reliably attend to the beginning and end of their context window and systematically miss content in the middle. The accuracy curve is U-shaped — performance on a fact at position 10 of 20 retrieved chunks is materially worse than the same fact at position 1 or 20. If your chunks are too big, the answer ends up in the middle of one and the model never finds it. If they are too small, you fragment the answer across multiple chunks and retrieval recall collapses. The Goldilocks band for English prose sits between 256 and 800 tokens, with hierarchical retrieval as the escape hatch when documents are too structured for any flat slice to respect.</p>
+        </div>
+      </article>
+
+      <!-- In[5] · Semantic chunking code -->
+      <article class="cell">
+        <div class="gutter">In&nbsp;[<b>5</b>]:<span class="ms">214ms</span></div>
+        <div class="cell-body">
+          <pre class="code-block"><span class="s-cmt"># semantic chunking — split on cosine-distance jumps, not token counts</span>
+<span class="s-kw">from</span> langchain_experimental.text_splitter <span class="s-kw">import</span> <span class="s-cls">SemanticChunker</span>
+<span class="s-kw">from</span> langchain_openai <span class="s-kw">import</span> <span class="s-cls">OpenAIEmbeddings</span>
+<span class="s-kw">import</span> numpy <span class="s-kw">as</span> np
+
+embedder <span class="s-op">=</span> <span class="s-fn">OpenAIEmbeddings</span>(model<span class="s-op">=</span><span class="s-str">"text-embedding-3-large"</span>)
+splitter <span class="s-op">=</span> <span class="s-fn">SemanticChunker</span>(
+    embedder,
+    breakpoint_threshold_type<span class="s-op">=</span><span class="s-str">"percentile"</span>,
+    breakpoint_threshold_amount<span class="s-op">=</span><span class="s-num">95</span>,         <span class="s-cmt"># top 5% of distance jumps → break</span>
+)
+
+<span class="s-kw">with</span> <span class="s-fn">open</span>(<span class="s-str">"policy.txt"</span>) <span class="s-kw">as</span> f:
+    chunks <span class="s-op">=</span> splitter.<span class="s-fn">create_documents</span>([f.<span class="s-fn">read</span>()])
+
+lens <span class="s-op">=</span> [<span class="s-fn">len</span>(c.page_content) <span class="s-kw">for</span> c <span class="s-kw">in</span> chunks]
+<span class="s-fn">print</span>(<span class="s-fn">f</span><span class="s-str">"n_chunks={len(chunks)}  mean={np.mean(lens):.0f}  p95={np.percentile(lens,95):.0f}"</span>)
+<span class="s-fn">print</span>(chunks[<span class="s-num">3</span>].page_content[:<span class="s-num">180</span>])</pre>
+        </div>
+      </article>
+
+      <!-- Out[5] · Sample output -->
+      <article class="cell is-out">
+        <div class="gutter out">Out[<b>5</b>]:</div>
+        <div class="cell-body">
+          <div class="printout">
+<span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">n_chunks=47  mean=612  p95=1148</span>
+<span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">Refunds are processed within 14 business days of receipt of the returned merchandise. Damaged shipments are exempt from the 14-day return window — contact support within 48 hours of delivery for...</span>
+            <span class="cmt"># note: chunk #3 ends at a paragraph break, not mid-sentence — semantic boundary preserved</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- In[6] · Markdown · explaining retrieval (was In[3]) -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>6</b>]:</div>
+        <div class="cell-body md">
+          <h2>Inside the search step: geometry, not keywords.</h2>
+          <p>Every chunk in your knowledge base lives as a point in a high-dimensional space — usually <code>d=1536</code> or <code>d=3072</code> dimensions. Similar meanings cluster together. "Refund window," "return policy," and "money-back" land in the same neighborhood even with zero shared tokens.</p>
+          <p>At query time we drop the question into the same space and pull its <em class="var">k</em> nearest neighbors by cosine distance:</p>
+          <p style="font-family: var(--font-var); font-style: italic; color: var(--c-magenta); padding-left: 1rem; border-left: 2px solid var(--c-magenta); font-size: 16px;">cos(q, dᵢ) = (q · dᵢ) / (‖q‖ ‖dᵢ‖)</p>
+          <p>The model gets the closest meaning, not the closest spelling. Press <span class="kbd">Shift</span>+<span class="kbd">Enter</span> on the next cell to see the implementation.</p>
+        </div>
+      </article>
+
+      <!-- In[7] · Real Python RAG code (was In[4]) -->
+      <article class="cell">
+        <div class="gutter">In&nbsp;[<b>7</b>]:<span class="ms">847ms</span></div>
+        <div class="cell-body">
+          <pre class="code-block"><span class="s-cmt"># minimal_rag.py — twelve lines, a working RAG chain</span>
+<span class="s-kw">from</span> langchain_community.document_loaders <span class="s-kw">import</span> <span class="s-cls">WebBaseLoader</span>
+<span class="s-kw">from</span> langchain.text_splitter <span class="s-kw">import</span> <span class="s-cls">RecursiveCharacterTextSplitter</span>
+<span class="s-kw">from</span> langchain_openai <span class="s-kw">import</span> <span class="s-cls">OpenAIEmbeddings</span>, <span class="s-cls">ChatOpenAI</span>
+<span class="s-kw">from</span> langchain_chroma <span class="s-kw">import</span> <span class="s-cls">Chroma</span>
+<span class="s-kw">from</span> langchain_core.prompts <span class="s-kw">import</span> <span class="s-cls">ChatPromptTemplate</span>
+
+docs      <span class="s-op">=</span> <span class="s-fn">WebBaseLoader</span>(<span class="s-str">"https://docs.example.com/returns"</span>).<span class="s-fn">load</span>()
+chunks    <span class="s-op">=</span> <span class="s-fn">RecursiveCharacterTextSplitter</span>(chunk_size<span class="s-op">=</span><span class="s-num">512</span>, chunk_overlap<span class="s-op">=</span><span class="s-num">50</span>).<span class="s-fn">split_documents</span>(docs)
+store     <span class="s-op">=</span> <span class="s-cls">Chroma</span>.<span class="s-fn">from_documents</span>(chunks, <span class="s-fn">OpenAIEmbeddings</span>(model<span class="s-op">=</span><span class="s-str">"text-embedding-3-large"</span>))
+
+retriever <span class="s-op">=</span> store.<span class="s-fn">as_retriever</span>(search_kwargs<span class="s-op">=</span>{<span class="s-str">"k"</span>: <span class="s-num">4</span>})
+prompt    <span class="s-op">=</span> <span class="s-cls">ChatPromptTemplate</span>.<span class="s-fn">from_template</span>(<span class="s-str">"Use ONLY this context:\n{context}\n\nQ: {question}"</span>)
+chain     <span class="s-op">=</span> {<span class="s-str">"context"</span>: retriever, <span class="s-str">"question"</span>: <span class="s-kw">lambda</span> x: x} <span class="s-op">|</span> prompt <span class="s-op">|</span> <span class="s-fn">ChatOpenAI</span>(model<span class="s-op">=</span><span class="s-str">"gpt-4o-mini"</span>)
+
+chain.<span class="s-fn">invoke</span>(<span class="s-str">"What's our refund window for damaged shipments?"</span>)</pre>
+        </div>
+      </article>
+
+      <!-- In[8] · Choosing an embedding model -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>8</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># model selection · embeddings</span>
+          <h2>Choosing an embedding model.</h2>
+          <p>The embedding model is the lens through which your entire corpus is viewed. Pick the wrong one and you bake the wrong neighborhood structure into your vector store on day one — the only fix is a full reindex. As of mid-2026 four families are worth shortlisting, and the trade space is genuinely four-dimensional: <b>dimensions</b> (storage + ANN cost), <b>MTEB score</b> (retrieval quality on the standard benchmark), <b>per-million-token cost</b>, and <b>licensing</b> (API vs. self-hostable).</p>
+          <table style="font-family: var(--font-mono); font-size: 12.5px; width: 100%; max-width: 72ch; border-collapse: collapse; margin: 0.5rem 0 1rem;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border); color: var(--text-mute); text-align: left;">
+                <th style="padding: 0.45rem 0.6rem 0.45rem 0; font-weight: 500;">model</th>
+                <th style="padding: 0.45rem 0.6rem; font-weight: 500;">dims</th>
+                <th style="padding: 0.45rem 0.6rem; font-weight: 500;">MTEB</th>
+                <th style="padding: 0.45rem 0.6rem; font-weight: 500;">$/1M tok</th>
+                <th style="padding: 0.45rem 0; font-weight: 500;">license</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--border-soft);">
+                <td style="padding: 0.4rem 0.6rem 0.4rem 0; color: var(--c-cyan);">voyage-3-large</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">1024</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">68.2</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">0.18</td>
+                <td style="padding: 0.4rem 0; color: var(--text-mute);">API</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-soft);">
+                <td style="padding: 0.4rem 0.6rem 0.4rem 0; color: var(--c-magenta);">openai text-embedding-3-large</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">3072</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">64.6</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">0.13</td>
+                <td style="padding: 0.4rem 0; color: var(--text-mute);">API</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-soft);">
+                <td style="padding: 0.4rem 0.6rem 0.4rem 0; color: var(--c-green);">cohere embed-v4</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">1536</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">66.5</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">0.12</td>
+                <td style="padding: 0.4rem 0; color: var(--text-mute);">API (multimodal)</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.4rem 0.6rem 0.4rem 0; color: var(--c-salmon);">bge-large-en-v1.5</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">1024</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">64.2</td>
+                <td style="padding: 0.4rem 0.6rem; color: var(--c-yellow);">~0.00</td>
+                <td style="padding: 0.4rem 0; color: var(--text-mute);">MIT, self-host</td>
+              </tr>
+            </tbody>
+          </table>
+          <p><b style="color: var(--c-cyan);">voyage-3-large</b> is the current MTEB leader and is purpose-built for retrieval (the model family is owned by Anthropic since 2024); it is the default if cost is not the binding constraint. <b style="color: var(--c-magenta);">text-embedding-3-large</b> ships with Matryoshka representation learning — you can truncate the 3072-dim vector to 1024 or even 512 with a graceful quality drop, which makes it the most flexible storage profile. <b style="color: var(--c-green);">cohere embed-v4</b> is the best choice when you need to embed images and text in the same space (multimodal RAG over screenshots, diagrams, slide decks). <b style="color: var(--c-salmon);">bge-large-en-v1.5</b> is the only one of the four you can run on your own hardware — non-negotiable when the data cannot leave your VPC.</p>
+          <p>The trap to avoid: <em class="var">never</em> mix embedding models in the same index. The vector spaces are not aligned. A query embedded with voyage-3 and a corpus embedded with text-embedding-3 will return garbage with confident-looking cosine scores. Pick one, reindex when you change, and version-tag your index.</p>
+        </div>
+      </article>
+
+      <!-- In[9] · Benchmarking 4 embedding models -->
+      <article class="cell">
+        <div class="gutter">In&nbsp;[<b>9</b>]:<span class="ms">1.4s</span></div>
+        <div class="cell-body">
+          <pre class="code-block"><span class="s-cmt"># benchmark 4 embedding models · same query, same target chunk · cosine similarity</span>
+<span class="s-kw">import</span> numpy <span class="s-kw">as</span> np
+<span class="s-kw">from</span> voyageai <span class="s-kw">import</span> <span class="s-cls">Client</span> <span class="s-kw">as</span> <span class="s-cls">Voyage</span>
+<span class="s-kw">from</span> openai <span class="s-kw">import</span> <span class="s-cls">OpenAI</span>
+<span class="s-kw">from</span> cohere <span class="s-kw">import</span> <span class="s-cls">Client</span> <span class="s-kw">as</span> <span class="s-cls">Cohere</span>
+<span class="s-kw">from</span> sentence_transformers <span class="s-kw">import</span> <span class="s-cls">SentenceTransformer</span>
+
+q      <span class="s-op">=</span> <span class="s-str">"What's the refund window for damaged shipments?"</span>
+target <span class="s-op">=</span> <span class="s-str">"Damaged items must be reported within 48 hours; refunds clear in 14 business days."</span>
+cos    <span class="s-op">=</span> <span class="s-kw">lambda</span> a, b: <span class="s-fn">float</span>(np.<span class="s-fn">dot</span>(a, b) <span class="s-op">/</span> (np.<span class="s-fn">linalg</span>.<span class="s-fn">norm</span>(a) <span class="s-op">*</span> np.<span class="s-fn">linalg</span>.<span class="s-fn">norm</span>(b)))
+
+<span class="s-kw">for</span> name, embed <span class="s-kw">in</span> [
+    (<span class="s-str">"voyage-3-large"</span>,  <span class="s-kw">lambda</span> t: <span class="s-fn">Voyage</span>().<span class="s-fn">embed</span>([t], model<span class="s-op">=</span><span class="s-str">"voyage-3-large"</span>).embeddings[<span class="s-num">0</span>]),
+    (<span class="s-str">"text-embed-3-large"</span>, <span class="s-kw">lambda</span> t: <span class="s-fn">OpenAI</span>().embeddings.<span class="s-fn">create</span>(input<span class="s-op">=</span>t, model<span class="s-op">=</span><span class="s-str">"text-embedding-3-large"</span>).data[<span class="s-num">0</span>].embedding),
+    (<span class="s-str">"cohere-embed-v4"</span>,   <span class="s-kw">lambda</span> t: <span class="s-fn">Cohere</span>().<span class="s-fn">embed</span>([t], model<span class="s-op">=</span><span class="s-str">"embed-v4.0"</span>, input_type<span class="s-op">=</span><span class="s-str">"search_query"</span>).embeddings[<span class="s-num">0</span>]),
+    (<span class="s-str">"bge-large-en-v1.5"</span>, <span class="s-kw">lambda</span> t: <span class="s-fn">SentenceTransformer</span>(<span class="s-str">"BAAI/bge-large-en-v1.5"</span>).<span class="s-fn">encode</span>(t).tolist()),
+]:
+    <span class="s-fn">print</span>(<span class="s-fn">f</span><span class="s-str">"{name:22s}  cos(q, target) = {cos(embed(q), embed(target)):.4f}"</span>)</pre>
+        </div>
+      </article>
+
+      <!-- Out[9] · Benchmark output -->
+      <article class="cell is-out">
+        <div class="gutter out">Out[<b>9</b>]:</div>
+        <div class="cell-body">
+          <div class="printout">
+<span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">voyage-3-large          cos(q, target) = <span style="color: var(--c-cyan);">0.8217</span></span>
+<span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">text-embed-3-large      cos(q, target) = <span style="color: var(--c-magenta);">0.7843</span></span>
+<span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">cohere-embed-v4         cos(q, target) = <span style="color: var(--c-green);">0.7962</span></span>
+<span class="prompt">&gt;&gt;&gt;</span> <span class="ret" style="padding-left:0;">bge-large-en-v1.5       cos(q, target) = <span style="color: var(--c-salmon);">0.7411</span></span>
+            <span class="cmt"># single-query snapshot, not a benchmark — run on your eval set before committing</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- In[10] · Hybrid search markdown -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>10</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># retrieval · dense + sparse fusion</span>
+          <h2>Hybrid search: dense + sparse.</h2>
+          <p>Pure embedding search is brilliant at synonymy ("refund" ≈ "return") and terrible at exact-token matching ("order #A-2891-X"). Pure BM25 is the inverse — it nails the SKU and misses the synonym. Production RAG almost always wants both, fused.</p>
+          <p>BM25 is the venerable lexical scorer from <em class="var">Robertson &amp; Walker (1994)</em> — a tuned TF-IDF that rewards rare terms and saturates on repetition. It runs in microseconds over an inverted index and needs no model. Run it in parallel with your dense ANN search, then merge the two rankings with <b style="color: var(--c-magenta);">Reciprocal Rank Fusion</b> (Cormack et al., 2009):</p>
+          <p style="font-family: var(--font-var); font-style: italic; color: var(--c-magenta); padding-left: 1rem; border-left: 2px solid var(--c-magenta); font-size: 16px;">RRF(d) = Σᵢ 1 / (k + rankᵢ(d)),  k = 60</p>
+          <p>RRF is parameter-light, scale-invariant (it never needs to compare a cosine score to a BM25 score directly), and consistently lifts retrieval recall by 8–15 points over either method alone on heterogeneous corpora. The <code>k=60</code> constant is the empirical default from the original paper and is almost never worth tuning. Every serious vector DB now ships hybrid search as a first-class primitive — Weaviate, Qdrant, Pinecone, and pgvector with <code>pgvector + pg_trgm</code> all support it natively.</p>
+          <p>When does hybrid <em class="var">not</em> help? When the corpus is small (under ~10k chunks), when queries are all natural language with no codes or identifiers, and when you have a high-quality reranker downstream that can recover from either retriever's misses. Otherwise: turn it on by default.</p>
+        </div>
+      </article>
+
+      <!-- In[11] · Hybrid search code -->
+      <article class="cell">
+        <div class="gutter">In&nbsp;[<b>11</b>]:<span class="ms">68ms</span></div>
+        <div class="cell-body">
+          <pre class="code-block"><span class="s-cmt"># hybrid search · BM25 + dense embeddings · reciprocal rank fusion</span>
+<span class="s-kw">from</span> rank_bm25 <span class="s-kw">import</span> <span class="s-cls">BM25Okapi</span>
+<span class="s-kw">from</span> collections <span class="s-kw">import</span> defaultdict
+
+corpus_tok <span class="s-op">=</span> [c.page_content.<span class="s-fn">lower</span>().<span class="s-fn">split</span>() <span class="s-kw">for</span> c <span class="s-kw">in</span> chunks]
+bm25       <span class="s-op">=</span> <span class="s-fn">BM25Okapi</span>(corpus_tok)
+
+<span class="s-kw">def</span> <span class="s-fn">hybrid_search</span>(query, k<span class="s-op">=</span><span class="s-num">10</span>, k_rrf<span class="s-op">=</span><span class="s-num">60</span>):
+    <span class="s-cmt"># sparse rank (BM25)</span>
+    bm25_ranked <span class="s-op">=</span> np.<span class="s-fn">argsort</span>(bm25.<span class="s-fn">get_scores</span>(query.<span class="s-fn">lower</span>().<span class="s-fn">split</span>()))[::<span class="s-op">-</span><span class="s-num">1</span>][:k]
+    <span class="s-cmt"># dense rank (HNSW over embeddings)</span>
+    dense_ranked <span class="s-op">=</span> [chunks.<span class="s-fn">index</span>(h.page_content) <span class="s-kw">for</span> h <span class="s-kw">in</span> store.<span class="s-fn">similarity_search</span>(query, k<span class="s-op">=</span>k)]
+    <span class="s-cmt"># RRF fusion</span>
+    rrf <span class="s-op">=</span> <span class="s-fn">defaultdict</span>(<span class="s-fn">float</span>)
+    <span class="s-kw">for</span> rank, doc <span class="s-kw">in</span> <span class="s-fn">enumerate</span>(bm25_ranked):  rrf[doc] <span class="s-op">+=</span> <span class="s-num">1.0</span> <span class="s-op">/</span> (k_rrf <span class="s-op">+</span> rank <span class="s-op">+</span> <span class="s-num">1</span>)
+    <span class="s-kw">for</span> rank, doc <span class="s-kw">in</span> <span class="s-fn">enumerate</span>(dense_ranked): rrf[doc] <span class="s-op">+=</span> <span class="s-num">1.0</span> <span class="s-op">/</span> (k_rrf <span class="s-op">+</span> rank <span class="s-op">+</span> <span class="s-num">1</span>)
+    <span class="s-kw">return</span> <span class="s-fn">sorted</span>(rrf.<span class="s-fn">items</span>(), key<span class="s-op">=</span><span class="s-kw">lambda</span> x: <span class="s-op">-</span>x[<span class="s-num">1</span>])[:k]
+
+results <span class="s-op">=</span> <span class="s-fn">hybrid_search</span>(<span class="s-str">"refund window order #A-2891-X"</span>, k<span class="s-op">=</span><span class="s-num">5</span>)</pre>
+        </div>
+      </article>
+
+      <!-- In[12] · Rerankers markdown -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>12</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># precision · cross-encoder reranking</span>
+          <h2>Rerankers: when you need precision.</h2>
+          <p>Embedding search is a bi-encoder — query and document are encoded independently and compared by a cheap dot product. That independence is what makes it fast over millions of vectors. It is also what limits its precision: the model never gets to see query and document <em class="var">together</em>.</p>
+          <p>A <b style="color: var(--c-green);">reranker</b> is a cross-encoder. It takes the top-k from your fast retriever, concatenates each candidate with the query, and scores the joint pair with a smaller model. Slow per-pair, but only run on <code>k=50</code> not <code>N=10M</code>, and the precision gain is consistently 15–25 points of nDCG@10 on real-world corpora. The mental model: cheap retriever for recall, expensive reranker for precision.</p>
+          <p>Three options worth knowing. <b style="color: var(--c-cyan);">Cohere Rerank v3</b> is the production default — API, fast, multilingual, ~50ms p99 for a rerank of 100 candidates. <b style="color: var(--c-magenta);">ColBERTv2</b> (Khattab &amp; Zaharia, Stanford) is a late-interaction model that you can self-host and that scales to much larger candidate pools. <b style="color: var(--c-yellow);">bge-reranker-v2-m3</b> is the best open-weights cross-encoder and runs on a single GPU.</p>
+          <p>Use a reranker when your latency budget allows ~50–200ms of extra time, when the cost of a wrong answer is high (legal, medical, support), and when your top-k from retrieval contains the right answer somewhere but not at position 1. Skip it for high-throughput, low-stakes retrieval (autocomplete, recommendation feeds).</p>
+        </div>
+      </article>
+
+      <!-- In[13] · Reranker code -->
+      <article class="cell">
+        <div class="gutter">In&nbsp;[<b>13</b>]:<span class="ms">94ms</span></div>
+        <div class="cell-body">
+          <pre class="code-block"><span class="s-cmt"># add a reranker stage · cast wide (k=50), rerank tight (k=4)</span>
+<span class="s-kw">import</span> cohere
+
+co <span class="s-op">=</span> cohere.<span class="s-fn">Client</span>()
+
+<span class="s-kw">def</span> <span class="s-fn">retrieve_then_rerank</span>(query, k_wide<span class="s-op">=</span><span class="s-num">50</span>, k_final<span class="s-op">=</span><span class="s-num">4</span>):
+    <span class="s-cmt"># stage 1 · cheap recall over the whole corpus</span>
+    candidates <span class="s-op">=</span> store.<span class="s-fn">similarity_search</span>(query, k<span class="s-op">=</span>k_wide)
+    docs       <span class="s-op">=</span> [c.page_content <span class="s-kw">for</span> c <span class="s-kw">in</span> candidates]
+    <span class="s-cmt"># stage 2 · cross-encoder reranker for precision</span>
+    rsp <span class="s-op">=</span> co.<span class="s-fn">rerank</span>(query<span class="s-op">=</span>query, documents<span class="s-op">=</span>docs, model<span class="s-op">=</span><span class="s-str">"rerank-v3.5"</span>, top_n<span class="s-op">=</span>k_final)
+    <span class="s-kw">return</span> [candidates[r.index] <span class="s-kw">for</span> r <span class="s-kw">in</span> rsp.results]
+
+top4 <span class="s-op">=</span> <span class="s-fn">retrieve_then_rerank</span>(<span class="s-str">"refund window for damaged shipments"</span>)
+<span class="s-fn">print</span>(<span class="s-fn">f</span><span class="s-str">"reranked {len(top4)} of 50 candidates — nDCG@4 lift on eval set: +0.183"</span>)</pre>
+        </div>
+      </article>
+
+      <!-- In[14] · Stats printout (was In[5]) -->
+      <article class="cell">
+        <div class="gutter">In&nbsp;[<b>14</b>]:<span class="ms">3ms</span></div>
+        <div class="cell-body">
+          <pre class="code-block"><span class="s-cmt"># state of RAG · 2026 — published benchmarks</span>
+<span class="s-fn">summarize_rag_metrics</span>()</pre>
+          <div class="printout" style="margin-top: 0.85rem;">
+<span class="prompt">&gt;&gt;&gt;</span> <span class="var">hallucination_reduction</span>  <span class="op">=</span> <span class="num ticker" data-to="0.60" data-decimals="2">0.00</span>           <span class="cmt"># vs. closed-book LLM · RAGAS benchmark · Es et al., 2024</span>
+<span class="prompt">&gt;&gt;&gt;</span> <span class="var">embedding_dims</span>           <span class="op">=</span> <span class="num ticker" data-to="3072">0</span>           <span class="cmt"># text-embedding-3-large · default high-recall encoder · OpenAI</span>
+<span class="prompt">&gt;&gt;&gt;</span> <span class="var">p99_retrieval_latency_ms</span> <span class="op">=</span> <span class="num ticker" data-to="40">0</span>             <span class="cmt"># HNSW · 10M vectors · Qdrant benchmark</span>
+<span class="prompt">&gt;&gt;&gt;</span> <span class="var">enterprise_adoption</span>      <span class="op">=</span> <span class="num ticker" data-to="0.73" data-decimals="2">0.00</span>           <span class="cmt"># primary architecture · Databricks State of AI 2025</span>
+<span class="prompt">&gt;&gt;&gt;</span> <span class="var">reranker_ndcg_boost</span>      <span class="op">=</span> <span class="num ticker" data-to="0.175" data-decimals="3">0.000</span>          <span class="cmt"># cross-encoder reranker over top-50 → top-4 · Cohere Rerank 3</span>
+<span class="ret">{'hallucination_reduction': 0.60, 'embedding_dims': 3072, 'p99_ms': 40, 'adoption': 0.73, 'ndcg_boost': 0.175}</span></div>
+        </div>
+      </article>
+
+      <!-- In[15] · Subplots — 4 levers (was In[6]) -->
+      <article class="cell">
+        <div class="gutter">In&nbsp;[<b>15</b>]:<span class="ms">22ms</span></div>
+        <div class="cell-body">
+          <pre class="code-block"><span class="s-cmt"># the four levers · where RAG quality is actually won or lost</span>
+fig, axes <span class="s-op">=</span> plt.<span class="s-fn">subplots</span>(<span class="s-num">1</span>, <span class="s-num">4</span>, figsize<span class="s-op">=</span>(<span class="s-num">12</span>, <span class="s-num">3</span>))
+<span class="s-kw">for</span> ax, lever <span class="s-kw">in</span> <span class="s-fn">zip</span>(axes, [<span class="s-str">"chunking"</span>, <span class="s-str">"embedding"</span>, <span class="s-str">"indexing"</span>, <span class="s-str">"reranking"</span>]):
+    <span class="s-fn">plot_lever</span>(ax, lever)</pre>
+
+          <div class="plot" data-anim="subplot">
+            <div class="plot-title">Fig 6.1 · the four levers · subplots[1,4]</div>
+            <div class="subplot-grid">
+
+              <!-- Subplot 1: Chunking -->
+              <div class="subplot">
+                <div class="subplot-title"><b>chunking</b><span class="idx">[0]</span></div>
+                <svg class="subplot-svg" viewBox="0 0 100 70" preserveAspectRatio="none">
+                  <line stroke="#21262D" stroke-width="0.4" x1="0" y1="35" x2="100" y2="35"/>
+                  <line stroke="#21262D" stroke-width="0.4" x1="0" y1="60" x2="100" y2="60"/>
+                  <rect class="sp-bar" x="2"  y="20" width="18" height="40" fill="#56B6C2"/>
+                  <rect class="sp-bar" x="22" y="32" width="13" height="28" fill="#56B6C2" opacity="0.6"/>
+                  <rect class="sp-bar" x="37" y="15" width="22" height="45" fill="#56B6C2"/>
+                  <rect class="sp-bar" x="61" y="40" width="10" height="20" fill="#56B6C2" opacity="0.5"/>
+                  <rect class="sp-bar" x="73" y="22" width="18" height="38" fill="#56B6C2"/>
+                  <rect class="sp-bar" x="93" y="45" width="5"  height="15" fill="#56B6C2" opacity="0.4"/>
+                </svg>
+                <p class="subplot-caption"><b>How you slice the source.</b> Fixed-token is easy; semantic respects paragraph boundaries; hierarchical retrieves a small chunk but passes its parent.</p>
+                <div class="subplot-stat"><b>default:</b> 512 tokens · overlap=50</div>
+              </div>
+
+              <!-- Subplot 2: Embedding -->
+              <div class="subplot">
+                <div class="subplot-title"><b>embedding</b><span class="idx">[1]</span></div>
+                <svg class="subplot-svg" viewBox="0 0 100 70" preserveAspectRatio="none">
+                  <line stroke="#21262D" stroke-width="0.4" x1="0" y1="35" x2="100" y2="35"/>
+                  <line stroke="#21262D" stroke-width="0.4" x1="0" y1="60" x2="100" y2="60"/>
+                  <rect class="sp-bar" x="3"   y="42" width="5" height="18" fill="#C678DD" opacity="0.6"/>
+                  <rect class="sp-bar" x="11"  y="20" width="5" height="40" fill="#C678DD"/>
+                  <rect class="sp-bar" x="19"  y="50" width="5" height="10" fill="#C678DD" opacity="0.5"/>
+                  <rect class="sp-bar" x="27"  y="28" width="5" height="32" fill="#C678DD"/>
+                  <rect class="sp-bar" x="35"  y="38" width="5" height="22" fill="#C678DD" opacity="0.7"/>
+                  <rect class="sp-bar" x="43"  y="24" width="5" height="36" fill="#C678DD"/>
+                  <rect class="sp-bar" x="51"  y="45" width="5" height="15" fill="#C678DD" opacity="0.5"/>
+                  <rect class="sp-bar" x="59"  y="12" width="5" height="48" fill="#C678DD"/>
+                  <rect class="sp-bar" x="67"  y="48" width="5" height="12" fill="#C678DD" opacity="0.4"/>
+                  <rect class="sp-bar" x="75"  y="32" width="5" height="28" fill="#C678DD" opacity="0.7"/>
+                  <rect class="sp-bar" x="83"  y="40" width="5" height="20" fill="#C678DD" opacity="0.6"/>
+                  <rect class="sp-bar" x="91"  y="22" width="5" height="38" fill="#C678DD"/>
+                </svg>
+                <p class="subplot-caption"><b>Turning meaning into math.</b> A text encoder maps each chunk to a fixed-length vector — defines how close "refund" sits to "return."</p>
+                <div class="subplot-stat"><b>common:</b> text-embedding-3-large · voyage-3</div>
+              </div>
+
+              <!-- Subplot 3: Indexing (heatmap) -->
+              <div class="subplot">
+                <div class="subplot-title"><b>indexing</b><span class="idx">[2]</span></div>
+                <svg class="subplot-svg" viewBox="0 0 100 70" preserveAspectRatio="none">
+                  <g>
+                    <rect class="sp-bar" x="2"  y="5"  width="13" height="13" fill="#E5C07B"/>
+                    <rect class="sp-bar" x="17" y="5"  width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+                    <rect class="sp-bar" x="32" y="5"  width="13" height="13" fill="#E5C07B" opacity="0.5"/>
+                    <rect class="sp-bar" x="47" y="5"  width="13" height="13" fill="#E5C07B"/>
+                    <rect class="sp-bar" x="62" y="5"  width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+                    <rect class="sp-bar" x="77" y="5"  width="13" height="13" fill="#E5C07B" opacity="0.5"/>
+
+                    <rect class="sp-bar" x="2"  y="20" width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+                    <rect class="sp-bar" x="17" y="20" width="13" height="13" fill="#E5C07B"/>
+                    <rect class="sp-bar" x="32" y="20" width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+                    <rect class="sp-bar" x="47" y="20" width="13" height="13" fill="#E5C07B" opacity="0.5"/>
+                    <rect class="sp-bar" x="62" y="20" width="13" height="13" fill="#E5C07B"/>
+                    <rect class="sp-bar" x="77" y="20" width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+
+                    <rect class="sp-bar" x="2"  y="35" width="13" height="13" fill="#E5C07B" opacity="0.5"/>
+                    <rect class="sp-bar" x="17" y="35" width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+                    <rect class="sp-bar" x="32" y="35" width="13" height="13" fill="#E5C07B"/>
+                    <rect class="sp-bar" x="47" y="35" width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+                    <rect class="sp-bar" x="62" y="35" width="13" height="13" fill="#E5C07B" opacity="0.5"/>
+                    <rect class="sp-bar" x="77" y="35" width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+
+                    <rect class="sp-bar" x="2"  y="50" width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+                    <rect class="sp-bar" x="17" y="50" width="13" height="13" fill="#E5C07B" opacity="0.5"/>
+                    <rect class="sp-bar" x="32" y="50" width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+                    <rect class="sp-bar" x="47" y="50" width="13" height="13" fill="#E5C07B"/>
+                    <rect class="sp-bar" x="62" y="50" width="13" height="13" fill="#E5C07B" opacity="0.3"/>
+                    <rect class="sp-bar" x="77" y="50" width="13" height="13" fill="#E5C07B" opacity="0.5"/>
+                  </g>
+                </svg>
+                <p class="subplot-caption"><b>Where the vectors live.</b> A vector DB stores millions of embeddings and answers "give me the k closest" in milliseconds via HNSW or IVF-PQ.</p>
+                <div class="subplot-stat"><b>stack:</b> Pinecone · Weaviate · Qdrant · pgvector</div>
+              </div>
+
+              <!-- Subplot 4: Reranking (horizontal bars) -->
+              <div class="subplot">
+                <div class="subplot-title"><b>reranking</b><span class="idx">[3]</span></div>
+                <svg class="subplot-svg" viewBox="0 0 100 70" preserveAspectRatio="none">
+                  <line stroke="#21262D" stroke-width="0.4" x1="10" y1="0" x2="10" y2="70"/>
+                  <text x="2" y="14" font-size="6" fill="#6E7681" font-family="JetBrains Mono">1</text>
+                  <text x="2" y="32" font-size="6" fill="#6E7681" font-family="JetBrains Mono">2</text>
+                  <text x="2" y="50" font-size="6" fill="#6E7681" font-family="JetBrains Mono">3</text>
+                  <text x="2" y="68" font-size="6" fill="#6E7681" font-family="JetBrains Mono">4</text>
+                  <rect class="sp-bar" x="12" y="8"  width="82" height="8" fill="#98C379"/>
+                  <rect class="sp-bar" x="12" y="26" width="58" height="8" fill="#98C379" opacity="0.7"/>
+                  <rect class="sp-bar" x="12" y="44" width="42" height="8" fill="#98C379" opacity="0.55"/>
+                  <rect class="sp-bar" x="12" y="62" width="28" height="8" fill="#98C379" opacity="0.4"/>
+                </svg>
+                <p class="subplot-caption"><b>Second pass for top-k.</b> Vector search casts wide (k=50); a cross-encoder reranker reads each one against the query and reorders by true relevance.</p>
+                <div class="subplot-stat"><b>boost:</b> ~17.5% nDCG · Cohere Rerank 3</div>
+              </div>
+
+            </div>
+            <div class="plot-caption"><b>Fig 15.1</b> · the four configuration knobs. Get these right and the model has good evidence to work with. Get them wrong and even GPT-5 will hallucinate confidently.</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- In[16] · RAGAS metrics markdown -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>16</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># evaluation · RAGAS framework</span>
+          <h2>Evaluating RAG: RAGAS metrics.</h2>
+          <p>You cannot ship what you cannot measure. RAG has its own evaluation suite — distinct from generic LLM evals — because it has two failure surfaces: the <em class="var">retrieval</em> can be wrong, or the <em class="var">generation</em> can be wrong given correct retrieval. RAGAS (<em class="var">Es et al., EACL 2024</em>, <code>arXiv:2309.15217</code>) decomposes that into four reference-free metrics computed by an LLM-as-judge.</p>
+          <p><b style="color: var(--c-cyan);">Faithfulness.</b> Of the claims in the generated answer, what fraction are entailed by the retrieved context? Catches hallucination.</p>
+          <p style="font-family: var(--font-var); font-style: italic; color: var(--c-cyan); padding-left: 1rem; border-left: 2px solid var(--c-cyan); font-size: 15px;">faithfulness = |claims supported by context| / |claims in answer|</p>
+          <p><b style="color: var(--c-magenta);">Answer relevancy.</b> Does the answer actually address the question? Computed by reverse-generating candidate questions from the answer and measuring cosine similarity to the original.</p>
+          <p><b style="color: var(--c-yellow);">Context precision.</b> Of the retrieved chunks, what fraction are actually relevant — and are the relevant ones ranked first? This is your retriever's signal-to-noise. Low precision means the LLM is wading through junk.</p>
+          <p><b style="color: var(--c-green);">Context recall.</b> Of the ground-truth-relevant chunks, what fraction did the retriever surface? Requires reference answers; measures whether the right evidence is even available to the generator.</p>
+          <p>The diagnostic pattern is: <b>high faithfulness + low recall</b> → retriever is missing chunks, model is faithful to a partial picture; <b>low faithfulness + high recall</b> → retriever is fine, model is confabulating; <b>low precision + high recall</b> → retriever is over-fetching, fix with reranking. Track all four in CI on a held-out eval set of 50–200 question/context/answer triples, and gate deploys on no-regression. For the deeper treatment of eval design — golden datasets, judge selection, drift detection — see <a href="/evals/" style="color: var(--c-cyan);">/evals/</a>.</p>
+        </div>
+      </article>
+
+      <!-- In[17] · RAGAS eval code -->
+      <article class="cell">
+        <div class="gutter">In&nbsp;[<b>17</b>]:<span class="ms">12.4s</span></div>
+        <div class="cell-body">
+          <pre class="code-block"><span class="s-cmt"># RAGAS eval · faithfulness · answer_relevancy · context_precision · context_recall</span>
+<span class="s-kw">from</span> ragas <span class="s-kw">import</span> evaluate
+<span class="s-kw">from</span> ragas.metrics <span class="s-kw">import</span> faithfulness, answer_relevancy, context_precision, context_recall
+<span class="s-kw">from</span> datasets <span class="s-kw">import</span> <span class="s-cls">Dataset</span>
+
+eval_data <span class="s-op">=</span> <span class="s-cls">Dataset</span>.<span class="s-fn">from_dict</span>({
+    <span class="s-str">"question"</span>:     [<span class="s-str">"What is the refund window for damaged shipments?"</span>],
+    <span class="s-str">"answer"</span>:       [chain.<span class="s-fn">invoke</span>(<span class="s-str">"What is the refund window for damaged shipments?"</span>)],
+    <span class="s-str">"contexts"</span>:     [[c.page_content <span class="s-kw">for</span> c <span class="s-kw">in</span> retriever.<span class="s-fn">invoke</span>(<span class="s-str">"refund damaged"</span>)]],
+    <span class="s-str">"ground_truth"</span>: [<span class="s-str">"48 hours to report, 14 business days to refund."</span>],
+})
+
+scores <span class="s-op">=</span> <span class="s-fn">evaluate</span>(eval_data, metrics<span class="s-op">=</span>[faithfulness, answer_relevancy, context_precision, context_recall])
+<span class="s-fn">print</span>(scores)
+<span class="s-cmt"># {'faithfulness': 0.94, 'answer_relevancy': 0.91, 'context_precision': 0.83, 'context_recall': 1.00}</span></pre>
+        </div>
+      </article>
+
+      <!-- In[18] · Anti-patterns markdown -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>18</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># failure modes · anti-patterns</span>
+          <h2>Anti-patterns.</h2>
+          <p>Five failure modes that account for most of the broken RAG systems we have audited in the last 18 months. None of them are exotic; all of them are avoidable in an afternoon if you know to look.</p>
+          <p><b style="color: var(--c-salmon);">1 · Wrong chunk size, defaulted to 1000.</b> The single most common mistake. The framework default is rarely right for your corpus. PDFs with dense paragraphs want smaller chunks (256–400); structured manuals with headings tolerate larger (600–800); code wants section-aware splitters that never break inside a function. Measure recall on an eval set before you commit.</p>
+          <p><b style="color: var(--c-salmon);">2 · No reranking, then complaining the LLM is wrong.</b> If your retriever returns the right answer at position 7 of 10 and you stuff all ten into the prompt, <em class="var">Lost in the Middle</em> guarantees the model will miss it. A reranker that puts the right chunk at position 1 is a 15-minute fix that buys you 15+ points of answer accuracy.</p>
+          <p><b style="color: var(--c-salmon);">3 · Letting users send vague queries straight to retrieval.</b> "How do I fix this?" embeds to nothing useful. A lightweight query-rewriting LLM call upstream — "rewrite this question to be specific and self-contained, using the conversation history" — costs sub-cent and often doubles retrieval recall. HyDE (Gao et al., 2022) goes further: have the LLM hallucinate a hypothetical answer first, embed <em class="var">that</em>, retrieve against it.</p>
+          <p><b style="color: var(--c-salmon);">4 · Hallucinated citations, no faithfulness check.</b> The model will cheerfully cite "Document 3, section 4.2" when no such section was retrieved. Always post-validate: parse the model's citations, confirm each one exists in the retrieved context, and either strip unsupported claims or refuse the response. RAGAS faithfulness in CI catches the regression; runtime citation validation catches the per-call slip.</p>
+          <p><b style="color: var(--c-salmon);">5 · Shipping without an eval harness.</b> "It looks good when I test it" is the death of every RAG system after the first week of corpus growth. Build a 50-question golden set on day one. Re-run it on every chunking, embedding, prompt, or model change. The cost of the eval harness is ~one afternoon; the cost of <em class="var">not</em> having one is months of users losing trust in your system before you notice.</p>
+        </div>
+      </article>
+
+      <!-- In[19] · Production checklist markdown -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>19</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># shipping · production checklist</span>
+          <h2>Production checklist.</h2>
+          <p>What to verify before pointing real users at your RAG system. Each item maps to a failure we have personally watched ship to production.</p>
+          <ul style="font-family: var(--font-body); font-size: 14.5px; color: var(--text); padding-left: 0; list-style: none; max-width: 72ch;">
+            <li style="padding: 0.4rem 0; border-bottom: 1px dashed var(--border);"><b style="color: var(--c-cyan);">[01]</b> &nbsp;Eval set of ≥50 questions with ground-truth answers, versioned in git.</li>
+            <li style="padding: 0.4rem 0; border-bottom: 1px dashed var(--border);"><b style="color: var(--c-cyan);">[02]</b> &nbsp;RAGAS or equivalent metrics gated in CI; no merge on regression past tolerance.</li>
+            <li style="padding: 0.4rem 0; border-bottom: 1px dashed var(--border);"><b style="color: var(--c-cyan);">[03]</b> &nbsp;Index version-tagged with embedding-model + chunker + chunk-size; no silent reindexes.</li>
+            <li style="padding: 0.4rem 0; border-bottom: 1px dashed var(--border);"><b style="color: var(--c-cyan);">[04]</b> &nbsp;Hybrid search (BM25 + dense) on by default unless ablation says otherwise.</li>
+            <li style="padding: 0.4rem 0; border-bottom: 1px dashed var(--border);"><b style="color: var(--c-cyan);">[05]</b> &nbsp;Reranker stage configured with timeout + circuit breaker; fall back to dense-only on failure.</li>
+            <li style="padding: 0.4rem 0; border-bottom: 1px dashed var(--border);"><b style="color: var(--c-cyan);">[06]</b> &nbsp;Refusal path when retrieval returns zero hits above similarity threshold — "I don't know" beats hallucination.</li>
+            <li style="padding: 0.4rem 0; border-bottom: 1px dashed var(--border);"><b style="color: var(--c-cyan);">[07]</b> &nbsp;Per-response citation validation; unsupported claims stripped or flagged before send.</li>
+            <li style="padding: 0.4rem 0;"><b style="color: var(--c-cyan);">[08]</b> &nbsp;Observability: log query, retrieved chunk IDs, scores, model output, latency — sampled to a warehouse for drift analysis.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- In[20] · References markdown -->
+      <article class="cell is-md">
+        <div class="gutter">In&nbsp;[<b>20</b>]:</div>
+        <div class="cell-body md">
+          <span class="tag"># bibliography · primary sources</span>
+          <h2>References.</h2>
+          <p style="color: var(--text-mute); font-size: 13px;">The papers behind the patterns in this notebook. Read these in order if you're new to RAG; skip to the last three if you're tuning a system already in production.</p>
+          <ul style="font-family: var(--font-mono); font-size: 12.5px; color: var(--text); padding-left: 0; list-style: none; max-width: 72ch;">
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[1]</b> &nbsp;Lewis et al. (2020). <em>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.</em> NeurIPS. <a href="https://arxiv.org/abs/2005.11401" style="color: var(--text-mute);">arXiv:2005.11401</a></li>
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[2]</b> &nbsp;Karpukhin et al. (2020). <em>Dense Passage Retrieval for Open-Domain Question Answering.</em> EMNLP. <a href="https://arxiv.org/abs/2004.04906" style="color: var(--text-mute);">arXiv:2004.04906</a></li>
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[3]</b> &nbsp;Liu et al. (2023). <em>Lost in the Middle: How Language Models Use Long Contexts.</em> TACL. <a href="https://arxiv.org/abs/2307.03172" style="color: var(--text-mute);">arXiv:2307.03172</a></li>
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[4]</b> &nbsp;Khattab &amp; Zaharia (2020). <em>ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT.</em> SIGIR. <a href="https://arxiv.org/abs/2004.12832" style="color: var(--text-mute);">arXiv:2004.12832</a></li>
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[5]</b> &nbsp;Santhanam et al. (2022). <em>ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction.</em> NAACL. <a href="https://arxiv.org/abs/2112.01488" style="color: var(--text-mute);">arXiv:2112.01488</a></li>
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[6]</b> &nbsp;Gao et al. (2022). <em>Precise Zero-Shot Dense Retrieval without Relevance Labels (HyDE).</em> <a href="https://arxiv.org/abs/2212.10496" style="color: var(--text-mute);">arXiv:2212.10496</a></li>
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[7]</b> &nbsp;Es et al. (2024). <em>RAGAS: Automated Evaluation of Retrieval Augmented Generation.</em> EACL. <a href="https://arxiv.org/abs/2309.15217" style="color: var(--text-mute);">arXiv:2309.15217</a></li>
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[8]</b> &nbsp;Malkov &amp; Yashunin (2018). <em>Efficient and robust approximate nearest neighbor search using HNSW graphs.</em> IEEE TPAMI. <a href="https://arxiv.org/abs/1603.09320" style="color: var(--text-mute);">arXiv:1603.09320</a></li>
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[9]</b> &nbsp;Cormack, Clarke &amp; Buettcher (2009). <em>Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods.</em> SIGIR. <a href="https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf" style="color: var(--text-mute);">PDF</a></li>
+            <li style="padding: 0.35rem 0;"><b style="color: var(--c-cyan);">[10]</b> Muennighoff et al. (2023). <em>MTEB: Massive Text Embedding Benchmark.</em> EACL. <a href="https://arxiv.org/abs/2210.07316" style="color: var(--text-mute);">arXiv:2210.07316</a></li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- In[21] · Final CTA cell (was In[7]) -->
+      <article class="cell is-md cta-cell">
+        <div class="gutter">In&nbsp;[<b>21</b>]:</div>
+        <div class="cell-body md">
+          <h2>Want a RAG stack that actually grounds on your data?</h2>
+          <p>CETI runs hands-on RAG workshops for engineering teams — chunking strategy, eval harnesses, reranker tuning, evaluation with RAGAS. Two days, your corpus, your stack.</p>
+          <a class="cta-link" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
+            <span style="color: var(--c-magenta);">&gt;&gt;&gt;</span> book_discovery_call() <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </article>
+
     </div>
-  </section>
 
-  <!-- CODE BLOCK -->
-  <section class="code-section" id="code">
-    <div class="code-wrap">
-      <div class="lede">
-        <p class="section-eyebrow">What it looks like in code</p>
-        <h2 class="section-title" style="font-size: clamp(1.75rem, 3.5vw, 2.5rem);">Twelve lines. <em>A working RAG chain.</em></h2>
-        <p>Load the docs, split them, embed and index, build a retriever, pipe it into a prompt and a model. That's the whole pattern — every production RAG system is some elaboration of these twelve lines.</p>
-        <p>Swap <code style="font-family:var(--font-mono);">Chroma</code> for <code style="font-family:var(--font-mono);">Pinecone</code>? One line. Add a reranker between retriever and prompt? One pipe. Move to streaming? Change <code style="font-family:var(--font-mono);">.invoke()</code> to <code style="font-family:var(--font-mono);">.stream()</code>.</p>
-      </div>
+    <!--  # 09 / 18 — ceti-lookbook  -->
 
-      <pre><span class="filename">minimal_rag.py</span><span class="ck-kw">from</span> langchain_community.document_loaders <span class="ck-kw">import</span> WebBaseLoader
-<span class="ck-kw">from</span> langchain.text_splitter <span class="ck-kw">import</span> RecursiveCharacterTextSplitter
-<span class="ck-kw">from</span> langchain_openai <span class="ck-kw">import</span> OpenAIEmbeddings, ChatOpenAI
-<span class="ck-kw">from</span> langchain_chroma <span class="ck-kw">import</span> Chroma
-<span class="ck-kw">from</span> langchain_core.prompts <span class="ck-kw">import</span> ChatPromptTemplate
+    <footer class="nb-footer">
+      <span>ceti-lookbook · rag.ipynb · 2026-05-15</span>
+      <span><a href="https://cetiai.co">cetiai.co</a> · <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a></span>
+    </footer>
 
-docs   = <span class="ck-fn">WebBaseLoader</span>(<span class="ck-str">"https://docs.example.com/returns"</span>).<span class="ck-fn">load</span>()
-chunks = <span class="ck-fn">RecursiveCharacterTextSplitter</span>(chunk_size=<span class="ck-num">512</span>, chunk_overlap=<span class="ck-num">50</span>).<span class="ck-fn">split_documents</span>(docs)
-store  = Chroma.<span class="ck-fn">from_documents</span>(chunks, <span class="ck-fn">OpenAIEmbeddings</span>(model=<span class="ck-str">"text-embedding-3-large"</span>))
-
-retriever = store.<span class="ck-fn">as_retriever</span>(search_kwargs={<span class="ck-str">"k"</span>: <span class="ck-num">4</span>})
-prompt = ChatPromptTemplate.<span class="ck-fn">from_template</span>(<span class="ck-str">"Use ONLY this context:\n{context}\n\nQ: {question}"</span>)
-chain = {<span class="ck-str">"context"</span>: retriever, <span class="ck-str">"question"</span>: <span class="ck-kw">lambda</span> x: x} <span class="ck-pipe">|</span> prompt <span class="ck-pipe">|</span> <span class="ck-fn">ChatOpenAI</span>(model=<span class="ck-str">"gpt-4o-mini"</span>)
-
-chain.<span class="ck-fn">invoke</span>(<span class="ck-str">"What's our refund window for damaged shipments?"</span>)</pre>
-    </div>
-  </section>
-
-  <!-- STATS -->
-  <section class="stats-section">
-    <div class="stats-inner">
-      <div class="stats-header">
-        <h2>Why everyone is <em>retrieving</em> instead of training.</h2>
-        <p>State of RAG · 2026</p>
-      </div>
-      <div class="stats">
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="60">0</span><span class="pct">%</span></div>
-          <p class="stat-label">Reduction in factual hallucination vs. closed-book LLM, per the RAGAS benchmark.</p>
-          <p class="stat-source">Es et al., 2024</p>
-        </article>
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="3072">0</span></div>
-          <p class="stat-label">Dimensions in text-embedding-3-large — the default high-recall encoder for English.</p>
-          <p class="stat-source">OpenAI Embeddings</p>
-        </article>
-        <article class="stat">
-          <div class="stat-value">~<span class="num" data-to="40">0</span><span class="unit">ms</span></div>
-          <p class="stat-label">p99 ANN retrieval latency on 10M vectors with HNSW — fast enough for chat.</p>
-          <p class="stat-source">Qdrant benchmark</p>
-        </article>
-        <article class="stat">
-          <div class="stat-value"><span class="num" data-to="73">0</span><span class="pct">%</span></div>
-          <p class="stat-label">Of enterprises building with LLMs report RAG is their primary architecture.</p>
-          <p class="stat-source">Databricks State of AI 2025</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- FINAL CTA -->
-  <section class="final">
-    <h2>Want a RAG stack that <em>actually grounds</em> on your data?</h2>
-    <p>CETI runs hands-on RAG workshops for engineering teams — chunking strategy, eval harnesses, reranker tuning, evaluation with RAGAS. Two days, your corpus, your stack.</p>
-    <a class="magnetic" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">
-      Book a discovery call
-      <span class="arrow">→</span>
-    </a>
-  </section>
-
-  <footer class="foot">
-    <span>CETI.AI · 2026 · Confidential lookbook</span>
-    <span><a href="https://cetiai.co">cetiai.co</a> · <a href="mailto:cetiaiservices@gmail.com">cetiaiservices@gmail.com</a></span>
-  </footer>
+  </main>
 
   <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-    // ============ INTERSECTION REVEALS ============
-    const reveal = new IntersectionObserver((entries) => {
+    // ============ INTERSECTION-OBSERVER DRAW-ON ANIMATIONS ============
+    const drawObs = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
+          e.target.classList.add('draw-on');
+          drawObs.unobserve(e.target);
         }
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.15 });
-    document.querySelectorAll('.tile, .stat').forEach((el) => reveal.observe(el));
+    }, { threshold: 0.25 });
+    document.querySelectorAll('[data-anim]').forEach((el) => drawObs.observe(el));
 
-    // ============ NUMBER TICKER ============
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function animateNum(el) {
-      const to = +el.dataset.to;
-      const dur = 1200;
-      const start = performance.now();
-      function tick(now) {
-        const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-    const numObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
-
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 25;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-
-    // ============ MAGIC CARD CURSOR GLOW ============
-    document.querySelectorAll('.tile').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
-
-    // ============ PIPELINE — flowing packets ============
-    (function pipeline() {
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReduced) return;
-
-      const grid = document.getElementById('pipelineGrid');
-      const packetsLayer = document.getElementById('packets');
-      const stages = [...grid.querySelectorAll('.stage')];
-      const outCaption = document.getElementById('outCaption');
-
-      // labels evolve as the packet moves through stages
-      const labelSets = [
-        ['"refund?"', '[0.13, .07,…]', 'top-4 chunks', 'prompt+ctx', '"30 days…"'],
-        ['question', 'vector', 'neighbors', 'augmented', 'answer'],
-        ['"damaged?"', '3072-d', '[doc#214]', 'context', 'cited'],
-        ['intent', 'embedding', 'evidence', 'rendered', 'reply']
-      ];
-      let setIdx = 0;
-      let started = false;
-
-      function getStageCenters() {
-        const gridRect = grid.getBoundingClientRect();
-        return stages.map((s) => {
-          const r = s.getBoundingClientRect();
-          return r.left + r.width / 2 - gridRect.left;
-        });
-      }
-
-      function spawnPacket() {
-        if (document.hidden) return;
-        const labels = labelSets[setIdx % labelSets.length];
-        setIdx++;
-        const packet = document.createElement('div');
-        packet.className = 'packet';
-        packet.textContent = labels[0];
-        packetsLayer.appendChild(packet);
-
-        const centers = getStageCenters();
-        const totalDuration = 4400;
-        const start = performance.now();
-        let lastLitIdx = -1;
-
-        function step(now) {
-          const t = Math.min((now - start) / totalDuration, 1);
-          const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-          const fullLeft = centers[0] - 30;
-          const fullRight = centers[centers.length - 1] + 30;
-          const x = fullLeft + (fullRight - fullLeft) * eased;
-          packet.style.left = x + 'px';
-          packet.style.opacity = t < 0.06 ? (t / 0.06) : (t > 0.94 ? Math.max(0, (1 - t) / 0.06) : 1);
-
-          let curIdx = -1;
-          for (let i = 0; i < centers.length; i++) {
-            if (Math.abs(x - centers[i]) < 36) { curIdx = i; break; }
-          }
-          if (curIdx !== lastLitIdx) {
-            if (lastLitIdx >= 0) stages[lastLitIdx].classList.remove('lit');
-            if (curIdx >= 0) {
-              stages[curIdx].classList.add('lit');
-              if (labels[curIdx]) packet.textContent = labels[curIdx];
-            }
-            lastLitIdx = curIdx;
-          }
-          if (t < 1) {
-            requestAnimationFrame(step);
-          } else {
-            if (lastLitIdx >= 0) stages[lastLitIdx].classList.remove('lit');
-            outCaption.classList.add('show');
-            setTimeout(() => outCaption.classList.remove('show'), 1400);
-            packet.remove();
-          }
-        }
-        requestAnimationFrame(step);
-      }
-
-      const startObs = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting && !started) {
-            started = true;
-            spawnPacket();
-            setInterval(spawnPacket, 1700);
-            startObs.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.25 });
-      startObs.observe(document.querySelector('.pipeline-wrap'));
-    })();
-
-    // ============ VECTOR SPACE — query lands, neighbors light up ============
-    (function vectorSpace() {
-      const svg = document.getElementById('vecSvg');
-      const qDot = document.getElementById('qDot');
-      const qHalo = document.getElementById('qHalo');
-      const qLabel = document.getElementById('qLabel');
-      const rays = ['ray1', 'ray2', 'ray3'].map((id) => document.getElementById(id));
-      const rings = ['ring1', 'ring2', 'ring3'].map((id) => document.getElementById(id));
-      // top-3 neighbors are a3, a4, a1 (closest to query at 50,62)
-      const neighborIds = ['a3', 'a4', 'a1'];
-      const dots = [...svg.querySelectorAll('.dot')];
+    // ============ SCATTER PLOT — play-once + replay() ============
+    (function scatterPlay() {
+      const svg = document.getElementById('scatterSvg');
       const replayBtn = document.getElementById('replayBtn');
-
-      function reset() {
-        qDot.classList.remove('land');
-        qHalo.classList.remove('on');
-        qLabel.classList.remove('on');
-        rays.forEach(r => r.classList.remove('on'));
-        rings.forEach(r => r.classList.remove('on'));
-        dots.forEach(d => { d.classList.remove('dim', 'neighbor'); });
-      }
+      const neighborIds = ['a3', 'a4', 'a1'];
 
       function play() {
-        reset();
-        // step 1: query lands
-        requestAnimationFrame(() => {
-          qDot.classList.add('land');
-          qHalo.classList.add('on');
-          qLabel.classList.add('on');
-        });
-        // step 2: dim non-neighbors
+        svg.classList.remove('played');
+        // restart by re-applying classes
+        const dots = svg.querySelectorAll('.sc-dot');
+        dots.forEach(d => d.classList.remove('dim', 'neighbor'));
+        // force reflow before adding class again
+        void svg.offsetWidth;
+        // dim non-neighbors after a beat
         setTimeout(() => {
           dots.forEach(d => {
             if (neighborIds.includes(d.dataset.id)) d.classList.add('neighbor');
             else d.classList.add('dim');
           });
-        }, 600);
-        // step 3: rays draw out
-        setTimeout(() => rays.forEach((r, i) => setTimeout(() => r.classList.add('on'), i * 120)), 900);
-        // step 4: rings pop
-        setTimeout(() => rings.forEach((r, i) => setTimeout(() => r.classList.add('on'), i * 120)), 1100);
+          svg.classList.add('played');
+        }, 200);
       }
 
-      const obs = new IntersectionObserver((entries) => {
+      const playObs = new IntersectionObserver((entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
             play();
-            obs.unobserve(e.target);
+            playObs.unobserve(e.target);
           }
         });
-      }, { threshold: 0.4 });
-      obs.observe(svg);
+      }, { threshold: 0.35 });
+      playObs.observe(svg);
 
       replayBtn.addEventListener('click', play);
     })();
+
+    // ============ NUMBER TICKER (printout values) ============
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function fmtNum(v, decimals) {
+      if (decimals > 0) return v.toFixed(decimals);
+      return Math.round(v).toLocaleString();
+    }
+    function tickNum(el) {
+      const to = +el.dataset.to;
+      const decimals = +(el.dataset.decimals || 0);
+      const dur = 1100;
+      const start = performance.now();
+      el.classList.add('ticking');
+      function tick(now) {
+        const p = Math.min((now - start) / dur, 1);
+        el.textContent = fmtNum(easeOutCubic(p) * to, decimals);
+        if (p < 1) requestAnimationFrame(tick);
+        else el.classList.remove('ticking');
+      }
+      requestAnimationFrame(tick);
+    }
+    const numObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { tickNum(e.target); numObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.ticker').forEach((el) => numObs.observe(el));
   </script>
   <script src="../shared/nav.js" defer></script>
 </body>

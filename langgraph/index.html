@@ -3,1067 +3,2216 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LangGraph — Agents that remember.</title>
-  <meta name="description" content="LangGraph is a low-level orchestration framework for stateful, graph-based LLM agents. A five-minute primer for builders and curious product folks.">
+  <title>&gt; LANGGRAPH_AGENTS.HTML</title>
+  <meta name="description" content="LangGraph — stateful, graph-based LLM agents. Low-level orchestration. The ReAct loop drawn raw, with checkpointing, branching, and human-in-the-loop.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --color-bg: #FAF7F2;
-      --color-bg-warm: #F5F0E8;
-      --color-bg-code: #1E1E2E;
-      --color-text: #2C2A28;
-      --color-text-secondary: #6B6560;
-      --color-text-muted: #9E9790;
-      --color-border: #E5DFD6;
-      --color-border-light: #EEEBE5;
-      --color-surface: #FFFFFF;
-      --color-accent: #D94F30;
-      --color-accent-hover: #C4432A;
-      --color-accent-light: #FDEEE9;
-      --color-accent-muted: #E8836C;
-      --color-info: #2A7B9B;
-      --color-success: #2D8B55;
-      --color-actor-2: #2A7B9B;
-      --color-actor-3: #7B6DAA;
-      --color-actor-4: #D4A843;
+      --bg:        #000000;
+      --fg:        #FFFFFF;
+      --fg-dim:    #A0A0A0;
+      --fg-mute:   #5A5A5A;
+      --line:      rgba(255,255,255,0.18);
+      --line-soft: rgba(255,255,255,0.08);
+      --grid:      rgba(255,255,255,0.04);
 
-      --font-display: 'Bricolage Grotesque', Georgia, serif;
-      --font-body: 'DM Sans', -apple-system, sans-serif;
-      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --lime:    #39FF14;
+      --cyan:    #00FFFF;
+      --magenta: #FF00FF;
+      --amber:   #FFB000;
 
-      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --mono: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
 
-      --duration-fast: 150ms;
-      --duration-normal: 300ms;
-      --duration-slow: 500ms;
-      --duration-slower: 700ms;
-      --stagger: 80ms;
-
-      --shadow-md: 0 4px 12px rgba(44, 42, 40, 0.08);
-      --shadow-lg: 0 8px 24px rgba(44, 42, 40, 0.1);
-      --shadow-xl: 0 16px 48px rgba(44, 42, 40, 0.12);
+      --step: steps(1, end);
     }
 
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
+
     html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      background-image:
-        radial-gradient(ellipse at 15% 10%, rgba(217, 79, 48, 0.05) 0%, transparent 45%),
-        radial-gradient(ellipse at 85% 90%, rgba(42, 123, 155, 0.03) 0%, transparent 50%);
-      line-height: 1.6;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--mono);
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 1.55;
       -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-position: 0 0;
+      overflow-x: hidden;
     }
 
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 9999px; }
+    ::selection { background: var(--lime); color: var(--bg); }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--fg-mute); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--lime); }
+
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { color: var(--lime); }
+    a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+    /* ============ WATERMARK ============ */
+    .watermark {
+      position: fixed;
+      top: 12px; right: 12px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--lime);
+      z-index: 100;
+      pointer-events: none;
+      mix-blend-mode: difference;
+    }
+
+    /* ============ LAYOUT ============ */
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
 
     /* ============ HERO ============ */
     .hero {
-      min-height: 92dvh;
-      padding: 5rem 1.5rem 4rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      max-width: 1100px;
+      padding: 96px 24px 64px;
+      max-width: 1200px;
       margin: 0 auto;
+      position: relative;
     }
-    .eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-accent);
-      opacity: 0;
-      transition: opacity var(--duration-slow) var(--ease-out);
+
+    .prompt-line {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--fg-dim);
+      margin: 0 0 24px;
+      letter-spacing: 0.04em;
     }
-    .hero.visible .eyebrow { opacity: 1; }
-    .eyebrow .dot {
-      display: inline-block;
-      width: 6px; height: 6px;
-      background: var(--color-accent);
-      border-radius: 50%;
-      margin: 0 0.6em;
-      vertical-align: middle;
+    .prompt-line .prompt-tag {
+      color: var(--lime);
+    }
+    .prompt-line .path {
+      color: var(--cyan);
     }
 
     .hero-title {
-      font-family: var(--font-display);
+      font-family: var(--mono);
       font-weight: 700;
-      font-size: clamp(2.75rem, 7vw, 5rem);
-      line-height: 1.02;
-      letter-spacing: -0.035em;
-      margin: 1.75rem 0 1.75rem;
-      max-width: 16ch;
+      font-size: clamp(2.2rem, 6vw, 4.5rem);
+      line-height: 1.0;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+      text-transform: uppercase;
+      white-space: pre;
+      overflow: hidden;
     }
-    .hero-title .word {
+    .hero-title .typewriter {
       display: inline-block;
-      opacity: 0;
-      transform: translateY(28px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
+      overflow: hidden;
+      vertical-align: bottom;
+      white-space: nowrap;
+      border-right: 0.6ch solid var(--lime);
+      animation: typeIn 1.8s steps(28, end) 0.2s both,
+                 caretBlink 0.9s steps(1, end) 2s infinite;
+      width: 0;
     }
-    .hero.visible .hero-title .word { opacity: 1; transform: translateY(0); }
-    .hero.visible .hero-title .word:nth-child(1) { transition-delay: 100ms; }
-    .hero.visible .hero-title .word:nth-child(2) { transition-delay: 180ms; }
-    .hero.visible .hero-title .word:nth-child(3) { transition-delay: 260ms; }
-    .hero-title em {
-      font-style: normal;
-      color: var(--color-accent);
-      position: relative;
-    }
-    .hero-title em::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0; bottom: 0.05em;
-      height: 0.18em;
-      background: var(--color-accent-light);
-      z-index: -1;
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 800ms var(--ease-out) 700ms;
-    }
-    .hero.visible .hero-title em::after { transform: scaleX(1); }
+    @keyframes typeIn { from { width: 0; } to { width: 100%; } }
+    @keyframes caretBlink { 50% { border-color: transparent; } }
 
     .hero-sub {
-      font-size: 1.2rem;
-      color: var(--color-text-secondary);
-      max-width: 52ch;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity var(--duration-slower) var(--ease-out), transform var(--duration-slower) var(--ease-out);
-      transition-delay: 600ms;
+      max-width: 64ch;
+      font-family: var(--mono);
+      font-size: 15px;
+      color: var(--fg-dim);
+      line-height: 1.65;
+      margin: 32px 0 0;
     }
-    .hero.visible .hero-sub { opacity: 1; transform: translateY(0); }
+    .hero-sub .hl { color: var(--lime); }
+    .hero-sub .hl2 { color: var(--cyan); }
 
+    /* Scanline shimmer overlay on hero */
+    .scanline {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      mix-blend-mode: screen;
+      opacity: 0.6;
+    }
+    .scanline::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      top: -40%;
+      height: 6px;
+      background: linear-gradient(180deg, transparent, rgba(57,255,20,0.18), transparent);
+      animation: scan 4s linear infinite;
+    }
+    @keyframes scan {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(140vh); }
+    }
+
+    /* ============ ASCII RULE ============ */
+    .ascii-rule {
+      font-family: var(--mono);
+      color: var(--fg-mute);
+      font-size: 12px;
+      letter-spacing: 0;
+      margin: 8px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      user-select: none;
+    }
+    .ascii-rule.lime { color: var(--lime); }
+
+    /* ============ CTA ROW ============ */
     .cta-row {
       display: flex;
-      gap: 1.25rem;
-      margin-top: 2.5rem;
+      gap: 20px;
       align-items: center;
       flex-wrap: wrap;
-      opacity: 0;
-      transition: opacity var(--duration-slower) var(--ease-out);
-      transition-delay: 800ms;
+      margin-top: 40px;
     }
-    .hero.visible .cta-row { opacity: 1; }
-
-    /* ============ MAGNETIC BUTTON ============ */
-    .magnetic {
+    .btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 1rem 1.75rem;
-      border-radius: 9999px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
+      gap: 8px;
+      padding: 12px 18px;
+      font-family: var(--mono);
       font-weight: 500;
-      font-size: 1rem;
-      border: none;
-      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: lowercase;
+      background: var(--bg);
+      color: var(--lime);
+      border: 2px solid var(--lime);
       cursor: pointer;
-      transform: translate3d(var(--mx, 0), var(--my, 0), 0);
-      transition: transform 600ms var(--ease-spring), background 200ms ease;
-      will-change: transform;
+      transition: background 80ms var(--step), color 80ms var(--step);
     }
-    .magnetic:hover { background: var(--color-accent-hover); }
-    .magnetic .arrow {
-      transition: transform 300ms var(--ease-out);
+    .btn:hover {
+      background: var(--lime);
+      color: var(--bg);
+    }
+    .btn .pfx { opacity: 0.7; }
+    .btn:hover .pfx { opacity: 1; }
+    .btn .cursor {
       display: inline-block;
+      width: 0.55ch;
+      height: 1em;
+      background: currentColor;
+      margin-left: 4px;
+      animation: caretBlink 0.9s steps(1, end) infinite;
     }
-    .magnetic:hover .arrow { transform: translateX(4px); }
-
-    .secondary {
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      font-size: 0.95rem;
-      transition: color 200ms;
-      font-family: var(--font-body);
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 0;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--fg-dim);
+      letter-spacing: 0.04em;
     }
-    .secondary:hover { color: var(--color-accent); }
+    .btn-secondary:hover { color: var(--cyan); }
 
-    /* ============ LOOP DIAGRAM SECTION ============ */
-    .loop-section {
-      padding: 4rem 1.5rem 6rem;
-      max-width: 1100px;
+    /* ============ SECTION ============ */
+    section {
+      padding: 72px 24px;
+      max-width: 1200px;
       margin: 0 auto;
+      position: relative;
     }
-    .section-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
+
+    .section-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--color-text-muted);
-      margin: 0 0 0.75rem;
+      color: var(--lime);
+      margin: 0 0 12px;
     }
-    .section-heading {
-      font-family: var(--font-display);
+    .section-tag::before { content: '[' attr(data-num) '] '; color: var(--fg-mute); }
+
+    .section-h {
+      font-family: var(--mono);
       font-weight: 700;
-      font-size: clamp(2rem, 4vw, 3rem);
-      letter-spacing: -0.025em;
+      font-size: clamp(1.6rem, 3.4vw, 2.6rem);
       line-height: 1.1;
-      margin: 0 0 1rem;
-      max-width: 22ch;
+      letter-spacing: -0.015em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
+      color: var(--fg);
     }
+    .section-h .accent { color: var(--lime); }
+    .section-h .accent-c { color: var(--cyan); }
+
     .section-sub {
-      color: var(--color-text-secondary);
-      max-width: 56ch;
-      font-size: 1.05rem;
+      max-width: 70ch;
+      color: var(--fg-dim);
+      font-size: 14px;
+      line-height: 1.65;
       margin: 0;
     }
 
-    .loop-stage {
-      margin-top: 3.5rem;
+    /* ============ LOOP DIAGRAM ============ */
+    .loop-wrap {
+      margin-top: 56px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      align-items: center;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: 48px;
+      align-items: stretch;
+    }
+
+    .loop-frame {
+      border: 2px solid var(--fg);
+      padding: 28px;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 23px,
+          rgba(255,255,255,0.02) 23px,
+          rgba(255,255,255,0.02) 24px
+        );
+      position: relative;
+    }
+    .loop-frame::before {
+      content: '┌─[ AGENT.LOOP ]─';
+      position: absolute;
+      top: -10px; left: 16px;
+      background: var(--bg);
+      padding: 0 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--lime);
+      letter-spacing: 0.08em;
+    }
+    .loop-frame::after {
+      content: '─[ TICK=6s ]─┐';
+      position: absolute;
+      top: -10px; right: 16px;
+      background: var(--bg);
+      padding: 0 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-mute);
+      letter-spacing: 0.08em;
     }
 
     .loop-viz {
-      position: relative;
+      width: 100%;
       aspect-ratio: 1 / 1;
       max-width: 460px;
-      width: 100%;
       margin: 0 auto;
-    }
-    .loop-viz svg { width: 100%; height: 100%; display: block; overflow: visible; }
-
-    /* The traveling pulse */
-    .pulse-glow {
-      filter: drop-shadow(0 0 8px var(--color-accent)) drop-shadow(0 0 16px rgba(217, 79, 48, 0.45));
+      display: block;
     }
 
-    /* Node activations driven via animation-delay + a single shared keyframe */
-    .node-circle {
-      fill: var(--color-surface);
-      stroke: var(--color-border);
+    .loop-viz .edge {
+      stroke: var(--lime);
+      stroke-width: 1.5;
+      fill: none;
+      stroke-dasharray: 4 3;
+    }
+    .loop-viz .edge-exit {
+      stroke: var(--fg-mute);
+      stroke-width: 1.5;
+      fill: none;
+      stroke-dasharray: 2 4;
+    }
+
+    .node-rect {
+      fill: var(--bg);
+      stroke: var(--fg);
       stroke-width: 2;
-      transform-box: fill-box;
-      transform-origin: center;
-      transition: transform var(--duration-normal) var(--ease-spring);
     }
-    .node-group { transform-box: fill-box; transform-origin: center; }
-    .node-group.active .node-circle {
-      fill: var(--color-accent-light);
-      stroke: var(--color-accent);
-      stroke-width: 2.5;
+    .node-group.active .node-rect {
+      stroke: var(--magenta);
+      fill: rgba(255,0,255,0.08);
     }
-    .node-group.active .node-icon { color: var(--color-accent); }
-    .node-group.active { animation: nodePop 600ms var(--ease-spring); }
-
-    @keyframes nodePop {
-      0%   { transform: scale(1); }
-      40%  { transform: scale(1.08); }
-      100% { transform: scale(1); }
-    }
-
     .node-label {
-      font-family: var(--font-display);
+      font-family: var(--mono);
       font-weight: 700;
       font-size: 13px;
-      letter-spacing: -0.01em;
-      fill: var(--color-text);
+      fill: var(--fg);
       text-anchor: middle;
       dominant-baseline: middle;
+      letter-spacing: 0.04em;
     }
     .node-sublabel {
-      font-family: var(--font-mono);
+      font-family: var(--mono);
+      font-weight: 400;
       font-size: 9px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      fill: var(--color-text-muted);
+      fill: var(--fg-dim);
       text-anchor: middle;
       dominant-baseline: middle;
-    }
-    .node-group.active .node-sublabel { fill: var(--color-accent); }
-
-    .edge-path {
-      fill: none;
-      stroke: var(--color-border);
-      stroke-width: 1.5;
-      stroke-dasharray: 4 4;
-    }
-    .edge-path.solid { stroke-dasharray: none; }
-
-    .exit-edge {
-      stroke: var(--color-text-muted);
-      stroke-width: 1.5;
-      fill: none;
-      stroke-dasharray: 3 3;
-    }
-    .exit-label {
-      font-family: var(--font-mono);
-      font-size: 9px;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      fill: var(--color-text-muted);
+    }
+    .node-num {
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 9px;
+      fill: var(--lime);
+      text-anchor: middle;
+      dominant-baseline: middle;
+      letter-spacing: 0.08em;
+    }
+    .node-group.active .node-label { fill: var(--magenta); }
+    .node-group.active .node-num { fill: var(--magenta); }
+    .node-group.active .node-sublabel { fill: var(--cyan); }
+
+    .exit-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      fill: var(--fg-mute);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
     }
 
-    /* State pill below diagram */
-    .state-pill {
-      margin: 1.5rem auto 0;
-      max-width: 380px;
-      padding: 0.75rem 1rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--color-text-secondary);
-      box-shadow: var(--shadow-md);
+    /* State readout */
+    .state-readout {
+      margin-top: 24px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg-dim);
+      background: rgba(255,255,255,0.02);
     }
-    .state-pill .state-key { color: var(--color-text-muted); }
-    .state-pill .state-val {
-      color: var(--color-accent);
-      transition: opacity 250ms var(--ease-out);
+    .state-readout .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 3px 0;
     }
-    .state-pill .state-line { display: flex; justify-content: space-between; padding: 0.15rem 0; }
+    .state-readout .key { color: var(--fg-mute); }
+    .state-readout .val { color: var(--lime); font-weight: 500; }
+    .state-readout .val.cyan { color: var(--cyan); }
+    .state-readout .row.head {
+      padding-bottom: 8px;
+      margin-bottom: 6px;
+      border-bottom: 1px dashed var(--line-soft);
+      color: var(--fg);
+    }
 
+    /* Loop copy */
     .loop-copy h3 {
-      font-family: var(--font-display);
+      font-family: var(--mono);
       font-weight: 700;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
+      text-transform: uppercase;
       letter-spacing: -0.01em;
-      margin: 0 0 0.75rem;
+      margin: 0 0 14px;
+      color: var(--fg);
     }
-    .loop-copy p { color: var(--color-text-secondary); margin: 0 0 1rem; }
+    .loop-copy h3 .ck { color: var(--lime); }
+    .loop-copy p {
+      color: var(--fg-dim);
+      margin: 0 0 18px;
+      font-size: 14px;
+    }
     .loop-copy ol {
       list-style: none;
       padding: 0;
-      margin: 1.5rem 0 0;
+      margin: 28px 0 0;
       counter-reset: step;
     }
     .loop-copy ol li {
       counter-increment: step;
-      padding: 0.85rem 0 0.85rem 2.75rem;
+      padding: 14px 0 14px 60px;
       position: relative;
-      border-top: 1px solid var(--color-border-light);
-      color: var(--color-text);
+      border-top: 1px solid var(--line-soft);
+      color: var(--fg);
     }
-    .loop-copy ol li:first-child { border-top: none; }
+    .loop-copy ol li:first-child { border-top: 1px solid var(--line); }
+    .loop-copy ol li:last-child { border-bottom: 1px solid var(--line); }
     .loop-copy ol li::before {
-      content: counter(step, decimal-leading-zero);
+      content: '> ' counter(step, decimal-leading-zero);
       position: absolute;
       left: 0;
-      top: 0.85rem;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--color-accent);
-      letter-spacing: 0.05em;
-      font-weight: 500;
+      top: 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--lime);
+      letter-spacing: 0.04em;
     }
     .loop-copy ol li strong {
-      font-family: var(--font-display);
+      font-family: var(--mono);
       font-weight: 700;
-      color: var(--color-text);
+      color: var(--fg);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
     .loop-copy ol li span {
       display: block;
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-      margin-top: 0.15rem;
+      color: var(--fg-dim);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .loop-copy code {
+      font-family: var(--mono);
+      color: var(--magenta);
+      font-size: 0.95em;
     }
 
-    /* ============ WHY A GRAPH ============ */
-    .why {
-      padding: 5rem 1.5rem;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
+    /* ============ BENTO 2x2 ============ */
     .bento {
-      margin-top: 3rem;
+      margin-top: 48px;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-auto-rows: minmax(200px, auto);
-      gap: 1rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-top: 2px solid var(--fg);
+      border-left: 2px solid var(--fg);
     }
-    .magic-card {
+    .tile {
+      padding: 28px 24px;
+      border-right: 2px solid var(--fg);
+      border-bottom: 2px solid var(--fg);
+      background: var(--bg);
       position: relative;
-      padding: 1.75rem;
-      border-radius: 16px;
-      background:
-        radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%),
-          rgba(217, 79, 48, 0.08), transparent 40%),
-        var(--color-surface);
-      border: 1px solid var(--color-border);
-      transition: border-color var(--duration-normal), transform var(--duration-normal) var(--ease-spring), box-shadow var(--duration-normal) var(--ease-out);
-      cursor: default;
-      opacity: 0;
-      transform: translateY(20px);
-      overflow: hidden;
+      transition: background 80ms var(--step);
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
     }
-    .magic-card.visible {
-      opacity: 1; transform: translateY(0);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring);
+    .tile:hover { background: rgba(57,255,20,0.04); animation: flicker 0.4s steps(4, end); }
+    @keyframes flicker {
+      0%, 100% { background: rgba(57,255,20,0.04); }
+      30%      { background: rgba(57,255,20,0.10); }
+      60%      { background: rgba(0,255,255,0.04); }
     }
-    .magic-card.visible:hover {
-      transform: translateY(-3px);
-      border-color: var(--color-accent-muted);
-      box-shadow: var(--shadow-lg);
+    .tile-num {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--fg-mute);
+      letter-spacing: 0.14em;
+      margin: 0 0 10px;
     }
-    .magic-card.span-2 { grid-column: span 2; }
-
-    .card-tag {
-      display: inline-block;
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 0.25rem 0.6rem;
-      border-radius: 999px;
-    }
-    .card-title {
-      font-family: var(--font-display);
+    .tile-num .live { color: var(--lime); }
+    .tile h3 {
+      font-family: var(--mono);
       font-weight: 700;
-      font-size: 1.35rem;
-      letter-spacing: -0.01em;
-      margin: 1rem 0 0.5rem;
-    }
-    .card-body {
-      color: var(--color-text-secondary);
-      font-size: 0.95rem;
-      margin: 0;
-    }
-
-    /* Motifs inside cards */
-    .motif {
-      margin-top: 1.25rem;
-      height: 60px;
-      position: relative;
-    }
-    .motif-checkpoint {
-      display: flex; align-items: center; gap: 6px; height: 100%;
-    }
-    .motif-checkpoint .chk {
-      flex: 1; height: 6px;
-      background: var(--color-border-light);
-      border-radius: 3px;
-      position: relative;
-      overflow: hidden;
-    }
-    .motif-checkpoint .chk::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--color-accent);
-      transform-origin: left;
-      transform: scaleX(0);
-      animation: chkFill 2.4s var(--ease-out) infinite;
-    }
-    .motif-checkpoint .chk:nth-child(2)::after { animation-delay: 0.4s; }
-    .motif-checkpoint .chk:nth-child(3)::after { animation-delay: 0.8s; }
-    .motif-checkpoint .chk:nth-child(4)::after { animation-delay: 1.2s; }
-    @keyframes chkFill {
-      0%, 90%, 100% { transform: scaleX(0); }
-      30%, 70% { transform: scaleX(1); }
-    }
-
-    .motif-branch svg { width: 100%; height: 100%; }
-    .motif-branch .br-line {
-      stroke: var(--color-border);
-      stroke-width: 1.5;
-      fill: none;
-    }
-    .motif-branch .br-active {
-      stroke: var(--color-accent);
-      stroke-width: 2.5;
-      fill: none;
-      stroke-dasharray: 80;
-      stroke-dashoffset: 80;
-      animation: brDraw 2.6s var(--ease-out) infinite;
-    }
-    @keyframes brDraw {
-      0% { stroke-dashoffset: 80; }
-      45% { stroke-dashoffset: 0; }
-      55% { stroke-dashoffset: 0; }
-      100% { stroke-dashoffset: 80; }
-    }
-
-    .motif-memory {
-      display: flex; gap: 8px; align-items: flex-end; height: 100%;
-    }
-    .motif-memory .stick {
-      flex: 1;
-      background: var(--color-accent);
-      border-radius: 3px 3px 0 0;
-      opacity: 0.25;
-      animation: memPulse 2.4s var(--ease-out) infinite;
-    }
-    .motif-memory .stick:nth-child(1) { animation-delay: 0s; height: 25%; }
-    .motif-memory .stick:nth-child(2) { animation-delay: 0.2s; height: 45%; }
-    .motif-memory .stick:nth-child(3) { animation-delay: 0.4s; height: 65%; }
-    .motif-memory .stick:nth-child(4) { animation-delay: 0.6s; height: 80%; }
-    .motif-memory .stick:nth-child(5) { animation-delay: 0.8s; height: 95%; }
-    @keyframes memPulse {
-      0%, 100% { opacity: 0.25; }
-      50% { opacity: 1; }
-    }
-
-    .motif-hitl {
-      display: flex; align-items: center; justify-content: center; gap: 14px;
-      height: 100%;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
+      font-size: 1.1rem;
       text-transform: uppercase;
-      color: var(--color-text-muted);
+      letter-spacing: 0.01em;
+      margin: 0 0 12px;
+      color: var(--fg);
     }
-    .motif-hitl .pill {
-      padding: 0.4rem 0.8rem;
-      background: var(--color-bg-warm);
-      border: 1px solid var(--color-border);
-      border-radius: 999px;
+    .tile h3 .arrow { color: var(--lime); }
+    .tile p {
+      color: var(--fg-dim);
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 0 0 18px;
     }
-    .motif-hitl .pill.human {
-      background: var(--color-accent-light);
-      border-color: var(--color-accent-muted);
-      color: var(--color-accent);
-      animation: humanBlink 2.4s ease-in-out infinite;
+    .tile .motif {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line-soft);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-mute);
+      letter-spacing: 0.08em;
     }
-    @keyframes humanBlink {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(217, 79, 48, 0); }
-      50% { box-shadow: 0 0 0 6px rgba(217, 79, 48, 0.12); }
+    .tile .motif .ascii {
+      display: block;
+      color: var(--lime);
+      white-space: pre;
+      font-size: 11px;
+      line-height: 1.3;
     }
-    .motif-hitl .arrow-s {
-      color: var(--color-text-muted);
+    .tile .motif .ascii.cyan { color: var(--cyan); }
+    .tile .motif .ascii.magenta { color: var(--magenta); }
+
+    /* Bar motif */
+    .bar-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-dim);
+    }
+    .bar-line .bar {
+      color: var(--lime);
+      letter-spacing: 0;
     }
 
-    /* ============ CODE SECTION ============ */
-    .code-section {
-      padding: 5rem 1.5rem;
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    pre.code-block {
-      margin: 2.5rem 0 0;
-      padding: 1.75rem 2rem;
-      background: var(--color-bg-code);
-      color: #CDD6F4;
-      border-radius: 16px;
-      font-family: var(--font-mono);
-      font-size: 0.88rem;
-      line-height: 1.65;
+    /* ============ CODE BLOCK ============ */
+    .code-block {
+      margin: 36px 0 0;
+      border: 2px solid var(--fg);
+      background: var(--bg);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
       overflow-x: auto;
-      box-shadow: var(--shadow-lg);
-      white-space: pre;
+      position: relative;
     }
-    pre.code-block::-webkit-scrollbar { height: 6px; }
-    pre.code-block::-webkit-scrollbar-thumb { background: #45475A; border-radius: 9999px; }
-    .ck { color: #CBA6F7; }   /* keyword */
-    .cs { color: #A6E3A1; }   /* string */
-    .cf { color: #89B4FA; }   /* function */
-    .cc { color: #6C7086; font-style: italic; }   /* comment */
-    .cn { color: #FAB387; }   /* number */
-    .cp { color: #F9E2AF; }   /* property */
-    .co { color: #94E2D5; }   /* operator */
-    .cm { color: #F38BA8; }   /* module / class */
+    .code-block .titlebar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      border-bottom: 2px solid var(--fg);
+      font-size: 11px;
+      color: var(--fg-dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.03);
+    }
+    .code-block .titlebar .name { color: var(--lime); }
+    .code-block .titlebar .meta { color: var(--fg-mute); }
+    .code-block pre {
+      margin: 0;
+      padding: 20px 24px;
+      white-space: pre;
+      color: var(--fg);
+    }
+    .code-block .ln {
+      display: inline-block;
+      width: 2.4ch;
+      color: var(--fg-mute);
+      user-select: none;
+      margin-right: 1ch;
+    }
+    .k  { color: var(--lime); font-weight: 500; }   /* keyword */
+    .s  { color: var(--amber); }                     /* string  */
+    .f  { color: var(--cyan); }                      /* func    */
+    .c  { color: var(--fg-mute); font-style: italic; } /* comment */
+    .o  { color: var(--magenta); }                   /* op      */
+    .m  { color: var(--cyan); }                      /* module  */
 
     .code-caption {
-      margin-top: 1.25rem;
-      font-size: 0.9rem;
-      color: var(--color-text-muted);
-      font-family: var(--font-mono);
+      margin-top: 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg-mute);
       letter-spacing: 0.02em;
+    }
+    .code-caption::before { content: '// '; color: var(--lime); }
+
+    /* ============ STATS / ASCII BARS ============ */
+    .stats {
+      margin-top: 48px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-top: 2px solid var(--fg);
+      border-left: 2px solid var(--fg);
+    }
+    .stat {
+      padding: 24px 22px;
+      border-right: 2px solid var(--fg);
+      border-bottom: 2px solid var(--fg);
+      background: var(--bg);
+    }
+    .stat-key {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: var(--fg-mute);
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+    .stat-val {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      line-height: 1;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+    .stat-val .unit { color: var(--lime); }
+    .stat-val .unit.cyan { color: var(--cyan); }
+    .stat-bar {
+      margin-top: 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--lime);
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .stat-bar .pct { color: var(--fg-dim); margin-left: 8px; }
+    .stat-note {
+      margin-top: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--fg-dim);
+      line-height: 1.5;
     }
 
     /* ============ USE CASES ============ */
     .cases {
-      padding: 5rem 1.5rem;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .stats {
-      margin-top: 2.5rem;
+      margin-top: 48px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
+      gap: 0;
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
     }
-    .stat {
-      padding: 1.75rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition:
-        opacity var(--duration-slower) var(--ease-spring),
-        transform var(--duration-slower) var(--ease-spring);
+    .case {
+      padding: 22px 22px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--bg);
     }
-    .stat.visible { opacity: 1; transform: translateY(0); }
-    .stat:nth-child(2).visible { transition-delay: 100ms; }
-    .stat:nth-child(3).visible { transition-delay: 200ms; }
-
-    .stat-value {
-      font-family: var(--font-display);
-      font-size: clamp(2.2rem, 4.5vw, 3rem);
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
-      color: var(--color-text);
-    }
-    .stat-value .accent { color: var(--color-accent); }
-    .stat-label {
-      margin-top: 0.5rem;
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
-    }
-
-    .case-row {
-      margin-top: 3rem;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
-    .case-card {
-      padding: 1.75rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--duration-slower) var(--ease-spring), transform var(--duration-slower) var(--ease-spring), border-color var(--duration-normal);
-    }
-    .case-card.visible { opacity: 1; transform: translateY(0); }
-    .case-card:nth-child(2).visible { transition-delay: 100ms; }
-    .case-card:nth-child(3).visible { transition-delay: 200ms; }
-    .case-card:hover { border-color: var(--color-accent-muted); }
-
+    .case:hover { background: rgba(0,255,255,0.03); }
     .case-tag {
-      font-family: var(--font-mono);
-      font-size: 0.68rem;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: var(--cyan);
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-accent);
+      margin: 0 0 10px;
     }
-    .case-card h4 {
-      font-family: var(--font-display);
+    .case h4 {
+      font-family: var(--mono);
       font-weight: 700;
-      font-size: 1.2rem;
-      margin: 0.75rem 0 0.5rem;
-      letter-spacing: -0.01em;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      margin: 0 0 8px;
+      color: var(--fg);
     }
-    .case-card p {
-      color: var(--color-text-secondary);
-      font-size: 0.92rem;
+    .case p {
+      color: var(--fg-dim);
+      font-size: 13px;
+      line-height: 1.55;
       margin: 0;
     }
 
     /* ============ FINAL CTA ============ */
     .final {
-      padding: 6rem 1.5rem 8rem;
-      max-width: 760px;
+      padding: 96px 24px 80px;
+      max-width: 1200px;
       margin: 0 auto;
-      text-align: center;
     }
-    .final h2 {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 3rem);
+    .final-frame {
+      border: 2px solid var(--lime);
+      padding: 48px 32px;
+      text-align: left;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 23px,
+          rgba(57,255,20,0.025) 23px,
+          rgba(57,255,20,0.025) 24px
+        );
+      position: relative;
+    }
+    .final-frame::before {
+      content: '┌─[ DEPLOY ]──';
+      position: absolute;
+      top: -10px; left: 20px;
+      background: var(--bg);
+      padding: 0 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--lime);
+      letter-spacing: 0.08em;
+    }
+    .final-h {
+      font-family: var(--mono);
       font-weight: 700;
-      letter-spacing: -0.025em;
+      font-size: clamp(1.6rem, 3.6vw, 2.6rem);
       line-height: 1.1;
-      margin: 0 0 1rem;
+      text-transform: uppercase;
+      letter-spacing: -0.015em;
+      margin: 0 0 16px;
+      color: var(--fg);
     }
+    .final-h .accent { color: var(--lime); }
     .final p {
-      color: var(--color-text-secondary);
-      margin: 0 auto 2.5rem;
-      max-width: 50ch;
-      font-size: 1.05rem;
+      color: var(--fg-dim);
+      max-width: 60ch;
+      margin: 0 0 32px;
+      font-size: 14px;
     }
-    .final .cta-row { justify-content: center; }
 
+    /* ============ FOOTER ============ */
     footer {
-      padding: 2rem 1.5rem 3rem;
-      text-align: center;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-      color: var(--color-text-muted);
+      padding: 32px 24px 96px;
+      max-width: 1200px;
+      margin: 0 auto;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--fg-mute);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
-    footer a { color: var(--color-text-secondary); text-decoration: none; border-bottom: 1px dotted var(--color-border); }
-    footer a:hover { color: var(--color-accent); }
+    footer .ascii-rule { color: var(--fg-mute); margin-bottom: 16px; }
+    footer a { color: var(--fg-dim); border-bottom: 1px dotted var(--fg-mute); }
+    footer a:hover { color: var(--lime); }
 
     /* ============ RESPONSIVE ============ */
     @media (max-width: 880px) {
-      .loop-stage { grid-template-columns: 1fr; gap: 2rem; }
-      .bento { grid-template-columns: repeat(2, 1fr); }
-      .magic-card.span-2 { grid-column: span 2; }
+      .loop-wrap { grid-template-columns: 1fr; gap: 36px; }
+      .bento { grid-template-columns: 1fr; }
+      .cases { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; }
+      .ascii-rule { font-size: 10px; }
     }
     @media (max-width: 640px) {
-      .hero { padding-top: 3.5rem; min-height: auto; }
-      .stats { grid-template-columns: 1fr; }
-      .case-row { grid-template-columns: 1fr; }
-      .bento { grid-template-columns: 1fr; }
-      .magic-card.span-2 { grid-column: auto; }
-      .cta-row { gap: 0.75rem; }
-      pre.code-block { padding: 1.25rem; font-size: 0.78rem; }
+      .hero { padding: 64px 20px 40px; }
+      section { padding: 56px 20px; }
+      .final { padding: 64px 20px 48px; }
+      .final-frame { padding: 32px 22px; }
+      .watermark { font-size: 9px; top: 8px; right: 8px; }
+      .code-block pre { padding: 16px 14px; font-size: 11px; }
+      .loop-frame { padding: 22px 18px; }
+      .loop-frame::before, .loop-frame::after { font-size: 9px; }
     }
     @media (max-width: 380px) {
-      .hero-title { font-size: 2.5rem; }
+      .hero-title { font-size: 1.9rem; }
     }
 
     /* ============ REDUCED MOTION ============ */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+        animation: none !important;
+        transition: none !important;
         scroll-behavior: auto !important;
       }
-      .hero .word, .hero-sub, .cta-row, .stat, .magic-card, .case-card, .eyebrow {
-        opacity: 1 !important;
-        transform: none !important;
+      .hero-title .typewriter {
+        width: 100% !important;
+        border-right-color: transparent !important;
       }
-      .hero-title em::after { transform: scaleX(1) !important; }
-      .pulse-dot, .motif-checkpoint .chk::after, .motif-branch .br-active,
-      .motif-memory .stick, .motif-hitl .pill.human, .node-group { animation: none !important; }
-      .pulse-dot { display: none; }
+      .scanline { display: none; }
+      .btn .cursor { display: none; }
     }
     @media (hover: none) {
-      .magnetic { transform: none !important; }
-      .magic-card:hover { transform: none !important; }
+      .tile:hover { background: var(--bg); animation: none; }
+    }
+
+    /* ============ EXTENDED PANELS ============ */
+    .panel {
+      margin-top: 56px; border: 2px solid var(--fg);
+      padding: 32px 28px 28px; position: relative;
+      background: repeating-linear-gradient(0deg, transparent 0, transparent 23px, rgba(255,255,255,0.018) 23px, rgba(255,255,255,0.018) 24px);
+    }
+    .panel.cyan { border-color: var(--cyan); }
+    .panel.magenta { border-color: var(--magenta); }
+    .panel::before {
+      content: '┌─[ ' attr(data-label) ' ]─';
+      position: absolute; top: -10px; left: 18px;
+      background: var(--bg); padding: 0 8px;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--lime); letter-spacing: 0.08em;
+      text-transform: uppercase; white-space: nowrap;
+    }
+    .panel.cyan::before { color: var(--cyan); }
+    .panel.magenta::before { color: var(--magenta); }
+    .panel::after {
+      content: '─[ ' attr(data-meta) ' ]─┐';
+      position: absolute; top: -10px; right: 18px;
+      background: var(--bg); padding: 0 8px;
+      font-family: var(--mono); font-size: 11px;
+      color: var(--fg-mute); letter-spacing: 0.08em;
+      text-transform: uppercase; white-space: nowrap;
+    }
+    .panel p { color: var(--fg-dim); font-size: 14px; line-height: 1.7; margin: 0 0 18px; }
+    .panel p:last-child { margin-bottom: 0; }
+    .panel p .hl { color: var(--lime); }
+    .panel p .hl2 { color: var(--cyan); }
+    .panel p .warn { color: var(--magenta); }
+    .panel p code, .gotcha p code {
+      font-family: var(--mono); color: var(--cyan);
+      background: rgba(0,255,255,0.06);
+      padding: 1px 5px; border: 1px solid rgba(0,255,255,0.18); font-size: 0.92em;
+    }
+    .panel h3 {
+      font-family: var(--mono); font-weight: 700; font-size: 1.05rem;
+      text-transform: uppercase; letter-spacing: 0.02em;
+      color: var(--fg); margin: 28px 0 14px;
+    }
+    .panel h3:first-child { margin-top: 0; }
+    .panel h3 .arrow { color: var(--lime); }
+    .panel h3 .arrow.cyan { color: var(--cyan); }
+    .panel h3 .arrow.magenta { color: var(--magenta); }
+
+    /* ============ PROMPT TEMPLATE ============ */
+    .prompt-template {
+      margin: 22px 0; border-left: 2px solid var(--lime);
+      padding: 14px 18px 14px 16px; background: rgba(57,255,20,0.03);
+      font-family: var(--mono); font-size: 12.5px;
+      color: var(--fg); white-space: pre-wrap; line-height: 1.6;
+    }
+    .prompt-template .ph { color: var(--lime); }
+    .prompt-template .ph2 { color: var(--cyan); }
+    .prompt-template .ph3 { color: var(--magenta); }
+    .prompt-template .cmt { color: var(--fg-mute); font-style: italic; }
+
+    /* ============ PATTERN GRID ============ */
+    .pattern-grid {
+      margin-top: 48px; display: grid; grid-template-columns: 1fr; gap: 0;
+      border-top: 2px solid var(--fg); border-left: 2px solid var(--fg);
+    }
+    .pattern {
+      padding: 28px 26px; border-right: 2px solid var(--fg);
+      border-bottom: 2px solid var(--fg); background: var(--bg);
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: 32px; align-items: start;
+    }
+    .pattern-meta .pattern-num {
+      font-family: var(--mono); font-size: 10px;
+      color: var(--lime); letter-spacing: 0.14em; margin: 0 0 8px;
+    }
+    .pattern-meta h3 {
+      font-family: var(--mono); font-weight: 700; font-size: 1.15rem;
+      text-transform: uppercase; letter-spacing: 0.01em; margin: 0 0 14px; color: var(--fg);
+    }
+    .pattern-meta h3 .arrow { color: var(--lime); }
+    .pattern-meta p { color: var(--fg-dim); font-size: 13px; line-height: 1.65; margin: 0 0 12px; }
+    .pattern-meta p .hl { color: var(--lime); }
+    .pattern-meta p .hl2 { color: var(--cyan); }
+    .pattern-meta p .warn { color: var(--magenta); }
+    .pattern-meta .when {
+      font-family: var(--mono); font-size: 11px; color: var(--fg-mute);
+      letter-spacing: 0.08em; margin-top: 8px; padding-top: 10px;
+      border-top: 1px dashed var(--line-soft);
+    }
+    .pattern-meta .when span { color: var(--cyan); }
+    .pattern-viz {
+      font-family: var(--mono); font-size: 12px; line-height: 1.45;
+      color: var(--lime); white-space: pre; overflow-x: auto;
+      padding: 14px; border: 1px solid var(--line);
+      background: rgba(57,255,20,0.03); min-height: 100%;
+    }
+    .pattern-viz.cyan { color: var(--cyan); background: rgba(0,255,255,0.03); }
+    .pattern-viz.magenta { color: var(--magenta); background: rgba(255,0,255,0.03); }
+    .pattern-viz .lbl { color: var(--fg); }
+
+    @media (max-width: 880px) {
+      .pattern { grid-template-columns: 1fr; gap: 18px; }
+    }
+
+    /* ============ COMPARISON TABLE ============ */
+    .ascii-table-wrap {
+      margin-top: 24px; overflow-x: auto;
+      border: 2px solid var(--fg); padding: 18px; background: var(--bg);
+    }
+    .ascii-table {
+      font-family: var(--mono); font-size: 12px; line-height: 1.5;
+      color: var(--fg); white-space: pre; margin: 0;
+    }
+    .ascii-table .head { color: var(--lime); }
+    .ascii-table .row-c { color: var(--cyan); }
+    .ascii-table .row-m { color: var(--magenta); }
+
+    .comp-caption {
+      margin-top: 14px; font-family: var(--mono); font-size: 12px;
+      color: var(--fg-mute); letter-spacing: 0.02em;
+    }
+    .comp-caption::before { content: '// '; color: var(--lime); }
+
+    /* ============ GOTCHAS ============ */
+    .gotcha-list { margin: 28px 0 0; list-style: none; padding: 0; counter-reset: gotcha; }
+    .gotcha {
+      counter-increment: gotcha; padding: 22px 22px 22px 84px;
+      position: relative; border-top: 1px solid var(--line);
+      background: rgba(255,0,255,0.015);
+    }
+    .gotcha:last-child { border-bottom: 1px solid var(--line); }
+    .gotcha::before {
+      content: '!' counter(gotcha, decimal-leading-zero);
+      position: absolute; left: 20px; top: 22px;
+      font-family: var(--mono); font-size: 13px; font-weight: 700;
+      color: var(--magenta); letter-spacing: 0.06em;
+    }
+    .gotcha h4 {
+      font-family: var(--mono); font-weight: 700; font-size: 1rem;
+      text-transform: uppercase; letter-spacing: 0.02em; margin: 0 0 8px; color: var(--fg);
+    }
+    .gotcha h4 .tag {
+      font-size: 10px; color: var(--magenta);
+      letter-spacing: 0.14em; margin-left: 10px; vertical-align: middle;
+    }
+    .gotcha p { color: var(--fg-dim); font-size: 13px; line-height: 1.65; margin: 0 0 10px; }
+    .gotcha .fix {
+      font-family: var(--mono); font-size: 12px; color: var(--lime);
+      letter-spacing: 0.04em; padding-top: 8px;
+      border-top: 1px dashed var(--line-soft);
+    }
+    .gotcha .fix::before { content: '> fix: '; color: var(--fg-mute); }
+
+    /* ============ WALKTHROUGH ============ */
+    .steps { margin-top: 28px; list-style: none; padding: 0; counter-reset: wstep; }
+    .wstep {
+      counter-increment: wstep; padding: 24px 0 24px 64px;
+      position: relative; border-top: 1px solid var(--line-soft);
+    }
+    .wstep:first-child { border-top: 1px solid var(--line); }
+    .wstep:last-child { border-bottom: 1px solid var(--line); }
+    .wstep::before {
+      content: 'STEP ' counter(wstep, decimal-leading-zero);
+      position: absolute; left: 0; top: 24px;
+      font-family: var(--mono); font-size: 10px;
+      color: var(--lime); letter-spacing: 0.14em;
+      writing-mode: vertical-rl; transform: rotate(180deg); max-height: 80px;
+    }
+    .wstep h4 {
+      font-family: var(--mono); font-weight: 700; font-size: 1rem;
+      text-transform: uppercase; letter-spacing: 0.02em; margin: 0 0 10px; color: var(--fg);
+    }
+    .wstep h4 .arrow { color: var(--cyan); }
+    .wstep p { color: var(--fg-dim); font-size: 13px; line-height: 1.65; margin: 0 0 14px; }
+    .wstep .mini-code {
+      font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+      color: var(--fg); background: rgba(255,255,255,0.025);
+      border: 1px solid var(--line); padding: 12px 14px;
+      white-space: pre; overflow-x: auto; margin: 0 0 6px;
+    }
+    .wstep .mini-code .k { color: var(--lime); }
+    .wstep .mini-code .s { color: var(--amber); }
+    .wstep .mini-code .f { color: var(--cyan); }
+    .wstep .mini-code .c { color: var(--fg-mute); font-style: italic; }
+    .wstep .mini-code .o { color: var(--magenta); }
+
+    /* ============ REFERENCES ============ */
+    .refs {
+      margin-top: 28px; list-style: none; padding: 0; display: grid;
+      grid-template-columns: 1fr 1fr; gap: 0;
+      border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+    }
+    .refs li {
+      padding: 18px 20px;
+      border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      background: var(--bg);
+    }
+    .refs li:hover { background: rgba(0,255,255,0.03); }
+    .refs .ref-tag {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+      color: var(--lime); text-transform: uppercase; margin: 0 0 6px;
+    }
+    .refs .ref-title {
+      font-family: var(--mono); font-weight: 700; font-size: 0.95rem;
+      color: var(--fg); margin: 0 0 6px; line-height: 1.35;
+    }
+    .refs .ref-meta {
+      font-family: var(--mono); font-size: 11px; color: var(--fg-mute);
+      margin: 0 0 8px; letter-spacing: 0.02em;
+    }
+    .refs .ref-link {
+      font-family: var(--mono); font-size: 11px; color: var(--cyan);
+      letter-spacing: 0.02em; word-break: break-all;
+    }
+    .refs .ref-link:hover { color: var(--lime); }
+
+    @media (max-width: 880px) { .refs { grid-template-columns: 1fr; } }
+
+    /* ============ SUB-SECTION ============ */
+    .subsection { margin-top: 48px; }
+    .subsection-head {
+      font-family: var(--mono); font-weight: 700; font-size: 1.3rem;
+      text-transform: uppercase; letter-spacing: 0.01em; color: var(--fg); margin: 0 0 8px;
+    }
+    .subsection-head .num { color: var(--fg-mute); margin-right: 10px; }
+    .subsection-head .arrow { color: var(--lime); }
+    .subsection-head .arrow.cyan { color: var(--cyan); }
+    .subsection-head .arrow.magenta { color: var(--magenta); }
+    .subsection-sub {
+      color: var(--fg-dim); font-size: 14px; line-height: 1.65;
+      margin: 0 0 22px; max-width: 72ch;
     }
   </style>
 </head>
 <body>
 
+  <div class="watermark" aria-hidden="true">// CETI/LOOKBOOK &middot; 01/18</div>
+
   <!-- ============ HERO ============ -->
   <section class="hero" id="hero">
-    <p class="eyebrow">LangGraph<span class="dot"></span>Stateful Agent Graphs</p>
-    <h1 class="hero-title">
-      <span class="word">Agents</span>
-      <span class="word">that</span>
-      <span class="word"><em>remember.</em></span>
-    </h1>
-    <p class="hero-sub">LangGraph is the low-level orchestration framework for building stateful, long-running LLM agents as directed graphs &mdash; the way teams at Klarna, Replit, Uber and LinkedIn actually ship them.</p>
+    <div class="scanline" aria-hidden="true"></div>
+
+    <p class="prompt-line">
+      <span class="prompt-tag">user@ceti</span>:<span class="path">~/lookbook</span>$ cat <span style="color:var(--lime);">langgraph_agents.html</span>
+    </p>
+
+    <h1 class="hero-title"><span class="typewriter">&gt; LANGGRAPH_AGENTS</span></h1>
+
+    <div class="ascii-rule" aria-hidden="true">─────────────────────────────────────────────────────────────────────</div>
+
+    <p class="hero-sub">
+      <span class="hl">// stateful, graph-based LLM agents.</span><br>
+      Low-level orchestration. Nodes do work, edges decide what runs next,
+      state threads through all of it. The way <span class="hl2">Klarna, Replit, Uber, LinkedIn</span>
+      actually ship agents in production &mdash; not the demo that breaks on turn 4.
+    </p>
+
     <div class="cta-row">
-      <a class="magnetic" href="#loop">
-        See how the loop works
-        <span class="arrow">&rarr;</span>
+      <a class="btn" href="#loop">
+        <span class="pfx">&gt;</span> see_the_loop.sh
+        <span class="cursor" aria-hidden="true"></span>
       </a>
-      <a class="secondary" href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener">Read the docs &darr;</a>
+      <a class="btn-secondary" href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener">[ docs &darr; ]</a>
+    </div>
+  </section>
+
+  <!-- ============ README PANEL ============ -->
+  <section id="readme">
+    <p class="section-tag" data-num="00">// readme.md</p>
+    <h2 class="section-h">What LangGraph is. <span class="accent">Why it exists.</span></h2>
+
+    <div class="panel" data-label="README.MD" data-meta="ROOT · 4 PARA">
+      <p>
+        <span class="hl">LangGraph</span> is a low-level orchestration framework for building
+        stateful, multi-step LLM applications. It treats your agent as a
+        <span class="hl2">directed graph of nodes and edges with explicit, durable state</span>.
+        Nodes do work (call an LLM, hit a tool, transform data). Edges decide what runs next. State
+        is a typed object that threads through every step, gets persisted on every transition, and
+        survives crashes, restarts, and approval pauses that stretch across days.
+      </p>
+      <p>
+        It exists because <span class="hl">LangChain agents shipped, hit production, and broke</span>.
+        The original <code>AgentExecutor</code> (2022&ndash;2023) was a single while-loop that hid
+        every interesting decision behind a string-templated prompt. Teams shipping real products hit
+        the same wall: no way to inspect intermediate state, branch on tool output, pause for a
+        human, recover from a crash, or run specialists in parallel. The agent was a black box.
+        Debugging meant <code>print()</code> statements and prayer.
+      </p>
+      <p>
+        The response, released mid-2024 and matured through 2025&ndash;2026, was a rebuild around
+        <span class="hl2">Pregel-style graph execution</span> &mdash; the model Google uses for
+        trillion-edge graph workloads. Define a state schema, register node functions that return
+        updates, wire them with conditional edges. The runtime handles checkpointing, streaming,
+        parallel branches, recursion limits, and human-in-the-loop pauses. Intentionally low-level:
+        there is no <code>magic_agent()</code> helper. You write the graph; the runtime executes it;
+        you see and modify every step.
+      </p>
+      <p>
+        Today (early 2026) LangGraph runs production agents at <span class="hl">Klarna, Replit, Uber,
+        LinkedIn, Elastic, AppFolio, and Komodo Health</span>, among many others. The
+        <code>langgraph</code> package is the de-facto control plane for the LangChain ecosystem;
+        <code>langchain</code> v1.0 exposes <code>create_agent()</code> as a thin wrapper that
+        compiles a LangGraph underneath. This page walks the runtime: ReAct as a graph, the state
+        schema, checkpointing, streaming, HITL, multi-agent patterns, and the gotchas.
+      </p>
     </div>
   </section>
 
   <!-- ============ THE AGENT LOOP ============ -->
-  <section class="loop-section" id="loop">
-    <p class="section-eyebrow">The agent loop</p>
-    <h2 class="section-heading">A thinking, acting, observing cycle &mdash; with memory.</h2>
-    <p class="section-sub">Every LangGraph agent is a graph. Nodes do the work. Edges decide what runs next. State threads through all of it &mdash; so the agent doesn't restart its brain on every step.</p>
+  <section id="loop">
+    <p class="section-tag" data-num="01">// the_agent_loop</p>
+    <h2 class="section-h">A thinking, acting, observing cycle &mdash; <span class="accent">with memory.</span></h2>
+    <p class="section-sub">
+      Every LangGraph agent is a graph. Nodes do the work. Edges decide what runs next.
+      State threads through all of it &mdash; so the agent doesn't restart its brain on every step.
+    </p>
 
-    <div class="loop-stage">
-      <!-- The signature animated loop -->
-      <div class="loop-viz">
-        <svg viewBox="0 0 400 400" role="img" aria-label="Three nodes — Reason, Act, Observe — connected in a clockwise cycle. A vermillion pulse travels around the cycle, activating each node in turn. A dashed exit edge labelled FINISH leaves the Reason node.">
-          <!-- Cycle path (invisible, used to motion-path the pulse) -->
+    <div class="loop-wrap">
+      <div class="loop-frame">
+        <svg class="loop-viz" viewBox="0 0 400 400" role="img" aria-label="Three nodes — Reason, Act, Observe — connected in a clockwise cycle. The active node is highlighted in magenta as the agent loops through the ReAct cycle.">
           <defs>
             <path id="cycle"
-                  d="M 200 70
-                     A 130 130 0 0 1 313 265
-                     A 130 130 0 0 1 87 265
-                     A 130 130 0 0 1 200 70 Z" />
+                  d="M 200 80
+                     L 320 240
+                     L 80 240 Z" />
           </defs>
 
-          <!-- Visible cycle path -->
-          <use href="#cycle" class="edge-path solid" />
+          <!-- Cycle edges (square corners, hard lines) -->
+          <line class="edge" x1="200" y1="80" x2="320" y2="240" />
+          <line class="edge" x1="320" y1="240" x2="80" y2="240" />
+          <line class="edge" x1="80" y1="240" x2="200" y2="80" />
 
-          <!-- Arrow indicators on the cycle (three small triangles) -->
-          <g fill="var(--color-text-muted)">
-            <polygon points="0,-5 8,0 0,5" transform="translate(308, 165) rotate(60)" />
-            <polygon points="0,-5 8,0 0,5" transform="translate(200, 335) rotate(180)" />
-            <polygon points="0,-5 8,0 0,5" transform="translate(92, 165) rotate(-60)" />
+          <!-- Direction arrows on edges -->
+          <g fill="var(--lime)">
+            <polygon points="0,-5 9,0 0,5" transform="translate(265, 165) rotate(53)" />
+            <polygon points="0,-5 9,0 0,5" transform="translate(200, 240) rotate(180)" />
+            <polygon points="0,-5 9,0 0,5" transform="translate(135, 165) rotate(-53)" />
           </g>
 
-          <!-- Exit edge: Reason → FINISH -->
-          <path class="exit-edge" d="M 200 70 L 200 25" />
-          <polygon points="0,-4 7,0 0,4" transform="translate(200, 25) rotate(-90)" fill="var(--color-text-muted)" />
-          <text x="216" y="34" class="exit-label">FINISH</text>
+          <!-- Exit edge: Reason → END -->
+          <line class="edge-exit" x1="200" y1="80" x2="200" y2="32" />
+          <polygon points="0,-4 7,0 0,4" transform="translate(200, 32) rotate(-90)" fill="var(--fg-mute)" />
+          <text x="210" y="40" class="exit-label">END</text>
 
-          <!-- Node 1: Reason (top) -->
-          <g class="node-group" id="node-reason" transform="translate(200, 70)">
-            <circle class="node-circle" r="46" />
-            <text class="node-sublabel" y="-10">01</text>
-            <text class="node-label" y="8">Reason</text>
-            <text class="node-sublabel" y="22">think</text>
+          <!-- Node 1: REASON -->
+          <g class="node-group" id="node-reason" transform="translate(200, 80)">
+            <rect class="node-rect" x="-58" y="-32" width="116" height="64" />
+            <text class="node-num" y="-14">[01]</text>
+            <text class="node-label" y="3">REASON</text>
+            <text class="node-sublabel" y="20">think</text>
           </g>
 
-          <!-- Node 2: Act (bottom-right) -->
-          <g class="node-group" id="node-act" transform="translate(313, 265)">
-            <circle class="node-circle" r="46" />
-            <text class="node-sublabel" y="-10">02</text>
-            <text class="node-label" y="8">Act</text>
-            <text class="node-sublabel" y="22">tool call</text>
+          <!-- Node 2: ACT -->
+          <g class="node-group" id="node-act" transform="translate(320, 240)">
+            <rect class="node-rect" x="-58" y="-32" width="116" height="64" />
+            <text class="node-num" y="-14">[02]</text>
+            <text class="node-label" y="3">ACT</text>
+            <text class="node-sublabel" y="20">tool_call</text>
           </g>
 
-          <!-- Node 3: Observe (bottom-left) -->
-          <g class="node-group" id="node-observe" transform="translate(87, 265)">
-            <circle class="node-circle" r="46" />
-            <text class="node-sublabel" y="-10">03</text>
-            <text class="node-label" y="8">Observe</text>
-            <text class="node-sublabel" y="22">result</text>
-          </g>
-
-          <!-- The traveling pulse -->
-          <g class="pulse-glow">
-            <circle r="7" fill="var(--color-accent)">
-              <animateMotion dur="6s" repeatCount="indefinite" rotate="auto">
-                <mpath href="#cycle" />
-              </animateMotion>
-            </circle>
-            <!-- trailing softer pulse -->
-            <circle r="4" fill="var(--color-accent-muted)" opacity="0.55">
-              <animateMotion dur="6s" repeatCount="indefinite" begin="-0.25s">
-                <mpath href="#cycle" />
-              </animateMotion>
-            </circle>
+          <!-- Node 3: OBSERVE -->
+          <g class="node-group" id="node-observe" transform="translate(80, 240)">
+            <rect class="node-rect" x="-58" y="-32" width="116" height="64" />
+            <text class="node-num" y="-14">[03]</text>
+            <text class="node-label" y="3">OBSERVE</text>
+            <text class="node-sublabel" y="20">result</text>
           </g>
         </svg>
 
-        <!-- State pill -->
-        <div class="state-pill" aria-live="polite">
-          <div class="state-line"><span class="state-key">state.step</span><span class="state-val" id="state-step">reason</span></div>
-          <div class="state-line"><span class="state-key">state.messages</span><span class="state-val" id="state-messages">2</span></div>
-          <div class="state-line"><span class="state-key">state.observations</span><span class="state-val" id="state-obs">1</span></div>
+        <!-- STATE READOUT -->
+        <div class="state-readout" aria-live="polite">
+          <div class="row head"><span class="key">// state[t]</span><span class="val cyan" id="state-tick">t=000</span></div>
+          <div class="row"><span class="key">step</span><span class="val" id="state-step">reason</span></div>
+          <div class="row"><span class="key">messages</span><span class="val cyan" id="state-messages">2</span></div>
+          <div class="row"><span class="key">observations</span><span class="val cyan" id="state-obs">1</span></div>
         </div>
       </div>
 
-      <!-- Copy beside it -->
       <div class="loop-copy">
-        <h3>The ReAct loop, drawn as a graph.</h3>
-        <p>Each node receives the full state, returns an update, and hands control to the next node. The pulse you see is one tick of the agent &mdash; in production it might be a single LLM call, a tool invocation, and an observation.</p>
+        <h3><span class="ck">&gt;</span> ReAct loop, drawn as a graph.</h3>
+        <p>Each node receives the full state, returns an update, and hands control to the next node.
+          One tick = one LLM call, one tool invocation, one observation.</p>
         <ol>
-          <li><strong>Reason</strong><span>The LLM reads the conversation so far and decides what to do next &mdash; or whether it's done.</span></li>
-          <li><strong>Act</strong><span>The agent calls a tool: a search, a database query, a Python function, an external API.</span></li>
-          <li><strong>Observe</strong><span>The tool's output is appended to state and the loop continues &mdash; or routes to <code style="font-family:var(--font-mono); font-size:0.85em; color:var(--color-accent);">END</code>.</span></li>
+          <li>
+            <strong>REASON</strong>
+            <span>The LLM reads conversation, decides next step &mdash; or whether it's done.</span>
+          </li>
+          <li>
+            <strong>ACT</strong>
+            <span>Agent invokes a tool: search, db query, Python function, external API.</span>
+          </li>
+          <li>
+            <strong>OBSERVE</strong>
+            <span>Tool output is appended to state. Loop continues, or routes to <code>END</code>.</span>
+          </li>
         </ol>
       </div>
     </div>
   </section>
 
+  <!-- ============ THE REACT LOOP DEEP DIVE ============ -->
+  <section id="react">
+    <p class="section-tag" data-num="01.5">// the_react_loop.md</p>
+    <h2 class="section-h">Where the loop came from &mdash; <span class="accent-c">Yao et al., 2022.</span></h2>
+    <p class="section-sub">
+      The cycle above is not a LangGraph invention. It is a direct implementation of the
+      <span style="color:var(--lime)">ReAct</span> pattern from
+      <em>"ReAct: Synergizing Reasoning and Acting in Language Models"</em> (Yao et al. &mdash;
+      arXiv:2210.03629). The paper shows that interleaving free-form reasoning with grounded tool
+      calls beats either alone on HotpotQA, Fever, ALFWorld, and WebShop. LangGraph is the runtime
+      that makes ReAct shippable.
+    </p>
+
+    <div class="panel cyan" data-label="THE_REACT_LOOP.MD" data-meta="arXiv:2210.03629">
+      <p>
+        The ReAct paper&apos;s central insight is structural. Before ReAct, the two dominant patterns
+        were <span class="hl">Chain-of-Thought</span> (Wei et al., 2022 &mdash; think out loud, then
+        answer) and <span class="hl2">Act-only</span> tool-use (SayCan, WebGPT &mdash; pick a tool, run
+        it, repeat). CoT hallucinated freely; Act-only wandered without a plan. ReAct&apos;s trick was
+        to <em>alternate</em>: write a <code>Thought</code>, emit an <code>Action</code> and
+        <code>Action Input</code>, receive an <code>Observation</code>, repeat. The thoughts give the
+        model space to plan; the actions give it ground truth; the observations close the loop. On
+        HotpotQA the paper reports a +10 EM jump over CoT-only on the same backbone.
+      </p>
+
+      <h3><span class="arrow cyan">&gt;</span> THE ORIGINAL PROMPT TEMPLATE</h3>
+      <p>
+        The prompt is almost embarrassingly simple. Five labeled lines, repeated. The model learns the
+        pattern from a handful of in-context examples and then continues it. Here is the canonical form,
+        lightly cleaned up:
+      </p>
+
+      <div class="prompt-template"><span class="cmt"># SYSTEM PROMPT</span>
+Answer the following question. You have access to the following tools:
+<span class="ph">{tool_descriptions}</span>
+
+Use this exact format. Repeat the Thought/Action/Action Input/Observation
+block as many times as needed. End with Final Answer.
+
+Question: <span class="ph2">{the_user_question}</span>
+Thought:   <span class="cmt">&lt;reason about what to do next&gt;</span>
+Action:    <span class="ph">{tool_name_from_list}</span>
+Action Input: <span class="ph3">{json_args_for_the_tool}</span>
+Observation: <span class="cmt">&lt;tool output, injected by the runtime&gt;</span>
+...  <span class="cmt">(loop)</span>
+Thought: I now know the final answer.
+Final Answer: <span class="ph2">{the_answer}</span></div>
+
+      <p>
+        That is the entire trick. The runtime parses <code>Action:</code> and
+        <code>Action Input:</code>, dispatches the tool, appends the result as
+        <code>Observation:</code>, and feeds the growing transcript back for the next turn. The loop
+        terminates on <code>Final Answer:</code>. Modern function-calling models (GPT-4o+, Claude 3+,
+        Gemini 1.5+) replace the text-parsing dance with structured <span class="hl2">tool_call</span>
+        objects, but the four logical sub-steps are unchanged.
+      </p>
+
+      <h3><span class="arrow cyan">&gt;</span> THE FOUR SUB-STEPS, IN DETAIL</h3>
+      <p>
+        <span class="hl">[01] THOUGHT</span> &mdash; The model emits free-form text explaining what it
+        intends to do and why. This is the reasoning step; thoughts are for working memory and never
+        get passed to a tool. In LangGraph this is the LLM call inside the <code>reason</code> node.
+        Ablation studies in the paper show that removing thoughts drops HotpotQA EM from 35.1 to 25.7.
+      </p>
+      <p>
+        <span class="hl">[02] ACTION</span> &mdash; The model selects exactly one tool from the
+        allowed list. With function-calling models this is a strongly-typed dispatch: invalid actions
+        come back as <code>Observation: error: tool not found</code> so the model can recover. The
+        action is a categorical choice &mdash; the model commits.
+      </p>
+      <p>
+        <span class="hl">[03] ACTION INPUT</span> &mdash; The tool arguments, almost always a JSON
+        object. With Pydantic-typed tools the runtime validates input shape before dispatch; type
+        errors become observations and the model retries. This is where most agent bugs live. Strong
+        schemas + validation feedback + a max-retry budget is the production recipe.
+      </p>
+      <p>
+        <span class="hl">[04] OBSERVATION</span> &mdash; The tool result, appended verbatim as a
+        <code>ToolMessage</code>. The model now reads the full transcript and generates the next
+        Thought. Token budget matters here: a long-running agent with verbose observations can blow
+        past the context window. LangGraph&apos;s <code>trim_messages</code> helper and per-node
+        summarization nodes solve this.
+      </p>
+
+      <p>
+        The paper&apos;s most-cited contribution is the <span class="hl2">interleaving</span> &mdash;
+        reasoning informs the action, observation informs the next reasoning step. That feedback
+        loop is what LangGraph encodes as the <code>reason &rarr; act &rarr; observe</code> cycle.
+        Everything else on this page is plumbing on top.
+      </p>
+    </div>
+  </section>
+
   <!-- ============ WHY A GRAPH ============ -->
-  <section class="why">
-    <p class="section-eyebrow">Why a graph &mdash; not a chain</p>
-    <h2 class="section-heading">Chains run forward. Graphs remember, branch, pause, resume.</h2>
+  <section id="why">
+    <p class="section-tag" data-num="02">// why_a_graph</p>
+    <h2 class="section-h">Chains run forward. <span class="accent-c">Graphs remember, branch, pause, resume.</span></h2>
 
     <div class="bento">
-      <!-- Tile 1: Stateful memory (wide) -->
-      <article class="magic-card span-2">
-        <span class="card-tag">01 &middot; State</span>
-        <h3 class="card-title">Memory is a first-class type.</h3>
-        <p class="card-body">Define a typed state schema once. Every node reads it, returns updates, and the graph merges them. No more passing context dictionaries through ten function calls.</p>
-        <div class="motif motif-memory" aria-hidden="true">
-          <div class="stick"></div><div class="stick"></div><div class="stick"></div><div class="stick"></div><div class="stick"></div>
+      <article class="tile">
+        <p class="tile-num">[01/04] <span class="live">// STATE</span></p>
+        <h3><span class="arrow">&gt;</span> memory is a first-class type</h3>
+        <p>Define a typed state schema once. Every node reads it, returns updates, the graph merges them. No more passing context dicts through ten function calls.</p>
+        <div class="motif">
+          <span class="ascii">state: {<br>&nbsp;&nbsp;messages: [...],<br>&nbsp;&nbsp;observations: [...],<br>&nbsp;&nbsp;cursor: 0x4F2A<br>}</span>
         </div>
       </article>
 
-      <!-- Tile 2: Branching -->
-      <article class="magic-card">
-        <span class="card-tag">02 &middot; Routing</span>
-        <h3 class="card-title">Conditional edges.</h3>
-        <p class="card-body">A node returns "search" or "respond" &mdash; the graph routes accordingly.</p>
-        <div class="motif motif-branch" aria-hidden="true">
-          <svg viewBox="0 0 120 60" preserveAspectRatio="none">
-            <path class="br-line" d="M 10 30 L 50 30 L 95 10" />
-            <path class="br-line" d="M 50 30 L 95 50" />
-            <path class="br-active" d="M 10 30 L 50 30 L 95 10" />
-            <circle cx="50" cy="30" r="3" fill="var(--color-accent)" />
-            <circle cx="95" cy="10" r="3" fill="var(--color-accent)" />
-            <circle cx="95" cy="50" r="3" fill="var(--color-border)" />
-            <circle cx="10" cy="30" r="3" fill="var(--color-text-muted)" />
-          </svg>
+      <article class="tile">
+        <p class="tile-num">[02/04] <span class="live">// ROUTING</span></p>
+        <h3><span class="arrow">&gt;</span> conditional edges</h3>
+        <p>A node returns "search" or "respond" &mdash; the graph routes accordingly. Decisions encoded as data, not buried in if-statements.</p>
+        <div class="motif">
+          <span class="ascii">    ┌─&gt; SEARCH<br>NODE┤<br>    └─&gt; RESPOND</span>
         </div>
       </article>
 
-      <!-- Tile 3: Checkpointing -->
-      <article class="magic-card">
-        <span class="card-tag">03 &middot; Durability</span>
-        <h3 class="card-title">Checkpoint anywhere.</h3>
-        <p class="card-body">Every step persists. Crash a node, restart from the last good state.</p>
-        <div class="motif motif-checkpoint" aria-hidden="true">
-          <div class="chk"></div><div class="chk"></div><div class="chk"></div><div class="chk"></div>
+      <article class="tile">
+        <p class="tile-num">[03/04] <span class="live">// DURABILITY</span></p>
+        <h3><span class="arrow">&gt;</span> checkpoint anywhere</h3>
+        <p>Every step persists. Crash a node, restart from the last good state. No replay-from-scratch tax.</p>
+        <div class="motif">
+          <span class="ascii">[####][####][####][####]<br>ckpt  ckpt  ckpt  ckpt<br>t=01  t=02  t=03  t=04</span>
         </div>
       </article>
 
-      <!-- Tile 4: Human-in-the-loop (wide) -->
-      <article class="magic-card span-2">
-        <span class="card-tag">04 &middot; Oversight</span>
-        <h3 class="card-title">Pause for a human, then resume.</h3>
-        <p class="card-body">Inspect state mid-run. Approve a tool call. Edit a draft. The graph waits, then continues from exactly where it stopped &mdash; minutes or days later.</p>
-        <div class="motif motif-hitl" aria-hidden="true">
-          <span class="pill">Agent</span>
-          <span class="arrow-s">&rarr;</span>
-          <span class="pill human">Human</span>
-          <span class="arrow-s">&rarr;</span>
-          <span class="pill">Agent</span>
+      <article class="tile">
+        <p class="tile-num">[04/04] <span class="live">// OVERSIGHT</span></p>
+        <h3><span class="arrow">&gt;</span> pause for human, resume</h3>
+        <p>Inspect state mid-run. Approve a tool call. Edit a draft. Graph waits, continues exactly where it stopped &mdash; minutes or days later.</p>
+        <div class="motif">
+          <span class="ascii magenta">AGENT &raquo;&raquo; [HUMAN] &raquo;&raquo; AGENT<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&uarr;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;wait()</span>
         </div>
       </article>
+    </div>
+  </section>
+
+  <!-- ============ STATE SCHEMA ============ -->
+  <section id="state-schema">
+    <p class="section-tag" data-num="02.5">// state_schema.py</p>
+    <h2 class="section-h">State is a <span class="accent">typed object.</span> Reducers merge updates.</h2>
+    <p class="section-sub">
+      Every LangGraph application starts with a state schema. It is a TypedDict (Python) or a Zod
+      schema (TypeScript) that declares the keys your graph cares about and, for each key, the
+      <span style="color:var(--lime)">reducer function</span> the runtime should use to merge updates
+      from concurrent nodes. Reducers are the single most important concept in LangGraph &mdash; they
+      are what makes parallel branches and partial updates safe.
+    </p>
+
+    <div class="panel" data-label="STATE_SCHEMA.PY" data-meta="3 LISTINGS · TYPEDDICT">
+      <p>
+        A state schema declares <span class="hl">what the graph remembers between nodes</span>. The
+        simplest is <code>MessagesState</code>, a built-in with one key (<code>messages</code>) and
+        <code>add_messages</code> attached. Real apps need more &mdash; tool budgets, step counters,
+        scratch buffers, summaries. Declare the keys, pick a reducer for each, and the runtime threads
+        the typed object through every node call.
+      </p>
+
+      <div class="code-block">
+        <div class="titlebar">
+          <span class="name">$ schema.py</span>
+          <span class="meta">LISTING 1 · 12L · STATE DEFINITION</span>
+        </div>
+<pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">typing</span> <span class="k">import</span> Annotated, TypedDict
+<span class="ln"> 2</span><span class="k">from</span> <span class="m">langgraph.graph.message</span> <span class="k">import</span> add_messages
+<span class="ln"> 3</span><span class="k">from</span> <span class="m">operator</span> <span class="k">import</span> add
+<span class="ln"> 4</span>
+<span class="ln"> 5</span><span class="k">class</span> <span class="f">AgentState</span>(TypedDict):
+<span class="ln"> 6</span>    <span class="c"># messages: append, dedup by id, keep order</span>
+<span class="ln"> 7</span>    messages<span class="o">:</span> Annotated[<span class="k">list</span>, add_messages]
+<span class="ln"> 8</span>    <span class="c"># documents: concatenate lists across parallel nodes</span>
+<span class="ln"> 9</span>    documents<span class="o">:</span> Annotated[<span class="k">list</span>[<span class="k">dict</span>], add]
+<span class="ln">10</span>    <span class="c"># scalar: last-write-wins (no reducer)</span>
+<span class="ln">11</span>    iterations<span class="o">:</span> <span class="k">int</span>
+<span class="ln">12</span>    next_step<span class="o">:</span> <span class="k">str</span></pre>
+      </div>
+
+      <p>
+        The key bit is <code>Annotated[list, add_messages]</code>. The runtime reads the reducer from
+        the annotation and calls <code>add_messages(existing, new)</code> to merge concurrent updates.
+        For plain lists use <code>operator.add</code>. For scalars, last-write-wins is the default.
+        Without a reducer, concurrent updates raise <code>InvalidUpdateError</code>.
+      </p>
+
+      <h3><span class="arrow">&gt;</span> THE add_messages REDUCER, EXPANDED</h3>
+      <p>
+        <code>add_messages</code> is not just concatenation. It deduplicates by message id (so
+        checkpoint replays don&apos;t double-append), coerces dicts into <code>BaseMessage</code>
+        subclasses, and honors a <code>RemoveMessage</code> sentinel for id-based deletes. Exactly the
+        reducer you want for conversation transcripts.
+      </p>
+
+      <div class="code-block">
+        <div class="titlebar">
+          <span class="name">$ reducer.py</span>
+          <span class="meta">LISTING 2 · 11L · ADD_MESSAGES BEHAVIOR</span>
+        </div>
+<pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">langchain_core.messages</span> <span class="k">import</span> AIMessage, RemoveMessage
+<span class="ln"> 2</span><span class="k">from</span> <span class="m">langgraph.graph.message</span> <span class="k">import</span> add_messages
+<span class="ln"> 3</span>
+<span class="ln"> 4</span>existing <span class="o">=</span> [AIMessage(content<span class="o">=</span><span class="s">"hi"</span>, id<span class="o">=</span><span class="s">"a1"</span>)]
+<span class="ln"> 5</span>incoming <span class="o">=</span> [AIMessage(content<span class="o">=</span><span class="s">"hi (edited)"</span>, id<span class="o">=</span><span class="s">"a1"</span>)]
+<span class="ln"> 6</span><span class="f">add_messages</span>(existing, incoming)
+<span class="ln"> 7</span><span class="c"># =&gt; [AIMessage("hi (edited)", id="a1")]  # dedup + replace by id</span>
+<span class="ln"> 8</span>
+<span class="ln"> 9</span><span class="c"># Delete a message by emitting a RemoveMessage with its id</span>
+<span class="ln">10</span><span class="f">add_messages</span>(existing, [RemoveMessage(id<span class="o">=</span><span class="s">"a1"</span>)])
+<span class="ln">11</span><span class="c"># =&gt; []</span></pre>
+      </div>
+
+      <h3><span class="arrow">&gt;</span> CONDITIONAL EDGES = DECISIONS AS DATA</h3>
+      <p>
+        Once you have a state schema, the second piece is the conditional edge: a small pure
+        function that reads state and returns the next node name (or <code>END</code>). The router
+        is where &ldquo;if the model called a tool, go act; otherwise stop&rdquo; lives. Pure, so
+        testable in isolation. Compiled, so missing destinations raise at compile time &mdash; not at
+        midnight in production.
+      </p>
+
+      <div class="code-block">
+        <div class="titlebar">
+          <span class="name">$ router.py</span>
+          <span class="meta">LISTING 3 · 14L · CONDITIONAL EDGE</span>
+        </div>
+<pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">langgraph.graph</span> <span class="k">import</span> StateGraph, START, END
+<span class="ln"> 2</span>
+<span class="ln"> 3</span><span class="k">def</span> <span class="f">route_after_reason</span>(state: AgentState) <span class="o">-&gt;</span> <span class="k">str</span>:
+<span class="ln"> 4</span>    last <span class="o">=</span> state[<span class="s">"messages"</span>][<span class="o">-</span>1]
+<span class="ln"> 5</span>    <span class="k">if</span> last.tool_calls<span class="o">:</span>
+<span class="ln"> 6</span>        <span class="k">return</span> <span class="s">"act"</span>          <span class="c"># model asked for a tool</span>
+<span class="ln"> 7</span>    <span class="k">if</span> state[<span class="s">"iterations"</span>] <span class="o">&gt;=</span> <span class="s">10</span><span class="o">:</span>
+<span class="ln"> 8</span>        <span class="k">return</span> <span class="s">"summarize"</span>    <span class="c"># budget hit, wrap up</span>
+<span class="ln"> 9</span>    <span class="k">return</span> END                <span class="c"># model is done</span>
+<span class="ln">10</span>
+<span class="ln">11</span>graph <span class="o">=</span> <span class="f">StateGraph</span>(AgentState)
+<span class="ln">12</span>graph.<span class="f">add_node</span>(<span class="s">"reason"</span>, reason)
+<span class="ln">13</span>graph.<span class="f">add_node</span>(<span class="s">"act"</span>, act)
+<span class="ln">14</span>graph.<span class="f">add_node</span>(<span class="s">"summarize"</span>, summarize)
+<span class="ln">15</span>graph.<span class="f">add_edge</span>(START, <span class="s">"reason"</span>)
+<span class="ln">16</span>graph.<span class="f">add_conditional_edges</span>(<span class="s">"reason"</span>, route_after_reason)
+<span class="ln">17</span>graph.<span class="f">add_edge</span>(<span class="s">"act"</span>, <span class="s">"reason"</span>)
+<span class="ln">18</span>graph.<span class="f">add_edge</span>(<span class="s">"summarize"</span>, END)</pre>
+      </div>
+
+      <p>
+        Three primitives, infinite topology. The compiled graph is a Pregel-style executor: at each
+        step the runtime invokes the active node, merges updates through per-key reducers, persists
+        a checkpoint, and reads the router to pick the next set.
+      </p>
     </div>
   </section>
 
   <!-- ============ CODE ============ -->
-  <section class="code-section">
-    <p class="section-eyebrow">What it looks like in code</p>
-    <h2 class="section-heading">Ten lines to a working stateful agent.</h2>
-    <p class="section-sub">Python. No magic. Define a state, add nodes, draw the edges, compile.</p>
+  <section id="code">
+    <p class="section-tag" data-num="03">// in_python</p>
+    <h2 class="section-h">Ten lines to a working <span class="accent">stateful agent.</span></h2>
+    <p class="section-sub">No magic. Define a state. Add nodes. Draw the edges. Compile.</p>
 
-<pre class="code-block" aria-label="Minimal LangGraph example in Python"><span class="ck">from</span> <span class="cm">langgraph.graph</span> <span class="ck">import</span> StateGraph, MessagesState, START, END
+    <div class="code-block" role="region" aria-label="Minimal LangGraph example in Python">
+      <div class="titlebar">
+        <span class="name">$ agent.py</span>
+        <span class="meta">PYTHON · 15L · UTF-8</span>
+      </div>
+<pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">langgraph.graph</span> <span class="k">import</span> StateGraph, MessagesState, START, END
+<span class="ln"> 2</span>
+<span class="ln"> 3</span><span class="k">def</span> <span class="f">reason</span>(state: MessagesState):
+<span class="ln"> 4</span>    <span class="c"># LLM looks at messages, decides next step</span>
+<span class="ln"> 5</span>    <span class="k">return</span> {<span class="s">"messages"</span><span class="o">:</span> [llm.invoke(state[<span class="s">"messages"</span>])]}
+<span class="ln"> 6</span>
+<span class="ln"> 7</span><span class="k">def</span> <span class="f">act</span>(state: MessagesState):
+<span class="ln"> 8</span>    <span class="c"># Run the tool call from the latest message</span>
+<span class="ln"> 9</span>    <span class="k">return</span> {<span class="s">"messages"</span><span class="o">:</span> [tool_node.invoke(state)]}
+<span class="ln">10</span>
+<span class="ln">11</span>graph <span class="o">=</span> <span class="f">StateGraph</span>(MessagesState)
+<span class="ln">12</span>graph.<span class="f">add_node</span>(<span class="s">"reason"</span>, reason)
+<span class="ln">13</span>graph.<span class="f">add_node</span>(<span class="s">"act"</span>, act)
+<span class="ln">14</span>graph.<span class="f">add_edge</span>(START, <span class="s">"reason"</span>)
+<span class="ln">15</span>graph.<span class="f">add_conditional_edges</span>(<span class="s">"reason"</span>, should_act, {<span class="s">"yes"</span><span class="o">:</span> <span class="s">"act"</span>, <span class="s">"no"</span><span class="o">:</span> END})
+<span class="ln">16</span>graph.<span class="f">add_edge</span>(<span class="s">"act"</span>, <span class="s">"reason"</span>)
+<span class="ln">17</span>
+<span class="ln">18</span>agent <span class="o">=</span> graph.<span class="f">compile</span>(checkpointer<span class="o">=</span>memory)</pre>
+    </div>
 
-<span class="ck">def</span> <span class="cf">reason</span>(state: MessagesState):
-    <span class="cc"># LLM looks at messages, decides next step</span>
-    <span class="ck">return</span> {<span class="cs">"messages"</span><span class="co">:</span> [llm.invoke(state[<span class="cs">"messages"</span>])]}
-
-<span class="ck">def</span> <span class="cf">act</span>(state: MessagesState):
-    <span class="cc"># Run the tool call from the latest message</span>
-    <span class="ck">return</span> {<span class="cs">"messages"</span><span class="co">:</span> [tool_node.invoke(state)]}
-
-graph <span class="co">=</span> <span class="cf">StateGraph</span>(MessagesState)
-graph.<span class="cf">add_node</span>(<span class="cs">"reason"</span>, reason)
-graph.<span class="cf">add_node</span>(<span class="cs">"act"</span>, act)
-graph.<span class="cf">add_edge</span>(START, <span class="cs">"reason"</span>)
-graph.<span class="cf">add_conditional_edges</span>(<span class="cs">"reason"</span>, should_act, {<span class="cs">"yes"</span><span class="co">:</span> <span class="cs">"act"</span>, <span class="cs">"no"</span><span class="co">:</span> END})
-graph.<span class="cf">add_edge</span>(<span class="cs">"act"</span>, <span class="cs">"reason"</span>)
-
-agent <span class="co">=</span> graph.<span class="cf">compile</span>(checkpointer<span class="co">=</span>memory)</pre>
-
-    <p class="code-caption">// That's the entire structure of a ReAct agent in LangGraph. The conditional edge is what makes it a graph instead of a chain.</p>
+    <p class="code-caption">That's the entire structure of a ReAct agent. The conditional edge is what makes it a graph instead of a chain.</p>
   </section>
 
-  <!-- ============ USE CASES ============ -->
-  <section class="cases">
-    <p class="section-eyebrow">Where it's running</p>
-    <h2 class="section-heading">Used in production by teams shipping real agent products.</h2>
+  <!-- ============ RUNTIME PRIMITIVES ============ -->
+  <section id="runtime">
+    <p class="section-tag" data-num="03.5">// runtime_primitives</p>
+    <h2 class="section-h">Three primitives that make agents <span class="accent">production-grade.</span></h2>
+    <p class="section-sub">
+      Checkpointing, streaming, and human-in-the-loop are not separate features bolted on top of the
+      graph &mdash; they fall out of the runtime almost for free, because the runtime persists state on
+      every transition and exposes the event stream to callers. Below: what each one does, when you
+      need it, and the minimum code to turn it on.
+    </p>
+
+    <div class="subsection">
+      <h3 class="subsection-head"><span class="num">[01]</span><span class="arrow">&gt;</span> CHECKPOINTING</h3>
+      <p class="subsection-sub">
+        Every node transition writes a checkpoint &mdash; a full snapshot of state plus the &ldquo;next
+        node&rdquo; pointer &mdash; to a configured persistence backend. Set the
+        <code style="color:var(--cyan)">checkpointer</code> argument at compile time and the runtime
+        does the rest: crash recovery, time-travel debugging, fork-and-resume, and human-in-the-loop
+        pauses are all just &ldquo;load a checkpoint, change something, continue.&rdquo;
+      </p>
+      <div class="panel" data-label="CHECKPOINTING" data-meta="SqliteSaver · MemorySaver · Postgres">
+        <p>
+          The persistence model is a write-ahead log per <code>thread_id</code> &mdash; a thread is
+          one conversation or workflow instance. Each step appends a checkpoint with a unique
+          <code>checkpoint_id</code>. Resume by reusing <code>thread_id</code>; time-travel by passing
+          a specific <code>checkpoint_id</code>; fork by copying a checkpoint into a new thread and
+          running both in parallel.
+        </p>
+        <div class="code-block">
+          <div class="titlebar">
+            <span class="name">$ checkpoint.py</span>
+            <span class="meta">SQLITESAVER · LOCAL DEV</span>
+          </div>
+<pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">langgraph.checkpoint.sqlite</span> <span class="k">import</span> SqliteSaver
+<span class="ln"> 2</span><span class="k">from</span> <span class="m">langgraph.graph</span> <span class="k">import</span> StateGraph
+<span class="ln"> 3</span>
+<span class="ln"> 4</span><span class="c"># 1. Open a checkpointer. Use Postgres in prod.</span>
+<span class="ln"> 5</span>memory <span class="o">=</span> SqliteSaver.from_conn_string(<span class="s">"./agent.db"</span>)
+<span class="ln"> 6</span>
+<span class="ln"> 7</span><span class="c"># 2. Compile the graph with it.</span>
+<span class="ln"> 8</span>agent <span class="o">=</span> graph.<span class="f">compile</span>(checkpointer<span class="o">=</span>memory)
+<span class="ln"> 9</span>
+<span class="ln">10</span><span class="c"># 3. Use a thread_id to scope a conversation/run.</span>
+<span class="ln">11</span>cfg <span class="o">=</span> {<span class="s">"configurable"</span><span class="o">:</span> {<span class="s">"thread_id"</span><span class="o">:</span> <span class="s">"user-42-session-7"</span>}}
+<span class="ln">12</span>agent.<span class="f">invoke</span>({<span class="s">"messages"</span><span class="o">:</span> [(<span class="s">"user"</span>, <span class="s">"hello"</span>)]}, cfg)
+<span class="ln">13</span>
+<span class="ln">14</span><span class="c"># Later (minutes? days? after a crash?) — same thread_id resumes.</span>
+<span class="ln">15</span>agent.<span class="f">invoke</span>({<span class="s">"messages"</span><span class="o">:</span> [(<span class="s">"user"</span>, <span class="s">"follow-up"</span>)]}, cfg)</pre>
+        </div>
+        <p>
+          Three backends ship in the box: <code>MemorySaver</code> for tests,
+          <code>SqliteSaver</code> for local dev and single-node deployments, and
+          <code>PostgresSaver</code> for production. The Postgres version uses
+          <code>SELECT ... FOR UPDATE SKIP LOCKED</code> so multiple workers can pull from the same
+          queue of pending threads without stepping on each other. The wire format is stable; you can
+          inspect checkpoints with <code>agent.get_state(cfg)</code> and walk history with
+          <code>agent.get_state_history(cfg)</code>, which returns the full log in reverse-chronological
+          order. That last call is what powers the LangGraph Studio time-travel UI.
+        </p>
+        <p>
+          Checkpointing overhead is negligible against the LLM call &mdash; a few KB written per step
+          against 100ms+ of inference latency. Teams that skip it &ldquo;for speed&rdquo; regret it
+          the first time a process dies mid-run. Turn it on. The default is off only because it
+          requires you to choose a backend.
+        </p>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-head"><span class="num">[02]</span><span class="arrow cyan">&gt;</span> STREAMING</h3>
+      <p class="subsection-sub">
+        Three orthogonal stream modes ship with the runtime, and you can subscribe to any combination.
+        <code>stream_mode=&quot;values&quot;</code> emits the full state after every node. <code>&quot;updates&quot;</code> emits only
+        the per-node delta. <code>&quot;messages&quot;</code> emits token-by-token LLM output. Pick what your UI
+        needs and let the runtime do the multiplexing.
+      </p>
+      <div class="panel cyan" data-label="STREAMING" data-meta="values · updates · messages">
+        <p>
+          The streaming API is the single most under-appreciated piece of the runtime. Without it you
+          have two bad choices: block on <code>invoke()</code> and your UI hangs for ten seconds while
+          the agent thinks, or hand-roll a websocket protocol to push intermediate state from the agent
+          to the client. With it, you call <code>agent.stream(input, cfg, stream_mode=&quot;...&quot;)</code> and
+          you get an iterator of typed events. Token streaming, intermediate tool calls, node
+          transitions, and final state all flow through the same channel.
+        </p>
+        <div class="code-block">
+          <div class="titlebar">
+            <span class="name">$ stream.py</span>
+            <span class="meta">MULTI-MODE STREAM</span>
+          </div>
+<pre><span class="ln"> 1</span><span class="c"># Mode 1: stream node-by-node deltas (good for activity logs)</span>
+<span class="ln"> 2</span><span class="k">for</span> chunk <span class="k">in</span> agent.<span class="f">stream</span>(payload, cfg, stream_mode<span class="o">=</span><span class="s">"updates"</span>):
+<span class="ln"> 3</span>    <span class="k">for</span> node_name, update <span class="k">in</span> chunk.items()<span class="o">:</span>
+<span class="ln"> 4</span>        <span class="f">print</span>(<span class="s">f"[{</span>node_name<span class="s">}] "</span>, update)
+<span class="ln"> 5</span>
+<span class="ln"> 6</span><span class="c"># Mode 2: stream LLM tokens (good for chat UIs)</span>
+<span class="ln"> 7</span><span class="k">async for</span> msg, meta <span class="k">in</span> agent.<span class="f">astream</span>(
+<span class="ln"> 8</span>    payload, cfg, stream_mode<span class="o">=</span><span class="s">"messages"</span>
+<span class="ln"> 9</span>)<span class="o">:</span>
+<span class="ln">10</span>    <span class="k">if</span> meta[<span class="s">"langgraph_node"</span>] <span class="o">==</span> <span class="s">"reason"</span><span class="o">:</span>
+<span class="ln">11</span>        <span class="f">print</span>(msg.content, end<span class="o">=</span><span class="s">""</span>, flush<span class="o">=</span><span class="k">True</span>)
+<span class="ln">12</span>
+<span class="ln">13</span><span class="c"># Mode 3: stream both at once (multi-stream)</span>
+<span class="ln">14</span><span class="k">for</span> evt <span class="k">in</span> agent.<span class="f">stream</span>(payload, cfg, stream_mode<span class="o">=</span>[<span class="s">"updates"</span>, <span class="s">"messages"</span>])<span class="o">:</span>
+<span class="ln">15</span>    kind, payload <span class="o">=</span> evt
+<span class="ln">16</span>    handle(kind, payload)</pre>
+        </div>
+        <p>
+          Stream mode composability makes the &ldquo;agent activity log + token-by-token response&rdquo;
+          pattern trivial. Hook <code>updates</code> into an activity panel; hook <code>messages</code>
+          into the current chat bubble. Both are live, merged by sequence number on the client. The
+          same <code>stream()</code> call works locally, behind FastAPI, or behind LangGraph Cloud.
+        </p>
+        <p>
+          Streaming and checkpointing compose. A streamed run still writes checkpoints at every node
+          boundary, so a disconnected client can replay missed events by walking
+          <code>get_state_history()</code>. That is what makes LangGraph viable for long-running
+          workflows behind flaky browser tabs.
+        </p>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-head"><span class="num">[03]</span><span class="arrow magenta">&gt;</span> HUMAN-IN-THE-LOOP</h3>
+      <p class="subsection-sub">
+        Drop a <code style="color:var(--magenta)">interrupt()</code> call inside any node and the
+        runtime suspends the graph, persists state, and returns control to the caller. Resume by
+        calling <code style="color:var(--magenta)">Command(resume=...)</code> with the human&apos;s
+        answer. The agent picks up exactly where it left off &mdash; minutes or days later.
+      </p>
+      <div class="panel magenta" data-label="HUMAN-IN-THE-LOOP" data-meta="interrupt() · Command(resume=)">
+        <p>
+          The first-class HITL primitive is <code>interrupt()</code>. You place it inside a node
+          exactly where a human should weigh in &mdash; before a destructive tool, after a draft,
+          when confidence drops. The runtime catches the interrupt, snapshots state to the
+          checkpointer, and returns with an <code>__interrupt__</code> sentinel telling the caller
+          what input is needed. The graph is paused; nothing burns CPU.
+        </p>
+        <div class="code-block">
+          <div class="titlebar">
+            <span class="name">$ hitl.py</span>
+            <span class="meta">INTERRUPT + RESUME</span>
+          </div>
+<pre><span class="ln"> 1</span><span class="k">from</span> <span class="m">langgraph.types</span> <span class="k">import</span> interrupt, Command
+<span class="ln"> 2</span>
+<span class="ln"> 3</span><span class="k">def</span> <span class="f">approval_node</span>(state: AgentState)<span class="o">:</span>
+<span class="ln"> 4</span>    draft <span class="o">=</span> state[<span class="s">"messages"</span>][<span class="o">-</span>1].content
+<span class="ln"> 5</span>    <span class="c"># Pause and surface the draft to the caller</span>
+<span class="ln"> 6</span>    decision <span class="o">=</span> <span class="f">interrupt</span>({<span class="s">"draft"</span><span class="o">:</span> draft, <span class="s">"question"</span><span class="o">:</span> <span class="s">"approve?"</span>})
+<span class="ln"> 7</span>    <span class="k">if</span> decision[<span class="s">"approved"</span>]<span class="o">:</span>
+<span class="ln"> 8</span>        <span class="k">return</span> {<span class="s">"next_step"</span><span class="o">:</span> <span class="s">"send"</span>}
+<span class="ln"> 9</span>    <span class="k">return</span> {<span class="s">"messages"</span><span class="o">:</span> [(<span class="s">"user"</span>, decision[<span class="s">"feedback"</span>])]}
+<span class="ln">10</span>
+<span class="ln">11</span><span class="c"># Run hits interrupt() -- agent.stream() returns an __interrupt__ event.</span>
+<span class="ln">12</span><span class="k">for</span> evt <span class="k">in</span> agent.<span class="f">stream</span>(payload, cfg)<span class="o">:</span> <span class="f">handle</span>(evt)
+<span class="ln">13</span>
+<span class="ln">14</span><span class="c"># Human responds via your UI; you resume with Command(resume=...)</span>
+<span class="ln">15</span>agent.<span class="f">invoke</span>(
+<span class="ln">16</span>    <span class="f">Command</span>(resume<span class="o">=</span>{<span class="s">"approved"</span><span class="o">:</span> <span class="k">True</span>}),
+<span class="ln">17</span>    cfg,  <span class="c"># same thread_id -- runtime loads checkpoint</span>
+<span class="ln">18</span>)</pre>
+        </div>
+        <p>
+          Three placement patterns cover almost every real use case.
+          <span class="hl">Pre-tool approval</span> &mdash; gate the <code>act</code> node on
+          dangerous tool names; human approves, edits args, or rejects.
+          <span class="hl">Draft review</span> &mdash; pause in a <code>review</code> node after a
+          writer; human accepts, revises, or rewrites. <span class="hl">Steering</span> &mdash; pause
+          at uncertain decision points (low logprob, retrieval miss, ambiguous routing); human picks
+          the branch.
+        </p>
+        <p>
+          What makes this work in production vs. just demoware is that the pause survives everything
+          &mdash; crashes, deployments, hours of inactivity. The checkpointer holds suspended state;
+          the resume call is idempotent on <code>thread_id</code>. A Slack approval bot, a
+          daily-email queue, a &ldquo;approve&rdquo; button in a dashboard &mdash; all the same
+          primitive.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MULTI-AGENT PATTERNS ============ -->
+  <section id="multiagent">
+    <p class="section-tag" data-num="03.7">// multi_agent_patterns.md</p>
+    <h2 class="section-h">Three shapes for <span class="accent-c">multiple agents.</span></h2>
+    <p class="section-sub">
+      Once the single-agent ReAct loop is shippable, the next question is &ldquo;how do I run several
+      agents together?&rdquo; LangGraph doesn&apos;t prescribe one answer. It gives you a graph DSL
+      and you compose. Three patterns cover the overwhelming majority of production deployments:
+      <span style="color:var(--lime)">supervisor</span>, <span style="color:var(--cyan)">hierarchical</span>,
+      and <span style="color:var(--magenta)">parallel</span>.
+    </p>
+
+    <div class="pattern-grid">
+      <article class="pattern">
+        <div class="pattern-meta">
+          <p class="pattern-num">[PATTERN 01] // SUPERVISOR</p>
+          <h3><span class="arrow">&gt;</span> One router, N specialists</h3>
+          <p>
+            A single <span class="hl">supervisor node</span> reads the conversation, picks which
+            specialist runs next, routes to it. Each specialist is its own subgraph with a focused
+            system prompt and a narrow toolset. Control returns to the supervisor, which either
+            delegates again or terminates. Easiest pattern to reason about and debug &mdash; routing
+            decisions are visible in state at every step.
+          </p>
+          <p class="when">Use when: <span>tasks are heterogeneous and a single agent&apos;s prompt would balloon</span></p>
+        </div>
+        <div class="pattern-viz">                  <span class="lbl">[ USER ]</span>
+                       │
+                       ▼
+                 ╭───────────╮
+                 │ SUPERVISOR│ ◄──────┐
+                 ╰─────┬─────╯        │
+                       │              │
+        ┌──────────┬───┴───┬──────────┤
+        ▼          ▼       ▼          │
+    <span class="lbl">[research]</span>  <span class="lbl">[write]</span>  <span class="lbl">[critic]</span>      │
+        │          │       │          │
+        └──────────┴───┬───┴──────────┘
+                       │
+                     <span class="lbl">[ END ]</span>
+        </div>
+      </article>
+
+      <article class="pattern">
+        <div class="pattern-meta">
+          <p class="pattern-num">[PATTERN 02] // HIERARCHICAL</p>
+          <h3><span class="arrow">&gt;</span> Teams of teams</h3>
+          <p>
+            A top-level supervisor delegates to <span class="hl2">team supervisors</span>, each with
+            its own pool of specialists. Useful when the problem decomposes into sub-domains and each
+            team needs to manage its own scratchpad without polluting the parent state. The win is
+            state isolation &mdash; the parent only sees the team&apos;s final answer. Compose by
+            nesting compiled subgraphs as nodes.
+          </p>
+          <p class="when">Use when: <span>complexity has natural sub-domains, each with its own toolset</span></p>
+        </div>
+        <div class="pattern-viz cyan">              <span class="lbl">[ TOP SUPERVISOR ]</span>
+                     │
+         ┌───────────┴───────────┐
+         ▼                       ▼
+    ╭──────────╮            ╭──────────╮
+    │ RESEARCH │            │ ENGINEER │
+    │  TEAM    │            │  TEAM    │
+    ╰────┬─────╯            ╰────┬─────╯
+         │                       │
+   ┌─────┼─────┐           ┌─────┼─────┐
+   ▼     ▼     ▼           ▼     ▼     ▼
+  <span class="lbl">srch</span>  <span class="lbl">read</span>  <span class="lbl">sum</span>          <span class="lbl">plan</span>  <span class="lbl">code</span>  <span class="lbl">test</span>
+   │     │     │           │     │     │
+   └──┬──┴──┬──┘           └──┬──┴──┬──┘
+      ▼     ▼                 ▼     ▼
+    <span class="lbl">team summary</span> ──&gt; PARENT &lt;── <span class="lbl">team summary</span>
+        </div>
+      </article>
+
+      <article class="pattern">
+        <div class="pattern-meta">
+          <p class="pattern-num">[PATTERN 03] // PARALLEL (FAN-OUT/FAN-IN)</p>
+          <h3><span class="arrow">&gt;</span> Race or aggregate</h3>
+          <p>
+            A single node fans out to N specialists running concurrently &mdash; the runtime
+            dispatches each as an independent task. Each writes back to a
+            <span class="warn">shared key with a commutative reducer</span>
+            (usually <code>operator.add</code> on a list); a fan-in node aggregates. Use for ensemble
+            voting, parallel retrieval across heterogeneous sources, or running the same agent with N
+            prompts and picking the best output.
+          </p>
+          <p class="when">Use when: <span>specialists are independent and you want wall-clock latency &lt; sum(specialists)</span></p>
+        </div>
+        <div class="pattern-viz magenta">              <span class="lbl">[ FAN-OUT NODE ]</span>
+                     │
+       ┌─────────────┼─────────────┐
+       ▼             ▼             ▼
+  ╭─────────╮  ╭─────────╮  ╭─────────╮
+  │ AGENT_A │  │ AGENT_B │  │ AGENT_C │   (parallel)
+  ╰────┬────╯  ╰────┬────╯  ╰────┬────╯
+       │            │            │
+       └────────────┼────────────┘
+                    ▼
+              <span class="lbl">[ FAN-IN NODE ]</span>
+                    │
+                    ▼
+                <span class="lbl">[ vote/merge ]</span>
+                    │
+                  <span class="lbl">[ END ]</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section id="stats">
+    <p class="section-tag" data-num="04">// in_production</p>
+    <h2 class="section-h">Real teams shipping <span class="accent">real agent products.</span></h2>
 
     <div class="stats">
       <article class="stat">
-        <div class="stat-value"><span class="num" data-to="24">0</span><span class="accent">k</span></div>
-        <p class="stat-label">GitHub stars on the Python repo &mdash; growing fast in 2026.</p>
+        <p class="stat-key">github_stars</p>
+        <div class="stat-val"><span class="num" data-to="24">0</span><span class="unit">k</span></div>
+        <div class="stat-bar">[<span class="num-bar" data-pct="80">                </span>]<span class="pct">80%</span></div>
+        <p class="stat-note">Python repo &mdash; growing fast in 2026.</p>
       </article>
       <article class="stat">
-        <div class="stat-value"><span class="num" data-to="4">0</span></div>
-        <p class="stat-label">Adopters publicly running it: Klarna, Replit, Uber, LinkedIn &mdash; among many.</p>
+        <p class="stat-key">public_adopters</p>
+        <div class="stat-val"><span class="num" data-to="4">0</span></div>
+        <div class="stat-bar">[<span class="num-bar" data-pct="40">                </span>]<span class="pct">+many</span></div>
+        <p class="stat-note">Klarna, Replit, Uber, LinkedIn &mdash; named publicly.</p>
       </article>
       <article class="stat">
-        <div class="stat-value"><span class="num" data-to="2">0</span><span class="accent">x</span></div>
-        <p class="stat-label">First-class runtimes: Python and JavaScript, with a Java port too.</p>
+        <p class="stat-key">first_class_runtimes</p>
+        <div class="stat-val"><span class="num" data-to="2">0</span><span class="unit cyan">x</span></div>
+        <div class="stat-bar">[<span class="num-bar" data-pct="100">                </span>]<span class="pct">PY+JS</span></div>
+        <p class="stat-note">Python and JavaScript first-class. Java port also shipping.</p>
       </article>
     </div>
 
-    <div class="case-row">
-      <article class="case-card">
-        <span class="case-tag">Multi-agent</span>
-        <h4>Specialist teams of agents</h4>
-        <p>A supervisor node routes work to a researcher, a writer, a critic. Each is its own subgraph. State threads through all of them.</p>
+    <div class="cases">
+      <article class="case">
+        <p class="case-tag">multi_agent</p>
+        <h4>Specialist teams</h4>
+        <p>Supervisor node routes work to a researcher, a writer, a critic. Each is its own subgraph. State threads through all.</p>
       </article>
-      <article class="case-card">
-        <span class="case-tag">Conditional flow</span>
-        <h4>Branching on what the model said</h4>
-        <p>If the answer mentions a SQL query &rarr; run it. If it asks for clarification &rarr; route to a human. The graph encodes the decision.</p>
+      <article class="case">
+        <p class="case-tag">conditional_flow</p>
+        <h4>Branch on model output</h4>
+        <p>Answer mentions a SQL query &rarr; run it. Asks for clarification &rarr; route to a human. Graph encodes the decision.</p>
       </article>
-      <article class="case-card">
-        <span class="case-tag">Long-running</span>
-        <h4>Workflows that span days</h4>
-        <p>An agent drafts an email Monday, waits for approval Tuesday, sends it Wednesday. Checkpointing makes that one logical run.</p>
+      <article class="case">
+        <p class="case-tag">long_running</p>
+        <h4>Workflows over days</h4>
+        <p>Agent drafts Monday, waits for approval Tuesday, sends Wednesday. Checkpointing makes that one logical run.</p>
       </article>
     </div>
+  </section>
+
+  <!-- ============ COMPARISON TABLE ============ -->
+  <section id="comparison">
+    <p class="section-tag" data-num="05">// comparison_table.csv</p>
+    <h2 class="section-h">LangGraph vs <span class="accent">the alternatives.</span></h2>
+    <p class="section-sub">
+      Four frameworks people actually reach for when building multi-step LLM applications:
+      LangGraph, LangChain&apos;s legacy <code style="color:var(--cyan)">AgentExecutor</code>,
+      CrewAI, and AutoGen. Different trade-offs &mdash; rendered the only acceptable way: ASCII.
+    </p>
+
+    <div class="ascii-table-wrap">
+<pre class="ascii-table"><span class="head">┌──────────────────┬──────────────────┬──────────────────┬──────────────────┬──────────────────┐
+│ ATTRIBUTE        │ LANGGRAPH        │ LC AGENTEXECUTOR │ CREWAI           │ AUTOGEN          │
+├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤</span>
+│ state            │ typed, reducers  │ implicit dict    │ implicit         │ implicit (msgs)  │
+│                  │ <span class="row-c">+ checkpoints</span>    │ + scratchpad     │ + crew memory    │ + agent memory   │
+├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
+│ debugging        │ <span class="row-c">studio + replay</span>  │ verbose=True     │ verbose=2        │ console logs +   │
+│                  │ <span class="row-c">+ time-travel</span>    │ + LangSmith      │ + step printout  │ <span class="row-c">studio (preview)</span> │
+├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
+│ streaming        │ <span class="row-c">values, updates,</span> │ tokens only      │ none built-in    │ async events     │
+│                  │ <span class="row-c">messages, custom</span> │                  │ (callbacks)      │ (v0.4+)          │
+├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
+│ deployment       │ <span class="row-c">Cloud + self-host</span> │ self-host        │ self-host        │ self-host        │
+│                  │ (FastAPI, k8s)   │                  │ (+ CrewAI Plus)  │                  │
+├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
+│ learning curve   │ <span class="row-m">medium-high</span>      │ low              │ low              │ medium           │
+├──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────┤
+│ license          │ <span class="row-c">MIT</span>              │ <span class="row-c">MIT</span>              │ <span class="row-c">MIT</span>              │ <span class="row-c">CC-BY-4.0 / MIT</span>  │
+<span class="head">└──────────────────┴──────────────────┴──────────────────┴──────────────────┴──────────────────┘</span></pre>
+    </div>
+
+    <p class="comp-caption">
+      Decision tree: prototyping in a notebook &mdash;
+      <span style="color:var(--lime)">LC AgentExecutor</span> or LangGraph&apos;s
+      <code style="color:var(--cyan)">create_agent</code>. Need durable state, time-travel,
+      streaming, or human-in-the-loop &mdash; <span style="color:var(--lime)">LangGraph</span>.
+      Role-prompted research crew &mdash; <span style="color:var(--magenta)">CrewAI</span> for the
+      configs, port to LangGraph to ship. Researching multi-agent patterns &mdash;
+      <span style="color:var(--cyan)">AutoGen</span>.
+    </p>
+  </section>
+
+  <!-- ============ GOTCHAS ============ -->
+  <section id="gotchas">
+    <p class="section-tag" data-num="06">// gotchas.txt</p>
+    <h2 class="section-h">Five mistakes that <span class="accent-c">cost you a weekend.</span></h2>
+    <p class="section-sub">
+      Common LangGraph footguns, in roughly the order you&apos;ll hit them on a real project. None of
+      these are bugs in the framework; they&apos;re consequences of the runtime&apos;s
+      &ldquo;everything is explicit&rdquo; design philosophy. Once you see them once, you stop hitting
+      them.
+    </p>
+
+    <ol class="gotcha-list">
+      <li class="gotcha">
+        <h4>Your reducer must be commutative for parallel paths <span class="tag">[CONCURRENCY]</span></h4>
+        <p>
+          When two nodes write to the same key in parallel, a non-commutative reducer (last-write-wins
+          on a scalar, for instance) races on task-scheduling order &mdash; tests go flaky and the
+          &ldquo;winner&rdquo; is undefined. Fan-out/fan-in patterns require commutative, associative
+          reducers. List concatenation works (order within a node is preserved, the union is what you
+          want). For numeric scalars, prefer <code>min</code>/<code>max</code>/<code>sum</code>.
+        </p>
+        <p class="fix">Annotate parallel-written keys with <code>operator.add</code> or a custom commutative reducer. If you genuinely need last-write semantics, don&apos;t fan out into that key.</p>
+      </li>
+
+      <li class="gotcha">
+        <h4>Forgetting recursion_limit on a self-looping graph <span class="tag">[INFINITE LOOPS]</span></h4>
+        <p>
+          LangGraph defaults to <code>recursion_limit=25</code> &mdash; the runtime raises
+          <code>GraphRecursionError</code> after 25 super-steps. People hit this when the model gets
+          stuck calling the same tool repeatedly or a router never returns <code>END</code>. The fix
+          is rarely &ldquo;raise the limit&rdquo; &mdash; it&apos;s adding a step counter and routing
+          to a summarize-and-stop node when the budget is hit.
+        </p>
+        <p class="fix">Add <code>iterations: int</code> to state, increment in <code>reason</code>, route to <code>END</code> at threshold. Keep <code>recursion_limit</code> as a backstop.</p>
+      </li>
+
+      <li class="gotcha">
+        <h4>State updates returned as objects, not dicts <span class="tag">[TYPE ERROR]</span></h4>
+        <p>
+          A node must return a <code>dict</code> with keys matching your state schema (or
+          <code>None</code> for no update). Returning a Pydantic model, a tuple, or a single message
+          raises <code>InvalidUpdateError</code> &mdash; easy to miss inside a streamed traceback.
+          <code>TypedDict</code> + <code>mypy</code> catches most of these until conditional returns
+          widen the inferred type.
+        </p>
+        <p class="fix">Always return <code>{&quot;key&quot;: value}</code> &mdash; even for one key. Wrap messages in <code>{&quot;messages&quot;: [msg]}</code>. Type-check node signatures.</p>
+      </li>
+
+      <li class="gotcha">
+        <h4>Mutating state in place instead of returning updates <span class="tag">[SILENT BUG]</span></h4>
+        <p>
+          The state arg is a reference to the runtime&apos;s working copy. Mutating
+          <code>state[&quot;messages&quot;].append(...)</code> and returning <code>None</code> appears
+          to work &mdash; until you turn on checkpointing and discover the persisted checkpoint never
+          recorded the mutation, so a resume reverts it. Two parallel nodes mutating in place corrupt
+          each other silently. Always return updates; never mutate the argument.
+        </p>
+        <p class="fix">Return <code>{&quot;messages&quot;: [new_msg]}</code> and let <code>add_messages</code> merge. Treat the state argument as immutable.</p>
+      </li>
+
+      <li class="gotcha">
+        <h4>Putting interrupt() outside a node function <span class="tag">[BAD PLACEMENT]</span></h4>
+        <p>
+          <code>interrupt()</code> only works inside a node function called by the runtime. Calling
+          it from a top-level script, a tool, or a callback raises <code>GraphInterrupt</code> at the
+          wrong level and crashes the run. Tools cannot interrupt; they must return. For a human in
+          the middle of a tool, dispatch from a node that previews the call, interrupts, and runs
+          only on approval.
+        </p>
+        <p class="fix">Move the <code>interrupt()</code> into a dedicated <code>approval</code> node placed before the tool node. Tools stay pure.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ============ WALKTHROUGH ============ -->
+  <section id="walkthrough">
+    <p class="section-tag" data-num="07">// walkthrough.sh</p>
+    <h2 class="section-h">A research agent <span class="accent">in eight steps.</span></h2>
+    <p class="section-sub">
+      End-to-end: from <code style="color:var(--cyan)">pip install</code> to a checkpointed,
+      streaming, human-approval-gated agent that searches the web and writes a one-paragraph
+      summary. Total code: under 80 lines. Run time to first working version: about an hour. Each
+      step builds on the previous one without rewrites.
+    </p>
+
+    <ol class="steps">
+      <li class="wstep">
+        <h4><span class="arrow">&gt;</span> Install + import</h4>
+        <p>
+          One pip line installs the runtime, the OpenAI chat wrapper, and a search tool. Any
+          function-calling LLM and any search tool work &mdash; Tavily ships with a free tier.
+        </p>
+        <pre class="mini-code"><span class="c">$ pip install -U langgraph langchain[openai] langchain-community tavily-python</span>
+
+<span class="k">from</span> <span class="f">typing</span> <span class="k">import</span> Annotated, TypedDict
+<span class="k">from</span> <span class="f">langgraph.graph</span> <span class="k">import</span> StateGraph, START, END
+<span class="k">from</span> <span class="f">langgraph.graph.message</span> <span class="k">import</span> add_messages
+<span class="k">from</span> <span class="f">langgraph.checkpoint.sqlite</span> <span class="k">import</span> SqliteSaver
+<span class="k">from</span> <span class="f">langgraph.types</span> <span class="k">import</span> interrupt, Command
+<span class="k">from</span> <span class="f">langchain_openai</span> <span class="k">import</span> ChatOpenAI
+<span class="k">from</span> <span class="f">langchain_community.tools.tavily_search</span> <span class="k">import</span> TavilySearchResults</pre>
+      </li>
+
+      <li class="wstep">
+        <h4><span class="arrow">&gt;</span> Define state</h4>
+        <p>
+          Two keys: a message transcript and an iteration counter. <code>messages</code> uses
+          <code>add_messages</code> so parallel branches and human-injected messages merge
+          correctly; the counter is a plain int (only <code>reason</code> writes it).
+        </p>
+        <pre class="mini-code"><span class="k">class</span> <span class="f">State</span>(TypedDict)<span class="o">:</span>
+    messages<span class="o">:</span> Annotated[<span class="k">list</span>, add_messages]
+    iterations<span class="o">:</span> <span class="k">int</span></pre>
+      </li>
+
+      <li class="wstep">
+        <h4><span class="arrow">&gt;</span> Wire the LLM + tools</h4>
+        <p>
+          Bind tools so the model knows what&apos;s callable. <code>.bind_tools()</code> attaches
+          function schemas; the model emits <code>tool_calls</code> instead of free-text actions.
+          Pass a list to scale to dozens of tools.
+        </p>
+        <pre class="mini-code">search <span class="o">=</span> <span class="f">TavilySearchResults</span>(max_results<span class="o">=</span><span class="s">3</span>)
+llm <span class="o">=</span> <span class="f">ChatOpenAI</span>(model<span class="o">=</span><span class="s">"gpt-4o"</span>).<span class="f">bind_tools</span>([search])</pre>
+      </li>
+
+      <li class="wstep">
+        <h4><span class="arrow">&gt;</span> Write the nodes</h4>
+        <p>
+          Three functions. <code>reason</code> calls the LLM and bumps the counter. <code>act</code>
+          runs the requested tool and appends the result. <code>approve</code> is the human gate
+          &mdash; <code>interrupt()</code> pauses the graph; the resume value drives continue-or-revise.
+        </p>
+        <pre class="mini-code"><span class="k">def</span> <span class="f">reason</span>(state)<span class="o">:</span>
+    <span class="k">return</span> {<span class="s">"messages"</span><span class="o">:</span> [llm.<span class="f">invoke</span>(state[<span class="s">"messages"</span>])],
+            <span class="s">"iterations"</span><span class="o">:</span> state[<span class="s">"iterations"</span>] <span class="o">+</span> <span class="s">1</span>}
+
+<span class="k">def</span> <span class="f">act</span>(state)<span class="o">:</span>
+    last <span class="o">=</span> state[<span class="s">"messages"</span>][<span class="o">-</span><span class="s">1</span>]
+    results <span class="o">=</span> [search.<span class="f">invoke</span>(c[<span class="s">"args"</span>]) <span class="k">for</span> c <span class="k">in</span> last.tool_calls]
+    <span class="k">return</span> {<span class="s">"messages"</span><span class="o">:</span> [(<span class="s">"tool"</span>, <span class="k">str</span>(results))]}
+
+<span class="k">def</span> <span class="f">approve</span>(state)<span class="o">:</span>
+    draft <span class="o">=</span> state[<span class="s">"messages"</span>][<span class="o">-</span><span class="s">1</span>].content
+    decision <span class="o">=</span> <span class="f">interrupt</span>({<span class="s">"draft"</span><span class="o">:</span> draft})
+    <span class="k">return</span> {<span class="s">"messages"</span><span class="o">:</span> [(<span class="s">"user"</span>, decision[<span class="s">"feedback"</span>])]} <span class="k">if</span> <span class="k">not</span> decision[<span class="s">"ok"</span>] <span class="k">else</span> {}</pre>
+      </li>
+
+      <li class="wstep">
+        <h4><span class="arrow">&gt;</span> Write the router</h4>
+        <p>
+          Tool calls → <code>act</code>. Budget hit → <code>approve</code>. Otherwise done. Three
+          lines, pure, testable with handcrafted state.
+        </p>
+        <pre class="mini-code"><span class="k">def</span> <span class="f">route</span>(state)<span class="o">:</span>
+    last <span class="o">=</span> state[<span class="s">"messages"</span>][<span class="o">-</span><span class="s">1</span>]
+    <span class="k">if</span> <span class="f">getattr</span>(last, <span class="s">"tool_calls"</span>, <span class="k">None</span>)<span class="o">:</span> <span class="k">return</span> <span class="s">"act"</span>
+    <span class="k">if</span> state[<span class="s">"iterations"</span>] <span class="o">&gt;=</span> <span class="s">5</span><span class="o">:</span> <span class="k">return</span> <span class="s">"approve"</span>
+    <span class="k">return</span> END</pre>
+      </li>
+
+      <li class="wstep">
+        <h4><span class="arrow">&gt;</span> Compile with a checkpointer</h4>
+        <p>
+          Register nodes, draw edges, attach SQLite, compile. Everything before
+          <code>compile()</code> is configuration; everything after is execution.
+        </p>
+        <pre class="mini-code">g <span class="o">=</span> <span class="f">StateGraph</span>(State)
+g.<span class="f">add_node</span>(<span class="s">"reason"</span>, reason); g.<span class="f">add_node</span>(<span class="s">"act"</span>, act); g.<span class="f">add_node</span>(<span class="s">"approve"</span>, approve)
+g.<span class="f">add_edge</span>(START, <span class="s">"reason"</span>)
+g.<span class="f">add_conditional_edges</span>(<span class="s">"reason"</span>, route)
+g.<span class="f">add_edge</span>(<span class="s">"act"</span>, <span class="s">"reason"</span>); g.<span class="f">add_edge</span>(<span class="s">"approve"</span>, END)
+memory <span class="o">=</span> SqliteSaver.<span class="f">from_conn_string</span>(<span class="s">"./agent.db"</span>)
+agent <span class="o">=</span> g.<span class="f">compile</span>(checkpointer<span class="o">=</span>memory)</pre>
+      </li>
+
+      <li class="wstep">
+        <h4><span class="arrow">&gt;</span> Stream a run</h4>
+        <p>
+          Pass a <code>thread_id</code>, stream the updates, print each node&apos;s contribution.
+          The stream pauses on <code>interrupt()</code> &mdash; the loop ends with an
+          <code>__interrupt__</code> event surfacing the draft for review.
+        </p>
+        <pre class="mini-code">cfg <span class="o">=</span> {<span class="s">"configurable"</span><span class="o">:</span> {<span class="s">"thread_id"</span><span class="o">:</span> <span class="s">"demo-1"</span>}}
+payload <span class="o">=</span> {<span class="s">"messages"</span><span class="o">:</span> [(<span class="s">"user"</span>, <span class="s">"Research SkyPilot vs Ray for LLM training."</span>)],
+           <span class="s">"iterations"</span><span class="o">:</span> <span class="s">0</span>}
+<span class="k">for</span> chunk <span class="k">in</span> agent.<span class="f">stream</span>(payload, cfg, stream_mode<span class="o">=</span><span class="s">"updates"</span>)<span class="o">:</span>
+    <span class="f">print</span>(chunk)</pre>
+      </li>
+
+      <li class="wstep">
+        <h4><span class="arrow">&gt;</span> Resume after human approval</h4>
+        <p>
+          Render the draft, collect the decision, resume with <code>Command(resume=...)</code> on
+          the same <code>thread_id</code>. The runtime loads the checkpoint, injects the value, and
+          continues from inside <code>approve</code> as if it never paused.
+        </p>
+        <pre class="mini-code">agent.<span class="f">invoke</span>(
+    <span class="f">Command</span>(resume<span class="o">=</span>{<span class="s">"ok"</span><span class="o">:</span> <span class="k">True</span>, <span class="s">"feedback"</span><span class="o">:</span> <span class="s">""</span>}),
+    cfg,
+)
+<span class="c"># &lt;= run completes; final state is in agent.get_state(cfg)</span></pre>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ============ REFERENCES ============ -->
+  <section id="references">
+    <p class="section-tag" data-num="08">// references.bib</p>
+    <h2 class="section-h">Primary sources. <span class="accent-c">Papers &amp; docs.</span></h2>
+    <p class="section-sub">
+      Every claim on this page traces back to one of the following. Read the ReAct paper first if you
+      read nothing else &mdash; the loop is the foundation, everything else is engineering on top.
+    </p>
+
+    <ul class="refs">
+      <li>
+        <p class="ref-tag">[01] PAPER · FOUNDATIONAL</p>
+        <p class="ref-title">ReAct: Synergizing Reasoning and Acting in Language Models</p>
+        <p class="ref-meta">Yao, Zhao, Yu, Du, Shafran, Narasimhan, Cao &middot; 2022 &middot; arXiv:2210.03629</p>
+        <a class="ref-link" href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">arxiv.org/abs/2210.03629</a>
+      </li>
+      <li>
+        <p class="ref-tag">[02] PAPER · CoT BASELINE</p>
+        <p class="ref-title">Chain-of-Thought Prompting Elicits Reasoning in Large Language Models</p>
+        <p class="ref-meta">Wei et al. &middot; 2022 &middot; arXiv:2201.11903</p>
+        <a class="ref-link" href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">arxiv.org/abs/2201.11903</a>
+      </li>
+      <li>
+        <p class="ref-tag">[03] PAPER · MULTI-AGENT</p>
+        <p class="ref-title">AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation</p>
+        <p class="ref-meta">Wu et al. &middot; Microsoft Research &middot; 2023 &middot; arXiv:2308.08155</p>
+        <a class="ref-link" href="https://arxiv.org/abs/2308.08155" target="_blank" rel="noopener">arxiv.org/abs/2308.08155</a>
+      </li>
+      <li>
+        <p class="ref-tag">[04] PAPER · PLANNING</p>
+        <p class="ref-title">Reflexion: Language Agents with Verbal Reinforcement Learning</p>
+        <p class="ref-meta">Shinn et al. &middot; 2023 &middot; arXiv:2303.11366</p>
+        <a class="ref-link" href="https://arxiv.org/abs/2303.11366" target="_blank" rel="noopener">arxiv.org/abs/2303.11366</a>
+      </li>
+      <li>
+        <p class="ref-tag">[05] PAPER · GRAPH RUNTIME</p>
+        <p class="ref-title">Pregel: A System for Large-Scale Graph Processing</p>
+        <p class="ref-meta">Malewicz et al. &middot; Google &middot; SIGMOD 2010</p>
+        <a class="ref-link" href="https://dl.acm.org/doi/10.1145/1807167.1807184" target="_blank" rel="noopener">dl.acm.org/doi/10.1145/1807167.1807184</a>
+      </li>
+      <li>
+        <p class="ref-tag">[06] DOCS · OFFICIAL</p>
+        <p class="ref-title">LangGraph Documentation &mdash; Concepts, How-Tos, Reference</p>
+        <p class="ref-meta">LangChain Inc. &middot; continuously updated</p>
+        <a class="ref-link" href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener">docs.langchain.com/oss/python/langgraph/overview</a>
+      </li>
+      <li>
+        <p class="ref-tag">[07] DOCS · API</p>
+        <p class="ref-title">LangGraph API Reference (Python)</p>
+        <p class="ref-meta">StateGraph, checkpointers, interrupt, Command, Pregel internals</p>
+        <a class="ref-link" href="https://langchain-ai.github.io/langgraph/reference/" target="_blank" rel="noopener">langchain-ai.github.io/langgraph/reference</a>
+      </li>
+      <li>
+        <p class="ref-tag">[08] SOURCE · MONOREPO</p>
+        <p class="ref-title">langchain-ai/langgraph &mdash; GitHub repository</p>
+        <p class="ref-meta">MIT license &middot; Python + TypeScript &middot; the runtime, examples, integrations</p>
+        <a class="ref-link" href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">github.com/langchain-ai/langgraph</a>
+      </li>
+    </ul>
   </section>
 
   <!-- ============ FINAL CTA ============ -->
   <section class="final">
-    <h2>Try it &mdash; in less time than it took to read this.</h2>
-    <p>The fastest path is the quickstart: 30 lines of Python and you have a stateful agent with a tool call, a conditional edge, and a checkpointer.</p>
-    <div class="cta-row">
-      <a class="magnetic" href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener">
-        Open the LangGraph docs
-        <span class="arrow">&rarr;</span>
-      </a>
-      <a class="secondary" href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">View on GitHub &darr;</a>
+    <div class="final-frame">
+      <h2 class="final-h">Try it &mdash; in <span class="accent">less time than it took to read this.</span></h2>
+      <p>The fastest path is the quickstart: 30 lines of Python and you have a stateful agent
+        with a tool call, a conditional edge, and a checkpointer.</p>
+      <div class="cta-row">
+        <a class="btn" href="https://docs.langchain.com/oss/python/langgraph/overview" target="_blank" rel="noopener">
+          <span class="pfx">&gt;</span> open_docs.sh
+          <span class="cursor" aria-hidden="true"></span>
+        </a>
+        <a class="btn-secondary" href="https://github.com/langchain-ai/langgraph" target="_blank" rel="noopener">[ github &darr; ]</a>
+        <a class="btn-secondary" href="https://calendly.com/manutej/30min" target="_blank" rel="noopener">[ book_call.sh &darr; ]</a>
+      </div>
     </div>
   </section>
 
   <footer>
-    Built for the CETI.AI lookbook &middot; <a href="https://cetiai.co">cetiai.co</a>
+    <div class="ascii-rule" aria-hidden="true">─────────────────────────────────────────────────────────────────────</div>
+    Built for the CETI.AI lookbook &middot; <a href="https://cetiai.co">cetiai.co</a> &middot; page 01/18
   </footer>
 
   <script>
-    // ============ HERO REVEAL ============
-    requestAnimationFrame(() => document.querySelector('.hero').classList.add('visible'));
-
-    // ============ INTERSECTION-DRIVEN REVEALS ============
-    const reveal = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          reveal.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
-    document.querySelectorAll('.stat, .magic-card, .case-card').forEach((el) => reveal.observe(el));
+    // ============ REDUCED MOTION GUARD ============
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // ============ NUMBER TICKER ============
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
     function animateNum(el) {
       const to = +el.dataset.to;
-      const dur = 1200;
+      if (reduced) { el.textContent = to.toLocaleString(); return; }
+      const dur = 900;
       const start = performance.now();
       function tick(now) {
         const p = Math.min((now - start) / dur, 1);
-        el.textContent = Math.round(easeOutCubic(p) * to).toLocaleString();
+        // steps-like easing — round in chunks
+        const stepped = Math.round(p * 12) / 12;
+        el.textContent = Math.round(stepped * to).toLocaleString();
         if (p < 1) requestAnimationFrame(tick);
+        else el.textContent = to.toLocaleString();
       }
       requestAnimationFrame(tick);
     }
+
+    // ============ ASCII BAR FILL ============
+    function fillBar(el) {
+      const pct = +el.dataset.pct;
+      const cells = 16;
+      const filled = Math.round((pct / 100) * cells);
+      if (reduced) {
+        el.textContent = '#'.repeat(filled) + '.'.repeat(cells - filled);
+        return;
+      }
+      let i = 0;
+      const id = setInterval(() => {
+        i++;
+        const f = Math.min(i, filled);
+        el.textContent = '#'.repeat(f) + '.'.repeat(cells - f);
+        if (i >= filled) clearInterval(id);
+      }, 50);
+    }
+
     const numObs = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
-        if (e.isIntersecting) { animateNum(e.target); numObs.unobserve(e.target); }
+        if (e.isIntersecting) {
+          animateNum(e.target);
+          numObs.unobserve(e.target);
+        }
       });
     }, { threshold: 0.5 });
     document.querySelectorAll('.num').forEach((el) => numObs.observe(el));
 
-    // ============ MAGNETIC BUTTONS ============
-    const STRENGTH = 25;
-    document.querySelectorAll('.magnetic').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - (r.left + r.width / 2)) / STRENGTH;
-        const y = (e.clientY - (r.top + r.height / 2)) / STRENGTH;
-        btn.style.setProperty('--mx', `${x}px`);
-        btn.style.setProperty('--my', `${y}px`);
+    const barObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          fillBar(e.target);
+          barObs.unobserve(e.target);
+        }
       });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.setProperty('--mx', '0px');
-        btn.style.setProperty('--my', '0px');
-      });
-    });
-
-    // ============ MAGIC CARDS (cursor-follow glow) ============
-    document.querySelectorAll('.magic-card').forEach((card) => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
-      });
-    });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.num-bar').forEach((el) => barObs.observe(el));
 
     // ============ LOOP NODE ACTIVATION ============
-    // The SVG pulse takes 6s to traverse the cycle. We sync node "active"
-    // pulses to it via a JS clock so the visuals always agree.
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!prefersReducedMotion) {
+    // Cycle through reason → act → observe with hard step transitions.
+    if (!reduced) {
       const nodes = [
         document.getElementById('node-reason'),
         document.getElementById('node-act'),
@@ -1073,30 +2222,38 @@ agent <span class="co">=</span> graph.<span class="cf">compile</span>(checkpoint
       const stateStep = document.getElementById('state-step');
       const stateMessages = document.getElementById('state-messages');
       const stateObs = document.getElementById('state-obs');
-      const PERIOD = 6000; // ms — must match animateMotion dur
-      const startedAt = performance.now();
-      let lastIdx = -1;
+      const stateTick = document.getElementById('state-tick');
+      const PERIOD = 1800; // ms per node — fast, hard cuts
+      let idx = 0;
       let messages = 2;
       let observations = 1;
+      let tickCount = 0;
 
-      function tickLoop(now) {
-        const t = ((now - startedAt) % PERIOD) / PERIOD; // 0..1
-        const idx = Math.floor(t * 3) % 3;
-        if (idx !== lastIdx) {
-          nodes.forEach((n, i) => n.classList.toggle('active', i === idx));
-          lastIdx = idx;
-          stateStep.textContent = stepNames[idx];
-          if (stepNames[idx] === 'act') { messages += 1; stateMessages.textContent = messages; }
-          if (stepNames[idx] === 'observe') { observations += 1; stateObs.textContent = observations; }
-          // Reset counters periodically so they don't grow forever
-          if (messages > 9) { messages = 2; }
-          if (observations > 9) { observations = 1; }
+      function step() {
+        nodes.forEach((n, i) => n && n.classList.toggle('active', i === idx));
+        if (stateStep) stateStep.textContent = stepNames[idx];
+        if (stepNames[idx] === 'act' && stateMessages) {
+          messages = Math.min(messages + 1, 12);
+          stateMessages.textContent = messages;
         }
-        requestAnimationFrame(tickLoop);
+        if (stepNames[idx] === 'observe' && stateObs) {
+          observations = Math.min(observations + 1, 12);
+          stateObs.textContent = observations;
+        }
+        if (idx === 0) {
+          // new cycle — reset counters periodically
+          if (messages > 8) messages = 2;
+          if (observations > 8) observations = 1;
+          tickCount++;
+        }
+        if (stateTick) {
+          stateTick.textContent = 't=' + String(tickCount * 3 + idx).padStart(3, '0');
+        }
+        idx = (idx + 1) % 3;
       }
-      requestAnimationFrame(tickLoop);
+      step();
+      setInterval(step, PERIOD);
     } else {
-      // Reduced motion: show a static "reason" step
       const reason = document.getElementById('node-reason');
       if (reason) reason.classList.add('active');
     }
